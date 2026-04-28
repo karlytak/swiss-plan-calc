@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Plateforme professionnelle pour courtiers suisses : impôts, LPP, 3e pilier, frontaliers, optimisation fiscale et simulations multi-scénarios sur les 26 cantons.",
+          "Plateforme professionnelle pour courtiers suisses : impôts, LPP, 3e pilier, frontaliers, optimisation fiscale et simulations multi-scénarios sur la Suisse romande.",
       },
     ],
   }),
@@ -87,7 +87,7 @@ function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Conçu pour les courtiers suisses · 26 cantons · Frontaliers inclus
+            Conçu pour les courtiers suisses · Suisse romande · Frontaliers inclus
           </div>
           <h1 className="text-balance text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
             Le calculateur de référence pour la{" "}
@@ -138,7 +138,7 @@ function Features() {
     {
       icon: Calculator,
       title: "Calculs exacts",
-      desc: "Barèmes officiels IFD et ICC pour les 26 cantons, multiplicateurs communaux, impôt à la source A/B/C/H, frontaliers.",
+      desc: "Barèmes officiels IFD et ICC pour les 6 cantons romands (GE, VD, VS, FR, NE, JU), multiplicateurs communaux, impôt à la source A/B/C/H, frontaliers.",
     },
     {
       icon: TrendingUp,
@@ -216,8 +216,8 @@ function Modules() {
     },
     {
       tag: "Comparateur",
-      title: "Classement des 26 cantons",
-      desc: "Pour un profil client donné, voir le classement exact des cantons les plus avantageux.",
+      title: "Classement des cantons romands",
+      desc: "Pour un profil client donné, voir le classement des 6 cantons romands (+ Zoug en référence) les plus avantageux.",
     },
   ];
   return (
@@ -388,7 +388,7 @@ function Footer() {
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
           <Globe2 className="h-3.5 w-3.5" />
-          26 cantons · Frontaliers FR / IT / DE / AT
+          Suisse romande · Frontaliers FR / IT / DE / AT
         </div>
       </div>
     </footer>
