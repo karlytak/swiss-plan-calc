@@ -522,18 +522,6 @@ function ClientDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="scenarios" className="mt-4">
-          <Card title="Scénarios & simulations">
-            <div className="rounded-lg border border-dashed border-border bg-muted/20 p-8 text-center">
-              <Calculator className="mx-auto h-8 w-8 text-primary" />
-              <h3 className="mt-3 text-base font-semibold">Moteur de simulations — bientôt</h3>
-              <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-                Les calculs d'impôts (IFD/ICC tous cantons), le 2e pilier, le 3a et les
-                scénarios "avant/après" arrivent dans la prochaine itération.
-              </p>
-            </div>
-          </Card>
-        </TabsContent>
       </Tabs>
     </div>
   );
