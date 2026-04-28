@@ -23,6 +23,9 @@ import { CANTONS } from "@/lib/swiss/cantons";
 import { computeIncomeTax, type IncomeTaxInput } from "@/lib/tax/income";
 import { CalcCard } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportCantonComparePdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/canton-compare")({
   head: () => ({ meta: [{ title: "Comparateur cantonal — SwissBroker Pro" }] }),
@@ -58,6 +61,14 @@ function CantonCompareCalc() {
   }, [form]);
 
   const referenceTax = data.find((d) => d.code === form.referenceCanton)?.total ?? 0;
+
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportCantonComparePdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      rows: data,
+    });
 
   return (
     <div className="space-y-6">
@@ -135,6 +146,10 @@ function CantonCompareCalc() {
           <Legend color="var(--muted-foreground)" label="Plus cher" />
         </div>
       </CalcCard>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
+      </div>
     </div>
   );
 }

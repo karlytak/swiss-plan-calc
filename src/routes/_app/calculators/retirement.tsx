@@ -12,6 +12,9 @@ import {
 import { CANTONS } from "@/lib/swiss/cantons";
 import { annuityVsLumpSum, capitalWithdrawalTax } from "@/lib/lpp";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportRetirementPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/retirement")({
   head: () => ({ meta: [{ title: "Rente vs capital — SwissBroker Pro" }] }),
@@ -56,6 +59,16 @@ function RetirementCalc() {
       : compare.recommendation === "lump_sum"
         ? "Privilégier le capital : meilleur rendement net après impôts si bien placé."
         : "Mixte recommandé : 50/50 capital + rente pour équilibrer sécurité et performance.";
+
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportRetirementPdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      lumpTax,
+      compare,
+      reco,
+    });
 
   return (
     <div className="space-y-6">
@@ -124,6 +137,10 @@ function RetirementCalc() {
       <div className="rounded-2xl border border-success/30 bg-success/5 p-5">
         <div className="text-xs font-medium uppercase tracking-wider text-success-foreground/80">Recommandation</div>
         <p className="mt-1 text-sm">{reco}</p>
+      </div>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
   );

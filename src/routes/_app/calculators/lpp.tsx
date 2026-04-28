@@ -23,6 +23,9 @@ import { projectLPP, simulateBuybackPlan } from "@/lib/lpp";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
 import type { IncomeTaxInput } from "@/lib/tax/income";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportLppPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/lpp")({
   head: () => ({ meta: [{ title: "LPP & rachats — SwissBroker Pro" }] }),
@@ -76,6 +79,15 @@ function LppCalc() {
       }),
     [form],
   );
+
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportLppPdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      projection,
+      buybackPlan,
+    });
 
   return (
     <div className="space-y-6">
@@ -197,6 +209,10 @@ function LppCalc() {
             </div>
           </CalcCard>
         </div>
+      </div>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
   );

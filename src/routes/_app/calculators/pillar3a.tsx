@@ -19,6 +19,9 @@ import {
 } from "@/lib/pillar3";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import type { IncomeTaxInput } from "@/lib/tax/income";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportPillar3aPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/pillar3a")({
   head: () => ({ meta: [{ title: "Pilier 3a — SwissBroker Pro" }] }),
@@ -83,6 +86,16 @@ function Pillar3aCalc() {
       }),
     [form],
   );
+
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportPillar3aPdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      taxSavings: savings,
+      projection,
+      staggered: stag,
+    });
 
   return (
     <div className="space-y-6">
@@ -166,6 +179,9 @@ function Pillar3aCalc() {
             <MoneyTile label="Par compte" value={stag.perAccount} />
           </div>
         </CalcCard>
+      </div>
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
   );
