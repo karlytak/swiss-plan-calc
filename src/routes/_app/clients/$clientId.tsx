@@ -302,13 +302,28 @@ function ClientDetailPage() {
       <Tabs defaultValue="overview" className="mt-8">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted p-1">
           <TabsTrigger value="overview">Synthèse</TabsTrigger>
+          <TabsTrigger value="optimizations">
+            Optimisations
+            {optimizations.length > 0 && (
+              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-[10px]">
+                {optimizations.length}
+              </Badge>
+            )}
+          </TabsTrigger>
           <TabsTrigger value="fiscal">Fiscalité</TabsTrigger>
           <TabsTrigger value="pension">Prévoyance</TabsTrigger>
           <TabsTrigger value="patrimoine">Patrimoine</TabsTrigger>
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
-          <TabsTrigger value="scenarios">Scénarios</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="optimizations" className="mt-4">
+          <OptimizationsPanel
+            optimizations={optimizations}
+            title={`Optimisations pour ${client.first_name}`}
+            emptyHint="Complétez la fiche (canton, salaire, LPP, 3a, fortune) pour générer des recommandations chiffrées."
+          />
+        </TabsContent>
 
         <TabsContent value="overview" className="mt-4">
           <div className="grid gap-4 lg:grid-cols-2">
