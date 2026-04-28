@@ -175,6 +175,42 @@ function ClientDetailPage() {
     (Number(assets?.mortgage_debt ?? 0));
   const children = parseChildren(client.children);
 
+  const taxInput: IncomeTaxInput = {
+    canton: client.canton ?? "VD",
+    status:
+      client.civil_status === "married" || client.civil_status === "registered_partnership"
+        ? "married"
+        : children.length > 0 && client.civil_status !== "married"
+          ? "single_with_children"
+          : "single",
+    confession:
+      client.confession === "catholic_roman"
+        ? "catholic"
+        : client.confession === "protestant"
+          ? "protestant"
+          : client.confession === "none"
+            ? "none"
+            : "other",
+    children: children.length,
+    grossSalary: Number(client.gross_annual_salary ?? 0),
+    spouseGrossSalary: Number(client.spouse_gross_annual_salary ?? 0),
+    bonus: Number(client.bonus ?? 0),
+    otherIncome: Number(client.other_income ?? 0),
+    pillar3aContributions: Number(pension?.pillar_3a_annual_contribution ?? 0),
+    mortgageInterest: Number(assets?.mortgage_interest ?? 0),
+    realEstateMaintenance: Number(assets?.real_estate_maintenance ?? 0),
+    netWealth: fortune,
+  };
+  const optimizations = runOptimizer({
+    taxInput,
+    lppBuybackCapacity: Number(pension?.lpp_max_buyback ?? 0),
+    pillar3aCurrent: Number(pension?.pillar_3a_annual_contribution ?? 0),
+    pillar3aBalance: Number(pension?.pillar_3a_accounts && Array.isArray(pension.pillar_3a_accounts) ? 0 : 0),
+    hasLPP: Number(pension?.lpp_current_balance ?? 0) > 0,
+    age: age ?? undefined,
+    lppBalance: Number(pension?.lpp_current_balance ?? 0),
+  });
+
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
