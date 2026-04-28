@@ -230,7 +230,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         spouse_last_name: isMarried ? form.spouse_last_name || null : null,
         spouse_date_of_birth: isMarried ? form.spouse_date_of_birth || null : null,
         spouse_gross_annual_salary: isMarried ? num(form.spouse_gross_annual_salary) : null,
-        children: form.children,
+        children: form.children as unknown as import("@/integrations/supabase/types").Json,
       };
 
       let savedId: string;
