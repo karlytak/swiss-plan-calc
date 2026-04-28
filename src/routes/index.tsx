@@ -216,8 +216,8 @@ function Modules() {
     },
     {
       tag: "Comparateur",
-      title: "Classement des 26 cantons",
-      desc: "Pour un profil client donné, voir le classement exact des cantons les plus avantageux.",
+      title: "Classement des cantons romands",
+      desc: "Pour un profil client donné, voir le classement des 6 cantons romands (+ Zoug en référence) les plus avantageux.",
     },
   ];
   return (
