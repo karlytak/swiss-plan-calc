@@ -138,7 +138,7 @@ function Features() {
     {
       icon: Calculator,
       title: "Calculs exacts",
-      desc: "Barèmes officiels IFD et ICC pour les 26 cantons, multiplicateurs communaux, impôt à la source A/B/C/H, frontaliers.",
+      desc: "Barèmes officiels IFD et ICC pour les 6 cantons romands (GE, VD, VS, FR, NE, JU), multiplicateurs communaux, impôt à la source A/B/C/H, frontaliers.",
     },
     {
       icon: TrendingUp,
