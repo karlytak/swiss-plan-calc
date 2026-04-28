@@ -19,6 +19,9 @@ import {
 } from "@/lib/pillar3";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import type { IncomeTaxInput } from "@/lib/tax/income";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportPillar3aPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/pillar3a")({
   head: () => ({ meta: [{ title: "Pilier 3a — SwissBroker Pro" }] }),
