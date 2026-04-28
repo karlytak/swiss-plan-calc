@@ -9,7 +9,6 @@ import {
   Loader2,
   Plus,
   StickyNote,
-  Calculator,
   Mail,
   Phone,
   MapPin,
