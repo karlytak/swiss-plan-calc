@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   Calculator,
   Coins,
@@ -9,6 +9,13 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export const Route = createFileRoute("/_app/calculators")({
   head: () => ({ meta: [{ title: "Calculateurs — SwissBroker Pro" }] }),
@@ -27,6 +34,10 @@ const TABS = [
 
 function CalculatorsLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const currentTab =
+    [...TABS].reverse().find((t) => (t.exact ? pathname === t.to : pathname.startsWith(t.to)))?.to ??
+    "/calculators";
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
@@ -35,7 +46,25 @@ function CalculatorsLayout() {
           Simulations rapides — barèmes 2026 — IFD, ICC, source, LPP, 3a, comparateur cantonal.
         </p>
       </div>
-      <div className="-mx-4 mb-6 overflow-x-auto px-4 sm:mx-0 sm:px-0">
+
+      {/* Mobile: select fallback for quick switching */}
+      <div className="mb-4 sm:hidden">
+        <Select value={currentTab} onValueChange={(v) => navigate({ to: v as (typeof TABS)[number]["to"] })}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TABS.map((t) => (
+              <SelectItem key={t.to} value={t.to}>
+                {t.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Tablet+: horizontal scrollable tab bar */}
+      <div className="-mx-4 mb-6 hidden overflow-x-auto px-4 sm:mx-0 sm:block sm:px-0">
         <nav className="flex min-w-max gap-1 rounded-xl border border-border bg-card/50 p-1">
           {TABS.map((t) => {
             const active = t.exact ? pathname === t.to : pathname.startsWith(t.to);
