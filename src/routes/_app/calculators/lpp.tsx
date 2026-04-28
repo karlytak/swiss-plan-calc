@@ -23,6 +23,9 @@ import { projectLPP, simulateBuybackPlan } from "@/lib/lpp";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
 import type { IncomeTaxInput } from "@/lib/tax/income";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportLppPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/lpp")({
   head: () => ({ meta: [{ title: "LPP & rachats — SwissBroker Pro" }] }),
