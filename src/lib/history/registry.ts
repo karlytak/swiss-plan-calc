@@ -80,8 +80,8 @@ export async function regeneratePdf(
         import("@/lib/tax/income"),
         import("@/lib/pdf/reports"),
       ]);
-      const result = computeIncomeTax(inputs as Parameters<typeof computeIncomeTax>[0]);
-      exportIncomeTaxPdf({ header, input: inputs as Parameters<typeof exportIncomeTaxPdf>[0]["input"], result });
+      const result = computeIncomeTax(inputs as unknown as Parameters<typeof computeIncomeTax>[0]);
+      exportIncomeTaxPdf({ header, input: inputs as unknown as Parameters<typeof exportIncomeTaxPdf>[0]["input"], result });
       return;
     }
     case "source_tax": {
@@ -89,8 +89,8 @@ export async function regeneratePdf(
         import("@/lib/tax/source"),
         import("@/lib/pdf/reports"),
       ]);
-      const result = computeSourceTax(inputs as Parameters<typeof computeSourceTax>[0]);
-      exportSourceTaxPdf({ header, input: inputs as Parameters<typeof exportSourceTaxPdf>[0]["input"], result });
+      const result = computeSourceTax(inputs as unknown as Parameters<typeof computeSourceTax>[0]);
+      exportSourceTaxPdf({ header, input: inputs as unknown as Parameters<typeof exportSourceTaxPdf>[0]["input"], result });
       return;
     }
     case "lpp": {
@@ -116,7 +116,7 @@ export async function regeneratePdf(
       });
       exportLppPdf({
         header,
-        input: inputs as Parameters<typeof exportLppPdf>[0]["input"],
+        input: inputs as unknown as Parameters<typeof exportLppPdf>[0]["input"],
         projection,
         buybackPlan,
       });
@@ -150,7 +150,7 @@ export async function regeneratePdf(
       });
       exportPillar3aPdf({
         header,
-        input: inputs as Parameters<typeof exportPillar3aPdf>[0]["input"],
+        input: inputs as unknown as Parameters<typeof exportPillar3aPdf>[0]["input"],
         taxSavings,
         projection,
         staggered,
@@ -182,7 +182,7 @@ export async function regeneratePdf(
             : "Mixte recommandé : 50/50 capital + rente pour équilibrer sécurité et performance.";
       exportRetirementPdf({
         header,
-        input: inputs as Parameters<typeof exportRetirementPdf>[0]["input"],
+        input: inputs as unknown as Parameters<typeof exportRetirementPdf>[0]["input"],
         lumpTax,
         compare,
         reco,
@@ -209,7 +209,7 @@ export async function regeneratePdf(
       }).sort((a, b) => a.total - b.total);
       exportCantonComparePdf({
         header,
-        input: inputs as Parameters<typeof exportCantonComparePdf>[0]["input"],
+        input: inputs as unknown as Parameters<typeof exportCantonComparePdf>[0]["input"],
         rows,
       });
       return;
