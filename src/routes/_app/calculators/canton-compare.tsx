@@ -62,6 +62,14 @@ function CantonCompareCalc() {
 
   const referenceTax = data.find((d) => d.code === form.referenceCanton)?.total ?? 0;
 
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportCantonComparePdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      rows: data,
+    });
+
   return (
     <div className="space-y-6">
       <CalcCard title="Profil à comparer" description="Charge fiscale annuelle simulée dans les 26 cantons.">
@@ -138,6 +146,10 @@ function CantonCompareCalc() {
           <Legend color="var(--muted-foreground)" label="Plus cher" />
         </div>
       </CalcCard>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
+      </div>
     </div>
   );
 }
