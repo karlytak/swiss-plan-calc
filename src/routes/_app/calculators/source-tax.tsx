@@ -16,6 +16,7 @@ import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/Calc
 import { Info } from "lucide-react";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportSourceTaxPdf } from "@/lib/pdf/reports";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/source-tax")({
@@ -135,7 +136,19 @@ function SourceTaxCalc() {
             <p className="mt-3 text-xs text-muted-foreground">{result.crossBorderNote}</p>
           )}
         </CalcCard>
-        <ExportPdfButton onClick={handleExport} />
+        <div className="flex flex-wrap justify-end gap-2">
+          <SaveSimulationButton
+            kind="source_tax"
+            inputs={form}
+            summary={{
+              rate: result.rate,
+              monthlyTax: result.monthlyTax,
+              annualTax: result.annualTax,
+            }}
+            defaultTitle={`Source ${form.canton} ${form.scale} — ${form.monthlyGross}/mois`}
+          />
+          <ExportPdfButton onClick={handleExport} />
+        </div>
       </div>
     </div>
   );
