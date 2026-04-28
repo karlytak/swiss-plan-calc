@@ -210,6 +210,10 @@ function LppCalc() {
           </CalcCard>
         </div>
       </div>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
+      </div>
     </div>
   );
 }
