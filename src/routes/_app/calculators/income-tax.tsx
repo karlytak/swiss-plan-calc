@@ -17,6 +17,7 @@ import { runOptimizer } from "@/lib/optimizer";
 import { OptimizationsPanel } from "@/components/optimizer/OptimizationsPanel";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportIncomeTaxPdf } from "@/lib/pdf/reports";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/income-tax")({
@@ -209,7 +210,21 @@ function IncomeTaxCalculator() {
         <OptimizationsPanel optimizations={optimizations} />
       </div>
 
-      <div className="flex justify-end lg:col-span-5">
+      <div className="flex flex-wrap justify-end gap-2 lg:col-span-5">
+        <SaveSimulationButton
+          kind="income_tax"
+          inputs={form}
+          summary={{
+            totalTax: result.totalTax,
+            effectiveRate: result.effectiveRate,
+            marginalRate: result.marginalRate,
+            taxableIncomeCC: result.taxableIncomeCC,
+            ifd: result.ifd,
+            cantonal: result.cantonal,
+            communal: result.communal,
+          }}
+          defaultTitle={`Impôt ${form.canton} — ${formatCHF(form.grossSalary)}`}
+        />
         <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
