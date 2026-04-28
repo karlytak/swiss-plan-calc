@@ -16,6 +16,7 @@ import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/Calc
 import { Info } from "lucide-react";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportSourceTaxPdf } from "@/lib/pdf/reports";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/source-tax")({
