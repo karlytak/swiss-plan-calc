@@ -7,7 +7,7 @@ import {
   PILLAR_3A_MAX_2026_LPP,
   type IncomeTaxInput,
 } from "../tax/income";
-import { simulateBuybackPlan, staggeredWithdrawal } from "../lpp";
+import { simulateBuybackPlan } from "../lpp";
 import { staggeredWithdrawal as stagged3a } from "../pillar3";
 import { CANTON_SCALES } from "../tax/cantons";
 
