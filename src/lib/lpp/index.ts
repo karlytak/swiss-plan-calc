@@ -33,23 +33,39 @@ export interface LPPProjectionInput {
   retirementAge: number;
   currentBalance: number;
   insuredSalary: number;
-  /** Taux de croissance annuel attendu de la caisse (default 1.5%) */
+  /** Taux de croissance annuel attendu de la caisse, brut (default 1.5%) */
   expectedReturnRate?: number;
+  /** Frais annuels (TER + frais admin) appliqués sur le capital, en % (default 0) */
+  feeRate?: number;
   /** Croissance salariale annuelle (default 1%) */
   salaryGrowthRate?: number;
   /** Taux de conversion à la retraite (default 6.8 ou propre à la caisse) */
   conversionRate?: number;
   /** Bonifications additionnelles plan sur-obligatoire (% sup.) */
   extraCreditRate?: number;
+  /** Rachat annuel additionnel injecté chaque année (CHF) */
+  yearlyBuyback?: number;
+  /** Nombre d'années sur lesquelles s'applique le rachat (default = jusqu'à la retraite) */
+  buybackYears?: number;
 }
 
 export interface LPPProjectionResult {
   /** Capital projeté à la retraite */
   projectedBalance: number;
+  /** Capital projeté SANS rendement (référence) */
+  projectedBalanceNoYield: number;
+  /** Capital projeté SANS frais (rendement brut uniquement) */
+  projectedBalanceGross: number;
   /** Rente annuelle estimée */
   annualPension: number;
   /** Rente mensuelle */
   monthlyPension: number;
+  /** Taux net effectivement appliqué (%) = brut - frais */
+  netReturnRate: number;
+  /** Total des frais cumulés sur la période (CHF) */
+  totalFees: number;
+  /** Total des rachats injectés (CHF) */
+  totalBuybacks: number;
   /** Détail année par année */
   yearly: Array<{
     age: number;
@@ -57,19 +73,30 @@ export interface LPPProjectionResult {
     coordinated: number;
     credit: number;
     interest: number;
+    fees: number;
+    buyback: number;
     balance: number;
+    balanceNoYield: number;
   }>;
 }
 
 export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
   const yearsToRetire = Math.max(0, input.retirementAge - input.currentAge);
-  const returnRate = (input.expectedReturnRate ?? 1.5) / 100;
+  const grossReturn = (input.expectedReturnRate ?? 1.5) / 100;
+  const fee = (input.feeRate ?? 0) / 100;
+  const netReturn = grossReturn - fee;
   const salaryGrowth = (input.salaryGrowthRate ?? 1) / 100;
   const conversionRate = (input.conversionRate ?? LPP_CONVERSION_RATE_2026) / 100;
   const extraCredit = (input.extraCreditRate ?? 0) / 100;
+  const yearlyBuyback = Math.max(0, input.yearlyBuyback ?? 0);
+  const buybackYears = Math.max(0, input.buybackYears ?? yearsToRetire);
 
   let balance = input.currentBalance;
+  let balanceNoYield = input.currentBalance;
+  let balanceGross = input.currentBalance;
   let salary = input.insuredSalary;
+  let totalFees = 0;
+  let totalBuybacks = 0;
   const yearly: LPPProjectionResult["yearly"] = [];
 
   for (let i = 0; i < yearsToRetire; i++) {
@@ -80,8 +107,16 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
     );
     const creditRate = lppCreditRate(age) + extraCredit;
     const credit = coordinated * creditRate;
-    const interest = balance * returnRate;
-    balance = balance + credit + interest;
+    const grossInterest = balance * grossReturn;
+    const fees = balance * fee;
+    const interest = grossInterest - fees;
+    const buyback = i < buybackYears ? yearlyBuyback : 0;
+
+    balance = balance + credit + interest + buyback;
+    balanceNoYield = balanceNoYield + credit + buyback;
+    balanceGross = balanceGross + credit + grossInterest + buyback;
+    totalFees += fees;
+    totalBuybacks += buyback;
 
     yearly.push({
       age: age + 1,
@@ -89,7 +124,10 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
       coordinated,
       credit: Math.round(credit),
       interest: Math.round(interest),
+      fees: Math.round(fees),
+      buyback: Math.round(buyback),
       balance: Math.round(balance),
+      balanceNoYield: Math.round(balanceNoYield),
     });
     salary *= 1 + salaryGrowth;
   }
@@ -97,8 +135,13 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
   const annualPension = balance * conversionRate;
   return {
     projectedBalance: Math.round(balance),
+    projectedBalanceNoYield: Math.round(balanceNoYield),
+    projectedBalanceGross: Math.round(balanceGross),
     annualPension: Math.round(annualPension),
     monthlyPension: Math.round(annualPension / 12),
+    netReturnRate: Math.round(netReturn * 10000) / 100,
+    totalFees: Math.round(totalFees),
+    totalBuybacks: Math.round(totalBuybacks),
     yearly,
   };
 }
