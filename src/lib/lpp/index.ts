@@ -33,14 +33,20 @@ export interface LPPProjectionInput {
   retirementAge: number;
   currentBalance: number;
   insuredSalary: number;
-  /** Taux de croissance annuel attendu de la caisse (default 1.5%) */
+  /** Taux de croissance annuel attendu de la caisse, brut (default 1.5%) */
   expectedReturnRate?: number;
+  /** Frais annuels (TER + frais admin) appliqués sur le capital, en % (default 0) */
+  feeRate?: number;
   /** Croissance salariale annuelle (default 1%) */
   salaryGrowthRate?: number;
   /** Taux de conversion à la retraite (default 6.8 ou propre à la caisse) */
   conversionRate?: number;
   /** Bonifications additionnelles plan sur-obligatoire (% sup.) */
   extraCreditRate?: number;
+  /** Rachat annuel additionnel injecté chaque année (CHF) */
+  yearlyBuyback?: number;
+  /** Nombre d'années sur lesquelles s'applique le rachat (default = jusqu'à la retraite) */
+  buybackYears?: number;
 }
 
 export interface LPPProjectionResult {
