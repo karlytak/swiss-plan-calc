@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * SwissBroker Pro — Design system 2026
+ * SwissBroker Pro · Design system 2026
  * Style: ultra-moderne, sobre, "Swiss precision".
  * Tokens en oklch uniquement.
  */
@@ -66,7 +66,7 @@
 :root {
   --radius: 0.75rem;
 
-  /* Light — clean, neutral, Swiss precision */
+  /* Light · clean, neutral, Swiss precision */
   --background: oklch(0.99 0.003 250);
   --foreground: oklch(0.18 0.02 260);
 
