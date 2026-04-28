@@ -335,7 +335,7 @@ export function exportPillar3aPdf(args: {
     grossSalary: number;
   };
   taxSavings: { taxSavings: number; effectiveCost: number; marginalRate: number };
-  projection: Pillar3aProjection;
+  projection: Pillar3aProjectionResult;
   staggered: StaggeredWithdrawalResult;
 }) {
   const { input, taxSavings, projection, staggered } = args;
