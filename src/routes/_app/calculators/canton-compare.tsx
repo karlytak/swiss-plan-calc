@@ -23,6 +23,9 @@ import { CANTONS } from "@/lib/swiss/cantons";
 import { computeIncomeTax, type IncomeTaxInput } from "@/lib/tax/income";
 import { CalcCard } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportCantonComparePdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/canton-compare")({
   head: () => ({ meta: [{ title: "Comparateur cantonal — SwissBroker Pro" }] }),
