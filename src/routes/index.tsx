@@ -87,7 +87,7 @@ function Hero() {
         <div className="mx-auto max-w-3xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-border bg-card/60 px-4 py-1.5 text-xs font-medium text-muted-foreground backdrop-blur">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Conçu pour les courtiers suisses · 26 cantons · Frontaliers inclus
+            Conçu pour les courtiers suisses · Suisse romande · Frontaliers inclus
           </div>
           <h1 className="text-balance text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
             Le calculateur de référence pour la{" "}
