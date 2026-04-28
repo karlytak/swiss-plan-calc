@@ -127,8 +127,10 @@ export function runOptimizer(input: OptimizerInput): Optimization[] {
   }
 
   // 4) COMPARATIF CANTONAL · si revenu élevé
+  // Scope v1 : la seule alternative proposée est Zoug (référence fiscalité optimisée).
+  // En v1.5+, élargir à SZ/NW/OW lorsqu'ils deviendront `comparable`.
   if (baseline.taxableIncomeCC > 100_000) {
-    const otherCantons = ["ZG", "SZ", "NW", "OW"];
+    const otherCantons = ["ZG"];
     let bestSavings = 0;
     let bestCanton = "";
     for (const c of otherCantons) {
