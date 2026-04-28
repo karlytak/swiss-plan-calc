@@ -415,6 +415,48 @@ export type Database = {
           },
         ]
       }
+      simulation_history: {
+        Row: {
+          broker_id: string
+          client_id: string | null
+          created_at: string
+          id: string
+          inputs: Json
+          kind: Database["public"]["Enums"]["simulation_kind"]
+          note: string | null
+          summary: Json
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          broker_id: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          kind: Database["public"]["Enums"]["simulation_kind"]
+          note?: string | null
+          summary?: Json
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          broker_id?: string
+          client_id?: string | null
+          created_at?: string
+          id?: string
+          inputs?: Json
+          kind?: Database["public"]["Enums"]["simulation_kind"]
+          note?: string | null
+          summary?: Json
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       simulations: {
         Row: {
           broker_id: string
@@ -535,6 +577,13 @@ export type Database = {
         | "pillar_3a_strategy"
         | "retirement"
         | "other"
+      simulation_kind:
+        | "income_tax"
+        | "source_tax"
+        | "lpp"
+        | "pillar3a"
+        | "retirement"
+        | "canton_compare"
       tax_status:
         | "ordinary_resident"
         | "source_taxed"
@@ -707,6 +756,14 @@ export const Constants = {
         "pillar_3a_strategy",
         "retirement",
         "other",
+      ],
+      simulation_kind: [
+        "income_tax",
+        "source_tax",
+        "lpp",
+        "pillar3a",
+        "retirement",
+        "canton_compare",
       ],
       tax_status: [
         "ordinary_resident",
