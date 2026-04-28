@@ -148,6 +148,16 @@ function IncomeTaxCalculator() {
               value={form.netWealth}
               onChange={(v) => setField("netWealth", v)}
             />
+            <NumField
+              label="Capacité de rachat LPP (CHF)"
+              value={form.lppBuybackCapacity}
+              onChange={(v) => setField("lppBuybackCapacity", v)}
+            />
+            <NumField
+              label="Capital 3a accumulé (CHF)"
+              value={form.pillar3aBalance}
+              onChange={(v) => setField("pillar3aBalance", v)}
+            />
           </div>
         </CalcCard>
       </div>
@@ -182,6 +192,10 @@ function IncomeTaxCalculator() {
             <Line label="Revenu imposable" value={formatCHF(result.taxableIncomeCC)} bold />
           </dl>
         </CalcCard>
+      </div>
+
+      <div className="lg:col-span-5">
+        <OptimizationsPanel optimizations={optimizations} />
       </div>
     </div>
   );
