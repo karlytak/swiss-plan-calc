@@ -1,0 +1,728 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.5"
+  }
+  public: {
+    Tables: {
+      client_assets: {
+        Row: {
+          bank_accounts: number
+          broker_id: string
+          client_id: string
+          created_at: string
+          id: string
+          mortgage_debt: number
+          mortgage_interest: number
+          other_assets: number
+          other_debts: number
+          real_estate_maintenance: number
+          real_estate_rental_value: number
+          real_estate_value: number
+          securities: number
+          updated_at: string
+          vehicles: number
+        }
+        Insert: {
+          bank_accounts?: number
+          broker_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          mortgage_debt?: number
+          mortgage_interest?: number
+          other_assets?: number
+          other_debts?: number
+          real_estate_maintenance?: number
+          real_estate_rental_value?: number
+          real_estate_value?: number
+          securities?: number
+          updated_at?: string
+          vehicles?: number
+        }
+        Update: {
+          bank_accounts?: number
+          broker_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          mortgage_debt?: number
+          mortgage_interest?: number
+          other_assets?: number
+          other_debts?: number
+          real_estate_maintenance?: number
+          real_estate_rental_value?: number
+          real_estate_value?: number
+          securities?: number
+          updated_at?: string
+          vehicles?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_assets_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_assets_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_notes: {
+        Row: {
+          body: string
+          broker_id: string
+          client_id: string
+          created_at: string
+          id: string
+        }
+        Insert: {
+          body: string
+          broker_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+        }
+        Update: {
+          body?: string
+          broker_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_notes_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_notes_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      client_pension: {
+        Row: {
+          broker_id: string
+          client_id: string
+          created_at: string
+          id: string
+          lpp_buybacks_done: Json
+          lpp_conversion_rate: number | null
+          lpp_coordination_deduction: number
+          lpp_current_balance: number
+          lpp_early_withdrawals: Json
+          lpp_insured_salary: number
+          lpp_max_buyback: number
+          lpp_plan: Database["public"]["Enums"]["lpp_plan_type"]
+          pillar_3a_accounts: Json
+          pillar_3a_annual_contribution: number
+          pillar_3b_accounts: Json
+          spouse_lpp_balance: number
+          spouse_pillar_3a_balance: number
+          updated_at: string
+          vested_benefits_accounts: Json
+        }
+        Insert: {
+          broker_id: string
+          client_id: string
+          created_at?: string
+          id?: string
+          lpp_buybacks_done?: Json
+          lpp_conversion_rate?: number | null
+          lpp_coordination_deduction?: number
+          lpp_current_balance?: number
+          lpp_early_withdrawals?: Json
+          lpp_insured_salary?: number
+          lpp_max_buyback?: number
+          lpp_plan?: Database["public"]["Enums"]["lpp_plan_type"]
+          pillar_3a_accounts?: Json
+          pillar_3a_annual_contribution?: number
+          pillar_3b_accounts?: Json
+          spouse_lpp_balance?: number
+          spouse_pillar_3a_balance?: number
+          updated_at?: string
+          vested_benefits_accounts?: Json
+        }
+        Update: {
+          broker_id?: string
+          client_id?: string
+          created_at?: string
+          id?: string
+          lpp_buybacks_done?: Json
+          lpp_conversion_rate?: number | null
+          lpp_coordination_deduction?: number
+          lpp_current_balance?: number
+          lpp_early_withdrawals?: Json
+          lpp_insured_salary?: number
+          lpp_max_buyback?: number
+          lpp_plan?: Database["public"]["Enums"]["lpp_plan_type"]
+          pillar_3a_accounts?: Json
+          pillar_3a_annual_contribution?: number
+          pillar_3b_accounts?: Json
+          spouse_lpp_balance?: number
+          spouse_pillar_3a_balance?: number
+          updated_at?: string
+          vested_benefits_accounts?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_pension_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_pension_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          activity_rate: number | null
+          archived: boolean
+          bonus: number | null
+          broker_id: string
+          canton: string | null
+          children: Json
+          civil_status: Database["public"]["Enums"]["civil_status"]
+          commune: string | null
+          confession: Database["public"]["Enums"]["confession"]
+          country_of_residence: string | null
+          created_at: string
+          date_of_birth: string | null
+          email: string | null
+          employer: string | null
+          first_name: string
+          gross_annual_salary: number | null
+          id: string
+          last_name: string
+          nationality: string | null
+          other_income: number | null
+          parish: string | null
+          permit: Database["public"]["Enums"]["permit_type"]
+          phone: string | null
+          postal_code: string | null
+          source_tax_scale: string | null
+          spouse_date_of_birth: string | null
+          spouse_first_name: string | null
+          spouse_gross_annual_salary: number | null
+          spouse_last_name: string | null
+          tax_status: Database["public"]["Enums"]["tax_status"]
+          updated_at: string
+          work_status: Database["public"]["Enums"]["work_status"]
+        }
+        Insert: {
+          activity_rate?: number | null
+          archived?: boolean
+          bonus?: number | null
+          broker_id: string
+          canton?: string | null
+          children?: Json
+          civil_status?: Database["public"]["Enums"]["civil_status"]
+          commune?: string | null
+          confession?: Database["public"]["Enums"]["confession"]
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employer?: string | null
+          first_name: string
+          gross_annual_salary?: number | null
+          id?: string
+          last_name: string
+          nationality?: string | null
+          other_income?: number | null
+          parish?: string | null
+          permit?: Database["public"]["Enums"]["permit_type"]
+          phone?: string | null
+          postal_code?: string | null
+          source_tax_scale?: string | null
+          spouse_date_of_birth?: string | null
+          spouse_first_name?: string | null
+          spouse_gross_annual_salary?: number | null
+          spouse_last_name?: string | null
+          tax_status?: Database["public"]["Enums"]["tax_status"]
+          updated_at?: string
+          work_status?: Database["public"]["Enums"]["work_status"]
+        }
+        Update: {
+          activity_rate?: number | null
+          archived?: boolean
+          bonus?: number | null
+          broker_id?: string
+          canton?: string | null
+          children?: Json
+          civil_status?: Database["public"]["Enums"]["civil_status"]
+          commune?: string | null
+          confession?: Database["public"]["Enums"]["confession"]
+          country_of_residence?: string | null
+          created_at?: string
+          date_of_birth?: string | null
+          email?: string | null
+          employer?: string | null
+          first_name?: string
+          gross_annual_salary?: number | null
+          id?: string
+          last_name?: string
+          nationality?: string | null
+          other_income?: number | null
+          parish?: string | null
+          permit?: Database["public"]["Enums"]["permit_type"]
+          phone?: string | null
+          postal_code?: string | null
+          source_tax_scale?: string | null
+          spouse_date_of_birth?: string | null
+          spouse_first_name?: string | null
+          spouse_gross_annual_salary?: number | null
+          spouse_last_name?: string | null
+          tax_status?: Database["public"]["Enums"]["tax_status"]
+          updated_at?: string
+          work_status?: Database["public"]["Enums"]["work_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          brokerage_name: string | null
+          created_at: string
+          default_canton: string | null
+          email: string
+          first_name: string | null
+          id: string
+          last_name: string | null
+          logo_url: string | null
+          phone: string | null
+          plan: Database["public"]["Enums"]["broker_plan"]
+          updated_at: string
+        }
+        Insert: {
+          brokerage_name?: string | null
+          created_at?: string
+          default_canton?: string | null
+          email: string
+          first_name?: string | null
+          id: string
+          last_name?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          plan?: Database["public"]["Enums"]["broker_plan"]
+          updated_at?: string
+        }
+        Update: {
+          brokerage_name?: string | null
+          created_at?: string
+          default_canton?: string | null
+          email?: string
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          logo_url?: string | null
+          phone?: string | null
+          plan?: Database["public"]["Enums"]["broker_plan"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      scenarios: {
+        Row: {
+          broker_id: string
+          client_id: string
+          created_at: string
+          description: string | null
+          id: string
+          inputs: Json
+          is_pinned: boolean
+          kind: Database["public"]["Enums"]["scenario_kind"]
+          name: string
+          tax_year: number
+          updated_at: string
+        }
+        Insert: {
+          broker_id: string
+          client_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          inputs?: Json
+          is_pinned?: boolean
+          kind?: Database["public"]["Enums"]["scenario_kind"]
+          name: string
+          tax_year?: number
+          updated_at?: string
+        }
+        Update: {
+          broker_id?: string
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          inputs?: Json
+          is_pinned?: boolean
+          kind?: Database["public"]["Enums"]["scenario_kind"]
+          name?: string
+          tax_year?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scenarios_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scenarios_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      simulations: {
+        Row: {
+          broker_id: string
+          client_id: string
+          computed_at: string
+          id: string
+          result: Json
+          scenario_id: string
+          tax_year: number
+        }
+        Insert: {
+          broker_id: string
+          client_id: string
+          computed_at?: string
+          id?: string
+          result?: Json
+          scenario_id: string
+          tax_year: number
+        }
+        Update: {
+          broker_id?: string
+          client_id?: string
+          computed_at?: string
+          id?: string
+          result?: Json
+          scenario_id?: string
+          tax_year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulations_broker_id_fkey"
+            columns: ["broker_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "simulations_scenario_id_fkey"
+            columns: ["scenario_id"]
+            isOneToOne: false
+            referencedRelation: "scenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tax_year_data: {
+        Row: {
+          canton: string | null
+          created_at: string
+          data_kind: string
+          id: string
+          payload: Json
+          source: string | null
+          tax_year: number
+        }
+        Insert: {
+          canton?: string | null
+          created_at?: string
+          data_kind: string
+          id?: string
+          payload: Json
+          source?: string | null
+          tax_year: number
+        }
+        Update: {
+          canton?: string | null
+          created_at?: string
+          data_kind?: string
+          id?: string
+          payload?: Json
+          source?: string | null
+          tax_year?: number
+        }
+        Relationships: []
+      }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      broker_plan: "free" | "pro" | "enterprise"
+      civil_status:
+        | "single"
+        | "married"
+        | "registered_partnership"
+        | "divorced"
+        | "widowed"
+        | "separated"
+      confession:
+        | "none"
+        | "roman_catholic"
+        | "protestant"
+        | "christian_catholic"
+        | "jewish"
+        | "other"
+      lpp_plan_type: "mandatory" | "extra_mandatory" | "executive" | "mixed"
+      permit_type: "none" | "B" | "C" | "L" | "Ci" | "F" | "G" | "swiss"
+      scenario_kind:
+        | "baseline"
+        | "marriage"
+        | "divorce"
+        | "child_birth"
+        | "move_canton"
+        | "activity_change"
+        | "become_self_employed"
+        | "real_estate_purchase"
+        | "lpp_buyback"
+        | "pillar_3a_strategy"
+        | "retirement"
+        | "other"
+      tax_status:
+        | "ordinary_resident"
+        | "source_taxed"
+        | "cross_border_g"
+        | "quasi_resident"
+        | "non_taxable"
+      work_status:
+        | "employee"
+        | "self_employed"
+        | "mixed"
+        | "retired"
+        | "unemployed"
+        | "student"
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
+}
+
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
+
+export type Tables<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])
+    ? (DefaultSchema["Tables"] &
+        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  DefaultSchemaTableNameOrOptions extends
+    | keyof DefaultSchema["Tables"]
+    | { schema: keyof DatabaseWithoutInternals },
+  TableName extends DefaultSchemaTableNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
+    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  DefaultSchemaEnumNameOrOptions extends
+    | keyof DefaultSchema["Enums"]
+    | { schema: keyof DatabaseWithoutInternals },
+  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
+    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof DefaultSchema["CompositeTypes"]
+    | { schema: keyof DatabaseWithoutInternals },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof DatabaseWithoutInternals
+  }
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
+    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never
+
+export const Constants = {
+  public: {
+    Enums: {
+      broker_plan: ["free", "pro", "enterprise"],
+      civil_status: [
+        "single",
+        "married",
+        "registered_partnership",
+        "divorced",
+        "widowed",
+        "separated",
+      ],
+      confession: [
+        "none",
+        "roman_catholic",
+        "protestant",
+        "christian_catholic",
+        "jewish",
+        "other",
+      ],
+      lpp_plan_type: ["mandatory", "extra_mandatory", "executive", "mixed"],
+      permit_type: ["none", "B", "C", "L", "Ci", "F", "G", "swiss"],
+      scenario_kind: [
+        "baseline",
+        "marriage",
+        "divorce",
+        "child_birth",
+        "move_canton",
+        "activity_change",
+        "become_self_employed",
+        "real_estate_purchase",
+        "lpp_buyback",
+        "pillar_3a_strategy",
+        "retirement",
+        "other",
+      ],
+      tax_status: [
+        "ordinary_resident",
+        "source_taxed",
+        "cross_border_g",
+        "quasi_resident",
+        "non_taxable",
+      ],
+      work_status: [
+        "employee",
+        "self_employed",
+        "mixed",
+        "retired",
+        "unemployed",
+        "student",
+      ],
+    },
+  },
+} as const
