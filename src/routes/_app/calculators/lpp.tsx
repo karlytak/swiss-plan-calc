@@ -35,10 +35,12 @@ function LppCalc() {
     retirementAge: 65,
     currentBalance: 250_000,
     insuredSalary: 95_000,
-    expectedReturnRate: 1.5,
+    expectedReturnRate: 2.5,
+    feeRate: 0.6,
     salaryGrowthRate: 1,
     conversionRate: 6.0,
     extraCreditRate: 0,
+    yearlyBuyback: 0,
     // rachat
     canton: "VD",
     status: "single" as IncomeTaxInput["status"],
@@ -51,7 +53,15 @@ function LppCalc() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  const projection = useMemo(() => projectLPP(form), [form]);
+  const projection = useMemo(
+    () =>
+      projectLPP({
+        ...form,
+        yearlyBuyback: Math.round(form.buybackCapacity / Math.max(1, form.buybackYears)),
+        buybackYears: form.buybackYears,
+      }),
+    [form],
+  );
   const buybackPlan = useMemo(
     () =>
       simulateBuybackPlan({
