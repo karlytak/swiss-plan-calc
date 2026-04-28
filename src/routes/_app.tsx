@@ -136,7 +136,7 @@ function DesktopSidebar({ onSignOut, email }: { onSignOut: () => Promise<void>; 
 function MobileHeader({ onSignOut, email }: { onSignOut: () => Promise<void>; email: string }) {
   const [open, setOpen] = useState(false);
   return (
-    <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border bg-background/80 px-4 backdrop-blur lg:hidden">
+    <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl saturate-150 lg:hidden">
       <BrandMark />
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
