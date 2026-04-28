@@ -27,6 +27,7 @@ import { Route as AppCalculatorsPillar3aRouteImport } from './routes/_app/calcul
 import { Route as AppCalculatorsLppRouteImport } from './routes/_app/calculators/lpp'
 import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calculators/income-tax'
 import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
+import { Route as AppClientsClientIdScenariosRouteImport } from './routes/_app/clients/$clientId.scenarios'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId.edit'
 
 const AuthRoute = AuthRouteImport.update({
@@ -120,6 +121,12 @@ const AppCalculatorsCantonCompareRoute =
     path: '/canton-compare',
     getParentRoute: () => AppCalculatorsRoute,
   } as any)
+const AppClientsClientIdScenariosRoute =
+  AppClientsClientIdScenariosRouteImport.update({
+    id: '/scenarios',
+    path: '/scenarios',
+    getParentRoute: () => AppClientsClientIdRoute,
+  } as any)
 const AppClientsClientIdEditRoute = AppClientsClientIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/calculators/': typeof AppCalculatorsIndexRoute
   '/clients/': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -164,6 +172,7 @@ export interface FileRoutesByTo {
   '/calculators': typeof AppCalculatorsIndexRoute
   '/clients': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -186,6 +195,7 @@ export interface FileRoutesById {
   '/_app/calculators/': typeof AppCalculatorsIndexRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/_app/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/calculators/'
     | '/clients/'
     | '/clients/$clientId/edit'
+    | '/clients/$clientId/scenarios'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +238,7 @@ export interface FileRouteTypes {
     | '/calculators'
     | '/clients'
     | '/clients/$clientId/edit'
+    | '/clients/$clientId/scenarios'
   id:
     | '__root__'
     | '/'
@@ -248,6 +260,7 @@ export interface FileRouteTypes {
     | '/_app/calculators/'
     | '/_app/clients/'
     | '/_app/clients/$clientId/edit'
+    | '/_app/clients/$clientId/scenarios'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -385,6 +398,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsCantonCompareRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/_app/clients/$clientId/scenarios': {
+      id: '/_app/clients/$clientId/scenarios'
+      path: '/scenarios'
+      fullPath: '/clients/$clientId/scenarios'
+      preLoaderRoute: typeof AppClientsClientIdScenariosRouteImport
+      parentRoute: typeof AppClientsClientIdRoute
+    }
     '/_app/clients/$clientId/edit': {
       id: '/_app/clients/$clientId/edit'
       path: '/edit'
@@ -421,10 +441,12 @@ const AppCalculatorsRouteWithChildren = AppCalculatorsRoute._addFileChildren(
 
 interface AppClientsClientIdRouteChildren {
   AppClientsClientIdEditRoute: typeof AppClientsClientIdEditRoute
+  AppClientsClientIdScenariosRoute: typeof AppClientsClientIdScenariosRoute
 }
 
 const AppClientsClientIdRouteChildren: AppClientsClientIdRouteChildren = {
   AppClientsClientIdEditRoute: AppClientsClientIdEditRoute,
+  AppClientsClientIdScenariosRoute: AppClientsClientIdScenariosRoute,
 }
 
 const AppClientsClientIdRouteWithChildren =
