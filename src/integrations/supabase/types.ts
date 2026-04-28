@@ -457,6 +457,51 @@ export type Database = {
         }
         Relationships: []
       }
+      simulation_shares: {
+        Row: {
+          broker_id: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_viewed_at: string | null
+          max_views: number | null
+          password_hash: string | null
+          revoked: boolean
+          simulation_id: string
+          token: string
+          updated_at: string
+          view_count: number
+        }
+        Insert: {
+          broker_id: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          max_views?: number | null
+          password_hash?: string | null
+          revoked?: boolean
+          simulation_id: string
+          token: string
+          updated_at?: string
+          view_count?: number
+        }
+        Update: {
+          broker_id?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_viewed_at?: string | null
+          max_views?: number | null
+          password_hash?: string | null
+          revoked?: boolean
+          simulation_id?: string
+          token?: string
+          updated_at?: string
+          view_count?: number
+        }
+        Relationships: []
+      }
       simulations: {
         Row: {
           broker_id: string
@@ -544,7 +589,26 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      access_shared_simulation: {
+        Args: { _password?: string; _token: string }
+        Returns: {
+          broker_display: string
+          expires_at: string
+          inputs: Json
+          kind: string
+          note: string
+          remaining_views: number
+          shared_at: string
+          simulation_created_at: string
+          summary: Json
+          tags: string[]
+          title: string
+        }[]
+      }
+      hash_share_password: {
+        Args: { _password: string; _share_id: string }
+        Returns: string
+      }
     }
     Enums: {
       broker_plan: "free" | "pro" | "enterprise"
