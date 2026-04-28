@@ -21,6 +21,7 @@ import {
   ComposedChart,
 } from "recharts";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { CANTONS } from "@/lib/swiss/cantons";
 import {
   compareVestedStrategies,
@@ -29,6 +30,7 @@ import {
   type VestedStrategy,
 } from "@/lib/lpp/vested";
 import { formatCHF } from "@/lib/format";
+import { exportVestedBenefitsPdf } from "@/lib/pdf/reports";
 
 export const Route = createFileRoute("/_app/calculators/vested-benefits")({
   head: () => ({ meta: [{ title: "Libre passage · SwissBroker Pro" }] }),
@@ -132,6 +134,17 @@ function VestedBenefitsCalc() {
       </div>
 
       <div className="space-y-4 lg:col-span-3">
+        <div className="flex justify-end">
+          <ExportPdfButton
+            onClick={() =>
+              exportVestedBenefitsPdf({
+                input: form,
+                projections,
+                recommended,
+              })
+            }
+          />
+        </div>
         <CalcCard title="Projection capital · 3 stratégies comparées">
           <div className="h-72 chart-rise">
             <ResponsiveContainer width="100%" height="100%">

@@ -12,9 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Info, CheckCircle2, AlertCircle, Scale } from "lucide-react";
 import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/CalcUI";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { CANTONS } from "@/lib/swiss/cantons";
 import { checkQuasiResident, compareTOUvsSource } from "@/lib/tax/tou";
 import type { IncomeTaxInput } from "@/lib/tax/income";
+import { exportTouPdf } from "@/lib/pdf/reports";
 
 export const Route = createFileRoute("/_app/calculators/tou")({
   head: () => ({ meta: [{ title: "TOU / quasi-résident · SwissBroker Pro" }] }),
@@ -160,6 +162,17 @@ function TOUCalc() {
       </div>
 
       <div className="space-y-4 lg:col-span-2">
+        <div className="flex justify-end">
+          <ExportPdfButton
+            onClick={() =>
+              exportTouPdf({
+                input: form,
+                eligibility,
+                comparison,
+              })
+            }
+          />
+        </div>
         <CalcCard title="Comparatif IS vs TOU">
           <Row>
             <MoneyTile label="IS retenue" value={comparison.sourceTax} hint={`${comparison.effectiveRateIS}%`} />
