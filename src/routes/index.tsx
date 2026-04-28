@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Plateforme professionnelle pour courtiers suisses : impôts, LPP, 3e pilier, frontaliers, optimisation fiscale et simulations multi-scénarios sur les 26 cantons.",
+          "Plateforme professionnelle pour courtiers suisses : impôts, LPP, 3e pilier, frontaliers, optimisation fiscale et simulations multi-scénarios sur la Suisse romande.",
       },
     ],
   }),
