@@ -1,5 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Coins, Wallet, Landmark, PiggyBank, Map, TrendingUp, ArrowRight } from "lucide-react";
+import {
+  Coins,
+  Wallet,
+  Landmark,
+  PiggyBank,
+  Map,
+  TrendingUp,
+  Globe,
+  Scale,
+  ShieldCheck,
+  ArrowRight,
+} from "lucide-react";
 import { CalcCard } from "@/components/calculators/CalcUI";
 
 export const Route = createFileRoute("/_app/calculators/")({
@@ -21,10 +32,28 @@ const ITEMS = [
     desc: "Barèmes A / B / C / H 2026 + frontaliers France (4.5 %).",
   },
   {
+    to: "/calculators/cross-border" as const,
+    icon: Globe,
+    title: "Frontaliers FR / IT",
+    desc: "Régime 4.5 % (8 cantons), Genève spécifique, accord italo-suisse Tessin 2023.",
+  },
+  {
+    to: "/calculators/tou" as const,
+    icon: Scale,
+    title: "TOU / quasi-résident",
+    desc: "Éligibilité 90 % et comparatif IS retenue vs taxation ordinaire ultérieure.",
+  },
+  {
     to: "/calculators/lpp" as const,
     icon: Landmark,
     title: "LPP & rachats",
     desc: "Projection capital retraite, plan de rachat étalé, économie fiscale.",
+  },
+  {
+    to: "/calculators/vested-benefits" as const,
+    icon: ShieldCheck,
+    title: "Libre passage",
+    desc: "Stratégies sécurité / équilibre / dynamique, projection nette frais et impôts.",
   },
   {
     to: "/calculators/pillar3a" as const,
