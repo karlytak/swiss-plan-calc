@@ -80,7 +80,7 @@ describe("Fixtures fiscales · profil 120k single, sans enfant, sans fortune", (
 
   it.each(["GE", "VD", "VS", "FR", "NE", "JU"])(
     "calcule un impôt > 0 pour %s",
-    (canton) => {
+    (canton: string) => {
       const r = computeIncomeTax({ canton, ...baseInput });
       expect(r.totalTax).toBeGreaterThan(0);
       expect(r.effectiveRate).toBeGreaterThan(0);
