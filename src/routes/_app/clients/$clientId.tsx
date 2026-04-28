@@ -50,6 +50,9 @@ import {
 } from "@/lib/swiss/enums";
 import { ageFromDob, parseChildren, type Client, type ClientPension, type ClientAssets, type ClientNote } from "@/lib/clients/types";
 import { formatCHF, formatPct } from "@/lib/format";
+import { runOptimizer } from "@/lib/optimizer";
+import { OptimizationsPanel } from "@/components/optimizer/OptimizationsPanel";
+import type { IncomeTaxInput } from "@/lib/tax/income";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client — SwissBroker Pro" }] }),
