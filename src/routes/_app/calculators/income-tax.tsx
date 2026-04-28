@@ -208,6 +208,10 @@ function IncomeTaxCalculator() {
       <div className="lg:col-span-5">
         <OptimizationsPanel optimizations={optimizations} />
       </div>
+
+      <div className="flex justify-end lg:col-span-5">
+        <ExportPdfButton onClick={handleExport} />
+      </div>
     </div>
   );
 }
