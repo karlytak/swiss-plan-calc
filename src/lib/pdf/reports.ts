@@ -4,7 +4,7 @@ import { ReportPdf, makeFilename, type PdfHeaderInfo } from "./builder";
 import { formatCHF, formatPct } from "@/lib/format";
 import type { IncomeTaxBreakdown, IncomeTaxInput } from "@/lib/tax/income";
 import type { LPPProjectionResult, LPPBuybackPlanResult, AnnuityVsLumpSumResult } from "@/lib/lpp";
-import type { Pillar3aProjection, StaggeredWithdrawalResult } from "@/lib/pillar3";
+import type { Pillar3aProjectionResult, StaggeredWithdrawalResult } from "@/lib/pillar3";
 import type { SourceTaxResult } from "@/lib/tax/source";
 import { CANTONS } from "@/lib/swiss/cantons";
 
