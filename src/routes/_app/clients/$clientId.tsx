@@ -51,7 +51,7 @@ import {
 import { ageFromDob, parseChildren, type Client, type ClientPension, type ClientAssets, type ClientNote } from "@/lib/clients/types";
 import { formatCHF, formatPct } from "@/lib/format";
 
-export const Route = createFileRoute("/_app/clients/$clientId")({
+export const Route = createFileRoute("/_app/clients/$clientId/")({
   head: () => ({ meta: [{ title: "Fiche client — SwissBroker Pro" }] }),
   component: ClientDetailPage,
 });

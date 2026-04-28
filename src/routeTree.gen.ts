@@ -17,6 +17,7 @@ import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index'
 import { Route as AppClientsNewRouteImport } from './routes/_app/clients/new'
+import { Route as AppClientsClientIdIndexRouteImport } from './routes/_app/clients/$clientId.index'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId.edit'
 
 const AuthRoute = AuthRouteImport.update({
@@ -58,6 +59,11 @@ const AppClientsNewRoute = AppClientsNewRouteImport.update({
   path: '/clients/new',
   getParentRoute: () => AppRoute,
 } as any)
+const AppClientsClientIdIndexRoute = AppClientsClientIdIndexRouteImport.update({
+  id: '/clients/$clientId/',
+  path: '/clients/$clientId/',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppClientsClientIdEditRoute = AppClientsClientIdEditRouteImport.update({
   id: '/clients/$clientId/edit',
   path: '/clients/$clientId/edit',
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/clients/new': typeof AppClientsNewRoute
   '/clients/': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/clients/$clientId/': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/clients/new': typeof AppClientsNewRoute
   '/clients': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/clients/$clientId': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/_app/clients/new': typeof AppClientsNewRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
+  '/_app/clients/$clientId/': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -107,6 +116,7 @@ export interface FileRouteTypes {
     | '/clients/new'
     | '/clients/'
     | '/clients/$clientId/edit'
+    | '/clients/$clientId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -117,6 +127,7 @@ export interface FileRouteTypes {
     | '/clients/new'
     | '/clients'
     | '/clients/$clientId/edit'
+    | '/clients/$clientId'
   id:
     | '__root__'
     | '/'
@@ -128,6 +139,7 @@ export interface FileRouteTypes {
     | '/_app/clients/new'
     | '/_app/clients/'
     | '/_app/clients/$clientId/edit'
+    | '/_app/clients/$clientId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -194,6 +206,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsNewRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/clients/$clientId/': {
+      id: '/_app/clients/$clientId/'
+      path: '/clients/$clientId'
+      fullPath: '/clients/$clientId/'
+      preLoaderRoute: typeof AppClientsClientIdIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/clients/$clientId/edit': {
       id: '/_app/clients/$clientId/edit'
       path: '/clients/$clientId/edit'
@@ -211,6 +230,7 @@ interface AppRouteChildren {
   AppClientsNewRoute: typeof AppClientsNewRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
   AppClientsClientIdEditRoute: typeof AppClientsClientIdEditRoute
+  AppClientsClientIdIndexRoute: typeof AppClientsClientIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -220,6 +240,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppClientsNewRoute: AppClientsNewRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
   AppClientsClientIdEditRoute: AppClientsClientIdEditRoute,
+  AppClientsClientIdIndexRoute: AppClientsClientIdIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
