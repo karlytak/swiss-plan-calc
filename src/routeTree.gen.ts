@@ -16,8 +16,15 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index'
+import { Route as AppCalculatorsIndexRouteImport } from './routes/_app/calculators/index'
 import { Route as AppClientsNewRouteImport } from './routes/_app/clients/new'
 import { Route as AppClientsClientIdRouteImport } from './routes/_app/clients/$clientId'
+import { Route as AppCalculatorsSourceTaxRouteImport } from './routes/_app/calculators/source-tax'
+import { Route as AppCalculatorsRetirementRouteImport } from './routes/_app/calculators/retirement'
+import { Route as AppCalculatorsPillar3aRouteImport } from './routes/_app/calculators/pillar3a'
+import { Route as AppCalculatorsLppRouteImport } from './routes/_app/calculators/lpp'
+import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calculators/income-tax'
+import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId.edit'
 
 const AuthRoute = AuthRouteImport.update({
@@ -54,6 +61,11 @@ const AppClientsIndexRoute = AppClientsIndexRouteImport.update({
   path: '/clients/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalculatorsIndexRoute = AppCalculatorsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
 const AppClientsNewRoute = AppClientsNewRouteImport.update({
   id: '/clients/new',
   path: '/clients/new',
@@ -64,6 +76,38 @@ const AppClientsClientIdRoute = AppClientsClientIdRouteImport.update({
   path: '/clients/$clientId',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCalculatorsSourceTaxRoute = AppCalculatorsSourceTaxRouteImport.update({
+  id: '/source-tax',
+  path: '/source-tax',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
+const AppCalculatorsRetirementRoute =
+  AppCalculatorsRetirementRouteImport.update({
+    id: '/retirement',
+    path: '/retirement',
+    getParentRoute: () => AppCalculatorsRoute,
+  } as any)
+const AppCalculatorsPillar3aRoute = AppCalculatorsPillar3aRouteImport.update({
+  id: '/pillar3a',
+  path: '/pillar3a',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
+const AppCalculatorsLppRoute = AppCalculatorsLppRouteImport.update({
+  id: '/lpp',
+  path: '/lpp',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
+const AppCalculatorsIncomeTaxRoute = AppCalculatorsIncomeTaxRouteImport.update({
+  id: '/income-tax',
+  path: '/income-tax',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
+const AppCalculatorsCantonCompareRoute =
+  AppCalculatorsCantonCompareRouteImport.update({
+    id: '/canton-compare',
+    path: '/canton-compare',
+    getParentRoute: () => AppCalculatorsRoute,
+  } as any)
 const AppClientsClientIdEditRoute = AppClientsClientIdEditRouteImport.update({
   id: '/edit',
   path: '/edit',
@@ -74,10 +118,17 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRoute
-  '/calculators': typeof AppCalculatorsRoute
+  '/calculators': typeof AppCalculatorsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
+  '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/calculators/lpp': typeof AppCalculatorsLppRoute
+  '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
+  '/calculators/retirement': typeof AppCalculatorsRetirementRoute
+  '/calculators/source-tax': typeof AppCalculatorsSourceTaxRoute
   '/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/clients/new': typeof AppClientsNewRoute
+  '/calculators/': typeof AppCalculatorsIndexRoute
   '/clients/': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
 }
@@ -85,10 +136,16 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRoute
-  '/calculators': typeof AppCalculatorsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
+  '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/calculators/lpp': typeof AppCalculatorsLppRoute
+  '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
+  '/calculators/retirement': typeof AppCalculatorsRetirementRoute
+  '/calculators/source-tax': typeof AppCalculatorsSourceTaxRoute
   '/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/clients/new': typeof AppClientsNewRoute
+  '/calculators': typeof AppCalculatorsIndexRoute
   '/clients': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
 }
@@ -98,10 +155,17 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/auth': typeof AuthRoute
   '/_app/account': typeof AppAccountRoute
-  '/_app/calculators': typeof AppCalculatorsRoute
+  '/_app/calculators': typeof AppCalculatorsRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
+  '/_app/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/_app/calculators/lpp': typeof AppCalculatorsLppRoute
+  '/_app/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
+  '/_app/calculators/retirement': typeof AppCalculatorsRetirementRoute
+  '/_app/calculators/source-tax': typeof AppCalculatorsSourceTaxRoute
   '/_app/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/_app/clients/new': typeof AppClientsNewRoute
+  '/_app/calculators/': typeof AppCalculatorsIndexRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
 }
@@ -113,8 +177,15 @@ export interface FileRouteTypes {
     | '/account'
     | '/calculators'
     | '/dashboard'
+    | '/calculators/canton-compare'
+    | '/calculators/income-tax'
+    | '/calculators/lpp'
+    | '/calculators/pillar3a'
+    | '/calculators/retirement'
+    | '/calculators/source-tax'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/calculators/'
     | '/clients/'
     | '/clients/$clientId/edit'
   fileRoutesByTo: FileRoutesByTo
@@ -122,10 +193,16 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/account'
-    | '/calculators'
     | '/dashboard'
+    | '/calculators/canton-compare'
+    | '/calculators/income-tax'
+    | '/calculators/lpp'
+    | '/calculators/pillar3a'
+    | '/calculators/retirement'
+    | '/calculators/source-tax'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/calculators'
     | '/clients'
     | '/clients/$clientId/edit'
   id:
@@ -136,8 +213,15 @@ export interface FileRouteTypes {
     | '/_app/account'
     | '/_app/calculators'
     | '/_app/dashboard'
+    | '/_app/calculators/canton-compare'
+    | '/_app/calculators/income-tax'
+    | '/_app/calculators/lpp'
+    | '/_app/calculators/pillar3a'
+    | '/_app/calculators/retirement'
+    | '/_app/calculators/source-tax'
     | '/_app/clients/$clientId'
     | '/_app/clients/new'
+    | '/_app/calculators/'
     | '/_app/clients/'
     | '/_app/clients/$clientId/edit'
   fileRoutesById: FileRoutesById
@@ -199,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/calculators/': {
+      id: '/_app/calculators/'
+      path: '/'
+      fullPath: '/calculators/'
+      preLoaderRoute: typeof AppCalculatorsIndexRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
     '/_app/clients/new': {
       id: '/_app/clients/new'
       path: '/clients/new'
@@ -213,6 +304,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsClientIdRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/calculators/source-tax': {
+      id: '/_app/calculators/source-tax'
+      path: '/source-tax'
+      fullPath: '/calculators/source-tax'
+      preLoaderRoute: typeof AppCalculatorsSourceTaxRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/calculators/retirement': {
+      id: '/_app/calculators/retirement'
+      path: '/retirement'
+      fullPath: '/calculators/retirement'
+      preLoaderRoute: typeof AppCalculatorsRetirementRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/calculators/pillar3a': {
+      id: '/_app/calculators/pillar3a'
+      path: '/pillar3a'
+      fullPath: '/calculators/pillar3a'
+      preLoaderRoute: typeof AppCalculatorsPillar3aRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/calculators/lpp': {
+      id: '/_app/calculators/lpp'
+      path: '/lpp'
+      fullPath: '/calculators/lpp'
+      preLoaderRoute: typeof AppCalculatorsLppRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/calculators/income-tax': {
+      id: '/_app/calculators/income-tax'
+      path: '/income-tax'
+      fullPath: '/calculators/income-tax'
+      preLoaderRoute: typeof AppCalculatorsIncomeTaxRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/calculators/canton-compare': {
+      id: '/_app/calculators/canton-compare'
+      path: '/canton-compare'
+      fullPath: '/calculators/canton-compare'
+      preLoaderRoute: typeof AppCalculatorsCantonCompareRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
     '/_app/clients/$clientId/edit': {
       id: '/_app/clients/$clientId/edit'
       path: '/edit'
@@ -222,6 +355,30 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AppCalculatorsRouteChildren {
+  AppCalculatorsCantonCompareRoute: typeof AppCalculatorsCantonCompareRoute
+  AppCalculatorsIncomeTaxRoute: typeof AppCalculatorsIncomeTaxRoute
+  AppCalculatorsLppRoute: typeof AppCalculatorsLppRoute
+  AppCalculatorsPillar3aRoute: typeof AppCalculatorsPillar3aRoute
+  AppCalculatorsRetirementRoute: typeof AppCalculatorsRetirementRoute
+  AppCalculatorsSourceTaxRoute: typeof AppCalculatorsSourceTaxRoute
+  AppCalculatorsIndexRoute: typeof AppCalculatorsIndexRoute
+}
+
+const AppCalculatorsRouteChildren: AppCalculatorsRouteChildren = {
+  AppCalculatorsCantonCompareRoute: AppCalculatorsCantonCompareRoute,
+  AppCalculatorsIncomeTaxRoute: AppCalculatorsIncomeTaxRoute,
+  AppCalculatorsLppRoute: AppCalculatorsLppRoute,
+  AppCalculatorsPillar3aRoute: AppCalculatorsPillar3aRoute,
+  AppCalculatorsRetirementRoute: AppCalculatorsRetirementRoute,
+  AppCalculatorsSourceTaxRoute: AppCalculatorsSourceTaxRoute,
+  AppCalculatorsIndexRoute: AppCalculatorsIndexRoute,
+}
+
+const AppCalculatorsRouteWithChildren = AppCalculatorsRoute._addFileChildren(
+  AppCalculatorsRouteChildren,
+)
 
 interface AppClientsClientIdRouteChildren {
   AppClientsClientIdEditRoute: typeof AppClientsClientIdEditRoute
@@ -236,7 +393,7 @@ const AppClientsClientIdRouteWithChildren =
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
-  AppCalculatorsRoute: typeof AppCalculatorsRoute
+  AppCalculatorsRoute: typeof AppCalculatorsRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRouteWithChildren
   AppClientsNewRoute: typeof AppClientsNewRoute
@@ -245,7 +402,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
-  AppCalculatorsRoute: AppCalculatorsRoute,
+  AppCalculatorsRoute: AppCalculatorsRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppClientsClientIdRoute: AppClientsClientIdRouteWithChildren,
   AppClientsNewRoute: AppClientsNewRoute,
@@ -262,3 +419,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
