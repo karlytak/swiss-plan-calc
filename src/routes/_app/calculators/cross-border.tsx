@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Globe, Info, ArrowRightLeft } from "lucide-react";
 import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/CalcUI";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { formatCHF } from "@/lib/format";
 import {
   computeCrossBorder,
@@ -18,6 +19,7 @@ import {
   FR_ACCORD_CANTONS,
 } from "@/lib/tax/cross-border";
 import { CANTON_BY_CODE } from "@/lib/swiss/cantons";
+import { exportCrossBorderPdf } from "@/lib/pdf/reports";
 
 export const Route = createFileRoute("/_app/calculators/cross-border")({
   head: () => ({ meta: [{ title: "Frontaliers · SwissBroker Pro" }] }),
@@ -128,6 +130,11 @@ function CrossBorderCalc() {
       </div>
 
       <div className="space-y-4 lg:col-span-2">
+        <div className="flex justify-end">
+          <ExportPdfButton
+            onClick={() => exportCrossBorderPdf({ input: form, result })}
+          />
+        </div>
         <CalcCard title={result.regimeLabel}>
           <Row>
             <MoneyTile label="Net annuel" value={result.netAnnual} tone="success" big />
