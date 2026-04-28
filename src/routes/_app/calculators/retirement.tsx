@@ -60,6 +60,16 @@ function RetirementCalc() {
         ? "Privilégier le capital : meilleur rendement net après impôts si bien placé."
         : "Mixte recommandé : 50/50 capital + rente pour équilibrer sécurité et performance.";
 
+  const { user } = useAuth();
+  const handleExport = () =>
+    exportRetirementPdf({
+      header: { brokerEmail: user?.email ?? undefined },
+      input: form,
+      lumpTax,
+      compare,
+      reco,
+    });
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
@@ -127,6 +137,10 @@ function RetirementCalc() {
       <div className="rounded-2xl border border-success/30 bg-success/5 p-5">
         <div className="text-xs font-medium uppercase tracking-wider text-success-foreground/80">Recommandation</div>
         <p className="mt-1 text-sm">{reco}</p>
+      </div>
+
+      <div className="flex justify-end">
+        <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
   );
