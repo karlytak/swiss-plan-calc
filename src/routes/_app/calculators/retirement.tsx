@@ -12,6 +12,9 @@ import {
 import { CANTONS } from "@/lib/swiss/cantons";
 import { annuityVsLumpSum, capitalWithdrawalTax } from "@/lib/lpp";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { exportRetirementPdf } from "@/lib/pdf/reports";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const Route = createFileRoute("/_app/calculators/retirement")({
   head: () => ({ meta: [{ title: "Rente vs capital — SwissBroker Pro" }] }),
