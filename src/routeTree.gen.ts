@@ -17,7 +17,7 @@ import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index'
 import { Route as AppClientsNewRouteImport } from './routes/_app/clients/new'
-import { Route as AppClientsClientIdIndexRouteImport } from './routes/_app/clients/$clientId.index'
+import { Route as AppClientsClientIdRouteImport } from './routes/_app/clients/$clientId'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId.edit'
 
 const AuthRoute = AuthRouteImport.update({
@@ -59,15 +59,15 @@ const AppClientsNewRoute = AppClientsNewRouteImport.update({
   path: '/clients/new',
   getParentRoute: () => AppRoute,
 } as any)
-const AppClientsClientIdIndexRoute = AppClientsClientIdIndexRouteImport.update({
-  id: '/clients/$clientId/',
-  path: '/clients/$clientId/',
+const AppClientsClientIdRoute = AppClientsClientIdRouteImport.update({
+  id: '/clients/$clientId',
+  path: '/clients/$clientId',
   getParentRoute: () => AppRoute,
 } as any)
 const AppClientsClientIdEditRoute = AppClientsClientIdEditRouteImport.update({
-  id: '/clients/$clientId/edit',
-  path: '/clients/$clientId/edit',
-  getParentRoute: () => AppRoute,
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => AppClientsClientIdRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -76,10 +76,10 @@ export interface FileRoutesByFullPath {
   '/account': typeof AppAccountRoute
   '/calculators': typeof AppCalculatorsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/clients/new': typeof AppClientsNewRoute
   '/clients/': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
-  '/clients/$clientId/': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -87,10 +87,10 @@ export interface FileRoutesByTo {
   '/account': typeof AppAccountRoute
   '/calculators': typeof AppCalculatorsRoute
   '/dashboard': typeof AppDashboardRoute
+  '/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/clients/new': typeof AppClientsNewRoute
   '/clients': typeof AppClientsIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
-  '/clients/$clientId': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -100,10 +100,10 @@ export interface FileRoutesById {
   '/_app/account': typeof AppAccountRoute
   '/_app/calculators': typeof AppCalculatorsRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/clients/$clientId': typeof AppClientsClientIdRouteWithChildren
   '/_app/clients/new': typeof AppClientsNewRoute
   '/_app/clients/': typeof AppClientsIndexRoute
   '/_app/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
-  '/_app/clients/$clientId/': typeof AppClientsClientIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -113,10 +113,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/calculators'
     | '/dashboard'
+    | '/clients/$clientId'
     | '/clients/new'
     | '/clients/'
     | '/clients/$clientId/edit'
-    | '/clients/$clientId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -124,10 +124,10 @@ export interface FileRouteTypes {
     | '/account'
     | '/calculators'
     | '/dashboard'
+    | '/clients/$clientId'
     | '/clients/new'
     | '/clients'
     | '/clients/$clientId/edit'
-    | '/clients/$clientId'
   id:
     | '__root__'
     | '/'
@@ -136,10 +136,10 @@ export interface FileRouteTypes {
     | '/_app/account'
     | '/_app/calculators'
     | '/_app/dashboard'
+    | '/_app/clients/$clientId'
     | '/_app/clients/new'
     | '/_app/clients/'
     | '/_app/clients/$clientId/edit'
-    | '/_app/clients/$clientId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -206,41 +206,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppClientsNewRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/clients/$clientId/': {
-      id: '/_app/clients/$clientId/'
+    '/_app/clients/$clientId': {
+      id: '/_app/clients/$clientId'
       path: '/clients/$clientId'
-      fullPath: '/clients/$clientId/'
-      preLoaderRoute: typeof AppClientsClientIdIndexRouteImport
+      fullPath: '/clients/$clientId'
+      preLoaderRoute: typeof AppClientsClientIdRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/clients/$clientId/edit': {
       id: '/_app/clients/$clientId/edit'
-      path: '/clients/$clientId/edit'
+      path: '/edit'
       fullPath: '/clients/$clientId/edit'
       preLoaderRoute: typeof AppClientsClientIdEditRouteImport
-      parentRoute: typeof AppRoute
+      parentRoute: typeof AppClientsClientIdRoute
     }
   }
 }
+
+interface AppClientsClientIdRouteChildren {
+  AppClientsClientIdEditRoute: typeof AppClientsClientIdEditRoute
+}
+
+const AppClientsClientIdRouteChildren: AppClientsClientIdRouteChildren = {
+  AppClientsClientIdEditRoute: AppClientsClientIdEditRoute,
+}
+
+const AppClientsClientIdRouteWithChildren =
+  AppClientsClientIdRoute._addFileChildren(AppClientsClientIdRouteChildren)
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppCalculatorsRoute: typeof AppCalculatorsRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppClientsClientIdRoute: typeof AppClientsClientIdRouteWithChildren
   AppClientsNewRoute: typeof AppClientsNewRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
-  AppClientsClientIdEditRoute: typeof AppClientsClientIdEditRoute
-  AppClientsClientIdIndexRoute: typeof AppClientsClientIdIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppCalculatorsRoute: AppCalculatorsRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppClientsClientIdRoute: AppClientsClientIdRouteWithChildren,
   AppClientsNewRoute: AppClientsNewRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
-  AppClientsClientIdEditRoute: AppClientsClientIdEditRoute,
-  AppClientsClientIdIndexRoute: AppClientsClientIdIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
@@ -253,3 +262,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
