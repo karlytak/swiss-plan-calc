@@ -135,6 +135,7 @@ function SourceTaxCalc() {
             <p className="mt-3 text-xs text-muted-foreground">{result.crossBorderNote}</p>
           )}
         </CalcCard>
+        <ExportPdfButton onClick={handleExport} />
       </div>
     </div>
   );
