@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
@@ -40,6 +41,11 @@ const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppHistoryRoute = AppHistoryRouteImport.update({
+  id: '/history',
+  path: '/history',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AppAccountRoute
   '/calculators': typeof AppCalculatorsRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/history': typeof AppHistoryRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRoute
   '/dashboard': typeof AppDashboardRoute
+  '/history': typeof AppHistoryRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
@@ -157,6 +165,7 @@ export interface FileRoutesById {
   '/_app/account': typeof AppAccountRoute
   '/_app/calculators': typeof AppCalculatorsRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/history': typeof AppHistoryRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/_app/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/_app/calculators/lpp': typeof AppCalculatorsLppRoute
@@ -177,6 +186,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/calculators'
     | '/dashboard'
+    | '/history'
     | '/calculators/canton-compare'
     | '/calculators/income-tax'
     | '/calculators/lpp'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/dashboard'
+    | '/history'
     | '/calculators/canton-compare'
     | '/calculators/income-tax'
     | '/calculators/lpp'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/_app/account'
     | '/_app/calculators'
     | '/_app/dashboard'
+    | '/_app/history'
     | '/_app/calculators/canton-compare'
     | '/_app/calculators/income-tax'
     | '/_app/calculators/lpp'
@@ -254,6 +266,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/history': {
+      id: '/_app/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
       id: '/_app/dashboard'
@@ -395,6 +414,7 @@ interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppCalculatorsRoute: typeof AppCalculatorsRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
+  AppHistoryRoute: typeof AppHistoryRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRouteWithChildren
   AppClientsNewRoute: typeof AppClientsNewRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
@@ -404,6 +424,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppCalculatorsRoute: AppCalculatorsRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
+  AppHistoryRoute: AppHistoryRoute,
   AppClientsClientIdRoute: AppClientsClientIdRouteWithChildren,
   AppClientsNewRoute: AppClientsNewRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
