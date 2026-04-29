@@ -42,12 +42,12 @@ function Landing() {
 function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link to="/" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-primary shadow-elegant">
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:px-6 lg:px-8">
+        <Link to="/" className="flex min-w-0 items-center gap-2">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-primary shadow-elegant">
             <span className="text-lg font-bold text-primary-foreground">S</span>
           </div>
-          <span className="text-lg font-semibold tracking-tight">
+          <span className="truncate text-base font-semibold tracking-tight sm:text-lg">
             SwissBroker <span className="text-primary">Pro</span>
           </span>
         </Link>
@@ -62,15 +62,16 @@ function Header() {
             Optimisation
           </a>
         </nav>
-        <div className="flex items-center gap-3">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           <Link to="/auth">
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="px-2 sm:px-3">
               Se connecter
             </Button>
           </Link>
           <Link to="/auth" search={{ mode: "signup" }}>
             <Button size="sm" className="shadow-elegant">
-              Essayer gratuitement
+              <span className="hidden sm:inline">Essayer gratuitement</span>
+              <span className="sm:hidden">Essayer</span>
             </Button>
           </Link>
         </div>
@@ -336,9 +337,9 @@ function SuggestionCard({
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="text-sm font-medium">{title}</div>
-        <div className="shrink-0 rounded-md bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
+        <div className="max-w-full whitespace-normal break-words rounded-md bg-success/10 px-2 py-0.5 text-xs font-semibold leading-snug text-success sm:shrink-0 sm:text-right">
           {amount}
         </div>
       </div>
