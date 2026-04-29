@@ -207,8 +207,8 @@ function CantonCompareCalc() {
 
         {/* Séparateur visuel + badge ZG */}
         {hasZG && (
-          <div className="mt-3 flex items-center gap-2 rounded-md border border-dashed border-primary/40 bg-primary/5 p-2 text-xs">
-            <Sparkles className="h-3.5 w-3.5 text-primary" aria-hidden />
+          <div className="mt-3 flex items-center gap-2 rounded-md border border-dashed border-success/40 bg-success/5 p-2 text-xs">
+            <Sparkles className="h-3.5 w-3.5 text-success" aria-hidden />
             <span className="font-semibold text-foreground">ZG · Zoug</span>
             <span className="text-muted-foreground">
               — Référence fiscalité optimisée (hors scope domicile v1, {romandsCount} cantons romands au-dessus)
@@ -218,8 +218,8 @@ function CantonCompareCalc() {
 
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <Legend color="var(--success)" label="Canton le plus avantageux (Romandie)" />
-          <Legend color="var(--primary)" label="Autres cantons" />
-          <Legend color="var(--primary)" label="Zoug — référence (translucide)" opacity={0.55} />
+          <Legend color="var(--primary)" label="Cantons romands" />
+          <Legend color="var(--success)" label="Zoug — référence fiscale" opacity={0.65} />
         </div>
       </CalcCard>
 
