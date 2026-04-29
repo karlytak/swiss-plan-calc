@@ -194,9 +194,11 @@
   --popover: oklch(0.2 0.018 260);
   --popover-foreground: oklch(0.97 0.005 250);
 
-  --primary: oklch(0.7 0.2 25);
+  --primary: oklch(0.72 0.12 185);
   --primary-foreground: oklch(0.16 0.015 260);
-  --primary-glow: oklch(0.78 0.18 25);
+  --primary-glow: oklch(0.8 0.12 185);
+  --primary-hover: oklch(0.78 0.12 185);
+  --primary-light: oklch(0.3 0.06 185);
 
   --secondary: oklch(0.25 0.015 260);
   --secondary-foreground: oklch(0.97 0.005 250);
@@ -204,36 +206,39 @@
   --muted: oklch(0.24 0.015 260);
   --muted-foreground: oklch(0.7 0.015 250);
 
-  --accent: oklch(0.27 0.02 260);
-  --accent-foreground: oklch(0.97 0.005 250);
+  --accent: oklch(0.82 0.16 75);
+  --accent-foreground: oklch(0.16 0.015 260);
 
   --destructive: oklch(0.7 0.22 25);
   --destructive-foreground: oklch(0.16 0.015 260);
+  --destructive-light: oklch(0.3 0.1 25);
 
-  --success: oklch(0.7 0.16 152);
+  --success: oklch(0.72 0.18 145);
   --success-foreground: oklch(0.16 0.015 260);
+  --success-light: oklch(0.3 0.08 145);
 
   --warning: oklch(0.78 0.16 75);
   --warning-foreground: oklch(0.16 0.015 260);
+  --warning-light: oklch(0.3 0.08 75);
 
   --border: oklch(1 0 0 / 9%);
   --input: oklch(1 0 0 / 12%);
-  --ring: oklch(0.7 0.2 25);
+  --ring: oklch(0.72 0.12 185);
 
-  --chart-1: oklch(0.7 0.2 25);
+  --chart-1: oklch(0.72 0.12 185);
   --chart-2: oklch(0.7 0.16 240);
-  --chart-3: oklch(0.7 0.16 152);
-  --chart-4: oklch(0.78 0.16 75);
+  --chart-3: oklch(0.72 0.18 145);
+  --chart-4: oklch(0.82 0.16 75);
   --chart-5: oklch(0.7 0.18 305);
 
   --sidebar: oklch(0.18 0.015 260);
   --sidebar-foreground: oklch(0.97 0.005 250);
-  --sidebar-primary: oklch(0.7 0.2 25);
+  --sidebar-primary: oklch(0.72 0.12 185);
   --sidebar-primary-foreground: oklch(0.16 0.015 260);
   --sidebar-accent: oklch(0.25 0.015 260);
   --sidebar-accent-foreground: oklch(0.97 0.005 250);
   --sidebar-border: oklch(1 0 0 / 9%);
-  --sidebar-ring: oklch(0.7 0.2 25);
+  --sidebar-ring: oklch(0.72 0.12 185);
 
   --shadow-elegant: 0 20px 50px -25px color-mix(in oklab, var(--primary) 60%, transparent);
   --shadow-card:
