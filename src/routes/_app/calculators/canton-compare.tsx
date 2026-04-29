@@ -194,9 +194,11 @@ function CantonCompareCalc() {
               <Bar dataKey="total" radius={[0, 6, 6, 0]}>
                 {data.map((d) => {
                   const isCheapest = cheapestRomand?.code === d.code;
-                  // P3 : pas de rouge. Tout en primary, sauf le moins cher en success.
-                  const fill = isCheapest ? "var(--success)" : "var(--primary)";
-                  return <Cell key={d.code} fill={fill} fillOpacity={d.code === ZG_CODE ? 0.55 : 1} />;
+                  const isZG = d.code === ZG_CODE;
+                  // ZG = exemple positif d'optimisation fiscale → vert translucide.
+                  // Plus avantageux Romandie → vert plein. Autres → teal (primary).
+                  const fill = isCheapest || isZG ? "var(--success)" : "var(--primary)";
+                  return <Cell key={d.code} fill={fill} fillOpacity={isZG ? 0.65 : 1} />;
                 })}
               </Bar>
             </BarChart>
