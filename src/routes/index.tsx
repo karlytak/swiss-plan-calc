@@ -336,9 +336,9 @@ function SuggestionCard({
 }) {
   return (
     <div className="rounded-xl border border-border bg-background p-4">
-      <div className="flex items-start justify-between gap-4">
+      <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
         <div className="text-sm font-medium">{title}</div>
-        <div className="shrink-0 rounded-md bg-success/10 px-2 py-0.5 text-xs font-semibold text-success">
+        <div className="max-w-full whitespace-normal break-words rounded-md bg-success/10 px-2 py-0.5 text-xs font-semibold leading-snug text-success sm:shrink-0 sm:text-right">
           {amount}
         </div>
       </div>
