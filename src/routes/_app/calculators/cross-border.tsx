@@ -163,7 +163,7 @@ function CrossBorderCalc() {
                 <div
                   className={`mt-2 text-xs font-semibold ${
                     result.alternative.delta > 0
-                      ? "text-emerald-600 dark:text-emerald-400"
+                      ? "text-success"
                       : "text-destructive"
                   }`}
                 >

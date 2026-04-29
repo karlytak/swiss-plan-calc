@@ -100,8 +100,8 @@ function TOUCalc() {
           <div
             className={`mt-4 flex items-start gap-2 rounded-lg border p-3 text-sm ${
               eligibility.eligibleForTOU
-                ? "border-emerald-500/30 bg-emerald-500/5 text-emerald-700 dark:text-emerald-400"
-                : "border-amber-500/30 bg-amber-500/5 text-amber-700 dark:text-amber-400"
+                ? "border-success/30 bg-success/5 text-success"
+                : "border-warning/30 bg-warning/5 text-warning"
             }`}
           >
             {eligibility.eligibleForTOU ? (
