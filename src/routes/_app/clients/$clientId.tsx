@@ -182,34 +182,8 @@ function ClientDetailPage() {
   const children = parseChildren(client.children);
 
   const bundle = { client, pension, assets };
-  const partial = toIncomeTaxInput(bundle);
-  const ctx = getClientTaxContext(client);
-  const taxInput: IncomeTaxInput = {
-    canton: partial.canton ?? "VD",
-    status: partial.status ?? (children.length > 0 ? "single_with_children" : "single"),
-    confession: partial.confession ?? "other",
-    children: partial.children ?? children.length,
-    grossSalary: partial.grossSalary ?? 0,
-    spouseGrossSalary: partial.spouseGrossSalary ?? 0,
-    bonus: partial.bonus ?? 0,
-    otherIncome: partial.otherIncome ?? 0,
-    pillar3aContributions: partial.pillar3aContributions ?? 0,
-    lppBuyback: 0,
-    mortgageInterest: partial.mortgageInterest ?? 0,
-    realEstateMaintenance: partial.realEstateMaintenance ?? 0,
-    netWealth: partial.netWealth ?? fortune,
-  };
-  const optimizations = runOptimizer({
-    taxInput,
-    lppBuybackCapacity: Number(pension?.lpp_max_buyback ?? 0),
-    pillar3aCurrent: Number(pension?.pillar_3a_annual_contribution ?? 0),
-    pillar3aBalance: Number(pension?.pillar_3a_accounts && Array.isArray(pension.pillar_3a_accounts) ? 0 : 0),
-    hasLPP: Number(pension?.lpp_current_balance ?? 0) > 0,
-    age: age ?? undefined,
-    lppBalance: Number(pension?.lpp_current_balance ?? 0),
-    taxStatus: ctx.taxStatus,
-    workStatus: ctx.workStatus,
-  });
+  const dashboard = useClientDashboard(bundle);
+  const optimizations = dashboard?.suggestions ?? [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
