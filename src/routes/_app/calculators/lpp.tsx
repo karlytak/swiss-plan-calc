@@ -64,6 +64,7 @@ function LppCalc() {
     buybackCapacity: 60_000,
     buybackYears: 3,
   });
+  useHydrateFormFromPrefill(prefill, setForm);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
