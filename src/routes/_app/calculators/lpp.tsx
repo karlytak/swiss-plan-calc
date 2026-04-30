@@ -76,6 +76,7 @@ function LppCalc() {
         ...form,
         yearlyBuyback: Math.round(form.buybackCapacity / Math.max(1, form.buybackYears)),
         buybackYears: form.buybackYears,
+        insuredSalaryCap: form.insuredSalaryCap,
       }),
     [form],
   );
