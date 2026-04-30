@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Client } from "@/lib/clients/types";
+import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
 
 type CalcRoute =
   | "/calculators/income-tax"
@@ -54,7 +55,10 @@ const CHIPS: CalcChip[] = [
 ];
 
 export function ClientCalculatorBar({ client }: { client: Client }) {
-  const visible = CHIPS.filter((c) => !c.show || c.show(client));
+  const workRules = getWorkStatusRules(client.work_status);
+  const visible = CHIPS.filter(
+    (c) => (!c.show || c.show(client)) && !workRules.hiddenCalculators.has(c.to),
+  );
   return (
     <div className="rounded-lg border bg-card p-3">
       <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">

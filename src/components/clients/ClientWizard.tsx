@@ -41,6 +41,8 @@ import {
   type SourceTaxScale,
 } from "@/lib/swiss/enums";
 import type { Child, Client } from "@/lib/clients/types";
+import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
+import { formatCHF } from "@/lib/format";
 
 const STEPS = [
   { id: 1, title: "Identité", desc: "Informations personnelles" },
@@ -377,7 +379,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         {step === 2 && <StepFiscal form={form} update={update} errors={errors} />}
         {step === 3 && <StepActivity form={form} update={update} />}
         {step === 4 && <StepFamily form={form} update={update} isMarried={isMarried} />}
-        {step === 5 && <StepPatrimoine form={form} update={update} />}
+        {step === 5 && <StepPatrimoine form={form} update={update} workStatus={form.work_status} />}
       </div>
 
       <div className="mt-6 flex items-center justify-between">
@@ -628,6 +630,16 @@ function StepFiscal({ form, update, errors }: StepProps) {
 }
 
 function StepActivity({ form, update }: StepProps) {
+  const rules = getWorkStatusRules(form.work_status);
+  const salaryLabel = rules.isSelfEmployed && form.work_status === "self_employed"
+    ? "Revenu net annuel (indépendant)"
+    : rules.isRetired
+      ? "Rentes annuelles totales (AVS + LPP)"
+      : "Salaire annuel brut";
+  const otherIncomeLabel = rules.isRetired
+    ? "Autres revenus (loyers, dividendes…)"
+    : "Autres revenus";
+
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="Statut professionnel">
@@ -647,39 +659,47 @@ function StepActivity({ form, update }: StepProps) {
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Taux d'activité" htmlFor="ar">
-        <NumField
-          id="ar"
-          value={form.activity_rate}
-          onChange={(v) => update("activity_rate", v)}
-          suffix="%"
-        />
-      </Field>
-      <Field label="Employeur" htmlFor="emp">
-        <Input
-          id="emp"
-          value={form.employer}
-          onChange={(e) => update("employer", e.target.value)}
-          maxLength={120}
-        />
-      </Field>
-      <Field label="Salaire annuel brut" htmlFor="sal">
-        <NumField
-          id="sal"
-          value={form.gross_annual_salary}
-          onChange={(v) => update("gross_annual_salary", v)}
-          suffix="CHF"
-        />
-      </Field>
-      <Field label="Bonus / 13e" htmlFor="bn">
-        <NumField
-          id="bn"
-          value={form.bonus}
-          onChange={(v) => update("bonus", v)}
-          suffix="CHF"
-        />
-      </Field>
-      <Field label="Autres revenus" htmlFor="oi">
+      {rules.hasSalary && (
+        <Field label="Taux d'activité" htmlFor="ar">
+          <NumField
+            id="ar"
+            value={form.activity_rate}
+            onChange={(v) => update("activity_rate", v)}
+            suffix="%"
+          />
+        </Field>
+      )}
+      {rules.hasSalary && !rules.isSelfEmployed && (
+        <Field label="Employeur" htmlFor="emp">
+          <Input
+            id="emp"
+            value={form.employer}
+            onChange={(e) => update("employer", e.target.value)}
+            maxLength={120}
+          />
+        </Field>
+      )}
+      {(rules.hasSalary || rules.isSelfEmployed || rules.isRetired) && (
+        <Field label={salaryLabel} htmlFor="sal">
+          <NumField
+            id="sal"
+            value={form.gross_annual_salary}
+            onChange={(v) => update("gross_annual_salary", v)}
+            suffix="CHF"
+          />
+        </Field>
+      )}
+      {rules.hasSalary && !rules.isSelfEmployed && (
+        <Field label="Bonus / 13e" htmlFor="bn">
+          <NumField
+            id="bn"
+            value={form.bonus}
+            onChange={(v) => update("bonus", v)}
+            suffix="CHF"
+          />
+        </Field>
+      )}
+      <Field label={otherIncomeLabel} htmlFor="oi">
         <NumField
           id="oi"
           value={form.other_income}
@@ -825,63 +845,109 @@ function StepFamily({
   );
 }
 
-function StepPatrimoine({ form, update }: StepProps) {
+function StepPatrimoine({
+  form,
+  update,
+  workStatus,
+}: StepProps & { workStatus: WorkStatus }) {
+  const rules = getWorkStatusRules(workStatus);
+  const netSelfIncome = Number(form.gross_annual_salary) || 0;
+  const cap3a = rules.hasLPP
+    ? rules.pillar3aCap
+    : rules.isSelfEmployed
+      ? Math.min(rules.pillar3aCap, Math.round(netSelfIncome * 0.2))
+      : rules.pillar3aCap;
+
   return (
     <div className="space-y-6">
-      <div>
-        <h3 className="text-sm font-semibold">2e pilier (LPP)</h3>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label="Avoir LPP actuel">
-            <NumField
-              value={form.lpp_current_balance}
-              onChange={(v) => update("lpp_current_balance", v)}
-              suffix="CHF"
-            />
-          </Field>
-          <Field label="Salaire assuré LPP">
-            <NumField
-              value={form.lpp_insured_salary}
-              onChange={(v) => update("lpp_insured_salary", v)}
-              suffix="CHF"
-            />
-          </Field>
-          <Field label="Capacité de rachat LPP" hint="Maximum mentionné par la caisse">
-            <NumField
-              value={form.lpp_max_buyback}
-              onChange={(v) => update("lpp_max_buyback", v)}
-              suffix="CHF"
-            />
-          </Field>
-          <Field label="Plan LPP">
-            <Select value={form.lpp_plan} onValueChange={(v) => update("lpp_plan", v as LppPlan)}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {Object.entries(LPP_PLAN_LABELS).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>
-                    {v}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </Field>
+      {rules.hasLPP ? (
+        <div>
+          <h3 className="text-sm font-semibold">2e pilier (LPP)</h3>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field label="Avoir LPP actuel">
+              <NumField
+                value={form.lpp_current_balance}
+                onChange={(v) => update("lpp_current_balance", v)}
+                suffix="CHF"
+              />
+            </Field>
+            <Field label="Salaire assuré LPP">
+              <NumField
+                value={form.lpp_insured_salary}
+                onChange={(v) => update("lpp_insured_salary", v)}
+                suffix="CHF"
+              />
+            </Field>
+            {rules.canBuybackLPP && (
+              <Field label="Capacité de rachat LPP" hint="Maximum mentionné par la caisse">
+                <NumField
+                  value={form.lpp_max_buyback}
+                  onChange={(v) => update("lpp_max_buyback", v)}
+                  suffix="CHF"
+                />
+              </Field>
+            )}
+            <Field label="Plan LPP">
+              <Select value={form.lpp_plan} onValueChange={(v) => update("lpp_plan", v as LppPlan)}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(LPP_PLAN_LABELS).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>
+                      {v}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          </div>
         </div>
-      </div>
+      ) : !rules.isRetired ? (
+        <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
+          Statut <strong>{rules.shortLabel}</strong> : pas d'affiliation LPP obligatoire.
+          {rules.isSelfEmployed
+            ? " Le client peut s'affilier facultativement à une institution de prévoyance."
+            : ""}
+        </div>
+      ) : (
+        <div>
+          <h3 className="text-sm font-semibold">2e pilier (LPP) — capital restant</h3>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field label="Capital LPP non retiré">
+              <NumField
+                value={form.lpp_current_balance}
+                onChange={(v) => update("lpp_current_balance", v)}
+                suffix="CHF"
+              />
+            </Field>
+          </div>
+        </div>
+      )}
 
       <Separator />
-      <div>
-        <h3 className="text-sm font-semibold">3e pilier (3a)</h3>
-        <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label="Versement annuel 3a" hint="Plafond 2026 salarié : 7'258 CHF">
-            <NumField
-              value={form.pillar_3a_annual_contribution}
-              onChange={(v) => update("pillar_3a_annual_contribution", v)}
-              suffix="CHF"
-            />
-          </Field>
+      {cap3a > 0 ? (
+        <div>
+          <h3 className="text-sm font-semibold">3e pilier (3a)</h3>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Versement annuel 3a"
+              hint={`Plafond 2026 ${rules.shortLabel.toLowerCase()} : ${formatCHF(cap3a)}`}
+            >
+              <NumField
+                value={form.pillar_3a_annual_contribution}
+                onChange={(v) => update("pillar_3a_annual_contribution", v)}
+                suffix="CHF"
+              />
+            </Field>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
+          Statut <strong>{rules.shortLabel}</strong> : versement 3a non applicable
+          {rules.isRetired ? " (au-delà de l'âge AVS)" : " (pas de revenu d'activité)"}.
+        </div>
+      )}
 
       <Separator />
       <div>
