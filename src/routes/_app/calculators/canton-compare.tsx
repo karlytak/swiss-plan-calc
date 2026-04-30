@@ -129,6 +129,7 @@ function CantonCompareCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <CalcCard
         title="Profil à comparer"
         description="Charge fiscale annuelle simulée pour le profil renseigné."
