@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   Select,
   SelectContent,
@@ -19,13 +21,24 @@ import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportIncomeTaxPdf } from "@/lib/pdf/reports";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePrefillFromClient } from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { stripUndefined, getClientTaxContext } from "@/lib/clients/to-calculator-input";
+
+const searchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
 
 export const Route = createFileRoute("/_app/calculators/income-tax")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Impôt revenu & fortune · SwissBroker Pro" }] }),
   component: IncomeTaxCalculator,
 });
 
 function IncomeTaxCalculator() {
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "income-tax");
+
   const [form, setForm] = useState({
     canton: "VD",
     status: "single" as IncomeTaxInput["status"],
@@ -44,6 +57,15 @@ function IncomeTaxCalculator() {
     pillar3aBalance: 0,
   });
 
+  // Hydratation 1 fois — les what-if du courtier ne sont jamais écrasés.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (prefill && !hydratedRef.current) {
+      setForm((prev) => ({ ...prev, ...stripUndefined(prefill) }));
+      hydratedRef.current = true;
+    }
+  }, [prefill]);
+
   const setField = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
@@ -57,8 +79,9 @@ function IncomeTaxCalculator() {
         pillar3aCurrent: form.pillar3aContributions,
         pillar3aBalance: form.pillar3aBalance,
         hasLPP: true,
+        ...(client ? getClientTaxContext(client) : {}),
       }),
-    [form],
+    [form, client],
   );
 
   const handleExport = () =>
@@ -70,6 +93,11 @@ function IncomeTaxCalculator() {
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      {client && (
+        <div className="md:col-span-5">
+          <ClientLinkBanner client={client} />
+        </div>
+      )}
       <div className="md:col-span-3">
         <CalcCard title="Situation" description="Renseignez votre profil fiscal.">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
