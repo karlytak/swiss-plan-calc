@@ -11,9 +11,9 @@ import {
   Cell,
 } from "recharts";
 import { Info, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -27,12 +27,21 @@ import {
   type SelectableCantonCode,
 } from "@/lib/swiss/cantons";
 import { computeIncomeTax, type IncomeTaxInput } from "@/lib/tax/income";
+import { capitalWithdrawalTax } from "@/lib/lpp";
 import { CalcCard } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportCantonComparePdf } from "@/lib/pdf/reports";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Client,
+  ClientPension,
+  ClientAssets,
+} from "@/lib/clients/types";
 
 const ZG_CODE = "ZG";
 
