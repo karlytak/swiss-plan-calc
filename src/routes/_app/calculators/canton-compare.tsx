@@ -73,7 +73,7 @@ function CantonCompareCalc() {
     netWealth: 0,
     referenceCanton: "VD" as SelectableCantonCode,
   });
-  useHydrateFormFromPrefill(prefill, setForm);
+  useHydrateFormFromPrefill(prefill as Partial<typeof form> | null, setForm);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
