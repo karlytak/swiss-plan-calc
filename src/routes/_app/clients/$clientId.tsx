@@ -308,7 +308,10 @@ function ClientDetailPage() {
           />
         </TabsContent>
 
-        <TabsContent value="overview" className="mt-4">
+        <TabsContent value="overview" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardOverview dashboard={dashboard} clientId={clientId} />
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title="Identité">
               <Row label="Date de naissance" value={client.date_of_birth ?? "—"} />
@@ -329,7 +332,10 @@ function ClientDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="fiscal" className="mt-4">
+        <TabsContent value="fiscal" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardFiscal dashboard={dashboard} clientId={clientId} />
+          )}
           <Card title="Situation fiscale">
             <Row label="Statut fiscal" value={TAX_STATUS_LABELS[client.tax_status]} />
             {client.source_tax_scale && (
@@ -356,7 +362,10 @@ function ClientDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="pension" className="mt-4">
+        <TabsContent value="pension" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardPension dashboard={dashboard} clientId={clientId} />
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title="2e pilier (LPP)">
               <Row label="Plan" value={pension ? LPP_PLAN_LABELS[pension.lpp_plan] : "—"} />
@@ -390,7 +399,8 @@ function ClientDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="patrimoine" className="mt-4">
+        <TabsContent value="patrimoine" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && <DashboardWealthSummary dashboard={dashboard} />}
           <Card title="Actifs et passifs">
             <Row label="Comptes bancaires" value={formatCHF(Number(assets?.bank_accounts ?? 0))} />
             <Row label="Titres / portefeuille" value={formatCHF(Number(assets?.securities ?? 0))} />
