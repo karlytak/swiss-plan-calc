@@ -93,6 +93,7 @@ function VestedBenefitsCalc() {
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-2">
         <CalcCard
           title="Paramètres"
