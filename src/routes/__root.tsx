@@ -1,9 +1,24 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import {
+  Outlet,
+  Link,
+  createRootRoute,
+  HeadContent,
+  Scripts,
+  retainSearchParams,
+} from "@tanstack/react-router";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import appCss from "../styles.css?url";
+
+// Search params globaux : `clientId` est conservé automatiquement entre
+// les calculateurs lorsque le courtier navigue depuis la fiche client.
+const rootSearchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
 
 function NotFoundComponent() {
   return (
