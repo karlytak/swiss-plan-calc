@@ -112,6 +112,7 @@ function Pillar3aCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title="Cotisation 3a annuelle" description="Plafond 2026 : 7'258 CHF (LPP) ou 36'288 CHF (indépendant).">
