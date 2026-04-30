@@ -50,11 +50,15 @@ import {
 } from "@/lib/swiss/enums";
 import { ageFromDob, parseChildren, type Client, type ClientPension, type ClientAssets, type ClientNote } from "@/lib/clients/types";
 import { formatCHF, formatPct } from "@/lib/format";
-import { runOptimizer } from "@/lib/optimizer";
 import { OptimizationsPanel } from "@/components/optimizer/OptimizationsPanel";
-import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ClientCalculatorBar } from "@/components/clients/ClientCalculatorBar";
-import { toIncomeTaxInput, getClientTaxContext } from "@/lib/clients/to-calculator-input";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import {
+  DashboardOverview,
+  DashboardFiscal,
+  DashboardPension,
+  DashboardWealthSummary,
+} from "@/components/clients/ClientDashboardSections";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
@@ -178,34 +182,8 @@ function ClientDetailPage() {
   const children = parseChildren(client.children);
 
   const bundle = { client, pension, assets };
-  const partial = toIncomeTaxInput(bundle);
-  const ctx = getClientTaxContext(client);
-  const taxInput: IncomeTaxInput = {
-    canton: partial.canton ?? "VD",
-    status: partial.status ?? (children.length > 0 ? "single_with_children" : "single"),
-    confession: partial.confession ?? "other",
-    children: partial.children ?? children.length,
-    grossSalary: partial.grossSalary ?? 0,
-    spouseGrossSalary: partial.spouseGrossSalary ?? 0,
-    bonus: partial.bonus ?? 0,
-    otherIncome: partial.otherIncome ?? 0,
-    pillar3aContributions: partial.pillar3aContributions ?? 0,
-    lppBuyback: 0,
-    mortgageInterest: partial.mortgageInterest ?? 0,
-    realEstateMaintenance: partial.realEstateMaintenance ?? 0,
-    netWealth: partial.netWealth ?? fortune,
-  };
-  const optimizations = runOptimizer({
-    taxInput,
-    lppBuybackCapacity: Number(pension?.lpp_max_buyback ?? 0),
-    pillar3aCurrent: Number(pension?.pillar_3a_annual_contribution ?? 0),
-    pillar3aBalance: Number(pension?.pillar_3a_accounts && Array.isArray(pension.pillar_3a_accounts) ? 0 : 0),
-    hasLPP: Number(pension?.lpp_current_balance ?? 0) > 0,
-    age: age ?? undefined,
-    lppBalance: Number(pension?.lpp_current_balance ?? 0),
-    taxStatus: ctx.taxStatus,
-    workStatus: ctx.workStatus,
-  });
+  const dashboard = useClientDashboard(bundle);
+  const optimizations = dashboard?.suggestions ?? [];
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -330,7 +308,10 @@ function ClientDetailPage() {
           />
         </TabsContent>
 
-        <TabsContent value="overview" className="mt-4">
+        <TabsContent value="overview" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardOverview dashboard={dashboard} clientId={clientId} />
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title="Identité">
               <Row label="Date de naissance" value={client.date_of_birth ?? "—"} />
@@ -351,7 +332,10 @@ function ClientDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="fiscal" className="mt-4">
+        <TabsContent value="fiscal" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardFiscal dashboard={dashboard} clientId={clientId} />
+          )}
           <Card title="Situation fiscale">
             <Row label="Statut fiscal" value={TAX_STATUS_LABELS[client.tax_status]} />
             {client.source_tax_scale && (
@@ -378,7 +362,10 @@ function ClientDetailPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="pension" className="mt-4">
+        <TabsContent value="pension" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && (
+            <DashboardPension dashboard={dashboard} clientId={clientId} />
+          )}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title="2e pilier (LPP)">
               <Row label="Plan" value={pension ? LPP_PLAN_LABELS[pension.lpp_plan] : "—"} />
@@ -412,7 +399,8 @@ function ClientDetailPage() {
           </div>
         </TabsContent>
 
-        <TabsContent value="patrimoine" className="mt-4">
+        <TabsContent value="patrimoine" className="mt-4 space-y-6">
+          {dashboard?.hasEnoughData && <DashboardWealthSummary dashboard={dashboard} />}
           <Card title="Actifs et passifs">
             <Row label="Comptes bancaires" value={formatCHF(Number(assets?.bank_accounts ?? 0))} />
             <Row label="Titres / portefeuille" value={formatCHF(Number(assets?.securities ?? 0))} />

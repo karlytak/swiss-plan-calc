@@ -11,9 +11,9 @@ import {
   Cell,
 } from "recharts";
 import { Info, Sparkles } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Select,
   SelectContent,
@@ -27,12 +27,21 @@ import {
   type SelectableCantonCode,
 } from "@/lib/swiss/cantons";
 import { computeIncomeTax, type IncomeTaxInput } from "@/lib/tax/income";
+import { capitalWithdrawalTax } from "@/lib/lpp";
 import { CalcCard } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportCantonComparePdf } from "@/lib/pdf/reports";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import type {
+  Client,
+  ClientPension,
+  ClientAssets,
+} from "@/lib/clients/types";
 
 const ZG_CODE = "ZG";
 
@@ -60,11 +69,35 @@ type Row = {
   isSeparator?: boolean;
 };
 
+type CompareMode = "annual" | "lump_sum";
+
 function CantonCompareCalc() {
   const { clientId } = Route.useSearch();
   const { client, prefill } = usePrefillFromClient(clientId, "canton-compare");
   const selectable = getSelectableCantons();
   const comparable = getComparableCantons();
+
+  // Charge le bundle complet (pension + assets) pour calculer le capital LPP
+  // projeté à 65 ans. Uniquement quand un client est sélectionné.
+  const { data: bundle } = useQuery({
+    enabled: !!clientId,
+    queryKey: ["client-bundle-canton-compare", clientId],
+    queryFn: async () => {
+      if (!clientId) return null;
+      const [c, p, a] = await Promise.all([
+        supabase.from("clients").select("*").eq("id", clientId).single(),
+        supabase.from("client_pension").select("*").eq("client_id", clientId).maybeSingle(),
+        supabase.from("client_assets").select("*").eq("client_id", clientId).maybeSingle(),
+      ]);
+      if (c.error) throw c.error;
+      return {
+        client: c.data as Client,
+        pension: (p.data ?? null) as ClientPension | null,
+        assets: (a.data ?? null) as ClientAssets | null,
+      };
+    },
+  });
+  const dashboard = useClientDashboard(bundle ?? null);
 
   const [form, setForm] = useState({
     grossSalary: 120_000,
@@ -78,25 +111,54 @@ function CantonCompareCalc() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const [mode, setMode] = useState<CompareMode>("annual");
+  const projectedLPPCapital = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
+  const lumpSumStatus: "single" | "married" | "single_with_children" =
+    form.status === "married"
+      ? "married"
+      : form.status === "single_with_children"
+        ? "single_with_children"
+        : "single";
+
   const data = useMemo<Row[]>(() => {
     const rows: Row[] = [];
     for (const c of comparable) {
       try {
-        const r = computeIncomeTax({
-          canton: c.code,
-          status: form.status,
-          children: form.children,
-          grossSalary: form.grossSalary,
-          spouseGrossSalary: form.spouseGrossSalary,
-          netWealth: form.netWealth,
-        });
-        rows.push({
-          code: c.code,
-          name: c.name,
-          total: r.totalTax,
-          effective: r.effectiveRate,
-          isReference: c.code === ZG_CODE,
-        });
+        if (mode === "annual") {
+          const r = computeIncomeTax({
+            canton: c.code,
+            status: form.status,
+            children: form.children,
+            grossSalary: form.grossSalary,
+            spouseGrossSalary: form.spouseGrossSalary,
+            netWealth: form.netWealth,
+          });
+          rows.push({
+            code: c.code,
+            name: c.name,
+            total: r.totalTax,
+            effective: r.effectiveRate,
+            isReference: c.code === ZG_CODE,
+          });
+        } else {
+          // Mode prestation LPP en capital à la retraite
+          const t = capitalWithdrawalTax({
+            capital: projectedLPPCapital,
+            canton: c.code,
+            status: lumpSumStatus,
+          });
+          const effective =
+            projectedLPPCapital > 0
+              ? Math.round((t.total / projectedLPPCapital) * 1000) / 10
+              : 0;
+          rows.push({
+            code: c.code,
+            name: c.name,
+            total: t.total,
+            effective,
+            isReference: c.code === ZG_CODE,
+          });
+        }
       } catch (e) {
         // Garde-fou : un canton comparable mais sans barème complet
         // ne casse pas tout le ranking (warn console seulement).
@@ -107,7 +169,7 @@ function CantonCompareCalc() {
     const romands = rows.filter((r) => r.code !== ZG_CODE).sort((a, b) => a.total - b.total);
     const zg = rows.filter((r) => r.code === ZG_CODE);
     return [...romands, ...zg];
-  }, [form, comparable]);
+  }, [form, comparable, mode, projectedLPPCapital, lumpSumStatus]);
 
   const referenceTax = data.find((d) => d.code === form.referenceCanton)?.total ?? 0;
   const cheapestRomand = useMemo(
@@ -131,9 +193,57 @@ function CantonCompareCalc() {
   return (
     <div className="space-y-6">
       {client && <ClientLinkBanner client={client} />}
+
+      {clientId && (
+        <CalcCard title="Mode de comparaison">
+          <RadioGroup
+            value={mode}
+            onValueChange={(v) => setMode(v as CompareMode)}
+            className="grid gap-3 sm:grid-cols-2"
+          >
+            <label
+              htmlFor="mode-annual"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 hover:bg-muted/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+            >
+              <RadioGroupItem id="mode-annual" value="annual" className="mt-1" />
+              <div>
+                <div className="text-sm font-medium">Charge fiscale annuelle</div>
+                <div className="text-xs text-muted-foreground">
+                  Situation actuelle : revenu et fortune renseignés.
+                </div>
+              </div>
+            </label>
+            <label
+              htmlFor="mode-lump-sum"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 hover:bg-muted/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5 aria-disabled:opacity-50"
+              aria-disabled={projectedLPPCapital <= 0}
+            >
+              <RadioGroupItem
+                id="mode-lump-sum"
+                value="lump_sum"
+                className="mt-1"
+                disabled={projectedLPPCapital <= 0}
+              />
+              <div>
+                <div className="text-sm font-medium">Impôt prestation LPP à la retraite</div>
+                <div className="text-xs text-muted-foreground">
+                  {projectedLPPCapital > 0
+                    ? `Capital projeté à 65 ans : ${formatCHF(projectedLPPCapital)}`
+                    : "Capital LPP projeté indisponible (renseigner LPP dans la fiche)."}
+                </div>
+              </div>
+            </label>
+          </RadioGroup>
+        </CalcCard>
+      )}
+
       <CalcCard
         title="Profil à comparer"
-        description="Charge fiscale annuelle simulée pour le profil renseigné."
+        description={
+          mode === "lump_sum"
+            ? `Impôt unique sur prestation en capital de ${formatCHF(projectedLPPCapital)} (1/5 du barème fédéral + cantonal).`
+            : "Charge fiscale annuelle simulée pour le profil renseigné."
+        }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <NumField label="Salaire brut (CHF)" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
