@@ -36,6 +36,9 @@ export const Route = createFileRoute("/_app/calculators/income-tax")({
 });
 
 function IncomeTaxCalculator() {
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "income-tax");
+
   const [form, setForm] = useState({
     canton: "VD",
     status: "single" as IncomeTaxInput["status"],
@@ -54,6 +57,15 @@ function IncomeTaxCalculator() {
     pillar3aBalance: 0,
   });
 
+  // Hydratation 1 fois — les what-if du courtier ne sont jamais écrasés.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (prefill && !hydratedRef.current) {
+      setForm((prev) => ({ ...prev, ...stripUndefined(prefill) }));
+      hydratedRef.current = true;
+    }
+  }, [prefill]);
+
   const setField = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
@@ -67,8 +79,9 @@ function IncomeTaxCalculator() {
         pillar3aCurrent: form.pillar3aContributions,
         pillar3aBalance: form.pillar3aBalance,
         hasLPP: true,
+        ...(client ? getClientTaxContext(client) : {}),
       }),
-    [form],
+    [form, client],
   );
 
   const handleExport = () =>
@@ -80,7 +93,11 @@ function IncomeTaxCalculator() {
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-      <div className="md:col-span-3">
+      {client && (
+        <div className="md:col-span-5">
+          <ClientLinkBanner client={client} />
+        </div>
+      )}
         <CalcCard title="Situation" description="Renseignez votre profil fiscal.">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Canton">
