@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { Globe, Info, ArrowRightLeft } from "lucide-react";
 import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/CalcUI";
@@ -208,21 +209,21 @@ function NumField({
   label,
   value,
   onChange,
-  step,
+  step: _step,
+  suffix,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   step?: number;
+  suffix?: string;
 }) {
   return (
     <Field label={label}>
-      <Input
-        type="number"
-        inputMode="decimal"
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
+      <BaseNumField
+        value={String(value)}
+        onChange={(v) => onChange(Number(v) || 0)}
+        suffix={suffix}
       />
     </Field>
   );

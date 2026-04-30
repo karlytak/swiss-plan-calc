@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
@@ -219,21 +220,22 @@ function NumField({
   label,
   value,
   onChange,
-  step = 1,
+  step: _step = 1,
+  suffix,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   step?: number;
+  suffix?: string;
 }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
-      <Input
-        type="number"
-        step={step}
-        value={value}
-        onChange={(e) => onChange(Number(e.target.value) || 0)}
+      <BaseNumField
+        value={String(value)}
+        onChange={(v) => onChange(Number(v) || 0)}
+        suffix={suffix}
       />
     </div>
   );

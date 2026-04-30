@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { getSelectableCantons, CROSS_BORDER_FR_CANTONS } from "@/lib/swiss/cantons";
@@ -94,19 +95,18 @@ function SourceTaxCalc() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">Salaire brut mensuel (CHF)</Label>
-              <Input
-                type="number"
-                value={form.monthlyGross}
-                onChange={(e) => set("monthlyGross", Number(e.target.value) || 0)}
+              <Label className="text-xs font-medium text-muted-foreground">Salaire brut mensuel</Label>
+              <BaseNumField
+                value={String(form.monthlyGross)}
+                onChange={(v) => set("monthlyGross", Number(v) || 0)}
+                suffix="CHF"
               />
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">Nombre d'enfants</Label>
-              <Input
-                type="number"
-                value={form.children}
-                onChange={(e) => set("children", Number(e.target.value) || 0)}
+              <BaseNumField
+                value={String(form.children)}
+                onChange={(v) => set("children", Number(v) || 0)}
               />
             </div>
             <label className="flex cursor-pointer items-center gap-2 text-sm">
