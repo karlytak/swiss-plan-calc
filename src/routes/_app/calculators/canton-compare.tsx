@@ -35,7 +35,17 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const ZG_CODE = "ZG";
 
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
+import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+
+const searchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/calculators/canton-compare")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Comparateur cantonal · SwissBroker Pro" }] }),
   component: CantonCompareCalc,
 });
@@ -50,6 +60,8 @@ type Row = {
 };
 
 function CantonCompareCalc() {
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "canton-compare");
   const selectable = getSelectableCantons();
   const comparable = getComparableCantons();
 
@@ -61,6 +73,7 @@ function CantonCompareCalc() {
     netWealth: 0,
     referenceCanton: "VD" as SelectableCantonCode,
   });
+  useHydrateFormFromPrefill(prefill, setForm);
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
