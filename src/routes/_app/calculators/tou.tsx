@@ -89,6 +89,7 @@ function TOUCalc() {
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-3 space-y-4">
         <CalcCard
           title="Éligibilité quasi-résident"
