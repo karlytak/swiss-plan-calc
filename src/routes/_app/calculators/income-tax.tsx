@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   Select,
   SelectContent,
@@ -19,8 +21,16 @@ import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportIncomeTaxPdf } from "@/lib/pdf/reports";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePrefillFromClient } from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { stripUndefined, getClientTaxContext } from "@/lib/clients/to-calculator-input";
+
+const searchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
 
 export const Route = createFileRoute("/_app/calculators/income-tax")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Impôt revenu & fortune · SwissBroker Pro" }] }),
   component: IncomeTaxCalculator,
 });
