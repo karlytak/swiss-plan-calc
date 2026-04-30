@@ -54,6 +54,7 @@ import { runOptimizer } from "@/lib/optimizer";
 import { OptimizationsPanel } from "@/components/optimizer/OptimizationsPanel";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ClientCalculatorBar } from "@/components/clients/ClientCalculatorBar";
+import { toIncomeTaxInput, getClientTaxContext } from "@/lib/clients/to-calculator-input";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
@@ -176,31 +177,23 @@ function ClientDetailPage() {
     (Number(assets?.mortgage_debt ?? 0));
   const children = parseChildren(client.children);
 
+  const bundle = { client, pension, assets };
+  const partial = toIncomeTaxInput(bundle);
+  const ctx = getClientTaxContext(client);
   const taxInput: IncomeTaxInput = {
-    canton: client.canton ?? "VD",
-    status:
-      client.civil_status === "married" || client.civil_status === "registered_partnership"
-        ? "married"
-        : children.length > 0
-          ? "single_with_children"
-          : "single",
-    confession:
-      client.confession === "roman_catholic" || client.confession === "christian_catholic"
-        ? "catholic"
-        : client.confession === "protestant"
-          ? "protestant"
-          : client.confession === "none"
-            ? "none"
-            : "other",
-    children: children.length,
-    grossSalary: Number(client.gross_annual_salary ?? 0),
-    spouseGrossSalary: Number(client.spouse_gross_annual_salary ?? 0),
-    bonus: Number(client.bonus ?? 0),
-    otherIncome: Number(client.other_income ?? 0),
-    pillar3aContributions: Number(pension?.pillar_3a_annual_contribution ?? 0),
-    mortgageInterest: Number(assets?.mortgage_interest ?? 0),
-    realEstateMaintenance: Number(assets?.real_estate_maintenance ?? 0),
-    netWealth: fortune,
+    canton: partial.canton ?? "VD",
+    status: partial.status ?? (children.length > 0 ? "single_with_children" : "single"),
+    confession: partial.confession ?? "other",
+    children: partial.children ?? children.length,
+    grossSalary: partial.grossSalary ?? 0,
+    spouseGrossSalary: partial.spouseGrossSalary ?? 0,
+    bonus: partial.bonus ?? 0,
+    otherIncome: partial.otherIncome ?? 0,
+    pillar3aContributions: partial.pillar3aContributions ?? 0,
+    lppBuyback: 0,
+    mortgageInterest: partial.mortgageInterest ?? 0,
+    realEstateMaintenance: partial.realEstateMaintenance ?? 0,
+    netWealth: partial.netWealth ?? fortune,
   };
   const optimizations = runOptimizer({
     taxInput,
@@ -210,8 +203,8 @@ function ClientDetailPage() {
     hasLPP: Number(pension?.lpp_current_balance ?? 0) > 0,
     age: age ?? undefined,
     lppBalance: Number(pension?.lpp_current_balance ?? 0),
-    taxStatus: client.tax_status,
-    workStatus: client.work_status,
+    taxStatus: ctx.taxStatus,
+    workStatus: ctx.workStatus,
   });
 
   return (

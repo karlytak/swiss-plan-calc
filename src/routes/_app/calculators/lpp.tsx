@@ -50,8 +50,9 @@ function LppCalc() {
     retirementAge: 65,
     currentBalance: 250_000,
     insuredSalary: 95_000,
-    expectedReturnRate: 2.5,
+    expectedReturnRate: 1.25,
     feeRate: 0.6,
+    insuredSalaryCap: 90_720,
     salaryGrowthRate: 1,
     conversionRate: 6.0,
     extraCreditRate: 0,
@@ -75,6 +76,7 @@ function LppCalc() {
         ...form,
         yearlyBuyback: Math.round(form.buybackCapacity / Math.max(1, form.buybackYears)),
         buybackYears: form.buybackYears,
+        insuredSalaryCap: form.insuredSalaryCap,
       }),
     [form],
   );
@@ -118,21 +120,49 @@ function LppCalc() {
               <NumField label="Croissance salariale (%/an)" value={form.salaryGrowthRate} onChange={(v) => set("salaryGrowthRate", v)} step={0.1} />
               <NumField label="Taux conversion à la retraite (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} />
               <NumField label="Bonifications surobligatoires (%)" value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} />
+              <NumField label="Plafond salaire assuré (CHF)" value={form.insuredSalaryCap} onChange={(v) => set("insuredSalaryCap", v)} step={1000} />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Rendement net effectif appliqué : <strong>{projection.netReturnRate.toFixed(2)}%</strong> par an.
             </p>
+            <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-[11px] leading-relaxed text-foreground/80">
+              <p className="font-semibold text-foreground">📘 Note pédagogique — plan LPP standard vs cadre</p>
+              <p className="mt-1">
+                Par défaut le calcul applique le <strong>minimum légal LPP</strong> :
+                rendement <strong>1.25 %</strong> (taux min. 2026), plafond salaire
+                assuré <strong>90 720 CHF</strong>, taux conversion <strong>6.8 %</strong>.
+                Pour un profil <strong>cadre / plan 1e</strong>, ajustez : bonifications
+                surobligatoires <strong>5–10 %</strong>, plafond élargi (jusqu'à
+                ~860 000 CHF), rendement réel de la caisse.
+              </p>
+            </div>
           </CalcCard>
         </div>
         <div className="space-y-4 md:col-span-2">
-          <CalcCard title="Résultat retraite">
+          <CalcCard title="Résultat à la retraite">
             <Row>
-              <MoneyTile label="Capital projeté (net)" value={projection.projectedBalance} tone="primary" big />
-              <MoneyTile label="Rente annuelle" value={projection.annualPension} tone="success" />
+              <MoneyTile
+                label="Capital projeté (avec rendement)"
+                value={projection.projectedBalance}
+                hint="Bonifications + intérêts nets + rachats"
+                tone="primary"
+                big
+              />
+              <MoneyTile
+                label="Rente annuelle estimée"
+                value={projection.annualPension}
+                hint={`Taux conversion ${form.conversionRate}%`}
+                tone="success"
+              />
             </Row>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <MoneyTile label="Rente mensuelle" value={projection.monthlyPension} tone="default" />
-              <MoneyTile label="Sans rendement" value={projection.projectedBalanceNoYield} tone="default" />
+              <MoneyTile
+                label="Capital sans rendement (référence)"
+                value={projection.projectedBalanceNoYield}
+                hint={`+${formatCHF(projection.projectedBalance - projection.projectedBalanceNoYield)} grâce au rendement`}
+                tone="default"
+              />
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
               <MoneyTile label="Frais cumulés" value={projection.totalFees} tone="warning" />
