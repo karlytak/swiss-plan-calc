@@ -47,6 +47,8 @@ export interface LPPProjectionInput {
   yearlyBuyback?: number;
   /** Nombre d'années sur lesquelles s'applique le rachat (default = jusqu'à la retraite) */
   buybackYears?: number;
+  /** Plafond du salaire coordonné assuré. Default = LPP_MAX_INSURED_SALARY_2026 (90 720). Augmenter pour plans 1e / surobligatoires (cadres). */
+  insuredSalaryCap?: number;
 }
 
 export interface LPPProjectionResult {
