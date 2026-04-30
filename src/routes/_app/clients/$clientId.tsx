@@ -50,11 +50,15 @@ import {
 } from "@/lib/swiss/enums";
 import { ageFromDob, parseChildren, type Client, type ClientPension, type ClientAssets, type ClientNote } from "@/lib/clients/types";
 import { formatCHF, formatPct } from "@/lib/format";
-import { runOptimizer } from "@/lib/optimizer";
 import { OptimizationsPanel } from "@/components/optimizer/OptimizationsPanel";
-import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ClientCalculatorBar } from "@/components/clients/ClientCalculatorBar";
-import { toIncomeTaxInput, getClientTaxContext } from "@/lib/clients/to-calculator-input";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import {
+  DashboardOverview,
+  DashboardFiscal,
+  DashboardPension,
+  DashboardWealthSummary,
+} from "@/components/clients/ClientDashboardSections";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
