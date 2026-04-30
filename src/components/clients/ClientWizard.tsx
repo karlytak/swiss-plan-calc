@@ -41,6 +41,8 @@ import {
   type SourceTaxScale,
 } from "@/lib/swiss/enums";
 import type { Child, Client } from "@/lib/clients/types";
+import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
+import { formatCHF } from "@/lib/format";
 
 const STEPS = [
   { id: 1, title: "Identité", desc: "Informations personnelles" },
@@ -377,7 +379,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         {step === 2 && <StepFiscal form={form} update={update} errors={errors} />}
         {step === 3 && <StepActivity form={form} update={update} />}
         {step === 4 && <StepFamily form={form} update={update} isMarried={isMarried} />}
-        {step === 5 && <StepPatrimoine form={form} update={update} />}
+        {step === 5 && <StepPatrimoine form={form} update={update} workStatus={form.work_status} />}
       </div>
 
       <div className="mt-6 flex items-center justify-between">
