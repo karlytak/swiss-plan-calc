@@ -154,11 +154,11 @@ export function DashboardFiscal({ dashboard, clientId }: Props) {
             />
             <DashboardMetric
               label="Taux effectif"
-              value={formatPct(dashboard.tax.effectiveRate / 100, 2)}
+              value={formatPct(dashboard.tax.effectiveRate, 2)}
             />
             <DashboardMetric
               label="Taux marginal"
-              value={formatPct(dashboard.tax.marginalRate / 100, 2)}
+              value={formatPct(dashboard.tax.marginalRate, 2)}
             />
             {dashboard.tax.monthlySourceTax !== null && (
               <DashboardMetric
