@@ -69,11 +69,35 @@ type Row = {
   isSeparator?: boolean;
 };
 
+type CompareMode = "annual" | "lump_sum";
+
 function CantonCompareCalc() {
   const { clientId } = Route.useSearch();
   const { client, prefill } = usePrefillFromClient(clientId, "canton-compare");
   const selectable = getSelectableCantons();
   const comparable = getComparableCantons();
+
+  // Charge le bundle complet (pension + assets) pour calculer le capital LPP
+  // projeté à 65 ans. Uniquement quand un client est sélectionné.
+  const { data: bundle } = useQuery({
+    enabled: !!clientId,
+    queryKey: ["client-bundle-canton-compare", clientId],
+    queryFn: async () => {
+      if (!clientId) return null;
+      const [c, p, a] = await Promise.all([
+        supabase.from("clients").select("*").eq("id", clientId).single(),
+        supabase.from("client_pension").select("*").eq("client_id", clientId).maybeSingle(),
+        supabase.from("client_assets").select("*").eq("client_id", clientId).maybeSingle(),
+      ]);
+      if (c.error) throw c.error;
+      return {
+        client: c.data as Client,
+        pension: (p.data ?? null) as ClientPension | null,
+        assets: (a.data ?? null) as ClientAssets | null,
+      };
+    },
+  });
+  const dashboard = useClientDashboard(bundle ?? null);
 
   const [form, setForm] = useState({
     grossSalary: 120_000,
@@ -87,25 +111,54 @@ function CantonCompareCalc() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  const [mode, setMode] = useState<CompareMode>("annual");
+  const projectedLPPCapital = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
+  const lumpSumStatus: "single" | "married" | "single_with_children" =
+    form.status === "married"
+      ? "married"
+      : form.status === "single_with_children"
+        ? "single_with_children"
+        : "single";
+
   const data = useMemo<Row[]>(() => {
     const rows: Row[] = [];
     for (const c of comparable) {
       try {
-        const r = computeIncomeTax({
-          canton: c.code,
-          status: form.status,
-          children: form.children,
-          grossSalary: form.grossSalary,
-          spouseGrossSalary: form.spouseGrossSalary,
-          netWealth: form.netWealth,
-        });
-        rows.push({
-          code: c.code,
-          name: c.name,
-          total: r.totalTax,
-          effective: r.effectiveRate,
-          isReference: c.code === ZG_CODE,
-        });
+        if (mode === "annual") {
+          const r = computeIncomeTax({
+            canton: c.code,
+            status: form.status,
+            children: form.children,
+            grossSalary: form.grossSalary,
+            spouseGrossSalary: form.spouseGrossSalary,
+            netWealth: form.netWealth,
+          });
+          rows.push({
+            code: c.code,
+            name: c.name,
+            total: r.totalTax,
+            effective: r.effectiveRate,
+            isReference: c.code === ZG_CODE,
+          });
+        } else {
+          // Mode prestation LPP en capital à la retraite
+          const t = capitalWithdrawalTax({
+            capital: projectedLPPCapital,
+            canton: c.code,
+            status: lumpSumStatus,
+          });
+          const effective =
+            projectedLPPCapital > 0
+              ? Math.round((t.total / projectedLPPCapital) * 1000) / 10
+              : 0;
+          rows.push({
+            code: c.code,
+            name: c.name,
+            total: t.total,
+            effective,
+            isReference: c.code === ZG_CODE,
+          });
+        }
       } catch (e) {
         // Garde-fou : un canton comparable mais sans barème complet
         // ne casse pas tout le ranking (warn console seulement).
@@ -116,7 +169,7 @@ function CantonCompareCalc() {
     const romands = rows.filter((r) => r.code !== ZG_CODE).sort((a, b) => a.total - b.total);
     const zg = rows.filter((r) => r.code === ZG_CODE);
     return [...romands, ...zg];
-  }, [form, comparable]);
+  }, [form, comparable, mode, projectedLPPCapital, lumpSumStatus]);
 
   const referenceTax = data.find((d) => d.code === form.referenceCanton)?.total ?? 0;
   const cheapestRomand = useMemo(
