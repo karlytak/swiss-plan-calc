@@ -193,9 +193,57 @@ function CantonCompareCalc() {
   return (
     <div className="space-y-6">
       {client && <ClientLinkBanner client={client} />}
+
+      {clientId && (
+        <CalcCard title="Mode de comparaison">
+          <RadioGroup
+            value={mode}
+            onValueChange={(v) => setMode(v as CompareMode)}
+            className="grid gap-3 sm:grid-cols-2"
+          >
+            <label
+              htmlFor="mode-annual"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 hover:bg-muted/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5"
+            >
+              <RadioGroupItem id="mode-annual" value="annual" className="mt-1" />
+              <div>
+                <div className="text-sm font-medium">Charge fiscale annuelle</div>
+                <div className="text-xs text-muted-foreground">
+                  Situation actuelle : revenu et fortune renseignés.
+                </div>
+              </div>
+            </label>
+            <label
+              htmlFor="mode-lump-sum"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border border-border bg-card p-3 hover:bg-muted/40 has-[:checked]:border-primary has-[:checked]:bg-primary/5 aria-disabled:opacity-50"
+              aria-disabled={projectedLPPCapital <= 0}
+            >
+              <RadioGroupItem
+                id="mode-lump-sum"
+                value="lump_sum"
+                className="mt-1"
+                disabled={projectedLPPCapital <= 0}
+              />
+              <div>
+                <div className="text-sm font-medium">Impôt prestation LPP à la retraite</div>
+                <div className="text-xs text-muted-foreground">
+                  {projectedLPPCapital > 0
+                    ? `Capital projeté à 65 ans : ${formatCHF(projectedLPPCapital)}`
+                    : "Capital LPP projeté indisponible (renseigner LPP dans la fiche)."}
+                </div>
+              </div>
+            </label>
+          </RadioGroup>
+        </CalcCard>
+      )}
+
       <CalcCard
         title="Profil à comparer"
-        description="Charge fiscale annuelle simulée pour le profil renseigné."
+        description={
+          mode === "lump_sum"
+            ? `Impôt unique sur prestation en capital de ${formatCHF(projectedLPPCapital)} (1/5 du barème fédéral + cantonal).`
+            : "Charge fiscale annuelle simulée pour le profil renseigné."
+        }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <NumField label="Salaire brut (CHF)" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
