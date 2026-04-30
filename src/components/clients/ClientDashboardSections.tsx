@@ -7,7 +7,7 @@ import {
   Landmark,
   PiggyBank,
   Map,
-  ScaleIcon,
+  Scale,
   Sparkles,
 } from "lucide-react";
 import {
@@ -275,7 +275,7 @@ export function DashboardPension({ dashboard, clientId }: Props) {
 
       <DashboardCard
         title="Rente vs capital"
-        icon={ScaleIcon}
+        icon={Scale}
         detailLink={{ to: "/calculators/retirement", search: linkSearch(clientId) }}
       >
         {dashboard.retirement ? (
