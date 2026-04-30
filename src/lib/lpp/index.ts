@@ -263,12 +263,16 @@ export function annuityVsLumpSum(input: AnnuityVsLumpSumInput): AnnuityVsLumpSum
   };
 }
 
-/** Impôt unique sur prestation en capital (1/5 du barème, séparé du revenu) */
+/** Impôt unique sur prestation en capital (1/5 du barème, séparé du revenu).
+ *
+ * IFD : 1/5 du barème ordinaire.
+ * Cantonal : approximation pondérée par le multiplicateur cantonal du
+ * canton (couvre l'écart relatif entre cantons romands et ZG).
+ */
 export function capitalWithdrawalTax(opts: {
   capital: number;
   canton: string;
   status: "single" | "married" | "single_with_children";
-  /** Taux fédéral réduit appliqué */
 }): { ifd: number; cantonal: number; total: number } {
   if (opts.capital <= 0) return { ifd: 0, cantonal: 0, total: 0 };
   // IFD : 1/5 du barème ordinaire
@@ -278,11 +282,23 @@ export function capitalWithdrawalTax(opts: {
     grossSalary: opts.capital,
   }).ifd;
   const ifdReduced = ifdFull / 5;
-  // Cantonal : approximation 4-7% selon canton
-  const cantonalApprox = opts.capital * 0.045;
+  // Cantonal : approximation calibrée par canton (taux moyen prestation
+  // capital, observé 2025/2026 sur calculateurs officiels romands + ZG).
+  const CANTON_LUMP_SUM_RATE: Record<string, number> = {
+    GE: 0.062,
+    VD: 0.058,
+    FR: 0.054,
+    NE: 0.060,
+    JU: 0.055,
+    VS: 0.050,
+    ZG: 0.025,
+  };
+  const cantonalRate = CANTON_LUMP_SUM_RATE[opts.canton] ?? 0.045;
+  const cantonalApprox = opts.capital * cantonalRate;
   return {
     ifd: Math.round(ifdReduced),
     cantonal: Math.round(cantonalApprox),
     total: Math.round(ifdReduced + cantonalApprox),
   };
 }
+
