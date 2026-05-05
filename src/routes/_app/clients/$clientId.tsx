@@ -148,6 +148,12 @@ function ClientDetailPage() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["client", clientId] }),
   });
 
+  // IMPORTANT : tous les hooks doivent être appelés avant tout return conditionnel.
+  const bundle = data
+    ? { client: data.client, pension: data.pension, assets: data.assets }
+    : null;
+  const dashboard = useClientDashboard(bundle);
+
   if (isLoading) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -180,9 +186,6 @@ function ClientDetailPage() {
     (Number(assets?.real_estate_value ?? 0)) -
     (Number(assets?.mortgage_debt ?? 0));
   const children = parseChildren(client.children);
-
-  const bundle = { client, pension, assets };
-  const dashboard = useClientDashboard(bundle);
   const optimizations = dashboard?.suggestions ?? [];
 
   return (
