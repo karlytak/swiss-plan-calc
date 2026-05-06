@@ -32,6 +32,7 @@ import {
   LPP_PLAN_LABELS,
   SOURCE_TAX_SCALES,
   SOURCE_TAX_SCALE_LABELS,
+  GENDER_LABELS,
   type CivilStatus,
   type Confession,
   type Permit,
@@ -39,6 +40,7 @@ import {
   type WorkStatus,
   type LppPlan,
   type SourceTaxScale,
+  type Gender,
 } from "@/lib/swiss/enums";
 import type { Child, Client } from "@/lib/clients/types";
 import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
