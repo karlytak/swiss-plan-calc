@@ -84,6 +84,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             key={item.to}
             to={item.to}
             onClick={onNavigate}
+            search={item.to === "/calculators" ? { clientId: undefined } : undefined}
             className={cn(
               "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
               active
