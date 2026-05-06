@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   LineChart,
   Line as RLine,
@@ -9,9 +9,17 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts";
-import { Input } from "@/components/ui/input";
+
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip as UiTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Calculator, Info, RotateCcw, Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,9 +28,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
-import { projectLPP, simulateBuybackPlan } from "@/lib/lpp";
+import { projectLPP, simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
+import { LPP_2026 } from "@/lib/lpp/parameters-2026";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
+const fmtCHF = formatCHF;
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportLppPdf } from "@/lib/pdf/reports";
@@ -50,10 +60,11 @@ function LppCalc() {
     currentAge: 40,
     retirementAge: 65,
     currentBalance: 250_000,
-    insuredSalary: 95_000,
+    grossSalary: 120_000,
+    insuredSalary: computeLppInsuredSalary(120_000, LPP_2026.maxInsuredSalary),
     expectedReturnRate: 1.25,
     feeRate: 0.6,
-    insuredSalaryCap: 90_720,
+    insuredSalaryCap: LPP_2026.maxInsuredSalary as number,
     salaryGrowthRate: 1,
     conversionRate: 6.0,
     extraCreditRate: 0,
@@ -61,15 +72,32 @@ function LppCalc() {
     // rachat
     canton: "VD",
     status: "single" as IncomeTaxInput["status"],
-    grossSalary: 120_000,
     children: 0,
     buybackCapacity: 60_000,
     buybackYears: 3,
   });
   useHydrateFormFromPrefill(prefill, setForm);
+  const [insuredSalaryManual, setInsuredSalaryManual] = useState(false);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  // Auto-recalcul du salaire assuré quand brut/plafond changent (sauf mode manuel)
+  useEffect(() => {
+    if (insuredSalaryManual) return;
+    const auto = computeLppInsuredSalary(form.grossSalary, form.insuredSalaryCap);
+    if (auto !== form.insuredSalary) {
+      setForm((f) => ({ ...f, insuredSalary: auto }));
+    }
+  }, [form.grossSalary, form.insuredSalaryCap, insuredSalaryManual, form.insuredSalary]);
+
+  const recalcAuto = () => {
+    setInsuredSalaryManual(false);
+    setForm((f) => ({
+      ...f,
+      insuredSalary: computeLppInsuredSalary(f.grossSalary, f.insuredSalaryCap),
+    }));
+  };
 
   const projection = useMemo(
     () =>
@@ -111,17 +139,28 @@ function LppCalc() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title="Projection capital LPP" description="Bonifications légales + rendement net (taux − frais) + rachats annuels.">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <InsuredSalaryPanel
+              grossSalary={form.grossSalary}
+              insuredSalary={form.insuredSalary}
+              insuredSalaryCap={form.insuredSalaryCap}
+              isManual={insuredSalaryManual}
+              onGrossChange={(v) => set("grossSalary", v)}
+              onCapChange={(v) => set("insuredSalaryCap", v)}
+              onInsuredChange={(v) => {
+                setInsuredSalaryManual(true);
+                set("insuredSalary", v);
+              }}
+              onRecalcAuto={recalcAuto}
+            />
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumField label="Âge actuel" value={form.currentAge} onChange={(v) => set("currentAge", v)} />
               <NumField label="Âge retraite" value={form.retirementAge} onChange={(v) => set("retirementAge", v)} />
               <NumField label="Avoir LPP actuel (CHF)" value={form.currentBalance} onChange={(v) => set("currentBalance", v)} />
-              <NumField label="Salaire assuré (CHF)" value={form.insuredSalary} onChange={(v) => set("insuredSalary", v)} />
               <NumField label="Rendement brut (%/an)" value={form.expectedReturnRate} onChange={(v) => set("expectedReturnRate", v)} step={0.1} />
               <NumField label="Frais TER + admin (%/an)" value={form.feeRate} onChange={(v) => set("feeRate", v)} step={0.05} />
               <NumField label="Croissance salariale (%/an)" value={form.salaryGrowthRate} onChange={(v) => set("salaryGrowthRate", v)} step={0.1} />
               <NumField label="Taux conversion à la retraite (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} />
               <NumField label="Bonifications surobligatoires (%)" value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} />
-              <NumField label="Plafond salaire assuré (CHF)" value={form.insuredSalaryCap} onChange={(v) => set("insuredSalaryCap", v)} step={1000} />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Rendement net effectif appliqué : <strong>{projection.netReturnRate.toFixed(2)}%</strong> par an.
@@ -230,7 +269,6 @@ function LppCalc() {
                   </SelectContent>
                 </Select>
               </div>
-              <NumField label="Salaire brut annuel (CHF)" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
               <NumField label="Nombre d'enfants" value={form.children} onChange={(v) => set("children", v)} />
               <NumField label="Capacité de rachat (CHF)" value={form.buybackCapacity} onChange={(v) => set("buybackCapacity", v)} />
               <NumField label="Étaler sur (années)" value={form.buybackYears} onChange={(v) => set("buybackYears", v)} />
@@ -303,5 +341,159 @@ function NumField({
         suffix={suffix}
       />
     </div>
+  );
+}
+
+function InsuredSalaryPanel({
+  grossSalary,
+  insuredSalary,
+  insuredSalaryCap,
+  isManual,
+  onGrossChange,
+  onCapChange,
+  onInsuredChange,
+  onRecalcAuto,
+}: {
+  grossSalary: number;
+  insuredSalary: number;
+  insuredSalaryCap: number;
+  isManual: boolean;
+  onGrossChange: (v: number) => void;
+  onCapChange: (v: number) => void;
+  onInsuredChange: (v: number) => void;
+  onRecalcAuto: () => void;
+}) {
+  const COORD = LPP_2026.coordinationDeduction;
+  const MIN_COORD = 3_780;
+  const ENTRY = LPP_2026.minAnnualSalary;
+
+  const belowEntry = grossSalary > 0 && grossSalary < ENTRY;
+  const rawDiff = grossSalary - COORD;
+  const capped = rawDiff > insuredSalaryCap;
+
+  let recap: React.ReactNode;
+  if (belowEntry) {
+    recap = (
+      <span className="text-warning">
+        Salaire inférieur au seuil d'entrée LPP ({fmtCHF(ENTRY)}). Affiliation LPP non obligatoire.
+      </span>
+    );
+  } else if (capped) {
+    recap = (
+      <>
+        {fmtCHF(grossSalary)} − {fmtCHF(COORD)} = {fmtCHF(rawDiff)},{" "}
+        <span className="font-semibold">plafonné à {fmtCHF(insuredSalaryCap)}</span>
+      </>
+    );
+  } else {
+    recap = (
+      <>
+        {fmtCHF(grossSalary)} − {fmtCHF(COORD)} = <span className="font-semibold">{fmtCHF(Math.max(MIN_COORD, rawDiff))}</span>{" "}
+        (sous plafond {fmtCHF(insuredSalaryCap)})
+      </>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Salaire assuré LPP
+        </div>
+
+        {/* ZONE 1 — Input primaire */}
+        <NumField
+          label="Salaire brut annuel total (CHF)"
+          value={grossSalary}
+          onChange={onGrossChange}
+        />
+
+        {/* ZONE 2 — Constantes */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs">
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Déduction coordination 2026
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent>Constante OFAS, non modifiable.</TooltipContent>
+              </UiTooltip>
+            </div>
+            <div className="mt-0.5 font-semibold tabular-nums">{fmtCHF(COORD)}</div>
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Plafond salaire assuré
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  Régime obligatoire pur. À ajuster si plan cadres (132'300) ou plan 1e
+                  (réservé aux salaires {">"} 132'300, plafond modulé selon le plan).
+                </TooltipContent>
+              </UiTooltip>
+            </div>
+            <BaseNumField
+              value={String(insuredSalaryCap)}
+              onChange={(v) => onCapChange(Number(v) || 0)}
+              className="mt-0.5 h-7 text-sm font-semibold"
+            />
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Salaire coord. minimum
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent>Plancher OFAS 2026.</TooltipContent>
+              </UiTooltip>
+            </div>
+            <div className="mt-0.5 font-semibold tabular-nums">{fmtCHF(MIN_COORD)}</div>
+          </div>
+        </div>
+
+        {/* ZONE 3 — Output */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Salaire assuré (CHF)
+            </Label>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                  isManual
+                    ? "bg-warning/15 text-warning-foreground border border-warning/30"
+                    : "bg-primary/15 text-primary border border-primary/30"
+                }`}
+              >
+                {isManual ? <Pencil className="h-3 w-3" /> : <Calculator className="h-3 w-3" />}
+                {isManual ? "Manuel" : "Auto"}
+              </span>
+              {isManual && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-[10px]"
+                  onClick={onRecalcAuto}
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" /> Recalculer auto
+                </Button>
+              )}
+            </div>
+          </div>
+          <BaseNumField
+            value={String(insuredSalary)}
+            onChange={(v) => onInsuredChange(Number(v) || 0)}
+            suffix="CHF"
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Calculé automatiquement à partir du salaire brut, de la déduction de
+            coordination et du plafond. Modifiable pour plans surobligatoires ou règles
+            spécifiques.
+          </p>
+          <p className="mt-1 text-[11px] tabular-nums text-foreground/80">{recap}</p>
+        </div>
+      </div>
+    </TooltipProvider>
   );
 }
