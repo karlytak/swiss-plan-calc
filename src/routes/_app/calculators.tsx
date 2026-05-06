@@ -27,10 +27,6 @@ const layoutSearchSchema = z.object({
 export const Route = createFileRoute("/_app/calculators")({
   head: () => ({ meta: [{ title: "Calculateurs · SwissBroker Pro" }] }),
   validateSearch: zodValidator(layoutSearchSchema),
-  search: {
-    // Conserve clientId entre les onglets internes du calculateur uniquement.
-    middlewares: [retainSearchParams(["clientId"])],
-  },
   component: CalculatorsLayout,
 });
 
