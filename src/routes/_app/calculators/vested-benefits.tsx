@@ -188,24 +188,24 @@ function VestedBenefitsCalc() {
                   type="monotone"
                   dataKey="security"
                   name="Sécurité"
-                  stroke="hsl(var(--muted-foreground))"
-                  strokeWidth={2}
+                  stroke="var(--muted-foreground)"
+                  strokeWidth={3}
                   dot={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="balanced"
                   name="Équilibré"
-                  stroke="hsl(var(--primary))"
-                  strokeWidth={2}
+                  stroke="var(--primary)"
+                  strokeWidth={3}
                   dot={false}
                 />
                 <Line
                   type="monotone"
                   dataKey="dynamic"
                   name="Dynamique"
-                  stroke="hsl(var(--success, 142 76% 36%))"
-                  strokeWidth={2}
+                  stroke="var(--success)"
+                  strokeWidth={3}
                   dot={false}
                 />
               </ComposedChart>
@@ -234,7 +234,7 @@ function VestedBenefitsCalc() {
                   )}
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{p.strategy.description}</p>
-                <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="mt-3 grid grid-cols-1 gap-2 xl:grid-cols-2">
                   <MoneyTile label="Capital final" value={p.finalBalance} tone="primary" />
                   <MoneyTile label="Gains nets" value={p.totalGains} tone="success" />
                 </div>

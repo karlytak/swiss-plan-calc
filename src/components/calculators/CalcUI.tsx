@@ -70,13 +70,13 @@ export function StatTile({
         toneCls,
       )}
     >
-      <div className="truncate text-[11px] font-medium uppercase tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
+      <div className="text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
         {label}
       </div>
       <div
         className={cn(
-          "mt-1 truncate font-semibold tabular-nums transition-transform duration-300 group-hover:translate-y-[-1px]",
-          big ? "text-2xl" : "text-xl",
+          "mt-1 break-words font-semibold leading-tight tabular-nums transition-transform duration-300 group-hover:translate-y-[-1px]",
+          big ? "text-2xl" : "text-lg sm:text-xl",
         )}
         title={value}
       >
