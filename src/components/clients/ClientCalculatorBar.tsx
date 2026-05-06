@@ -9,6 +9,7 @@ import {
   Receipt,
   Sun,
   Vault,
+  HeartHandshake,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Client } from "@/lib/clients/types";
@@ -23,6 +24,7 @@ type CalcRoute =
   | "/calculators/vested-benefits"
   | "/calculators/retirement"
   | "/calculators/canton-compare"
+  | "/calculators/avs-ai"
   | "/calculators/tou";
 
 type CalcChip = {
