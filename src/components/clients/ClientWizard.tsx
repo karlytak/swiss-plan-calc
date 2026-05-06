@@ -504,6 +504,22 @@ function StepIdentity({ form, update, errors }: StepProps) {
           onChange={(e) => update("date_of_birth", e.target.value)}
         />
       </Field>
+      <Field label="Genre">
+        <Select
+          value={form.gender || "unset"}
+          onValueChange={(v) => update("gender", v === "unset" ? "" : (v as Gender))}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="unset">Non renseigné</SelectItem>
+            {Object.entries(GENDER_LABELS).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </Field>
       <Field label="Nationalité" htmlFor="nat">
         <Input
           id="nat"
