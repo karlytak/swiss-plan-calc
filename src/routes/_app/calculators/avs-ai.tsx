@@ -102,6 +102,7 @@ function AvsAiCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         {/* === PARAMÈTRES === */}
         <div className="space-y-4 md:col-span-3">
