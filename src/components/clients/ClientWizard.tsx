@@ -84,6 +84,7 @@ interface FormState {
   first_name: string;
   last_name: string;
   date_of_birth: string;
+  gender: Gender | "";
   email: string;
   phone: string;
   nationality: string;
