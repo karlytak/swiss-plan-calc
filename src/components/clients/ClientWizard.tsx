@@ -291,6 +291,12 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         lpp_max_buyback: num(form.lpp_max_buyback) ?? 0,
         lpp_plan: form.lpp_plan,
         pillar_3a_annual_contribution: num(form.pillar_3a_annual_contribution) ?? 0,
+        pillar_3a_accounts: form.pillar_3a_accounts.filter(
+          (a) => a.institution.trim() !== "" || a.balance > 0,
+        ) as unknown as import("@/integrations/supabase/types").Json,
+        vested_benefits_accounts: form.vested_benefits_accounts.filter(
+          (a) => a.institution.trim() !== "" || a.balance > 0,
+        ) as unknown as import("@/integrations/supabase/types").Json,
       };
       const { data: existingPension } = await supabase
         .from("client_pension")
