@@ -93,14 +93,28 @@ export function MoneyTile({
   hint,
   tone,
   big,
+  compact = false,
 }: {
   label: string;
   value: number | null | undefined;
   hint?: string;
   tone?: "default" | "primary" | "success" | "warning";
   big?: boolean;
+  /** Si true, n'affiche pas le préfixe "CHF" devant le montant */
+  compact?: boolean;
 }) {
-  return <StatTile label={label} value={formatCHF(value ?? 0)} hint={hint} tone={tone} big={big} />;
+  const formatted = compact
+    ? new Intl.NumberFormat("fr-CH", { maximumFractionDigits: 0 }).format(value ?? 0)
+    : formatCHF(value ?? 0);
+  return (
+    <StatTile
+      label={compact ? `${label} (CHF)` : label}
+      value={formatted}
+      hint={hint}
+      tone={tone}
+      big={big}
+    />
+  );
 }
 
 export function PctTile({
