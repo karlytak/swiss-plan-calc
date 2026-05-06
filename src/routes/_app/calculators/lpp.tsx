@@ -139,17 +139,28 @@ function LppCalc() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title="Projection capital LPP" description="Bonifications légales + rendement net (taux − frais) + rachats annuels.">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <InsuredSalaryPanel
+              grossSalary={form.grossSalary}
+              insuredSalary={form.insuredSalary}
+              insuredSalaryCap={form.insuredSalaryCap}
+              isManual={insuredSalaryManual}
+              onGrossChange={(v) => set("grossSalary", v)}
+              onCapChange={(v) => set("insuredSalaryCap", v)}
+              onInsuredChange={(v) => {
+                setInsuredSalaryManual(true);
+                set("insuredSalary", v);
+              }}
+              onRecalcAuto={recalcAuto}
+            />
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumField label="Âge actuel" value={form.currentAge} onChange={(v) => set("currentAge", v)} />
               <NumField label="Âge retraite" value={form.retirementAge} onChange={(v) => set("retirementAge", v)} />
               <NumField label="Avoir LPP actuel (CHF)" value={form.currentBalance} onChange={(v) => set("currentBalance", v)} />
-              <NumField label="Salaire assuré (CHF)" value={form.insuredSalary} onChange={(v) => set("insuredSalary", v)} />
               <NumField label="Rendement brut (%/an)" value={form.expectedReturnRate} onChange={(v) => set("expectedReturnRate", v)} step={0.1} />
               <NumField label="Frais TER + admin (%/an)" value={form.feeRate} onChange={(v) => set("feeRate", v)} step={0.05} />
               <NumField label="Croissance salariale (%/an)" value={form.salaryGrowthRate} onChange={(v) => set("salaryGrowthRate", v)} step={0.1} />
               <NumField label="Taux conversion à la retraite (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} />
               <NumField label="Bonifications surobligatoires (%)" value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} />
-              <NumField label="Plafond salaire assuré (CHF)" value={form.insuredSalaryCap} onChange={(v) => set("insuredSalaryCap", v)} step={1000} />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Rendement net effectif appliqué : <strong>{projection.netReturnRate.toFixed(2)}%</strong> par an.
