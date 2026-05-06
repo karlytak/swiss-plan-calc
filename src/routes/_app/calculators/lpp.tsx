@@ -60,10 +60,11 @@ function LppCalc() {
     currentAge: 40,
     retirementAge: 65,
     currentBalance: 250_000,
-    insuredSalary: 95_000,
+    grossSalary: 120_000,
+    insuredSalary: computeLppInsuredSalary(120_000, LPP_2026.maxInsuredSalary),
     expectedReturnRate: 1.25,
     feeRate: 0.6,
-    insuredSalaryCap: 90_720,
+    insuredSalaryCap: LPP_2026.maxInsuredSalary,
     salaryGrowthRate: 1,
     conversionRate: 6.0,
     extraCreditRate: 0,
@@ -71,15 +72,32 @@ function LppCalc() {
     // rachat
     canton: "VD",
     status: "single" as IncomeTaxInput["status"],
-    grossSalary: 120_000,
     children: 0,
     buybackCapacity: 60_000,
     buybackYears: 3,
   });
   useHydrateFormFromPrefill(prefill, setForm);
+  const [insuredSalaryManual, setInsuredSalaryManual] = useState(false);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  // Auto-recalcul du salaire assuré quand brut/plafond changent (sauf mode manuel)
+  useEffect(() => {
+    if (insuredSalaryManual) return;
+    const auto = computeLppInsuredSalary(form.grossSalary, form.insuredSalaryCap);
+    if (auto !== form.insuredSalary) {
+      setForm((f) => ({ ...f, insuredSalary: auto }));
+    }
+  }, [form.grossSalary, form.insuredSalaryCap, insuredSalaryManual, form.insuredSalary]);
+
+  const recalcAuto = () => {
+    setInsuredSalaryManual(false);
+    setForm((f) => ({
+      ...f,
+      insuredSalary: computeLppInsuredSalary(f.grossSalary, f.insuredSalaryCap),
+    }));
+  };
 
   const projection = useMemo(
     () =>
