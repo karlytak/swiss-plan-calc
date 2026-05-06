@@ -10,6 +10,18 @@ export const LPP_MIN_ANNUAL_SALARY_2026 = 22_680;
 export const LPP_CONVERSION_RATE_2026 = 6.8; // taux légal LPP
 export const LPP_INTEREST_MIN_2026 = 1.25; // taux minimal LPP 2026
 
+export function computeLppInsuredSalary(
+  grossSalary: number,
+  insuredSalaryCap = LPP_MAX_INSURED_SALARY_2026,
+): number {
+  return Math.round(
+    Math.max(
+      0,
+      Math.min(grossSalary - LPP_COORDINATION_DEDUCTION_2026, insuredSalaryCap),
+    ),
+  );
+}
+
 /** Bonifications de vieillesse LPP · barème légal */
 export const LPP_AGE_CREDITS: Record<string, number> = {
   // Tranches d'âge → % du salaire coordonné
@@ -105,10 +117,7 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
 
   for (let i = 0; i < yearsToRetire; i++) {
     const age = input.currentAge + i;
-    const coordinated = Math.max(
-      0,
-      Math.min(salary - LPP_COORDINATION_DEDUCTION_2026, insuredCap),
-    );
+    const coordinated = Math.max(0, Math.min(salary, insuredCap));
     const creditRate = lppCreditRate(age) + extraCredit;
     const credit = coordinated * creditRate;
     const grossInterest = balance * grossReturn;
