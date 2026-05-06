@@ -50,7 +50,15 @@ function CalculatorsLayout() {
   const currentTab =
     [...TABS].reverse().find((t) => (t.exact ? pathname === t.to : pathname.startsWith(t.to)))?.to ??
     "/calculators";
+  const inClientContext = Boolean(clientId);
   return (
+    <div
+      className={cn(
+        "min-h-[calc(100vh-3.5rem)] transition-colors",
+        inClientContext &&
+          "bg-[linear-gradient(180deg,color-mix(in_oklab,var(--primary)_8%,transparent),transparent_320px)] ring-1 ring-inset ring-primary/15",
+      )}
+    >
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">Calculateurs</h1>
