@@ -20,12 +20,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const layoutSearchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/calculators")({
   head: () => ({ meta: [{ title: "Calculateurs · SwissBroker Pro" }] }),
+  validateSearch: zodValidator(layoutSearchSchema),
   search: {
     // Conserve clientId entre les onglets internes du calculateur uniquement.
-    // Les liens venant d'en dehors (sidebar, etc.) qui n'incluent pas clientId
-    // entreront en mode standalone (vierge).
     middlewares: [retainSearchParams(["clientId"])],
   },
   component: CalculatorsLayout,
