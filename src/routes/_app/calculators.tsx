@@ -1,4 +1,7 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   Calculator,
   Coins,
@@ -17,8 +20,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const layoutSearchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/calculators")({
   head: () => ({ meta: [{ title: "Calculateurs · SwissBroker Pro" }] }),
+  validateSearch: zodValidator(layoutSearchSchema),
   component: CalculatorsLayout,
 });
 
@@ -35,6 +43,8 @@ const TABS = [
 function CalculatorsLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const { clientId } = Route.useSearch();
+  const tabSearch = clientId ? { clientId } : undefined;
   const currentTab =
     [...TABS].reverse().find((t) => (t.exact ? pathname === t.to : pathname.startsWith(t.to)))?.to ??
     "/calculators";
@@ -49,7 +59,7 @@ function CalculatorsLayout() {
 
       {/* Mobile: select fallback for quick switching */}
       <div className="mb-4 sm:hidden">
-        <Select value={currentTab} onValueChange={(v) => navigate({ to: v as (typeof TABS)[number]["to"] })}>
+        <Select value={currentTab} onValueChange={(v) => navigate({ to: v as (typeof TABS)[number]["to"], search: tabSearch })}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -72,6 +82,7 @@ function CalculatorsLayout() {
               <Link
                 key={t.to}
                 to={t.to}
+                search={tabSearch}
                 className={cn(
                   "flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active

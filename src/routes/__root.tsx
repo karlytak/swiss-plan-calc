@@ -4,7 +4,6 @@ import {
   createRootRoute,
   HeadContent,
   Scripts,
-  retainSearchParams,
 } from "@tanstack/react-router";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -42,9 +41,6 @@ function NotFoundComponent() {
 
 export const Route = createRootRoute({
   validateSearch: zodValidator(rootSearchSchema),
-  search: {
-    middlewares: [retainSearchParams(["clientId"])],
-  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
