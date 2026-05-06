@@ -53,6 +53,11 @@ const STEPS = [
   { id: 5, title: "Patrimoine & prévoyance", desc: "LPP, 3a, fortune" },
 ] as const;
 
+export interface PensionAccount {
+  institution: string;
+  balance: number;
+}
+
 export interface WizardInitialData {
   client?: Client;
   pension?: {
@@ -61,6 +66,8 @@ export interface WizardInitialData {
     lpp_max_buyback: number;
     lpp_plan: LppPlan;
     pillar_3a_annual_contribution: number;
+    pillar_3a_accounts?: PensionAccount[];
+    vested_benefits_accounts?: PensionAccount[];
   };
   assets?: {
     bank_accounts: number;
@@ -108,6 +115,8 @@ interface FormState {
   lpp_max_buyback: string;
   lpp_plan: LppPlan;
   pillar_3a_annual_contribution: string;
+  pillar_3a_accounts: PensionAccount[];
+  vested_benefits_accounts: PensionAccount[];
   bank_accounts: string;
   securities: string;
   real_estate_value: string;
@@ -151,6 +160,8 @@ function initialForm(initial?: WizardInitialData): FormState {
     lpp_max_buyback: p?.lpp_max_buyback?.toString() ?? "",
     lpp_plan: p?.lpp_plan ?? "mandatory",
     pillar_3a_annual_contribution: p?.pillar_3a_annual_contribution?.toString() ?? "",
+    pillar_3a_accounts: parsePensionAccountsSafe(p?.pillar_3a_accounts),
+    vested_benefits_accounts: parsePensionAccountsSafe(p?.vested_benefits_accounts),
     bank_accounts: a?.bank_accounts?.toString() ?? "",
     securities: a?.securities?.toString() ?? "",
     real_estate_value: a?.real_estate_value?.toString() ?? "",
@@ -164,6 +175,16 @@ function parseChildrenSafe(value: unknown): Child[] {
     (c): c is Child =>
       typeof c === "object" && c !== null && typeof (c as Child).first_name === "string",
   );
+}
+
+function parsePensionAccountsSafe(value: unknown): PensionAccount[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
+    .map((c) => ({
+      institution: typeof c.institution === "string" ? c.institution : "",
+      balance: Number(c.balance ?? 0) || 0,
+    }));
 }
 
 const stepSchemas = {
@@ -270,6 +291,12 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         lpp_max_buyback: num(form.lpp_max_buyback) ?? 0,
         lpp_plan: form.lpp_plan,
         pillar_3a_annual_contribution: num(form.pillar_3a_annual_contribution) ?? 0,
+        pillar_3a_accounts: form.pillar_3a_accounts.filter(
+          (a) => a.institution.trim() !== "" || a.balance > 0,
+        ) as unknown as import("@/integrations/supabase/types").Json,
+        vested_benefits_accounts: form.vested_benefits_accounts.filter(
+          (a) => a.institution.trim() !== "" || a.balance > 0,
+        ) as unknown as import("@/integrations/supabase/types").Json,
       };
       const { data: existingPension } = await supabase
         .from("client_pension")
@@ -950,6 +977,12 @@ function StepPatrimoine({
               />
             </Field>
           </div>
+          <PensionAccountsEditor
+            label="Comptes 3a existants"
+            hint="Saisis chaque compte 3a (banque ou assurance) avec son solde actuel."
+            value={form.pillar_3a_accounts}
+            onChange={(v) => update("pillar_3a_accounts", v)}
+          />
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
@@ -957,6 +990,18 @@ function StepPatrimoine({
           {rules.isRetired ? " (au-delà de l'âge AVS)" : " (pas de revenu d'activité)"}.
         </div>
       )}
+
+      <Separator />
+      <div>
+        <h3 className="text-sm font-semibold">Comptes de libre passage</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Anciens 2e pilier transférés sur des comptes/polices de libre passage (changement d'emploi, indépendance, etc.).
+        </p>
+        <PensionAccountsEditor
+          value={form.vested_benefits_accounts}
+          onChange={(v) => update("vested_benefits_accounts", v)}
+        />
+      </div>
 
       <Separator />
       <div>
@@ -995,3 +1040,64 @@ function StepPatrimoine({
     </div>
   );
 }
+
+function PensionAccountsEditor({
+  value,
+  onChange,
+  label,
+  hint,
+}: {
+  value: PensionAccount[];
+  onChange: (v: PensionAccount[]) => void;
+  label?: string;
+  hint?: string;
+}) {
+  const total = value.reduce((s, a) => s + (Number(a.balance) || 0), 0);
+  const add = () => onChange([...value, { institution: "", balance: 0 }]);
+  const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
+  const patch = (i: number, p: Partial<PensionAccount>) =>
+    onChange(value.map((a, idx) => (idx === i ? { ...a, ...p } : a)));
+
+  return (
+    <div className="mt-4 space-y-2">
+      {label && <div className="text-xs font-medium text-muted-foreground">{label}</div>}
+      {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
+      {value.length === 0 ? (
+        <p className="text-xs italic text-muted-foreground">Aucun compte enregistré.</p>
+      ) : (
+        <div className="space-y-2">
+          {value.map((a, i) => (
+            <div key={i} className="flex items-end gap-2">
+              <div className="flex-1">
+                <Label className="text-[11px] text-muted-foreground">Institution</Label>
+                <Input
+                  value={a.institution}
+                  onChange={(e) => patch(i, { institution: e.target.value })}
+                  placeholder="UBS, Swiss Life, VIAC…"
+                />
+              </div>
+              <div className="w-40">
+                <Label className="text-[11px] text-muted-foreground">Solde</Label>
+                <NumField
+                  value={String(a.balance || "")}
+                  onChange={(v) => patch(i, { balance: Number(v) || 0 })}
+                  suffix="CHF"
+                />
+              </div>
+              <Button type="button" variant="ghost" size="icon" onClick={() => remove(i)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          ))}
+          <div className="text-right text-xs text-muted-foreground">
+            Total : <span className="font-medium text-foreground">{formatCHF(total)}</span>
+          </div>
+        </div>
+      )}
+      <Button type="button" variant="outline" size="sm" onClick={add}>
+        <Plus className="h-3.5 w-3.5" /> Ajouter un compte
+      </Button>
+    </div>
+  );
+}
+
