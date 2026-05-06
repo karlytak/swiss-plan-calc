@@ -243,6 +243,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         date_of_birth: form.date_of_birth || null,
+        gender: form.gender || null,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
         nationality: form.nationality || null,
