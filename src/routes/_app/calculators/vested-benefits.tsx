@@ -275,6 +275,12 @@ function VestedBenefitsCalc() {
               fourchettes ±1 écart-type. Performance passée non garantie. Ajustez l'horizon et la
               tolérance au risque selon le profil client.
             </div>
+            <div className="text-xs text-muted-foreground sm:col-span-2">
+              <strong className="text-foreground">Source des rendements :</strong> rendements de
+              référence basés sur les moyennes historiques 2010-2024 des indices SBI AAA-BBB
+              (obligataire CHF), SPI (actions suisses) et MSCI World (actions internationales).
+              Hypothèses indicatives — les rendements futurs peuvent différer.
+            </div>
           </Row>
         </CalcCard>
       </div>
