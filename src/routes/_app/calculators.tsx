@@ -43,6 +43,8 @@ const TABS = [
 function CalculatorsLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
+  const { clientId } = Route.useSearch();
+  const tabSearch = clientId ? { clientId } : undefined;
   const currentTab =
     [...TABS].reverse().find((t) => (t.exact ? pathname === t.to : pathname.startsWith(t.to)))?.to ??
     "/calculators";
