@@ -53,6 +53,11 @@ const STEPS = [
   { id: 5, title: "Patrimoine & prévoyance", desc: "LPP, 3a, fortune" },
 ] as const;
 
+export interface PensionAccount {
+  institution: string;
+  balance: number;
+}
+
 export interface WizardInitialData {
   client?: Client;
   pension?: {
@@ -61,6 +66,8 @@ export interface WizardInitialData {
     lpp_max_buyback: number;
     lpp_plan: LppPlan;
     pillar_3a_annual_contribution: number;
+    pillar_3a_accounts?: PensionAccount[];
+    vested_benefits_accounts?: PensionAccount[];
   };
   assets?: {
     bank_accounts: number;
