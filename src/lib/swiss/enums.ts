@@ -7,6 +7,13 @@ export type Permit = Database["public"]["Enums"]["permit_type"];
 export type TaxStatus = Database["public"]["Enums"]["tax_status"];
 export type WorkStatus = Database["public"]["Enums"]["work_status"];
 export type LppPlan = Database["public"]["Enums"]["lpp_plan_type"];
+export type Gender = Database["public"]["Enums"]["gender"];
+
+export const GENDER_LABELS: Record<Gender, string> = {
+  male: "Homme",
+  female: "Femme",
+  other: "Autre / Non binaire",
+};
 
 export const CIVIL_STATUS_LABELS: Record<CivilStatus, string> = {
   single: "Célibataire",

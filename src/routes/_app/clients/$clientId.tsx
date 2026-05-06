@@ -40,6 +40,7 @@ import { toast } from "sonner";
 import { CANTON_BY_CODE } from "@/lib/swiss/cantons";
 import {
   CIVIL_STATUS_LABELS,
+  GENDER_LABELS,
   CONFESSION_LABELS,
   PERMIT_LABELS,
   TAX_STATUS_LABELS,
@@ -207,6 +208,7 @@ function ClientDetailPage() {
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
             {age !== null && <span>{age} ans</span>}
             <span>{CIVIL_STATUS_LABELS[client.civil_status]}</span>
+            {client.gender && <span>{GENDER_LABELS[client.gender]}</span>}
             <Badge variant="outline" className="font-normal">
               {TAX_STATUS_LABELS[client.tax_status]}
             </Badge>

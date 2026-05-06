@@ -32,6 +32,7 @@ import {
   LPP_PLAN_LABELS,
   SOURCE_TAX_SCALES,
   SOURCE_TAX_SCALE_LABELS,
+  GENDER_LABELS,
   type CivilStatus,
   type Confession,
   type Permit,
@@ -39,6 +40,7 @@ import {
   type WorkStatus,
   type LppPlan,
   type SourceTaxScale,
+  type Gender,
 } from "@/lib/swiss/enums";
 import type { Child, Client } from "@/lib/clients/types";
 import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
@@ -82,6 +84,7 @@ interface FormState {
   first_name: string;
   last_name: string;
   date_of_birth: string;
+  gender: Gender | "";
   email: string;
   phone: string;
   nationality: string;
@@ -131,6 +134,7 @@ function initialForm(initial?: WizardInitialData): FormState {
     first_name: c?.first_name ?? "",
     last_name: c?.last_name ?? "",
     date_of_birth: c?.date_of_birth ?? "",
+    gender: (c?.gender as Gender | null) ?? "",
     email: c?.email ?? "",
     phone: c?.phone ?? "",
     nationality: c?.nationality ?? "CH",
@@ -239,6 +243,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         first_name: form.first_name.trim(),
         last_name: form.last_name.trim(),
         date_of_birth: form.date_of_birth || null,
+        gender: form.gender || null,
         email: form.email.trim() || null,
         phone: form.phone.trim() || null,
         nationality: form.nationality || null,
@@ -498,6 +503,22 @@ function StepIdentity({ form, update, errors }: StepProps) {
           value={form.date_of_birth}
           onChange={(e) => update("date_of_birth", e.target.value)}
         />
+      </Field>
+      <Field label="Genre">
+        <Select
+          value={form.gender || "unset"}
+          onValueChange={(v) => update("gender", v === "unset" ? "" : (v as Gender))}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="unset">Non renseigné</SelectItem>
+            {Object.entries(GENDER_LABELS).map(([k, v]) => (
+              <SelectItem key={k} value={k}>{v}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </Field>
       <Field label="Nationalité" htmlFor="nat">
         <Input
