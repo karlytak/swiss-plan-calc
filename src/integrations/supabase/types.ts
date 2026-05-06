@@ -220,6 +220,7 @@ export type Database = {
           email: string | null
           employer: string | null
           first_name: string
+          gender: Database["public"]["Enums"]["gender"] | null
           gross_annual_salary: number | null
           id: string
           last_name: string
@@ -254,6 +255,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           first_name: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           gross_annual_salary?: number | null
           id?: string
           last_name: string
@@ -288,6 +290,7 @@ export type Database = {
           email?: string | null
           employer?: string | null
           first_name?: string
+          gender?: Database["public"]["Enums"]["gender"] | null
           gross_annual_salary?: number | null
           id?: string
           last_name?: string
@@ -626,6 +629,7 @@ export type Database = {
         | "christian_catholic"
         | "jewish"
         | "other"
+      gender: "male" | "female" | "other"
       lpp_plan_type: "mandatory" | "extra_mandatory" | "executive" | "mixed"
       permit_type: "none" | "B" | "C" | "L" | "Ci" | "F" | "G" | "swiss"
       scenario_kind:
@@ -805,6 +809,7 @@ export const Constants = {
         "jewish",
         "other",
       ],
+      gender: ["male", "female", "other"],
       lpp_plan_type: ["mandatory", "extra_mandatory", "executive", "mixed"],
       permit_type: ["none", "B", "C", "L", "Ci", "F", "G", "swiss"],
       scenario_kind: [
