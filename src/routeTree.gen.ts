@@ -30,6 +30,7 @@ import { Route as AppCalculatorsLppRouteImport } from './routes/_app/calculators
 import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calculators/income-tax'
 import { Route as AppCalculatorsCrossBorderRouteImport } from './routes/_app/calculators/cross-border'
 import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
+import { Route as AppCalculatorsAvsAiRouteImport } from './routes/_app/calculators/avs-ai'
 import { Route as AppClientsClientIdScenariosRouteImport } from './routes/_app/clients/$clientId_.scenarios'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId_.edit'
 
@@ -141,6 +142,11 @@ const AppCalculatorsCantonCompareRoute =
     path: '/canton-compare',
     getParentRoute: () => AppCalculatorsRoute,
   } as any)
+const AppCalculatorsAvsAiRoute = AppCalculatorsAvsAiRouteImport.update({
+  id: '/avs-ai',
+  path: '/avs-ai',
+  getParentRoute: () => AppCalculatorsRoute,
+} as any)
 const AppClientsClientIdScenariosRoute =
   AppClientsClientIdScenariosRouteImport.update({
     id: '/clients/$clientId_/scenarios',
@@ -161,6 +167,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/shared/$token': typeof SharedTokenRoute
+  '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
@@ -184,6 +191,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/shared/$token': typeof SharedTokenRoute
+  '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
@@ -210,6 +218,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/history': typeof AppHistoryRoute
   '/shared/$token': typeof SharedTokenRoute
+  '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/_app/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/_app/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
@@ -236,6 +245,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/shared/$token'
+    | '/calculators/avs-ai'
     | '/calculators/canton-compare'
     | '/calculators/cross-border'
     | '/calculators/income-tax'
@@ -259,6 +269,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/shared/$token'
+    | '/calculators/avs-ai'
     | '/calculators/canton-compare'
     | '/calculators/cross-border'
     | '/calculators/income-tax'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/history'
     | '/shared/$token'
+    | '/_app/calculators/avs-ai'
     | '/_app/calculators/canton-compare'
     | '/_app/calculators/cross-border'
     | '/_app/calculators/income-tax'
@@ -457,6 +469,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsCantonCompareRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/_app/calculators/avs-ai': {
+      id: '/_app/calculators/avs-ai'
+      path: '/avs-ai'
+      fullPath: '/calculators/avs-ai'
+      preLoaderRoute: typeof AppCalculatorsAvsAiRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
     '/_app/clients/$clientId_/scenarios': {
       id: '/_app/clients/$clientId_/scenarios'
       path: '/clients/$clientId/scenarios'
@@ -475,6 +494,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppCalculatorsRouteChildren {
+  AppCalculatorsAvsAiRoute: typeof AppCalculatorsAvsAiRoute
   AppCalculatorsCantonCompareRoute: typeof AppCalculatorsCantonCompareRoute
   AppCalculatorsCrossBorderRoute: typeof AppCalculatorsCrossBorderRoute
   AppCalculatorsIncomeTaxRoute: typeof AppCalculatorsIncomeTaxRoute
@@ -488,6 +508,7 @@ interface AppCalculatorsRouteChildren {
 }
 
 const AppCalculatorsRouteChildren: AppCalculatorsRouteChildren = {
+  AppCalculatorsAvsAiRoute: AppCalculatorsAvsAiRoute,
   AppCalculatorsCantonCompareRoute: AppCalculatorsCantonCompareRoute,
   AppCalculatorsCrossBorderRoute: AppCalculatorsCrossBorderRoute,
   AppCalculatorsIncomeTaxRoute: AppCalculatorsIncomeTaxRoute,
