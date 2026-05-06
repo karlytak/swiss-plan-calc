@@ -61,6 +61,12 @@ function CalculatorsLayout() {
     >
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="mb-6">
+        {inClientContext && (
+          <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
+            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+            Mode dossier client
+          </div>
+        )}
         <h1 className="text-3xl font-bold tracking-tight">Calculateurs</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           Simulations rapides · barèmes 2026 · IFD, ICC, source, LPP, 3a, comparateur cantonal.
