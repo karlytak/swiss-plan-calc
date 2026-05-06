@@ -82,6 +82,7 @@ function CalculatorsLayout() {
               <Link
                 key={t.to}
                 to={t.to}
+                search={tabSearch}
                 className={cn(
                   "flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                   active
