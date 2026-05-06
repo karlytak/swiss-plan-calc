@@ -64,7 +64,7 @@ function LppCalc() {
     insuredSalary: computeLppInsuredSalary(120_000, LPP_2026.maxInsuredSalary),
     expectedReturnRate: 1.25,
     feeRate: 0.6,
-    insuredSalaryCap: LPP_2026.maxInsuredSalary,
+    insuredSalaryCap: LPP_2026.maxInsuredSalary as number,
     salaryGrowthRate: 1,
     conversionRate: 6.0,
     extraCreditRate: 0,
