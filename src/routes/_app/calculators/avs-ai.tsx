@@ -47,6 +47,8 @@ export const Route = createFileRoute("/_app/calculators/avs-ai")({
 
 function AvsAiCalc() {
   const currentYear = new Date().getFullYear();
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "avs-ai");
 
   const [form, setForm] = useState({
     // Personne 1
