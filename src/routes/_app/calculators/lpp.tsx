@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   LineChart,
   Line as RLine,
@@ -12,6 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip as UiTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Calculator, Info, RotateCcw, Pencil } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -20,7 +28,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
-import { projectLPP, simulateBuybackPlan } from "@/lib/lpp";
+import { projectLPP, simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
+import { LPP_2026 } from "@/lib/lpp/parameters-2026";
+import { formatCHF as fmtCHF } from "@/lib/format";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
 import type { IncomeTaxInput } from "@/lib/tax/income";
