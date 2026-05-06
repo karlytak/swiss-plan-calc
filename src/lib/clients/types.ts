@@ -16,12 +16,14 @@ export interface Child {
 
 export function parseChildren(value: unknown): Child[] {
   if (!Array.isArray(value)) return [];
-  return value.filter(
-    (c): c is Child =>
-      typeof c === "object" &&
-      c !== null &&
-      typeof (c as Child).first_name === "string",
-  );
+  return value.filter((c): c is Child => {
+    if (typeof c !== "object" || c === null) return false;
+    const child = c as Partial<Child>;
+    const hasName = typeof child.first_name === "string" && child.first_name.trim() !== "";
+    const hasDob = typeof child.date_of_birth === "string" && child.date_of_birth.trim() !== "";
+    // Ignore les lignes vides laissées par le wizard (ni nom ni date).
+    return hasName || hasDob;
+  });
 }
 
 export function ageFromDob(dob: string | null | undefined): number | null {
