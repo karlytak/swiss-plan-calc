@@ -1,4 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { retainSearchParams } from "@tanstack/react-router";
 import {
   Calculator,
   Coins,
@@ -19,6 +20,12 @@ import {
 
 export const Route = createFileRoute("/_app/calculators")({
   head: () => ({ meta: [{ title: "Calculateurs · SwissBroker Pro" }] }),
+  search: {
+    // Conserve clientId entre les onglets internes du calculateur uniquement.
+    // Les liens venant d'en dehors (sidebar, etc.) qui n'incluent pas clientId
+    // entreront en mode standalone (vierge).
+    middlewares: [retainSearchParams(["clientId"])],
+  },
   component: CalculatorsLayout,
 });
 
