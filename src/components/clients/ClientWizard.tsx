@@ -115,6 +115,8 @@ interface FormState {
   lpp_max_buyback: string;
   lpp_plan: LppPlan;
   pillar_3a_annual_contribution: string;
+  pillar_3a_accounts: PensionAccount[];
+  vested_benefits_accounts: PensionAccount[];
   bank_accounts: string;
   securities: string;
   real_estate_value: string;
