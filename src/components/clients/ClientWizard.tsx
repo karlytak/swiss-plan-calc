@@ -177,6 +177,16 @@ function parseChildrenSafe(value: unknown): Child[] {
   );
 }
 
+function parsePensionAccountsSafe(value: unknown): PensionAccount[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .filter((c): c is Record<string, unknown> => typeof c === "object" && c !== null)
+    .map((c) => ({
+      institution: typeof c.institution === "string" ? c.institution : "",
+      balance: Number(c.balance ?? 0) || 0,
+    }));
+}
+
 const stepSchemas = {
   1: z.object({
     first_name: z.string().trim().min(1, "Prénom requis").max(80),
