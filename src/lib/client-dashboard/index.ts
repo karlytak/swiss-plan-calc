@@ -115,6 +115,17 @@ export interface DashboardCantonCompare {
   maxSavings: number;
 }
 
+export interface DashboardAvs {
+  referenceAge: number;
+  retirementYear: number;
+  effectiveYears: number;
+  missingYears: number;
+  monthlyPension: number;
+  annualPension: number;
+  combinedMonthlyPension?: number;
+  cappedCouple: boolean;
+}
+
 export interface ClientDashboard {
   /** Indique si la fiche contient assez de données pour calculer quoi que ce soit. */
   hasEnoughData: boolean;
@@ -126,6 +137,7 @@ export interface ClientDashboard {
   pillar3a: DashboardPillar3a | null;
   retirement: DashboardRetirement | null;
   cantonCompare: DashboardCantonCompare | null;
+  avs: DashboardAvs | null;
   suggestions: Optimization[];
 }
 
