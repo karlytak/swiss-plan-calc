@@ -20,6 +20,11 @@ import {
   type Gender,
 } from "@/lib/avs";
 import { GENDER_LABELS } from "@/lib/swiss/enums";
+import {
+  usePrefillFromClient,
+  useHydrateFormFromPrefill,
+} from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
