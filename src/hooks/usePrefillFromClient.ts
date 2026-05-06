@@ -15,6 +15,7 @@ import {
   toPillar3aInput,
   toCantonCompareInput,
   toRetirementInput,
+  toAvsAiInput,
   stripUndefined,
   type ClientBundle,
 } from "@/lib/clients/to-calculator-input";
@@ -29,7 +30,8 @@ export type CalculatorKind =
   | "vested-benefits"
   | "pillar3a"
   | "canton-compare"
-  | "retirement";
+  | "retirement"
+  | "avs-ai";
 
 const MAPPERS = {
   "income-tax": toIncomeTaxInput,
@@ -41,6 +43,7 @@ const MAPPERS = {
   pillar3a: toPillar3aInput,
   "canton-compare": toCantonCompareInput,
   retirement: toRetirementInput,
+  "avs-ai": toAvsAiInput,
 } as const;
 
 export interface PrefillResult<K extends CalculatorKind> {
