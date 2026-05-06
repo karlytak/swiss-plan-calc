@@ -343,3 +343,157 @@ function NumField({
     </div>
   );
 }
+
+function InsuredSalaryPanel({
+  grossSalary,
+  insuredSalary,
+  insuredSalaryCap,
+  isManual,
+  onGrossChange,
+  onCapChange,
+  onInsuredChange,
+  onRecalcAuto,
+}: {
+  grossSalary: number;
+  insuredSalary: number;
+  insuredSalaryCap: number;
+  isManual: boolean;
+  onGrossChange: (v: number) => void;
+  onCapChange: (v: number) => void;
+  onInsuredChange: (v: number) => void;
+  onRecalcAuto: () => void;
+}) {
+  const COORD = LPP_2026.coordinationDeduction;
+  const MIN_COORD = 3_780;
+  const ENTRY = LPP_2026.minAnnualSalary;
+
+  const belowEntry = grossSalary > 0 && grossSalary < ENTRY;
+  const rawDiff = grossSalary - COORD;
+  const capped = rawDiff > insuredSalaryCap;
+
+  let recap: React.ReactNode;
+  if (belowEntry) {
+    recap = (
+      <span className="text-warning">
+        Salaire inférieur au seuil d'entrée LPP ({fmtCHF(ENTRY)}). Affiliation LPP non obligatoire.
+      </span>
+    );
+  } else if (capped) {
+    recap = (
+      <>
+        {fmtCHF(grossSalary)} − {fmtCHF(COORD)} = {fmtCHF(rawDiff)},{" "}
+        <span className="font-semibold">plafonné à {fmtCHF(insuredSalaryCap)}</span>
+      </>
+    );
+  } else {
+    recap = (
+      <>
+        {fmtCHF(grossSalary)} − {fmtCHF(COORD)} = <span className="font-semibold">{fmtCHF(Math.max(MIN_COORD, rawDiff))}</span>{" "}
+        (sous plafond {fmtCHF(insuredSalaryCap)})
+      </>
+    );
+  }
+
+  return (
+    <TooltipProvider>
+      <div className="rounded-xl border border-border bg-muted/30 p-4 space-y-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Salaire assuré LPP
+        </div>
+
+        {/* ZONE 1 — Input primaire */}
+        <NumField
+          label="Salaire brut annuel total (CHF)"
+          value={grossSalary}
+          onChange={onGrossChange}
+        />
+
+        {/* ZONE 2 — Constantes */}
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 text-xs">
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Déduction coordination 2026
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent>Constante OFAS, non modifiable.</TooltipContent>
+              </UiTooltip>
+            </div>
+            <div className="mt-0.5 font-semibold tabular-nums">{fmtCHF(COORD)}</div>
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Plafond salaire assuré
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  Régime obligatoire pur. À ajuster si plan cadres (132'300) ou plan 1e
+                  (réservé aux salaires {">"} 132'300, plafond modulé selon le plan).
+                </TooltipContent>
+              </UiTooltip>
+            </div>
+            <BaseNumField
+              value={String(insuredSalaryCap)}
+              onChange={(v) => onCapChange(Number(v) || 0)}
+              className="mt-0.5 h-7 text-sm font-semibold"
+            />
+          </div>
+
+          <div className="rounded-lg border border-border/60 bg-card p-2.5">
+            <div className="flex items-center gap-1 text-[10px] uppercase text-muted-foreground">
+              Salaire coord. minimum
+              <UiTooltip>
+                <TooltipTrigger asChild><Info className="h-3 w-3" /></TooltipTrigger>
+                <TooltipContent>Plancher OFAS 2026.</TooltipContent>
+              </UiTooltip>
+            </div>
+            <div className="mt-0.5 font-semibold tabular-nums">{fmtCHF(MIN_COORD)}</div>
+          </div>
+        </div>
+
+        {/* ZONE 3 — Output */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <Label className="text-xs font-medium text-muted-foreground">
+              Salaire assuré (CHF)
+            </Label>
+            <div className="flex items-center gap-2">
+              <span
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${
+                  isManual
+                    ? "bg-warning/15 text-warning-foreground border border-warning/30"
+                    : "bg-primary/15 text-primary border border-primary/30"
+                }`}
+              >
+                {isManual ? <Pencil className="h-3 w-3" /> : <Calculator className="h-3 w-3" />}
+                {isManual ? "Manuel" : "Auto"}
+              </span>
+              {isManual && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-6 px-2 text-[10px]"
+                  onClick={onRecalcAuto}
+                >
+                  <RotateCcw className="h-3 w-3 mr-1" /> Recalculer auto
+                </Button>
+              )}
+            </div>
+          </div>
+          <BaseNumField
+            value={String(insuredSalary)}
+            onChange={(v) => onInsuredChange(Number(v) || 0)}
+            suffix="CHF"
+          />
+          <p className="mt-1.5 text-[11px] text-muted-foreground">
+            Calculé automatiquement à partir du salaire brut, de la déduction de
+            coordination et du plafond. Modifiable pour plans surobligatoires ou règles
+            spécifiques.
+          </p>
+          <p className="mt-1 text-[11px] tabular-nums text-foreground/80">{recap}</p>
+        </div>
+      </div>
+    </TooltipProvider>
+  );
+}
