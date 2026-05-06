@@ -977,6 +977,12 @@ function StepPatrimoine({
               />
             </Field>
           </div>
+          <PensionAccountsEditor
+            label="Comptes 3a existants"
+            hint="Saisis chaque compte 3a (banque ou assurance) avec son solde actuel."
+            value={form.pillar_3a_accounts}
+            onChange={(v) => update("pillar_3a_accounts", v)}
+          />
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
