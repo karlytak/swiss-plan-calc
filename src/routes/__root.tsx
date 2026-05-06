@@ -41,9 +41,6 @@ function NotFoundComponent() {
 
 export const Route = createRootRoute({
   validateSearch: zodValidator(rootSearchSchema),
-  search: {
-    middlewares: [retainSearchParams(["clientId"])],
-  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
