@@ -20,6 +20,11 @@ import {
   type Gender,
 } from "@/lib/avs";
 import { GENDER_LABELS } from "@/lib/swiss/enums";
+import {
+  usePrefillFromClient,
+  useHydrateFormFromPrefill,
+} from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -42,6 +47,8 @@ export const Route = createFileRoute("/_app/calculators/avs-ai")({
 
 function AvsAiCalc() {
   const currentYear = new Date().getFullYear();
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "avs-ai");
 
   const [form, setForm] = useState({
     // Personne 1
@@ -61,6 +68,8 @@ function AvsAiCalc() {
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
+
+  useHydrateFormFromPrefill(prefill, setForm);
 
   const refAge = getReferenceAge(form.birthYear, form.gender);
   const refAgeSpouse = getReferenceAge(form.spouseBirthYear, form.spouseGender);
@@ -93,6 +102,7 @@ function AvsAiCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         {/* === PARAMÈTRES === */}
         <div className="space-y-4 md:col-span-3">

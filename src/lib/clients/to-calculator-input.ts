@@ -226,8 +226,42 @@ export function toRetirementInput(b: ClientBundle) {
   };
 }
 
-// ──────────────────────────────────────────────────────────────────────────
-// Utilitaires
+/** AVS/AI · 1er pilier */
+export function toAvsAiInput(b: ClientBundle) {
+  const birthYear = b.client.date_of_birth
+    ? new Date(b.client.date_of_birth).getFullYear()
+    : undefined;
+  const spouseBirthYear = b.client.spouse_date_of_birth
+    ? new Date(b.client.spouse_date_of_birth).getFullYear()
+    : undefined;
+  const isCouple =
+    b.client.civil_status === "married" ||
+    b.client.civil_status === "registered_partnership";
+  const gender = (b.client.gender as "male" | "female" | "other" | null) ?? undefined;
+  const avgIncome =
+    Number(b.client.gross_annual_salary ?? 0) + Number(b.client.bonus ?? 0);
+
+  // Référence : âge 65 par défaut, ajusté côté composant via getReferenceAge.
+  const retirementYear =
+    birthYear !== undefined ? birthYear + (gender === "female" && birthYear <= 1963 ? 64 : 65) : undefined;
+  const spouseRetirementYear =
+    spouseBirthYear !== undefined ? spouseBirthYear + 65 : undefined;
+
+  return {
+    birthYear,
+    gender,
+    contributionStartYear: birthYear !== undefined ? birthYear + 21 : undefined,
+    retirementYear,
+    averageAnnualIncome: avgIncome > 0 ? avgIncome : undefined,
+    isCouple: isCouple ? true : undefined,
+    spouseBirthYear,
+    spouseGender: undefined,
+    spouseContributionStartYear:
+      spouseBirthYear !== undefined ? spouseBirthYear + 21 : undefined,
+    spouseRetirementYear,
+    spouseAverageAnnualIncome: numOrUndef(b.client.spouse_gross_annual_salary),
+  };
+}
 // ──────────────────────────────────────────────────────────────────────────
 
 /** Somme les soldes ("balance" / "amount" / "value") d'un tableau JSONB de comptes. */
