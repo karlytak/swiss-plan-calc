@@ -38,6 +38,7 @@ import {
   getWorkStatusRules,
 } from "@/lib/clients/work-status-rules";
 import { runOptimizer, type Optimization } from "@/lib/optimizer";
+import { projectAvsPension, getReferenceAge, type Gender } from "@/lib/avs";
 
 export interface ClientBundle {
   client: Client;
