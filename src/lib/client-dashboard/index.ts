@@ -497,6 +497,7 @@ export function computeClientDashboard(b: ClientBundle): ClientDashboard {
     pillar3a,
     retirement,
     cantonCompare,
+    avs,
     suggestions,
   };
 }
