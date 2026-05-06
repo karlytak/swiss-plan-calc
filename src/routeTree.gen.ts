@@ -15,10 +15,14 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCompaniesRouteImport } from './routes/_app/companies'
 import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
+import { Route as AppCompaniesIndexRouteImport } from './routes/_app/companies/index'
 import { Route as AppClientsIndexRouteImport } from './routes/_app/clients/index'
 import { Route as AppCalculatorsIndexRouteImport } from './routes/_app/calculators/index'
+import { Route as AppCompaniesNewRouteImport } from './routes/_app/companies/new'
+import { Route as AppCompaniesCompanyIdRouteImport } from './routes/_app/companies/$companyId'
 import { Route as AppClientsNewRouteImport } from './routes/_app/clients/new'
 import { Route as AppClientsClientIdRouteImport } from './routes/_app/clients/$clientId'
 import { Route as AppCalculatorsVestedBenefitsRouteImport } from './routes/_app/calculators/vested-benefits'
@@ -31,6 +35,7 @@ import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calcu
 import { Route as AppCalculatorsCrossBorderRouteImport } from './routes/_app/calculators/cross-border'
 import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
 import { Route as AppCalculatorsAvsAiRouteImport } from './routes/_app/calculators/avs-ai'
+import { Route as AppCompaniesCompanyIdEditRouteImport } from './routes/_app/companies/$companyId_.edit'
 import { Route as AppClientsClientIdScenariosRouteImport } from './routes/_app/clients/$clientId_.scenarios'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId_.edit'
 
@@ -63,6 +68,11 @@ const AppDashboardRoute = AppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompaniesRoute = AppCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCalculatorsRoute = AppCalculatorsRouteImport.update({
   id: '/calculators',
   path: '/calculators',
@@ -73,6 +83,11 @@ const AppAccountRoute = AppAccountRouteImport.update({
   path: '/account',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCompaniesIndexRoute = AppCompaniesIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppCompaniesRoute,
+} as any)
 const AppClientsIndexRoute = AppClientsIndexRouteImport.update({
   id: '/clients/',
   path: '/clients/',
@@ -82,6 +97,16 @@ const AppCalculatorsIndexRoute = AppCalculatorsIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppCalculatorsRoute,
+} as any)
+const AppCompaniesNewRoute = AppCompaniesNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AppCompaniesRoute,
+} as any)
+const AppCompaniesCompanyIdRoute = AppCompaniesCompanyIdRouteImport.update({
+  id: '/$companyId',
+  path: '/$companyId',
+  getParentRoute: () => AppCompaniesRoute,
 } as any)
 const AppClientsNewRoute = AppClientsNewRouteImport.update({
   id: '/clients/new',
@@ -147,6 +172,12 @@ const AppCalculatorsAvsAiRoute = AppCalculatorsAvsAiRouteImport.update({
   path: '/avs-ai',
   getParentRoute: () => AppCalculatorsRoute,
 } as any)
+const AppCompaniesCompanyIdEditRoute =
+  AppCompaniesCompanyIdEditRouteImport.update({
+    id: '/$companyId_/edit',
+    path: '/$companyId/edit',
+    getParentRoute: () => AppCompaniesRoute,
+  } as any)
 const AppClientsClientIdScenariosRoute =
   AppClientsClientIdScenariosRouteImport.update({
     id: '/clients/$clientId_/scenarios',
@@ -164,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRoute
   '/calculators': typeof AppCalculatorsRouteWithChildren
+  '/companies': typeof AppCompaniesRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/shared/$token': typeof SharedTokenRoute
@@ -179,10 +211,14 @@ export interface FileRoutesByFullPath {
   '/calculators/vested-benefits': typeof AppCalculatorsVestedBenefitsRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
   '/clients/new': typeof AppClientsNewRoute
+  '/companies/$companyId': typeof AppCompaniesCompanyIdRoute
+  '/companies/new': typeof AppCompaniesNewRoute
   '/calculators/': typeof AppCalculatorsIndexRoute
   '/clients/': typeof AppClientsIndexRoute
+  '/companies/': typeof AppCompaniesIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
   '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
+  '/companies/$companyId/edit': typeof AppCompaniesCompanyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -203,10 +239,14 @@ export interface FileRoutesByTo {
   '/calculators/vested-benefits': typeof AppCalculatorsVestedBenefitsRoute
   '/clients/$clientId': typeof AppClientsClientIdRoute
   '/clients/new': typeof AppClientsNewRoute
+  '/companies/$companyId': typeof AppCompaniesCompanyIdRoute
+  '/companies/new': typeof AppCompaniesNewRoute
   '/calculators': typeof AppCalculatorsIndexRoute
   '/clients': typeof AppClientsIndexRoute
+  '/companies': typeof AppCompaniesIndexRoute
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
   '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
+  '/companies/$companyId/edit': typeof AppCompaniesCompanyIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -215,6 +255,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_app/account': typeof AppAccountRoute
   '/_app/calculators': typeof AppCalculatorsRouteWithChildren
+  '/_app/companies': typeof AppCompaniesRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/history': typeof AppHistoryRoute
   '/shared/$token': typeof SharedTokenRoute
@@ -230,10 +271,14 @@ export interface FileRoutesById {
   '/_app/calculators/vested-benefits': typeof AppCalculatorsVestedBenefitsRoute
   '/_app/clients/$clientId': typeof AppClientsClientIdRoute
   '/_app/clients/new': typeof AppClientsNewRoute
+  '/_app/companies/$companyId': typeof AppCompaniesCompanyIdRoute
+  '/_app/companies/new': typeof AppCompaniesNewRoute
   '/_app/calculators/': typeof AppCalculatorsIndexRoute
   '/_app/clients/': typeof AppClientsIndexRoute
+  '/_app/companies/': typeof AppCompaniesIndexRoute
   '/_app/clients/$clientId_/edit': typeof AppClientsClientIdEditRoute
   '/_app/clients/$clientId_/scenarios': typeof AppClientsClientIdScenariosRoute
+  '/_app/companies/$companyId_/edit': typeof AppCompaniesCompanyIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -242,6 +287,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/calculators'
+    | '/companies'
     | '/dashboard'
     | '/history'
     | '/shared/$token'
@@ -257,10 +303,14 @@ export interface FileRouteTypes {
     | '/calculators/vested-benefits'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/companies/$companyId'
+    | '/companies/new'
     | '/calculators/'
     | '/clients/'
+    | '/companies/'
     | '/clients/$clientId/edit'
     | '/clients/$clientId/scenarios'
+    | '/companies/$companyId/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -281,10 +331,14 @@ export interface FileRouteTypes {
     | '/calculators/vested-benefits'
     | '/clients/$clientId'
     | '/clients/new'
+    | '/companies/$companyId'
+    | '/companies/new'
     | '/calculators'
     | '/clients'
+    | '/companies'
     | '/clients/$clientId/edit'
     | '/clients/$clientId/scenarios'
+    | '/companies/$companyId/edit'
   id:
     | '__root__'
     | '/'
@@ -292,6 +346,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_app/account'
     | '/_app/calculators'
+    | '/_app/companies'
     | '/_app/dashboard'
     | '/_app/history'
     | '/shared/$token'
@@ -307,10 +362,14 @@ export interface FileRouteTypes {
     | '/_app/calculators/vested-benefits'
     | '/_app/clients/$clientId'
     | '/_app/clients/new'
+    | '/_app/companies/$companyId'
+    | '/_app/companies/new'
     | '/_app/calculators/'
     | '/_app/clients/'
+    | '/_app/companies/'
     | '/_app/clients/$clientId_/edit'
     | '/_app/clients/$clientId_/scenarios'
+    | '/_app/companies/$companyId_/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -364,6 +423,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/companies': {
+      id: '/_app/companies'
+      path: '/companies'
+      fullPath: '/companies'
+      preLoaderRoute: typeof AppCompaniesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/calculators': {
       id: '/_app/calculators'
       path: '/calculators'
@@ -378,6 +444,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/companies/': {
+      id: '/_app/companies/'
+      path: '/'
+      fullPath: '/companies/'
+      preLoaderRoute: typeof AppCompaniesIndexRouteImport
+      parentRoute: typeof AppCompaniesRoute
+    }
     '/_app/clients/': {
       id: '/_app/clients/'
       path: '/clients'
@@ -391,6 +464,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/calculators/'
       preLoaderRoute: typeof AppCalculatorsIndexRouteImport
       parentRoute: typeof AppCalculatorsRoute
+    }
+    '/_app/companies/new': {
+      id: '/_app/companies/new'
+      path: '/new'
+      fullPath: '/companies/new'
+      preLoaderRoute: typeof AppCompaniesNewRouteImport
+      parentRoute: typeof AppCompaniesRoute
+    }
+    '/_app/companies/$companyId': {
+      id: '/_app/companies/$companyId'
+      path: '/$companyId'
+      fullPath: '/companies/$companyId'
+      preLoaderRoute: typeof AppCompaniesCompanyIdRouteImport
+      parentRoute: typeof AppCompaniesRoute
     }
     '/_app/clients/new': {
       id: '/_app/clients/new'
@@ -476,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsAvsAiRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/_app/companies/$companyId_/edit': {
+      id: '/_app/companies/$companyId_/edit'
+      path: '/$companyId/edit'
+      fullPath: '/companies/$companyId/edit'
+      preLoaderRoute: typeof AppCompaniesCompanyIdEditRouteImport
+      parentRoute: typeof AppCompaniesRoute
+    }
     '/_app/clients/$clientId_/scenarios': {
       id: '/_app/clients/$clientId_/scenarios'
       path: '/clients/$clientId/scenarios'
@@ -525,9 +619,28 @@ const AppCalculatorsRouteWithChildren = AppCalculatorsRoute._addFileChildren(
   AppCalculatorsRouteChildren,
 )
 
+interface AppCompaniesRouteChildren {
+  AppCompaniesCompanyIdRoute: typeof AppCompaniesCompanyIdRoute
+  AppCompaniesNewRoute: typeof AppCompaniesNewRoute
+  AppCompaniesIndexRoute: typeof AppCompaniesIndexRoute
+  AppCompaniesCompanyIdEditRoute: typeof AppCompaniesCompanyIdEditRoute
+}
+
+const AppCompaniesRouteChildren: AppCompaniesRouteChildren = {
+  AppCompaniesCompanyIdRoute: AppCompaniesCompanyIdRoute,
+  AppCompaniesNewRoute: AppCompaniesNewRoute,
+  AppCompaniesIndexRoute: AppCompaniesIndexRoute,
+  AppCompaniesCompanyIdEditRoute: AppCompaniesCompanyIdEditRoute,
+}
+
+const AppCompaniesRouteWithChildren = AppCompaniesRoute._addFileChildren(
+  AppCompaniesRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRoute
   AppCalculatorsRoute: typeof AppCalculatorsRouteWithChildren
+  AppCompaniesRoute: typeof AppCompaniesRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRoute
@@ -540,6 +653,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRoute,
   AppCalculatorsRoute: AppCalculatorsRouteWithChildren,
+  AppCompaniesRoute: AppCompaniesRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppClientsClientIdRoute: AppClientsClientIdRoute,
