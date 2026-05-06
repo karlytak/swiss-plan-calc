@@ -69,6 +69,8 @@ function AvsAiCalc() {
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
+  useHydrateFormFromPrefill(prefill, setForm);
+
   const refAge = getReferenceAge(form.birthYear, form.gender);
   const refAgeSpouse = getReferenceAge(form.spouseBirthYear, form.spouseGender);
 
