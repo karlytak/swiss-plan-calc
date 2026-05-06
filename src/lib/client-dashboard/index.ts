@@ -399,6 +399,7 @@ export function computeClientDashboard(b: ClientBundle): ClientDashboard {
   const pillar3a = buildPillar3a(b, age, taxInput);
   const retirement = buildRetirement(b, lpp, taxInput);
   const cantonCompare = buildCantonCompare(b, taxInput);
+  const avs = buildAvs(b);
 
   // Suggestions = optimizer existant (réutilisation pure).
   let suggestions: Optimization[] = [];
