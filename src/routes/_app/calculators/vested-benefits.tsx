@@ -23,7 +23,7 @@ import {
 } from "recharts";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
-import { getSelectableCantons } from "@/lib/swiss/cantons";
+import { getWithdrawalCantons } from "@/lib/swiss/cantons";
 import {
   compareVestedStrategies,
   recommendVestedStrategy,
@@ -122,7 +122,7 @@ function VestedBenefitsCalc() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {getSelectableCantons().map((c) => (
+                  {getWithdrawalCantons().map((c) => (
                     <SelectItem key={c.code} value={c.code}>
                       {c.code} · {c.name}
                     </SelectItem>
