@@ -30,9 +30,9 @@ import {
 import { getSelectableCantons } from "@/lib/swiss/cantons";
 import { projectLPP, simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
 import { LPP_2026 } from "@/lib/lpp/parameters-2026";
-import { formatCHF as fmtCHF } from "@/lib/format";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
+const fmtCHF = formatCHF;
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportLppPdf } from "@/lib/pdf/reports";
