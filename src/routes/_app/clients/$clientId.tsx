@@ -210,6 +210,9 @@ function ClientDetailPage() {
     (Number(assets?.mortgage_debt ?? 0));
   const children = parseChildren(client.children);
   const optimizations = dashboard?.suggestions ?? [];
+  const clientAgeDays = Math.floor(
+    (Date.now() - new Date(client.created_at).getTime()) / 86400000,
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
