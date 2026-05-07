@@ -22,6 +22,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -84,9 +85,19 @@ function RetirementCalc() {
       compare,
       reco,
     });
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue", body: "Compare la rente viagère LPP vs le retrait du capital." },
+    { title: "Taux de conversion", body: "Pour 2026 : 6.0% sur la part obligatoire (en baisse continue). Vérifiez le taux de votre caisse." },
+    { title: "Hypothèses", body: "Espérance de vie, rendement post-retraite, fiscalité du capital — paramètres clés du verdict." }
+  ];
+
 
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide rente vs capital" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
       {client && <ClientLinkBanner client={client} />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">

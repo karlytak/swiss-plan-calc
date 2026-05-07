@@ -42,6 +42,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -132,9 +133,22 @@ function LppCalc() {
       projection,
       buybackPlan,
     });
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue dans le calculateur LPP", body: "Ce mode guide vous présente les étapes pour projeter votre 2e pilier et planifier vos rachats." },
+    { title: "Données personnelles", body: "Saisissez âge actuel, âge de retraite et avoir LPP actuel (visible sur votre certificat de prévoyance)." },
+    { title: "Salaire et salaire assuré", body: "Le salaire assuré LPP = salaire AVS - déduction de coordination (plafonné à 90 720 CHF en 2026)." },
+    { title: "Hypothèses de projection", body: "Rendement attendu (typiquement 1.25-2%), frais TER, croissance salariale. Restez conservateur." },
+    { title: "Plan de rachat", body: "Renseignez votre capacité de rachat (visible sur le certificat) et la durée souhaitée pour étaler l"économie fiscale." },
+    { title: "Résultats", body: "Capital projeté, rente mensuelle et économies fiscales totales liées aux rachats." }
+  ];
+
 
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide LPP" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
       {client && <ClientLinkBanner client={client} />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">

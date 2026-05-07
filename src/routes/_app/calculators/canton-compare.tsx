@@ -49,6 +49,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -189,9 +190,19 @@ function CantonCompareCalc() {
       input: form,
       rows: data,
     });
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue", body: "Compare la charge fiscale entre cantons pour un même profil." },
+    { title: "Paramètres", body: "Saisissez votre situation civile, revenu et déductions. Le calculateur compare les 26 cantons." },
+    { title: "Multiplicateur", body: "Calcul effectué sur le chef-lieu de chaque canton (commune-précise viendra dans une prochaine version)." }
+  ];
+
 
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide comparateur cantonal" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
       {client && <ClientLinkBanner client={client} />}
 
       {clientId && (

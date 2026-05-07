@@ -26,6 +26,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -64,9 +65,19 @@ function CrossBorderCalc() {
       : form.workCanton === "TI"
         ? "TI · accord 2023"
         : "Hors régime";
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue", body: "Calculateur dédié aux travailleurs frontaliers (accord franco-suisse)." },
+    { title: "Statut", body: "Frontalier de droit (rentre tous les jours) ou quasi-résident. Régime fiscal différent." },
+    { title: "Imposition", body: "Selon le canton (GE = imposition en Suisse, VD/NE/JU = imposition en France)." }
+  ];
+
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide frontaliers" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
       {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-3">
         <CalcCard
