@@ -222,12 +222,16 @@ function DirectorCompensationCalc() {
                   value={inputs.totalProfit}
                   onChange={(v) => setField("totalProfit", v)}
                   hint="Avant charges sociales et impôt société"
+                  wikiId="dirigeant"
+                  wikiTip="Résultat de la société AVANT toute rémunération du dirigeant. C'est le « gâteau » à répartir entre salaire, dividende et réserves."
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <SelectField
                     label="Canton siège société"
                     value={inputs.companyCanton}
                     onChange={(v) => setField("companyCanton", v as SelectableCantonCode)}
+                    wikiId="dirigeant"
+                    wikiTip="Canton du siège : détermine l'impôt sur le bénéfice de la société (IS cantonal + IFD)."
                   />
                   <SelectField
                     label="Canton domicile dirigeant"
@@ -235,6 +239,8 @@ function DirectorCompensationCalc() {
                     onChange={(v) =>
                       setField("directorCanton", v as SelectableCantonCode)
                     }
+                    wikiId="dirigeant"
+                    wikiTip="Canton de domicile : détermine l'impôt personnel sur le salaire et le dividende perçus."
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
