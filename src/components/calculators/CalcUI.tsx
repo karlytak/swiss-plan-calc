@@ -1,8 +1,57 @@
 // Petits composants réutilisables pour les calculateurs.
 import { useRef, type ReactNode } from "react";
+import { Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatCHF, formatPct } from "@/lib/format";
 import { useParallaxTilt } from "@/hooks/useParallaxTilt";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+
+/**
+ * Label avec icône info + tooltip explicatif.
+ * À utiliser sur tous les champs/résultats où une explication métier aide à éviter une perte de temps.
+ */
+export function InfoLabel({
+  children,
+  tip,
+  className,
+}: {
+  children: ReactNode;
+  tip: ReactNode;
+  className?: string;
+}) {
+  return (
+    <TooltipProvider delayDuration={150}>
+      <Label
+        className={cn(
+          "flex items-center gap-1 text-xs font-medium text-muted-foreground",
+          className,
+        )}
+      >
+        <span>{children}</span>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              type="button"
+              className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
+              aria-label="Aide"
+            >
+              <Info className="h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent className="max-w-xs text-left text-[11px] leading-snug">
+            {tip}
+          </TooltipContent>
+        </Tooltip>
+      </Label>
+    </TooltipProvider>
+  );
+}
 
 export function CalcCard({
   title,
