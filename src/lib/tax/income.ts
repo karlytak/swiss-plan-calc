@@ -161,18 +161,29 @@ export const AC_CEILING_2026 = 148_200; // Plafond AC 2026
 export function estimateSocialContributions(
   grossSalary: number,
   age: number = 40,
+  plan: "mandatory" | "cadres" | "1e" = "mandatory",
 ): { avs: number; ac: number; lpp: number } {
   const avs = grossSalary * AVS_AI_APG_RATE;
   const acBase = Math.min(grossSalary, AC_CEILING_2026) * AC_RATE;
   const acComp = Math.max(0, grossSalary - AC_CEILING_2026) * AC_COMPLEMENTARY_RATE;
   const ac = acBase + acComp;
 
-  // LPP : bonification (selon âge) × salaire coordonné, dont 50% part salarié
-  const cappedSalary = Math.min(grossSalary, LPP_2026.maxInsuredSalary);
+  // LPP : bonification (selon âge) × salaire coordonné, dont 50% part salarié.
+  // Plafond du salaire assuré dépend du plan :
+  //  - mandatory : LPP_2026.maxInsuredSalary (90'720)
+  //  - cadres    : 4× plafond LPP, soit ~362'880 (sur-obligatoire courant)
+  //  - 1e        : LPP_2026.oneEPlanCap (860'000)
+  const planCap =
+    plan === "1e"
+      ? LPP_2026.oneEPlanCap
+      : plan === "cadres"
+        ? LPP_2026.maxInsuredSalary * 4
+        : LPP_2026.maxInsuredSalary;
+  const cappedSalary = Math.min(grossSalary, planCap);
   const coordinated = Math.max(0, cappedSalary - LPP_2026.coordinationDeduction);
-  const creditRate = lppCreditRate(age) || 0.10; // défaut 10% si <25 ou >65
+  const creditRate = lppCreditRate(age) || 0.10;
   const lppEmployerEmployee = coordinated * creditRate;
-  const lpp = lppEmployerEmployee * 0.5; // part salarié = 50%
+  const lpp = lppEmployerEmployee * 0.5;
 
   return { avs: Math.round(avs), ac: Math.round(ac), lpp: Math.round(lpp) };
 }
