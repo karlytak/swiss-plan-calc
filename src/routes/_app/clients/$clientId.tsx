@@ -344,6 +344,7 @@ function ClientDetailPage() {
               />
               <Row label="Commune" value={client.commune ?? "—"} />
               <Row label="NPA" value={client.postal_code ?? "—"} />
+            </Card>
           </div>
           {client.work_status === "director" && (
             <ClientCompanyCard
@@ -354,6 +355,7 @@ function ClientDetailPage() {
           )}
         </TabsContent>
 
+        <TabsContent value="fiscal" className="mt-4 space-y-6">
           {dashboard?.hasEnoughData && (
             <DashboardFiscal dashboard={dashboard} clientId={clientId} />
           )}
