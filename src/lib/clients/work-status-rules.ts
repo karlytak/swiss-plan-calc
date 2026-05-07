@@ -100,6 +100,17 @@ export function getWorkStatusRules(status: WorkStatus | null | undefined): WorkS
         ]),
         shortLabel: "Étudiant",
       };
+    case "director":
+      return {
+        hasSalary: true,
+        hasLPP: true,
+        pillar3aCap: PILLAR_3A_MAX_LPP_2026,
+        canBuybackLPP: true,
+        isRetired: false,
+        isSelfEmployed: false,
+        hiddenCalculators: NO_HIDE,
+        shortLabel: "Dirigeant",
+      };
     case "employee":
     default:
       return {
