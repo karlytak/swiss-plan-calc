@@ -202,7 +202,7 @@ function Pillar3aCalc() {
                 </Select>
               </div>
               <NumField label="Salaire brut annuel" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
-              <NumField label={`Cotisation versée (max ${max.toLocaleString("fr-CH")})`} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} />
+              <NumField label={`Cotisation versée (max ${max.toLocaleString("fr-CH")})`} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} wikiId="p3a-base" wikiTip="Plafond 2026 : 7 258 CHF si affilié LPP, sinon 20 % du revenu (max 36 288 CHF)." />
             </div>
           </CalcCard>
         </div>
