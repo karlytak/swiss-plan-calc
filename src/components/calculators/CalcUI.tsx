@@ -223,8 +223,9 @@ export function PctTile({
   value: number | null | undefined;
   hint?: string;
   tone?: "default" | "primary" | "success" | "warning";
+  tip?: ReactNode;
 }) {
-  return <StatTile label={label} value={formatPct(value ?? 0)} hint={hint} tone={tone} />;
+  return <StatTile label={label} value={formatPct(value ?? 0)} hint={hint} tone={tone} tip={tip} />;
 }
 
 export function Row({ children }: { children: ReactNode }) {
