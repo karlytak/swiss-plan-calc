@@ -73,10 +73,12 @@ function CrossBorderCalc() {
   ];
 
 
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide frontaliers" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
 
       {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-3">

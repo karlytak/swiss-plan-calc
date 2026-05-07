@@ -87,16 +87,18 @@ function IncomeTaxCalculator() {
     });
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
-    { title: "Bienvenue", body: "Estimation rapide de l"impôt sur le revenu fédéral + cantonal + communal." },
-    { title: "Situation civile", body: "Détermine le barème (célibataire / marié / famille monoparentale)." },
+    { title: "Bienvenue", body: "Estimation rapide de l'impôt sur le revenu fédéral, cantonal et communal." },
+    { title: "Situation civile", body: "Détermine le barème (célibataire, marié, famille monoparentale)." },
     { title: "Déductions", body: "3a, rachat LPP, intérêts hypothécaires, primes maladie : à renseigner pour le calcul net." }
   ];
+
 
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide impôt revenu" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
 
       {client && (
         <div className="md:col-span-5">

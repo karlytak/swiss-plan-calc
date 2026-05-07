@@ -95,15 +95,17 @@ function VestedBenefitsCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue", body: "Calculateur de retrait de prestations de libre passage." },
-    { title: "Capital LP", body: "Solde du compte/police de libre passage à la sortie de la caisse de pension." },
-    { title: "Échelonnement", body: "Diviser le capital en 2 comptes LP permet un retrait sur 2 années fiscales et réduit la progression de l"impôt." }
+    { title: "Capital LP", body: "Solde du compte ou de la police de libre passage à la sortie de la caisse de pension." },
+    { title: "Échelonnement", body: "Diviser le capital en 2 comptes LP permet un retrait sur 2 années fiscales et réduit la progression de l'impôt." }
   ];
+
 
 
   return (
     <div className="space-y-6">
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide libre passage" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
       {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}

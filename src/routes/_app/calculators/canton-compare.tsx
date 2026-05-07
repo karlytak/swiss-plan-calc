@@ -198,10 +198,12 @@ function CantonCompareCalc() {
   ];
 
 
+
   return (
     <div className="space-y-6">
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide comparateur cantonal" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
 
       {client && <ClientLinkBanner client={client} />}
 
