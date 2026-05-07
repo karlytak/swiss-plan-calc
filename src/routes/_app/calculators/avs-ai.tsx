@@ -311,7 +311,7 @@ function AvsAiCalc() {
                 réduction proportionnelle des deux rentes individuelles.
               </p>
             ) : null}
-          </CalcCard>
+          </CalcCard></div>
 
           <CalcCard title="Détail personne assurée">
             <Row>
