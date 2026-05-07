@@ -35,7 +35,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_app/calculators/pillar3a")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({ meta: [{ title: "Pilier 3a · SwissBroker Pro" }] }),
+  head: () => ({ meta: [{ title: "3e pilier A & B · SwissBroker Pro" }] }),
   component: Pillar3aCalc,
 });
 
@@ -54,6 +54,11 @@ function Pillar3aCalc() {
     expectedReturn: 2.5,
     withdrawalCapital: 250_000,
     withdrawalAccounts: 3,
+    // 3e pilier B (libre, non déductible)
+    pillar3bYearly: 3_000,
+    pillar3bCurrent: 0,
+    pillar3bYears: 25,
+    pillar3bReturn: 2.0,
   });
   useHydrateFormFromPrefill(prefill, setForm);
 
