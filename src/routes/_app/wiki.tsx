@@ -20,7 +20,12 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 
+const searchSchema = z.object({
+  article: fallback(z.string().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/wiki")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Wiki & formation · SwissBroker Pro" }] }),
   component: WikiPage,
 });
