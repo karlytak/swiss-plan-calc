@@ -239,6 +239,64 @@ function AvsAiCalc() {
             </p>
           </CalcCard>
 
+          <CalcCard title="Bonifications & cas particuliers (optionnel)">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <NumField
+                label="Année de départ prévu de Suisse"
+                value={form.departureYear}
+                onChange={(v) => set("departureYear", v)}
+                wikiId="avs-base"
+                wikiTip="Si renseigné (≠ 0), les cotisations s'arrêtent à cette date au lieu de l'année de retraite. Critique pour frontaliers/expatriés."
+              />
+              <div />
+              <NumField
+                label="Années avec enfant < 16 ans (bonif. éducatives)"
+                value={form.educationalYears}
+                onChange={(v) => set("educationalYears", v)}
+                wikiId="avs-base"
+                wikiTip="3 × rente min annuelle (45 360 CHF en 2026) ajoutés au revenu déterminant par année reconnue."
+              />
+              <NumField
+                label="Part attribuée éducatives (%)"
+                value={form.educationalShare}
+                onChange={(v) => set("educationalShare", v)}
+                suffix="%"
+                wikiId="avs-base"
+                wikiTip="50 % si conjoint actif (à répartir), 100 % si seul parent / conjoint inactif."
+              />
+              <NumField
+                label="Années tâches d'assistance"
+                value={form.assistanceYears}
+                onChange={(v) => set("assistanceYears", v)}
+                wikiId="avs-base"
+                wikiTip="Années passées à s'occuper d'un proche nécessitant des soins (handicap moyen/grave, conditions strictes)."
+              />
+              <NumField
+                label="Part attribuée assistance (%)"
+                value={form.assistanceShare}
+                onChange={(v) => set("assistanceShare", v)}
+                suffix="%"
+              />
+            </div>
+            {(form.educationalYears > 0 || form.assistanceYears > 0 || form.departureYear > 0) && (
+              <div className="mt-3 rounded-md bg-muted/50 p-3 text-xs space-y-1">
+                {form.departureYear > 0 && (
+                  <p>
+                    Départ prévu en <strong>{form.departureYear}</strong> :{" "}
+                    {projection.primary.effectiveYears} années cotisées effectivement,{" "}
+                    {projection.primary.missingYears} années manquantes.
+                  </p>
+                )}
+                {projection.primary.bonificationsBonus > 0 && (
+                  <p>
+                    Bonus revenu déterminant : <strong>+{projection.primary.bonificationsBonus.toLocaleString("fr-CH")} CHF/an</strong>{" "}
+                    (revenu déterminant final : {projection.primary.determiningIncome.toLocaleString("fr-CH")} CHF).
+                  </p>
+                )}
+              </div>
+            )}
+          </CalcCard>
+
           <div data-guide="avs-couple"><CalcCard title="Conjoint·e (optionnel)">
             <label className="mb-3 flex items-center gap-2 text-sm">
               <Checkbox
