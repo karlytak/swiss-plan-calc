@@ -48,12 +48,14 @@ function IncomeTaxCalculator() {
     confession: "none" as NonNullable<IncomeTaxInput["confession"]>,
     children: 0,
     age: 40,
+    lppPlan: "mandatory" as NonNullable<IncomeTaxInput["lppPlan"]>,
     grossSalary: 100_000,
     spouseGrossSalary: 0,
     bonus: 0,
     otherIncome: 0,
     pillar3aContributions: 0,
     lppBuyback: 0,
+    healthInsurancePremiums: 0,
     mortgageInterest: 0,
     realEstateMaintenance: 0,
     netWealth: 0,
@@ -153,6 +155,23 @@ function IncomeTaxCalculator() {
             </Field>
             <NumField label="Nombre d'enfants" value={form.children} onChange={(v) => setField("children", v)} />
             <NumField label="Âge du contribuable" value={form.age} onChange={(v) => setField("age", v)} wikiId="lpp-credits" wikiTip="Détermine la bonification LPP (7 % à 25-34 ans, 10 % à 35-44, 15 % à 45-54, 18 % à 55-65). Part salarié = 50 % de la bonification." />
+            <Field label="Plan LPP" wikiId="lpp-base" wikiTip="Obligatoire : plafond 90 720 CHF. Cadres : sur-obligatoire jusqu'à ~362 880 CHF. 1e : individualisé jusqu'à 860 000 CHF. Impacte la part salarié déductible.">
+              <Select value={form.lppPlan} onValueChange={(v) => setField("lppPlan", v as typeof form.lppPlan)}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="mandatory">Obligatoire (plafond 90 720)</SelectItem>
+                  <SelectItem value="cadres">Cadres / sur-obligatoire</SelectItem>
+                  <SelectItem value="1e">Plan 1e (jusqu'à 860 000)</SelectItem>
+                </SelectContent>
+              </Select>
+            </Field>
+            <NumField
+              label="Primes maladie réelles (CHF, optionnel)"
+              value={form.healthInsurancePremiums}
+              onChange={(v) => setField("healthInsurancePremiums", v)}
+              wikiId="ifd-icc"
+              wikiTip="Si renseigné, remplace le forfait cantonal. Sinon : forfait cantonal 2026 appliqué automatiquement (GE 2 400 / VD 2 200 / FR 2 000 / NE 2 300 / BE 2 600 / ZH 2 600…)."
+            />
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">

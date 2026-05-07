@@ -25,6 +25,10 @@ export interface IncomeTaxInput {
   age?: number;
   /** Âge du conjoint (pour part salarié LPP conjoint). */
   spouseAge?: number;
+  /** Plan LPP appliqué : obligatoire (plafond 90'720), cadres (sur-obligatoire jusqu'à ~362'880), 1e (jusqu'à 860'000). */
+  lppPlan?: "mandatory" | "cadres" | "1e";
+  /** Idem côté conjoint */
+  spouseLppPlan?: "mandatory" | "cadres" | "1e";
   /** Confession du conjoint (impacte la part paroissiale couple) */
   spouseConfession?: "none" | "catholic" | "protestant" | "other";
 
@@ -114,9 +118,33 @@ export const MEALS_FORFAIT_ANNUAL = 3_200;
 export const PROFESSIONAL_FORFAIT_RATE = 0.03; // 3% du salaire net
 export const PROFESSIONAL_FORFAIT_MIN = 2_000;
 export const PROFESSIONAL_FORFAIT_MAX = 4_000;
+/** Forfait fédéral assurance maladie (IFD) */
 export const HEALTH_INSURANCE_MAX_SINGLE = 1_800;
 export const HEALTH_INSURANCE_MAX_MARRIED = 3_600;
 export const HEALTH_INSURANCE_PER_CHILD = 700;
+
+/**
+ * Forfaits cantonaux 2026 pour primes d'assurance-maladie + LCA (déduction
+ * cantonale). Valeurs indicatives publiées par les administrations fiscales
+ * cantonales — utilisées si l'utilisateur ne saisit pas ses primes réelles.
+ * Format : { single, married, perChild }.
+ */
+export const HEALTH_INSURANCE_CANTONAL_2026: Record<
+  string,
+  { single: number; married: number; perChild: number }
+> = {
+  GE: { single: 2_400, married: 4_800, perChild: 1_200 },
+  VD: { single: 2_200, married: 4_400, perChild: 1_300 },
+  VS: { single: 2_200, married: 4_400, perChild: 1_100 },
+  FR: { single: 2_000, married: 4_000, perChild: 1_000 },
+  NE: { single: 2_300, married: 4_600, perChild: 1_200 },
+  JU: { single: 2_100, married: 4_200, perChild: 1_100 },
+  BE: { single: 2_600, married: 5_200, perChild: 1_400 },
+  ZH: { single: 2_600, married: 5_200, perChild: 1_300 },
+  BS: { single: 2_400, married: 4_800, perChild: 1_200 },
+  BL: { single: 2_400, married: 4_800, perChild: 1_200 },
+  TI: { single: 2_300, married: 4_600, perChild: 1_200 },
+};
 export const CHILDCARE_MAX_FEDERAL_2026 = 25_500;
 // Cotisations sociales 2026 (parts salarié)
 export const AVS_AI_APG_RATE = 0.053; // AVS 5.3% (AI/APG inclus dans le taux global salarié)
@@ -133,18 +161,29 @@ export const AC_CEILING_2026 = 148_200; // Plafond AC 2026
 export function estimateSocialContributions(
   grossSalary: number,
   age: number = 40,
+  plan: "mandatory" | "cadres" | "1e" = "mandatory",
 ): { avs: number; ac: number; lpp: number } {
   const avs = grossSalary * AVS_AI_APG_RATE;
   const acBase = Math.min(grossSalary, AC_CEILING_2026) * AC_RATE;
   const acComp = Math.max(0, grossSalary - AC_CEILING_2026) * AC_COMPLEMENTARY_RATE;
   const ac = acBase + acComp;
 
-  // LPP : bonification (selon âge) × salaire coordonné, dont 50% part salarié
-  const cappedSalary = Math.min(grossSalary, LPP_2026.maxInsuredSalary);
+  // LPP : bonification (selon âge) × salaire coordonné, dont 50% part salarié.
+  // Plafond du salaire assuré dépend du plan :
+  //  - mandatory : LPP_2026.maxInsuredSalary (90'720)
+  //  - cadres    : 4× plafond LPP, soit ~362'880 (sur-obligatoire courant)
+  //  - 1e        : LPP_2026.oneEPlanCap (860'000)
+  const planCap =
+    plan === "1e"
+      ? LPP_2026.oneEPlanCap
+      : plan === "cadres"
+        ? LPP_2026.maxInsuredSalary * 4
+        : LPP_2026.maxInsuredSalary;
+  const cappedSalary = Math.min(grossSalary, planCap);
   const coordinated = Math.max(0, cappedSalary - LPP_2026.coordinationDeduction);
-  const creditRate = lppCreditRate(age) || 0.10; // défaut 10% si <25 ou >65
+  const creditRate = lppCreditRate(age) || 0.10;
   const lppEmployerEmployee = coordinated * creditRate;
-  const lpp = lppEmployerEmployee * 0.5; // part salarié = 50%
+  const lpp = lppEmployerEmployee * 0.5;
 
   return { avs: Math.round(avs), ac: Math.round(ac), lpp: Math.round(lpp) };
 }
@@ -164,9 +203,9 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
   const grossIncome = grossSalary + spouseSalary + bonus + otherIncome + rental + imputed;
 
   // Cotisations sociales obligatoires part salarié (déductibles à 100%)
-  const social = estimateSocialContributions(grossSalary, input.age);
+  const social = estimateSocialContributions(grossSalary, input.age, input.lppPlan);
   const spouseSocial = isMarried
-    ? estimateSocialContributions(spouseSalary, input.spouseAge)
+    ? estimateSocialContributions(spouseSalary, input.spouseAge, input.spouseLppPlan)
     : { avs: 0, ac: 0, lpp: 0 };
   const avsTotal = social.avs + spouseSocial.avs;
   const acTotal = social.ac + spouseSocial.ac;
@@ -201,13 +240,20 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
   const mortgage = input.mortgageInterest ?? 0;
   const realEstate = input.realEstateMaintenance ?? 0;
 
-  // Primes d'assurance maladie : forfaitaire selon situation
-  const healthBase = isMarried ? HEALTH_INSURANCE_MAX_MARRIED : HEALTH_INSURANCE_MAX_SINGLE;
-  const healthChildren = (input.children ?? 0) * HEALTH_INSURANCE_PER_CHILD;
-  const healthInsurance = Math.min(
-    input.healthInsurancePremiums ?? healthBase + healthChildren,
-    healthBase + healthChildren,
-  );
+  // Primes d'assurance maladie : forfait cantonal si dispo, sinon forfait fédéral
+  const cantonalForfait = HEALTH_INSURANCE_CANTONAL_2026[input.canton];
+  const healthBase = cantonalForfait
+    ? isMarried
+      ? cantonalForfait.married
+      : cantonalForfait.single
+    : isMarried
+      ? HEALTH_INSURANCE_MAX_MARRIED
+      : HEALTH_INSURANCE_MAX_SINGLE;
+  const perChild = cantonalForfait ? cantonalForfait.perChild : HEALTH_INSURANCE_PER_CHILD;
+  const healthChildren = (input.children ?? 0) * perChild;
+  const healthInsurance = input.healthInsurancePremiums
+    ? Math.min(input.healthInsurancePremiums, healthBase + healthChildren)
+    : healthBase + healthChildren;
 
   const childCare = Math.min(
     input.childCareCosts ?? 0,
