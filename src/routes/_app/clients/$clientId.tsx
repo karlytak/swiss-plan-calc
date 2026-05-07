@@ -33,7 +33,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -60,6 +59,11 @@ import {
   DashboardPension,
   DashboardWealthSummary,
 } from "@/components/clients/ClientDashboardSections";
+import { ClientCompanyCard } from "@/components/clients/ClientCompanyCard";
+import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
+import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
+import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
+import { AlertTriangle, Building2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
