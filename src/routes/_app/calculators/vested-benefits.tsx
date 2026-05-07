@@ -38,6 +38,7 @@ import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -115,21 +116,21 @@ function VestedBenefitsCalc() {
           description="Capital actuel + horizon jusqu'à la retraite."
         >
           <div className="space-y-4">
-            <Field label="Capital libre passage actuel">
+            <Field label="Capital libre passage actuel" wikiId="lpp-conversion" wikiTip="Solde du compte/police de libre passage (sortie de la caisse de pension, départ à l'étranger ou indépendance).">
               <BaseNumField
                 value={String(form.initialBalance)}
                 onChange={(v) => set("initialBalance", Number(v) || 0)}
                 suffix="CHF"
               />
             </Field>
-            <Field label="Années jusqu'au retrait">
+            <Field label="Années jusqu'au retrait" wikiId="lpp-conversion" wikiTip="Horizon de placement avant le retrait au plus tard 5 ans après l'âge AVS de référence.">
               <BaseNumField
                 value={String(form.yearsToRetirement)}
                 onChange={(v) => set("yearsToRetirement", Number(v) || 0)}
                 suffix="ans"
               />
             </Field>
-            <Field label="Canton de retrait">
+            <Field label="Canton de retrait" wikiId="lpp-conversion" wikiTip="Canton de l'institution de libre passage au moment du retrait. Ouverture en canton fiscalement avantageux possible (ex. SZ, ZG).">
               <Select
                 value={form.withdrawalCanton}
                 onValueChange={(v) => set("withdrawalCanton", v)}
@@ -303,10 +304,13 @@ function VestedBenefitsCalc() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, wikiId, wikiTip }: { label: string; children: React.ReactNode; wikiId?: string; wikiTip?: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       {children}
     </div>
   );

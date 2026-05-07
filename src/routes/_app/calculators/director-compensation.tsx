@@ -27,6 +27,7 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -221,12 +222,16 @@ function DirectorCompensationCalc() {
                   value={inputs.totalProfit}
                   onChange={(v) => setField("totalProfit", v)}
                   hint="Avant charges sociales et impôt société"
+                  wikiId="dirigeant"
+                  wikiTip="Résultat de la société AVANT toute rémunération du dirigeant. C'est le « gâteau » à répartir entre salaire, dividende et réserves."
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <SelectField
                     label="Canton siège société"
                     value={inputs.companyCanton}
                     onChange={(v) => setField("companyCanton", v as SelectableCantonCode)}
+                    wikiId="dirigeant"
+                    wikiTip="Canton du siège : détermine l'impôt sur le bénéfice de la société (IS cantonal + IFD)."
                   />
                   <SelectField
                     label="Canton domicile dirigeant"
@@ -234,6 +239,8 @@ function DirectorCompensationCalc() {
                     onChange={(v) =>
                       setField("directorCanton", v as SelectableCantonCode)
                     }
+                    wikiId="dirigeant"
+                    wikiTip="Canton de domicile : détermine l'impôt personnel sur le salaire et le dividende perçus."
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
@@ -268,10 +275,13 @@ function DirectorCompensationCalc() {
                     label="Âge dirigeant"
                     value={inputs.age}
                     onChange={(v) => setField("age", v)}
+                    wikiId="lpp-credits"
+                    wikiTip="Détermine la tranche de bonification LPP (7 % / 10 % / 15 % / 18 %)."
                   />
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">
-                      Plan LPP
+                    <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      <span>Plan LPP</span>
+                      <WikiTip articleId="lpp-coordination" tip="Obligatoire = plafond 90 720 CHF, taux légaux. Plan cadre / 1e = surobligatoire au choix de l'employeur, jusqu'à 900 000 CHF assurés." />
                     </Label>
                     <Select
                       value={inputs.lppPlan}
@@ -289,8 +299,9 @@ function DirectorCompensationCalc() {
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-medium">
-                      Participation qualifiée (≥ 10 %)
+                    <Label className="flex items-center gap-1.5 text-sm font-medium">
+                      <span>Participation qualifiée (≥ 10 %)</span>
+                      <WikiTip articleId="dirigeant" tip="≥ 10 % du capital = imposition privilégiée des dividendes (RFFA) : 70 % imposable au fédéral, 50-70 % cantonal selon canton." />
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Active l'imposition partielle des dividendes (RFFA).
@@ -349,15 +360,22 @@ function NumField({
   value,
   onChange,
   hint,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   hint?: string;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       <BaseNumField value={String(value)} onChange={(v) => onChange(Number(v) || 0)} />
       {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
     </div>
@@ -368,14 +386,21 @@ function SelectField({
   label,
   value,
   onChange,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger>
           <SelectValue />

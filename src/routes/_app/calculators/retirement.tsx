@@ -23,6 +23,7 @@ import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -105,10 +106,11 @@ function RetirementCalc() {
         <div className="md:col-span-3">
           <CalcCard title="Hypothèses" description="Comparez le retrait en capital au versement en rente.">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <NumField label="Capital LPP au moment de la retraite" value={form.capital} onChange={(v) => set("capital", v)} />
+              <NumField label="Capital LPP au moment de la retraite" value={form.capital} onChange={(v) => set("capital", v)} wikiId="lpp-conversion" wikiTip="Avoir LPP total disponible au départ à la retraite (obligatoire + surobligatoire)." />
               <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">
-                  Canton de retrait
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <span>Canton de retrait</span>
+                  <WikiTip articleId="lpp-conversion" tip="Canton de l'institution au moment du retrait — peut différer du domicile (ex. transfert vers Zoug)." />
                 </Label>
                 <Select value={form.canton} onValueChange={(v) => set("canton", v)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
@@ -134,10 +136,10 @@ function RetirementCalc() {
                   </SelectContent>
                 </Select>
               </div>
-              <NumField label="Taux de conversion (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} />
-              <NumField label="Espérance de vie résiduelle (ans)" value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} />
-              <NumField label="Rendement net du capital placé (%/an)" value={form.selfReturnRate} onChange={(v) => set("selfReturnRate", v)} step={0.1} />
-              <NumField label="Taux marginal sur la rente (%)" value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} />
+              <NumField label="Taux de conversion (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip="Taux légal 2026 : 6.8 %. Certaines caisses appliquent déjà 5.5 % sur la part surobligatoire." />
+              <NumField label="Espérance de vie résiduelle (ans)" value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip="Durée de versement attendue de la rente. OFAS : ~22 ans à 65 ans hommes, ~24 ans femmes." />
+              <NumField label="Rendement net du capital placé (%/an)" value={form.selfReturnRate} onChange={(v) => set("selfReturnRate", v)} step={0.1} wikiId="lpp-conversion" wikiTip="Hypothèse de rendement net si vous prenez le capital et l'investissez vous-même." />
+              <NumField label="Taux marginal sur la rente (%)" value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} wikiId="lpp-conversion" wikiTip="La rente LPP est imposée à 100 % comme un revenu. Tranche marginale de votre revenu retraite total." />
             </div>
           </CalcCard>
         </div>
@@ -198,16 +200,23 @@ function NumField({
   onChange,
   step: _step = 1,
   suffix,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   step?: number;
   suffix?: string;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       <BaseNumField
         value={String(value)}
         onChange={(v) => onChange(Number(v) || 0)}

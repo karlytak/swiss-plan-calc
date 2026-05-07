@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 import { getClientTaxContext } from "@/lib/clients/to-calculator-input";
 
 const searchSchema = z.object({
@@ -108,7 +109,7 @@ function IncomeTaxCalculator() {
       <div className="md:col-span-3">
         <CalcCard title="Situation" description="Renseignez votre profil fiscal.">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Canton">
+            <Field label="Canton" wikiId="ifd-icc" wikiTip="Détermine le barème ICC, le coefficient cantonal et le multiplicateur communal.">
               <Select value={form.canton} onValueChange={(v) => setField("canton", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -120,7 +121,7 @@ function IncomeTaxCalculator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Situation civile">
+            <Field label="Situation civile" wikiId="ifd-icc" wikiTip="Marié = splitting partiel (barème plus favorable). Famille monoparentale = barème spécial.">
               <Select
                 value={form.status}
                 onValueChange={(v) => setField("status", v as IncomeTaxInput["status"])}
@@ -133,7 +134,7 @@ function IncomeTaxCalculator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Confession">
+            <Field label="Confession" wikiId="ifd-icc" wikiTip="Catholique ou protestante = impôt ecclésiastique ajouté (selon canton).">
               <Select
                 value={form.confession}
                 onValueChange={(v) =>
@@ -174,36 +175,50 @@ function IncomeTaxCalculator() {
               label="Cotisations 3a (CHF)"
               value={form.pillar3aContributions}
               onChange={(v) => setField("pillar3aContributions", v)}
+              wikiId="p3a-base"
+              wikiTip="Salarié LPP : max 7 258 CHF (2026), 100 % déductible. Indépendant sans LPP : 20 % du revenu, max 36 288 CHF."
             />
             <NumField
               label="Rachat LPP (CHF)"
               value={form.lppBuyback}
               onChange={(v) => setField("lppBuyback", v)}
+              wikiId="lpp-rachat"
+              wikiTip="Déductible à 100 %. Capital bloqué 3 ans avant retrait en capital. Plafond sur certificat LPP."
             />
             <NumField
               label="Intérêts hypothécaires (CHF)"
               value={form.mortgageInterest}
               onChange={(v) => setField("mortgageInterest", v)}
+              wikiId="valeur-locative"
+              wikiTip="Déductibles à 100 %. Couplés à la valeur locative ajoutée au revenu."
             />
             <NumField
               label="Entretien immobilier (CHF)"
               value={form.realEstateMaintenance}
               onChange={(v) => setField("realEstateMaintenance", v)}
+              wikiId="valeur-locative"
+              wikiTip="Forfait 10 ou 20 % du loyer théorique selon âge du bien, ou frais réels. Travaux à valeur ajoutée non déductibles."
             />
             <NumField
               label="Fortune nette (CHF)"
               value={form.netWealth}
               onChange={(v) => setField("netWealth", v)}
+              wikiId="fortune"
+              wikiTip="Fortune nette imposable (actifs - dettes). Avoirs LPP / 3a exonérés tant que non retirés."
             />
             <NumField
               label="Capacité de rachat LPP (CHF)"
               value={form.lppBuybackCapacity}
               onChange={(v) => setField("lppBuybackCapacity", v)}
+              wikiId="lpp-rachat"
+              wikiTip="Différence entre l'avoir LPP cible et l'avoir actuel (figure sur le certificat LPP)."
             />
             <NumField
               label="Capital 3a accumulé (CHF)"
               value={form.pillar3aBalance}
               onChange={(v) => setField("pillar3aBalance", v)}
+              wikiId="p3a-base"
+              wikiTip="Solde total cumulé sur vos comptes 3a (banque + assurance)."
             />
           </div>
         </CalcCard>
@@ -266,10 +281,23 @@ function IncomeTaxCalculator() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({
+  label,
+  children,
+  wikiId,
+  wikiTip,
+}: {
+  label: string;
+  children: React.ReactNode;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
+}) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       {children}
     </div>
   );
@@ -280,14 +308,18 @@ function NumField({
   value,
   onChange,
   suffix,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   suffix?: string;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
-    <Field label={label}>
+    <Field label={label} wikiId={wikiId} wikiTip={wikiTip}>
       <BaseNumField
         value={String(value)}
         onChange={(v) => onChange(Number(v) || 0)}

@@ -24,6 +24,7 @@ import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -114,6 +115,8 @@ function TOUCalc() {
               label="Revenu mondial annuel (CHF)"
               value={form.worldwideIncome}
               onChange={(v) => set("worldwideIncome", v)}
+              wikiId="frontaliers"
+              wikiTip="Total mondial : salaires Suisse + revenus étrangers (locatifs, indépendant, etc.). Sert au seuil 90 %."
             />
             <Field label="Résidence UE / AELE">
               <div className="flex h-10 items-center gap-3 rounded-md border border-input bg-muted/40 px-3">
@@ -179,12 +182,12 @@ function TOUCalc() {
             <NumField label="Enfants à charge" value={form.children} onChange={(v) => set("children", v)} />
             <NumField label="Salaire annuel (CHF)" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
             <NumField label="Bonus (CHF)" value={form.bonus} onChange={(v) => set("bonus", v)} />
-            <NumField label="IS retenue annuelle (CHF)" value={form.sourceTaxAnnual} onChange={(v) => set("sourceTaxAnnual", v)} />
-            <NumField label="Cotisations 3a" value={form.pillar3aContributions} onChange={(v) => set("pillar3aContributions", v)} />
-            <NumField label="Rachat LPP" value={form.lppBuyback} onChange={(v) => set("lppBuyback", v)} />
-            <NumField label="Intérêts hypothécaires" value={form.mortgageInterest} onChange={(v) => set("mortgageInterest", v)} />
-            <NumField label="Entretien immobilier" value={form.realEstateMaintenance} onChange={(v) => set("realEstateMaintenance", v)} />
-            <NumField label="Primes maladie / LCA" value={form.healthInsurancePremiums} onChange={(v) => set("healthInsurancePremiums", v)} />
+            <NumField label="IS retenue annuelle (CHF)" value={form.sourceTaxAnnual} onChange={(v) => set("sourceTaxAnnual", v)} wikiId="frontaliers" wikiTip="Total impôt à la source prélevé sur l'année (figure sur le certificat de salaire)." />
+            <NumField label="Cotisations 3a" value={form.pillar3aContributions} onChange={(v) => set("pillar3aContributions", v)} wikiId="p3a-base" wikiTip="Salarié LPP : max 7 258 CHF (2026). Déductible uniquement avec la TOU." />
+            <NumField label="Rachat LPP" value={form.lppBuyback} onChange={(v) => set("lppBuyback", v)} wikiId="lpp-rachat" wikiTip="Déductible à 100 % via TOU. Capital bloqué 3 ans." />
+            <NumField label="Intérêts hypothécaires" value={form.mortgageInterest} onChange={(v) => set("mortgageInterest", v)} wikiId="valeur-locative" wikiTip="Déductibles à 100 % via TOU. Couplés à la valeur locative." />
+            <NumField label="Entretien immobilier" value={form.realEstateMaintenance} onChange={(v) => set("realEstateMaintenance", v)} wikiId="valeur-locative" wikiTip="Forfait 10 ou 20 % du loyer théorique selon âge du bien, ou frais réels." />
+            <NumField label="Primes maladie / LCA" value={form.healthInsurancePremiums} onChange={(v) => set("healthInsurancePremiums", v)} wikiId="ifd-icc" wikiTip="Déduction plafonnée variable selon canton et situation." />
           </div>
         </CalcCard>
       </div>
@@ -246,18 +249,21 @@ function TOUCalc() {
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, children, wikiId, wikiTip }: { label: string; children: React.ReactNode; wikiId?: string; wikiTip?: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       {children}
     </div>
   );
 }
 
-function NumField({ label, value, onChange, suffix }: { label: string; value: number; onChange: (v: number) => void; suffix?: string }) {
+function NumField({ label, value, onChange, suffix, wikiId, wikiTip }: { label: string; value: number; onChange: (v: number) => void; suffix?: string; wikiId?: string; wikiTip?: React.ReactNode }) {
   return (
-    <Field label={label}>
+    <Field label={label} wikiId={wikiId} wikiTip={wikiTip}>
       <BaseNumField
         value={String(value)}
         onChange={(v) => onChange(Number(v) || 0)}
