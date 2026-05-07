@@ -217,7 +217,7 @@ function AvsAiCalc() {
             </p>
           </CalcCard>
 
-          <CalcCard title="Conjoint·e (optionnel)">
+          <div data-guide="avs-couple"><CalcCard title="Conjoint·e (optionnel)">
             <label className="mb-3 flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.isCouple}
