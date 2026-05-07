@@ -101,9 +101,56 @@ function AvsAiCalc() {
 
   const ageAtRetirement = form.retirementYear - form.birthYear;
 
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    {
+      title: "Bienvenue dans le calculateur AVS/AI",
+      body: "Ce mode guide vous explique chaque champ dans l'ordre de saisie. Utilisez « Suivant » ou les flèches du clavier.",
+    },
+    {
+      target: "avs-birth-year",
+      title: "Année de naissance",
+      body: "Détermine l'âge de référence AVS21 (64 ou 65 ans selon le genre) et la fenêtre de retraite anticipée/ajournée.",
+    },
+    {
+      target: "avs-gender",
+      title: "Genre",
+      body: "Pour les femmes nées entre 1961 et 1969, AVS21 relève progressivement l'âge de référence de 64 à 65 ans.",
+    },
+    {
+      target: "avs-contrib-start",
+      title: "Année de début de cotisation",
+      body: "Année de votre première cotisation AVS (en général 18, 20 ou 21 ans selon votre situation). Sert à compter les années de cotisation.",
+    },
+    {
+      target: "avs-retirement-year",
+      title: "Année de retraite envisagée",
+      body: "Année où vous cesserez de cotiser. Une retraite anticipée réduit la rente, un ajournement l'augmente.",
+    },
+    {
+      target: "avs-income",
+      title: "Revenu annuel moyen carrière",
+      body: "Moyenne de vos revenus indexés sur toute la carrière. Au-delà du plafond, la rente est plafonnée à la rente max OFAS.",
+    },
+    {
+      target: "avs-couple",
+      title: "Calcul couple",
+      body: "Si marié·e, la rente du couple est plafonnée à 150 % de la rente max individuelle (effet de plafonnement).",
+    },
+    {
+      target: "avs-result",
+      title: "Rente prévisionnelle",
+      body: "Estimation mensuelle/annuelle. Pour un calcul officiel, demandez un Extrait de Compte Individuel (CI) à votre caisse.",
+    },
+  ];
+
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide AVS/AI" />
       {client && <ClientLinkBanner client={client} />}
+      <div className="flex justify-end">
+        <GuideToggleButton onClick={() => setGuideOpen(true)} />
+      </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         {/* === PARAMÈTRES === */}
         <div className="space-y-4 md:col-span-3">
