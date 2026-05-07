@@ -341,6 +341,7 @@ export type Database = {
           canton: string | null
           created_at: string
           founding_year: number | null
+          headcount_fte: number | null
           id: string
           ide_number: string | null
           legal_form: Database["public"]["Enums"]["company_legal_form"]
@@ -358,6 +359,7 @@ export type Database = {
           canton?: string | null
           created_at?: string
           founding_year?: number | null
+          headcount_fte?: number | null
           id?: string
           ide_number?: string | null
           legal_form?: Database["public"]["Enums"]["company_legal_form"]
@@ -375,6 +377,7 @@ export type Database = {
           canton?: string | null
           created_at?: string
           founding_year?: number | null
+          headcount_fte?: number | null
           id?: string
           ide_number?: string | null
           legal_form?: Database["public"]["Enums"]["company_legal_form"]
