@@ -969,7 +969,7 @@ function StepPatrimoine({
         </div>
       ) : (
         <div>
-          <h3 className="text-sm font-semibold">2e pilier (LPP) — capital restant</h3>
+          <h3 className="text-sm font-semibold">2e pilier (LPP) · capital restant</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field label="Capital LPP non retiré">
               <NumField

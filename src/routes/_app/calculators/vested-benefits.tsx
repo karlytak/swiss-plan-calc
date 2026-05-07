@@ -282,7 +282,7 @@ function VestedBenefitsCalc() {
             <strong className="text-foreground">Source des rendements :</strong> rendements de
             référence basés sur les moyennes historiques 2010-2024 des indices SBI AAA-BBB
             (obligataire CHF), SPI (actions suisses) et MSCI World (actions internationales).
-            Hypothèses indicatives — les rendements futurs peuvent différer.
+            Hypothèses indicatives. Les rendements futurs peuvent différer.
           </div>
         </Row>
       </CalcCard>
