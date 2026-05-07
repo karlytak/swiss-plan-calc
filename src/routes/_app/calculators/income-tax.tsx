@@ -25,6 +25,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 import { getClientTaxContext } from "@/lib/clients/to-calculator-input";
 
 const searchSchema = z.object({
