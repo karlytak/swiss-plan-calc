@@ -23,6 +23,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -87,9 +88,21 @@ function TOUCalc() {
       eligible: eligibility.eligibleForTOU,
     });
   }, [form, eligibility.eligibleForTOU]);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue", body: "Compare l'impôt à la source et la taxation ordinaire ultérieure (TOU)." },
+    { title: "Éligibilité", body: "Seuil de 90 pour cent de vos revenus mondiaux gagnés en Suisse, plus résidence UE/AELE." },
+    { title: "Verdict", body: "Si la TOU est moins chère ET vous êtes éligible, déposez la demande avant le 31 mars de l'année suivante." }
+  ];
+
+
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide TOU" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
+
       {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-3 space-y-4">
         <CalcCard

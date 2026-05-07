@@ -24,6 +24,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -59,9 +60,21 @@ function SourceTaxCalc() {
       input: form,
       result,
     });
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue", body: "Estimation de l'impôt à la source (barèmes A/B/C/H selon situation)." },
+    { title: "Barème", body: "A = célibataire, B = marié monoactif, C = marié biactif, H = famille monoparentale." },
+    { title: "TOU", body: "Si vous gagnez plus de 90 pour cent de vos revenus en Suisse, vous pouvez demander la TOU pour récupérer vos déductions." }
+  ];
+
+
 
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide impôt à la source" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
+
       {client && <div className="md:col-span-5"><ClientLinkBanner client={client} /></div>}
       <div className="md:col-span-3">
         <CalcCard

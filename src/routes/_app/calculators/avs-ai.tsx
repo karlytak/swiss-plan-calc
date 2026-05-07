@@ -25,6 +25,7 @@ import {
   useHydrateFormFromPrefill,
 } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -100,9 +101,56 @@ function AvsAiCalc() {
 
   const ageAtRetirement = form.retirementYear - form.birthYear;
 
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    {
+      title: "Bienvenue dans le calculateur AVS/AI",
+      body: "Ce mode guide vous explique chaque champ dans l'ordre de saisie. Utilisez « Suivant » ou les flèches du clavier.",
+    },
+    {
+      target: "avs-birth-year",
+      title: "Année de naissance",
+      body: "Détermine l'âge de référence AVS21 (64 ou 65 ans selon le genre) et la fenêtre de retraite anticipée/ajournée.",
+    },
+    {
+      target: "avs-gender",
+      title: "Genre",
+      body: "Pour les femmes nées entre 1961 et 1969, AVS21 relève progressivement l'âge de référence de 64 à 65 ans.",
+    },
+    {
+      target: "avs-contrib-start",
+      title: "Année de début de cotisation",
+      body: "Année de votre première cotisation AVS (en général 18, 20 ou 21 ans selon votre situation). Sert à compter les années de cotisation.",
+    },
+    {
+      target: "avs-retirement-year",
+      title: "Année de retraite envisagée",
+      body: "Année où vous cesserez de cotiser. Une retraite anticipée réduit la rente, un ajournement l'augmente.",
+    },
+    {
+      target: "avs-income",
+      title: "Revenu annuel moyen carrière",
+      body: "Moyenne de vos revenus indexés sur toute la carrière. Au-delà du plafond, la rente est plafonnée à la rente max OFAS.",
+    },
+    {
+      target: "avs-couple",
+      title: "Calcul couple",
+      body: "Si marié·e, la rente du couple est plafonnée à 150 % de la rente max individuelle (effet de plafonnement).",
+    },
+    {
+      target: "avs-result",
+      title: "Rente prévisionnelle",
+      body: "Estimation mensuelle/annuelle. Pour un calcul officiel, demandez un Extrait de Compte Individuel (CI) à votre caisse.",
+    },
+  ];
+
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide AVS/AI" />
       {client && <ClientLinkBanner client={client} />}
+      <div className="flex justify-end">
+        <GuideToggleButton onClick={() => setGuideOpen(true)} />
+      </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         {/* === PARAMÈTRES === */}
         <div className="space-y-4 md:col-span-3">
@@ -111,12 +159,14 @@ function AvsAiCalc() {
             description={`Âge de référence AVS21 : ${refAge} ans (déterminé par genre + année de naissance).`}
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <NumField
-                label="Année de naissance"
-                value={form.birthYear}
-                onChange={(v) => set("birthYear", v)}
-              />
-              <div className="space-y-1.5">
+              <div data-guide="avs-birth-year">
+                <NumField
+                  label="Année de naissance"
+                  value={form.birthYear}
+                  onChange={(v) => set("birthYear", v)}
+                />
+              </div>
+              <div data-guide="avs-gender" className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">Genre</Label>
                 <Select
                   value={form.gender}
@@ -132,22 +182,28 @@ function AvsAiCalc() {
                   </SelectContent>
                 </Select>
               </div>
-              <NumField
-                label="Année de début de cotisation"
-                value={form.contributionStartYear}
-                onChange={(v) => set("contributionStartYear", v)}
-              />
-              <NumField
-                label="Année de retraite envisagée"
-                value={form.retirementYear}
-                onChange={(v) => set("retirementYear", v)}
-              />
-              <NumField
-                label="Revenu annuel moyen carrière"
-                value={form.averageAnnualIncome}
-                onChange={(v) => set("averageAnnualIncome", v)}
-                suffix="CHF"
-              />
+              <div data-guide="avs-contrib-start">
+                <NumField
+                  label="Année de début de cotisation"
+                  value={form.contributionStartYear}
+                  onChange={(v) => set("contributionStartYear", v)}
+                />
+              </div>
+              <div data-guide="avs-retirement-year">
+                <NumField
+                  label="Année de retraite envisagée"
+                  value={form.retirementYear}
+                  onChange={(v) => set("retirementYear", v)}
+                />
+              </div>
+              <div data-guide="avs-income">
+                <NumField
+                  label="Revenu annuel moyen carrière"
+                  value={form.averageAnnualIncome}
+                  onChange={(v) => set("averageAnnualIncome", v)}
+                  suffix="CHF"
+                />
+              </div>
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Année courante : {currentYear} · Âge à la retraite :{" "}
@@ -161,7 +217,7 @@ function AvsAiCalc() {
             </p>
           </CalcCard>
 
-          <CalcCard title="Conjoint·e (optionnel)">
+          <div data-guide="avs-couple"><CalcCard title="Conjoint·e (optionnel)">
             <label className="mb-3 flex items-center gap-2 text-sm">
               <Checkbox
                 checked={form.isCouple}
@@ -213,12 +269,12 @@ function AvsAiCalc() {
                 </p>
               </div>
             )}
-          </CalcCard>
+          </CalcCard></div>
         </div>
 
         {/* === RÉSULTATS === */}
         <div className="space-y-4 md:col-span-2">
-          <CalcCard title="Rente prévisionnelle" tilt>
+          <div data-guide="avs-result"><CalcCard title="Rente prévisionnelle" tilt>
             {form.isCouple && projection.combinedMonthlyPension !== undefined ? (
               <Row>
                 <MoneyTile
@@ -255,7 +311,7 @@ function AvsAiCalc() {
                 réduction proportionnelle des deux rentes individuelles.
               </p>
             ) : null}
-          </CalcCard>
+          </CalcCard></div>
 
           <CalcCard title="Détail personne assurée">
             <Row>

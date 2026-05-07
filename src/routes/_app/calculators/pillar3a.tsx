@@ -28,6 +28,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -130,9 +131,22 @@ function Pillar3aCalc() {
       totalReturns: Math.round(balance - form.pillar3bCurrent - totalContrib),
     };
   }, [form.pillar3bCurrent, form.pillar3bReturn, form.pillar3bYears, form.pillar3bYearly]);
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue dans le calculateur 3e pilier", body: "Compare l'effet du 3a (lié, déductible, sortie limitée) et du 3b (libre, fiscalisé, souple)." },
+    { title: "Plafonds 3a 2026", body: "7 258 CHF pour salariés affiliés LPP, 36 288 CHF pour indépendants sans LPP (max 20 pour cent du revenu)." },
+    { title: "Hypothèses", body: "Rendement, durée et tranche marginale d'imposition pour estimer l'économie fiscale annuelle." },
+    { title: "3e pilier B", body: "Versement libre, retrait à tout moment, mais primes non déductibles. Intéressant pour défiscaliser via assurance-vie ou compléter le 3a saturé." }
+  ];
+
+
 
   return (
     <div className="space-y-6">
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide 3e pilier" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+
+
       {client && <ClientLinkBanner client={client} />}
 
       <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">

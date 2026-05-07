@@ -26,6 +26,7 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
@@ -189,9 +190,20 @@ function DirectorCompensationCalc() {
   );
   const recommendation = useMemo(() => recommendBestStrategy(allResults), [allResults]);
 
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: "Bienvenue dans le comparateur Dirigeant", body: "Ce mode guide explique comment optimiser le mix salaire / dividende / réserves pour un dirigeant de société." },
+    { title: "Bénéfice avant rémunération", body: "Le résultat de la société AVANT de vous verser quoi que ce soit. C'est le gâteau à répartir." },
+    { title: "Stratégies", body: "100% salaire (max LPP/AVS), 100% dividende (économie sociale), équilibré (best-of) ou personnalisée. Chaque option a un impact différent sur cotisations sociales et impôt." },
+    { title: "Réserves", body: "Bénéfice net (après IS) laissé dans la société au lieu d'être distribué. Ne crée pas d'impôt personnel et finance les futures distributions ou un rachat de parts." },
+    { title: "Comparatif", body: "Coût total (cotisations + impôt société + impôt personnel) et net en poche pour chaque stratégie." },
+  ];
+
   return (
     <TooltipProvider delayDuration={150}>
       <div className="space-y-6">
+        <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide Dirigeant" />
+        <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
         {(linkedClient || linkedCompany) && (
           <LinkBanner client={linkedClient} company={linkedCompany} />
         )}
