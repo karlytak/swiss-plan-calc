@@ -678,10 +678,15 @@ function effectivePct(r: CompensationResult): { s: number; d: number; rr: number
 function ComparisonTable({
   results,
   bestLabel,
+  currentLabel,
 }: {
   results: CompensationResult[];
   bestLabel?: string;
+  currentLabel?: string;
 }) {
+  const currentRow = currentLabel
+    ? results.find((r) => r.strategy.label === currentLabel)
+    : undefined;
   return (
     <div className="overflow-x-auto">
       <Table>
