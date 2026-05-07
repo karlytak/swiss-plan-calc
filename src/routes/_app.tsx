@@ -10,6 +10,7 @@ import {
   Building2,
   Menu,
   Bookmark,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
@@ -56,6 +57,7 @@ const NAV = [
   { to: "/clients", label: "Clients", icon: Users },
   { to: "/companies", label: "Sociétés", icon: Building2 },
   { to: "/calculators", label: "Calculateurs", icon: Calculator },
+  { to: "/wiki", label: "Wiki & formation", icon: BookOpen },
   { to: "/history", label: "Historique", icon: Bookmark },
   { to: "/account", label: "Mon profil", icon: UserCircle },
 ] as const;
