@@ -116,6 +116,21 @@ function Pillar3aCalc() {
       staggered: stag,
     });
 
+  // Projection 3e pilier B (libre, non déductible mais souvent exonéré à la sortie)
+  const projection3b = useMemo(() => {
+    const r = form.pillar3bReturn / 100;
+    let balance = form.pillar3bCurrent;
+    for (let i = 0; i < form.pillar3bYears; i++) {
+      balance = balance * (1 + r) + form.pillar3bYearly;
+    }
+    const totalContrib = form.pillar3bYearly * form.pillar3bYears;
+    return {
+      finalBalance: Math.round(balance),
+      totalContributions: totalContrib,
+      totalReturns: Math.round(balance - form.pillar3bCurrent - totalContrib),
+    };
+  }, [form.pillar3bCurrent, form.pillar3bReturn, form.pillar3bYears, form.pillar3bYearly]);
+
   return (
     <div className="space-y-6">
       {client && <ClientLinkBanner client={client} />}
