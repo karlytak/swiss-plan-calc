@@ -234,8 +234,8 @@ function Pillar3aCalc() {
         </CalcCard>
         <CalcCard title="Retrait étalé sur plusieurs comptes" description="3 à 5 comptes 3a permettent d'éclater l'imposition.">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <NumField label="Capital total à retirer" value={form.withdrawalCapital} onChange={(v) => set("withdrawalCapital", v)} />
-            <NumField label="Nombre de comptes" value={form.withdrawalAccounts} onChange={(v) => set("withdrawalAccounts", v)} />
+            <NumField label="Capital total à retirer" value={form.withdrawalCapital} onChange={(v) => set("withdrawalCapital", v)} wikiId="p3a-base" wikiTip="Capital cumulé sur tous les comptes 3a au moment du retrait." />
+            <NumField label="Nombre de comptes" value={form.withdrawalAccounts} onChange={(v) => set("withdrawalAccounts", v)} wikiId="p3a-base" wikiTip="Stratégie : 3 à 5 comptes 3a retirés sur des années différentes pour fractionner l'impôt." />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <MoneyTile label="Impôt si retrait unique" value={stag.totalTaxSingle} tone="warning" tip="Tout le capital retiré la même année : barème progressif appliqué d'un coup." />
