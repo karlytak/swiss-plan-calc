@@ -25,6 +25,10 @@ export interface IncomeTaxInput {
   age?: number;
   /** Âge du conjoint (pour part salarié LPP conjoint). */
   spouseAge?: number;
+  /** Plan LPP appliqué : obligatoire (plafond 90'720), cadres (sur-obligatoire jusqu'à ~362'880), 1e (jusqu'à 860'000). */
+  lppPlan?: "mandatory" | "cadres" | "1e";
+  /** Idem côté conjoint */
+  spouseLppPlan?: "mandatory" | "cadres" | "1e";
   /** Confession du conjoint (impacte la part paroissiale couple) */
   spouseConfession?: "none" | "catholic" | "protestant" | "other";
 
