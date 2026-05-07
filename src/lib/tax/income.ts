@@ -203,9 +203,9 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
   const grossIncome = grossSalary + spouseSalary + bonus + otherIncome + rental + imputed;
 
   // Cotisations sociales obligatoires part salarié (déductibles à 100%)
-  const social = estimateSocialContributions(grossSalary, input.age);
+  const social = estimateSocialContributions(grossSalary, input.age, input.lppPlan);
   const spouseSocial = isMarried
-    ? estimateSocialContributions(spouseSalary, input.spouseAge)
+    ? estimateSocialContributions(spouseSalary, input.spouseAge, input.spouseLppPlan)
     : { avs: 0, ac: 0, lpp: 0 };
   const avsTotal = social.avs + spouseSocial.avs;
   const acTotal = social.ac + spouseSocial.ac;
@@ -240,13 +240,20 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
   const mortgage = input.mortgageInterest ?? 0;
   const realEstate = input.realEstateMaintenance ?? 0;
 
-  // Primes d'assurance maladie : forfaitaire selon situation
-  const healthBase = isMarried ? HEALTH_INSURANCE_MAX_MARRIED : HEALTH_INSURANCE_MAX_SINGLE;
-  const healthChildren = (input.children ?? 0) * HEALTH_INSURANCE_PER_CHILD;
-  const healthInsurance = Math.min(
-    input.healthInsurancePremiums ?? healthBase + healthChildren,
-    healthBase + healthChildren,
-  );
+  // Primes d'assurance maladie : forfait cantonal si dispo, sinon forfait fédéral
+  const cantonalForfait = HEALTH_INSURANCE_CANTONAL_2026[input.canton];
+  const healthBase = cantonalForfait
+    ? isMarried
+      ? cantonalForfait.married
+      : cantonalForfait.single
+    : isMarried
+      ? HEALTH_INSURANCE_MAX_MARRIED
+      : HEALTH_INSURANCE_MAX_SINGLE;
+  const perChild = cantonalForfait ? cantonalForfait.perChild : HEALTH_INSURANCE_PER_CHILD;
+  const healthChildren = (input.children ?? 0) * perChild;
+  const healthInsurance = input.healthInsurancePremiums
+    ? Math.min(input.healthInsurancePremiums, healthBase + healthChildren)
+    : healthBase + healthChildren;
 
   const childCare = Math.min(
     input.childCareCosts ?? 0,
