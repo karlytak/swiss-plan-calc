@@ -350,15 +350,22 @@ function NumField({
   value,
   onChange,
   hint,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   hint?: string;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       <BaseNumField value={String(value)} onChange={(v) => onChange(Number(v) || 0)} />
       {hint && <p className="text-[11px] text-muted-foreground">{hint}</p>}
     </div>
@@ -369,14 +376,21 @@ function SelectField({
   label,
   value,
   onChange,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId && wikiTip ? <WikiTip articleId={wikiId} tip={wikiTip} /> : null}
+      </Label>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger>
           <SelectValue />
