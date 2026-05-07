@@ -116,21 +116,21 @@ function VestedBenefitsCalc() {
           description="Capital actuel + horizon jusqu'à la retraite."
         >
           <div className="space-y-4">
-            <Field label="Capital libre passage actuel">
+            <Field label="Capital libre passage actuel" wikiId="lpp-conversion" wikiTip="Solde du compte/police de libre passage (sortie de la caisse de pension, départ à l'étranger ou indépendance).">
               <BaseNumField
                 value={String(form.initialBalance)}
                 onChange={(v) => set("initialBalance", Number(v) || 0)}
                 suffix="CHF"
               />
             </Field>
-            <Field label="Années jusqu'au retrait">
+            <Field label="Années jusqu'au retrait" wikiId="lpp-conversion" wikiTip="Horizon de placement avant le retrait au plus tard 5 ans après l'âge AVS de référence.">
               <BaseNumField
                 value={String(form.yearsToRetirement)}
                 onChange={(v) => set("yearsToRetirement", Number(v) || 0)}
                 suffix="ans"
               />
             </Field>
-            <Field label="Canton de retrait">
+            <Field label="Canton de retrait" wikiId="lpp-conversion" wikiTip="Canton de l'institution de libre passage au moment du retrait. Ouverture en canton fiscalement avantageux possible (ex. SZ, ZG).">
               <Select
                 value={form.withdrawalCanton}
                 onValueChange={(v) => set("withdrawalCanton", v)}
