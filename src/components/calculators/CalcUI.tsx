@@ -119,12 +119,14 @@ export function StatTile({
   hint,
   tone = "default",
   big = false,
+  tip,
 }: {
   label: string;
   value: string;
   hint?: string;
   tone?: "default" | "primary" | "success" | "warning";
   big?: boolean;
+  tip?: ReactNode;
 }) {
   const toneCls =
     tone === "primary"
@@ -142,8 +144,26 @@ export function StatTile({
         toneCls,
       )}
     >
-      <div className="text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
-        {label}
+      <div className="flex items-center gap-1 text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
+        <span>{label}</span>
+        {tip ? (
+          <TooltipProvider delayDuration={150}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-3 w-3 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
+                  aria-label="Aide"
+                >
+                  <Info className="h-2.5 w-2.5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-left text-[11px] leading-snug normal-case tracking-normal">
+                {tip}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        ) : null}
       </div>
       <div
         className={cn(
@@ -166,6 +186,7 @@ export function MoneyTile({
   tone,
   big,
   compact = false,
+  tip,
 }: {
   label: string;
   value: number | null | undefined;
@@ -174,6 +195,7 @@ export function MoneyTile({
   big?: boolean;
   /** Si true, n'affiche pas le préfixe "CHF" devant le montant */
   compact?: boolean;
+  tip?: ReactNode;
 }) {
   const formatted = compact
     ? new Intl.NumberFormat("fr-CH", { maximumFractionDigits: 0 }).format(value ?? 0)
@@ -185,6 +207,7 @@ export function MoneyTile({
       hint={hint}
       tone={tone}
       big={big}
+      tip={tip}
     />
   );
 }
@@ -194,6 +217,7 @@ export function PctTile({
   value,
   hint,
   tone,
+  tip,
 }: {
   label: string;
   value: number | null | undefined;
