@@ -214,6 +214,7 @@ export type Database = {
           civil_status: Database["public"]["Enums"]["civil_status"]
           commune: string | null
           company_id: string | null
+          company_role: string | null
           confession: Database["public"]["Enums"]["confession"]
           country_of_residence: string | null
           created_at: string
@@ -250,6 +251,7 @@ export type Database = {
           civil_status?: Database["public"]["Enums"]["civil_status"]
           commune?: string | null
           company_id?: string | null
+          company_role?: string | null
           confession?: Database["public"]["Enums"]["confession"]
           country_of_residence?: string | null
           created_at?: string
@@ -286,6 +288,7 @@ export type Database = {
           civil_status?: Database["public"]["Enums"]["civil_status"]
           commune?: string | null
           company_id?: string | null
+          company_role?: string | null
           confession?: Database["public"]["Enums"]["confession"]
           country_of_residence?: string | null
           created_at?: string
@@ -743,6 +746,7 @@ export type Database = {
         | "retired"
         | "unemployed"
         | "student"
+        | "director"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -927,6 +931,7 @@ export const Constants = {
         "retired",
         "unemployed",
         "student",
+        "director",
       ],
     },
   },
