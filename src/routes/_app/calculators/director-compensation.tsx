@@ -382,6 +382,41 @@ function DirectorCompensationCalc() {
             >
               <CustomStrategySliders value={custom} onChange={setCustom} />
             </CalcCard>
+
+            <CalcCard
+              title="Situation actuelle du client"
+              description="Renseignez la rémunération réelle pour comparer avec les stratégies optimisées."
+            >
+              <Accordion type="single" collapsible defaultValue={hasCurrent ? "cur" : undefined}>
+                <AccordionItem value="cur" className="border-b-0">
+                  <AccordionTrigger className="py-2 text-sm">
+                    {hasCurrent ? "Modifier la situation actuelle" : "Saisir la situation actuelle"}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Switch checked={hasCurrent} onCheckedChange={setHasCurrent} />
+                      <span>Inclure la situation actuelle dans le comparatif</span>
+                    </div>
+                    <NumField
+                      label="Salaire brut actuel (CHF/an)"
+                      value={current.grossSalary}
+                      onChange={(v) => setCurrent((p) => ({ ...p, grossSalary: v }))}
+                    />
+                    <NumField
+                      label="Dividendes actuels (CHF/an)"
+                      value={current.dividends}
+                      onChange={(v) => setCurrent((p) => ({ ...p, dividends: v }))}
+                    />
+                    <NumField
+                      label="Réserves laissées en société (CHF/an, optionnel)"
+                      value={current.retained ?? 0}
+                      onChange={(v) => setCurrent((p) => ({ ...p, retained: v || undefined }))}
+                      hint="Laissez vide pour calcul automatique."
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CalcCard>
           </div>
 
           {/* Results */}
@@ -390,20 +425,26 @@ function DirectorCompensationCalc() {
               best={recommendation.best}
               reason={recommendation.reason}
               totalProfit={inputs.totalProfit}
+              current={currentResult}
+              clientName={linkedClient ? `${linkedClient.first_name} ${linkedClient.last_name}` : null}
             />
 
             <CalcCard
               title="Comparatif des stratégies"
               description="Mode réaliste : les dividendes sont cappés au bénéfice net après IS si nécessaire."
             >
-              <ComparisonTable results={allResults} bestLabel={recommendation.best.strategy.label} />
+              <ComparisonTable
+                results={tableResults}
+                bestLabel={recommendation.best.strategy.label}
+                currentLabel={currentResult?.strategy.label}
+              />
             </CalcCard>
 
             <CalcCard
               title="Visualisation : répartition du bénéfice"
               description="Pour chaque stratégie : impôts & cotisations, net dirigeant, réserves société."
             >
-              <ComparisonChart results={allResults} />
+              <ComparisonChart results={tableResults} />
             </CalcCard>
           </div>
         </div>
