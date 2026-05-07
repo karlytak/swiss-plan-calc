@@ -115,6 +115,8 @@ function TOUCalc() {
               label="Revenu mondial annuel (CHF)"
               value={form.worldwideIncome}
               onChange={(v) => set("worldwideIncome", v)}
+              wikiId="frontaliers"
+              wikiTip="Total mondial : salaires Suisse + revenus étrangers (locatifs, indépendant, etc.). Sert au seuil 90 %."
             />
             <Field label="Résidence UE / AELE">
               <div className="flex h-10 items-center gap-3 rounded-md border border-input bg-muted/40 px-3">
