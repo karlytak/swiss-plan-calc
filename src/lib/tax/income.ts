@@ -163,12 +163,13 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
 
   const grossIncome = grossSalary + spouseSalary + bonus + otherIncome + rental + imputed;
 
-  // Cotisations sociales obligatoires (déductibles à 100%)
-  const social = estimateSocialContributions(grossSalary);
+  // Cotisations sociales obligatoires part salarié (déductibles à 100%)
+  const social = estimateSocialContributions(grossSalary, input.age);
   const spouseSocial = isMarried
-    ? estimateSocialContributions(spouseSalary)
-    : { avs: 0, lpp: 0 };
+    ? estimateSocialContributions(spouseSalary, input.spouseAge)
+    : { avs: 0, ac: 0, lpp: 0 };
   const avsTotal = social.avs + spouseSocial.avs;
+  const acTotal = social.ac + spouseSocial.ac;
   const lppTotal = social.lpp + spouseSocial.lpp;
 
   // 3a (plafonné)
@@ -180,10 +181,14 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
   // Rachat LPP (entièrement déductible)
   const lppBuyback = input.lppBuyback ?? 0;
 
-  // Frais professionnels
+  // Frais professionnels : 3% du salaire NET (brut - AVS - AC - LPP), bornes 2'000 / 4'000
   let professional = input.professionalExpenses ?? 0;
   if (!input.professionalExpenses) {
-    const forfait = grossSalary * PROFESSIONAL_FORFAIT_RATE;
+    const netSalary = Math.max(
+      0,
+      grossSalary + spouseSalary - avsTotal - acTotal - lppTotal,
+    );
+    const forfait = netSalary * PROFESSIONAL_FORFAIT_RATE;
     professional = Math.max(
       PROFESSIONAL_FORFAIT_MIN,
       Math.min(PROFESSIONAL_FORFAIT_MAX, forfait),
@@ -216,6 +221,7 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
 
   const totalDeductions =
     avsTotal +
+    acTotal +
     lppTotal +
     pillar3a +
     lppBuyback +
