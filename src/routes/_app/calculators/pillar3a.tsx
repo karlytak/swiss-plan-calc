@@ -194,8 +194,8 @@ function Pillar3aCalc() {
         <div className="space-y-4 md:col-span-2">
           <CalcCard title="Économie fiscale immédiate">
             <Row>
-              <MoneyTile label="Économie d'impôt" value={savings.taxSavings} tone="success" big />
-              <MoneyTile label="Coût net" value={savings.effectiveCost} tone="primary" />
+              <MoneyTile label="Économie d'impôt" value={savings.taxSavings} tone="success" big tip="Impôt fédéral + cantonal + communal économisé grâce à la déduction." />
+              <MoneyTile label="Coût net" value={savings.effectiveCost} tone="primary" tip="Cotisation versée moins l'économie d'impôt. Effort réel d'épargne." />
             </Row>
             <p className="mt-2 text-xs text-muted-foreground">
               Taux marginal estimé : <strong>{savings.marginalRate.toFixed(1)} %</strong>
@@ -212,9 +212,9 @@ function Pillar3aCalc() {
             <NumField label="Rendement net (%/an)" value={form.expectedReturn} onChange={(v) => set("expectedReturn", v)} step={0.1} />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <MoneyTile label="Capital final" value={projection.finalBalance} tone="primary" big />
-            <MoneyTile label="Cotisations cumulées" value={projection.totalContributions} />
-            <MoneyTile label="Intérêts cumulés" value={projection.totalReturns} tone="success" />
+            <MoneyTile label="Capital final" value={projection.finalBalance} tone="primary" big tip="Solde estimé à la date du retrait, intérêts composés inclus." />
+            <MoneyTile label="Cotisations cumulées" value={projection.totalContributions} tip="Somme totale des versements effectués sur la période." />
+            <MoneyTile label="Intérêts cumulés" value={projection.totalReturns} tone="success" tip="Performance générée par la capitalisation composée." />
           </div>
         </CalcCard>
         <CalcCard title="Retrait étalé sur plusieurs comptes" description="3 à 5 comptes 3a permettent d'éclater l'imposition.">
@@ -223,9 +223,9 @@ function Pillar3aCalc() {
             <NumField label="Nombre de comptes" value={form.withdrawalAccounts} onChange={(v) => set("withdrawalAccounts", v)} />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
-            <MoneyTile label="Impôt si retrait unique" value={stag.totalTaxSingle} tone="warning" />
-            <MoneyTile label="Impôt si fractionné" value={stag.totalTaxSeparated} tone="primary" />
-            <MoneyTile label="Économie" value={stag.savings} tone="success" big />
+            <MoneyTile label="Impôt si retrait unique" value={stag.totalTaxSingle} tone="warning" tip="Tout le capital retiré la même année : barème progressif appliqué d'un coup." />
+            <MoneyTile label="Impôt si fractionné" value={stag.totalTaxSeparated} tone="primary" tip="Capital divisé en N retraits sur années différentes : chaque tranche imposée séparément à taux plus bas." />
+            <MoneyTile label="Économie" value={stag.savings} tone="success" big tip="Différence entre les deux scénarios. Gain fiscal de la stratégie." />
             <MoneyTile label="Par compte" value={stag.perAccount} tip="Montant moyen par compte 3a." />
           </div>
         </CalcCard>

@@ -200,7 +200,7 @@ function LppCalc() {
               />
             </Row>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <MoneyTile label="Rente mensuelle" value={projection.monthlyPension} tone="default" />
+              <MoneyTile label="Rente mensuelle" value={projection.monthlyPension} tone="default" tip="Rente mensuelle estimée à l'âge de référence." />
               <MoneyTile
                 label="Capital sans rendement (référence)"
                 value={projection.projectedBalanceNoYield}
@@ -209,8 +209,8 @@ function LppCalc() {
               />
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
-              <MoneyTile label="Frais cumulés" value={projection.totalFees} tone="warning" />
-              <MoneyTile label="Rachats injectés" value={projection.totalBuybacks} tone="default" />
+              <MoneyTile label="Frais cumulés" value={projection.totalFees} tone="warning" tip="Total des frais TER + administration prélevés sur la durée." />
+              <MoneyTile label="Rachats injectés" value={projection.totalBuybacks} tone="default" tip="Total des rachats LPP versés sur la période." />
             </div>
           </CalcCard>
         </div>
@@ -278,8 +278,8 @@ function LppCalc() {
         <div className="space-y-4 md:col-span-2">
           <CalcCard title="Économie fiscale">
             <Row>
-              <MoneyTile label="Économie totale" value={buybackPlan.totalTaxSavings} tone="success" big />
-              <MoneyTile label="Versement / an" value={buybackPlan.yearlyAmount} />
+              <MoneyTile label="Économie totale" value={buybackPlan.totalTaxSavings} tone="success" big tip="Somme des économies fiscales sur toute la durée du plan." />
+              <MoneyTile label="Versement / an" value={buybackPlan.yearlyAmount} tip="Versement annuel moyen pour atteindre l'objectif sur la durée choisie." />
             </Row>
             <p className="mt-2 text-xs text-muted-foreground">
               Retour fiscal moyen : <strong>{buybackPlan.averageReturn}%</strong> du capital racheté.

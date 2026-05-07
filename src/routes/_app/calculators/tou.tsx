@@ -202,7 +202,7 @@ function TOUCalc() {
             />
           </div>
           <div className="mt-3">
-            <PctTile label="Taux marginal" value={comparison.marginalRate} tone="primary" />
+            <PctTile label="Taux marginal" value={comparison.marginalRate} tone="primary" tip="Taux d'impôt sur le prochain franc gagné. Sert pour optimiser une déduction." />
           </div>
         </CalcCard>
 

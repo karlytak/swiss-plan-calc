@@ -131,11 +131,11 @@ function RetirementCalc() {
         <div className="space-y-4 md:col-span-2">
           <CalcCard title="Impôt unique sur capital (1/5 du barème)">
             <Row>
-              <MoneyTile label="IFD" value={lumpTax.ifd} />
-              <MoneyTile label="Cantonal" value={lumpTax.cantonal} />
+              <MoneyTile label="IFD" value={lumpTax.ifd} tip="Impôt fédéral direct, barème progressif fédéral identique dans toute la Suisse." />
+              <MoneyTile label="Cantonal" value={lumpTax.cantonal} tip="Part cantonale de l'impôt sur le revenu (barème du canton)." />
             </Row>
             <div className="mt-3">
-              <MoneyTile label="Total impôt capital" value={lumpTax.total} tone="warning" big />
+              <MoneyTile label="Total impôt capital" value={lumpTax.total} tone="warning" big tip="Total de l'impôt unique sur le retrait du capital de prévoyance." />
             </div>
           </CalcCard>
         </div>
@@ -144,14 +144,14 @@ function RetirementCalc() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <CalcCard title="Scénario rente">
           <Row>
-            <MoneyTile label="Total brut versé" value={compare.totalRente} />
-            <MoneyTile label="Net après impôts" value={compare.netAnnuity} tone="primary" big />
+            <MoneyTile label="Total brut versé" value={compare.totalRente} tip="Somme totale brute (salaire + dividendes) sortie de la société." />
+            <MoneyTile label="Net après impôts" value={compare.netAnnuity} tone="primary" big tip="Montant qui reste après application des impôts." />
           </Row>
         </CalcCard>
         <CalcCard title="Scénario capital">
           <Row>
-            <MoneyTile label="Capital après impôt" value={form.capital - lumpTax.total} />
-            <MoneyTile label="Net projeté" value={compare.netLumpSum} tone="primary" big />
+            <MoneyTile label="Capital après impôt" value={form.capital - lumpTax.total} tip="Capital net qui te reste après impôt unique sur le retrait." />
+            <MoneyTile label="Net projeté" value={compare.netLumpSum} tone="primary" big tip="Capital net projeté à l'échéance, frais et impôts déduits." />
           </Row>
         </CalcCard>
       </div>

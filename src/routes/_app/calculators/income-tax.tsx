@@ -199,16 +199,16 @@ function IncomeTaxCalculator() {
       <div className="space-y-4 md:col-span-2">
         <CalcCard title="Résultat fiscal" description="Estimation barèmes 2026.">
           <Row>
-            <MoneyTile label="Impôt total" value={result.totalTax} tone="primary" big />
-            <PctTile label="Taux effectif" value={result.effectiveRate} tone="primary" />
+            <MoneyTile label="Impôt total" value={result.totalTax} tone="primary" big tip="Somme IFD + cantonal + communal + paroissial sur la base imposable." />
+            <PctTile label="Taux effectif" value={result.effectiveRate} tone="primary" tip="Impôt total / revenu imposable. Taux moyen réellement payé." />
           </Row>
           <div className="mt-3 grid grid-cols-2 gap-3">
-            <MoneyTile label="IFD" value={result.ifd} />
-            <MoneyTile label="Cantonal" value={result.cantonal} />
-            <MoneyTile label="Communal" value={result.communal} />
-            <MoneyTile label="Paroissial" value={result.church} />
-            <MoneyTile label="Fortune" value={result.wealthTax} />
-            <PctTile label="Taux marginal" value={result.marginalRate} tone="warning" />
+            <MoneyTile label="IFD" value={result.ifd} tip="Impôt fédéral direct, barème progressif fédéral identique dans toute la Suisse." />
+            <MoneyTile label="Cantonal" value={result.cantonal} tip="Part cantonale de l'impôt sur le revenu (barème du canton)." />
+            <MoneyTile label="Communal" value={result.communal} tip="Part communale de l'impôt (multiplicateur de la commune appliqué à l'impôt cantonal)." />
+            <MoneyTile label="Paroissial" value={result.church} tip="Impôt ecclésiastique cantonal (selon confession et canton)." />
+            <MoneyTile label="Fortune" value={result.wealthTax} tip="Impôt cantonal et communal sur la fortune nette imposable." />
+            <PctTile label="Taux marginal" value={result.marginalRate} tone="warning" tip="Taux d'impôt sur le prochain franc gagné. Sert pour optimiser une déduction." />
           </div>
         </CalcCard>
 

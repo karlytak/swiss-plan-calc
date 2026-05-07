@@ -692,10 +692,10 @@ function RecommendationCard({
         </div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <MoneyTile label="Net dirigeant" value={best.directorNet} tone="success" big />
-        <MoneyTile label="Salaire brut" value={best.company.grossSalary} tone="default" />
-        <MoneyTile label="Dividendes" value={best.company.dividendsPaid} tone="primary" />
-        <MoneyTile label="Réserves" value={best.retainedInCompany} tone="default" />
+        <MoneyTile label="Net dirigeant" value={best.directorNet} tone="success" big tip="Cash net qui reste au dirigeant après cotisations sociales et impôt sur le revenu." />
+        <MoneyTile label="Salaire brut" value={best.company.grossSalary} tone="default" tip="Salaire brut versé par la société (avant cotisations sociales et impôts)." />
+        <MoneyTile label="Dividendes" value={best.company.dividendsPaid} tone="primary" tip="Montant brut versé en dividendes au dirigeant (avant imposition partielle)." />
+        <MoneyTile label="Réserves" value={best.retainedInCompany} tone="default" tip="Bénéfice net après IS conservé dans la société (renforce les fonds propres, pas imposé chez le dirigeant)." />
       </div>
       {lowSalaryWarning && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-xs">

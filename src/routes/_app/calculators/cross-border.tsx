@@ -152,8 +152,8 @@ function CrossBorderCalc() {
         </div>
         <CalcCard title={result.regimeLabel}>
           <Row>
-            <MoneyTile label="Net annuel" value={result.netAnnual} tone="success" big />
-            <PctTile label="Charge totale" value={result.totalRate} tone="primary" />
+            <MoneyTile label="Net annuel" value={result.netAnnual} tone="success" big tip="Revenu net annuel après tous prélèvements (cotisations + impôts)." />
+            <PctTile label="Charge totale" value={result.totalRate} tone="primary" tip="Charge fiscale totale en pourcentage du revenu brut." />
           </Row>
           <div className="mt-3 grid grid-cols-2 gap-3">
             <MoneyTile label="Retenue Suisse" value={result.swissTax} hint={`${result.swissRate}%`} />
