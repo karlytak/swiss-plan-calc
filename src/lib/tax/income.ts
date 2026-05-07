@@ -118,9 +118,33 @@ export const MEALS_FORFAIT_ANNUAL = 3_200;
 export const PROFESSIONAL_FORFAIT_RATE = 0.03; // 3% du salaire net
 export const PROFESSIONAL_FORFAIT_MIN = 2_000;
 export const PROFESSIONAL_FORFAIT_MAX = 4_000;
+/** Forfait fédéral assurance maladie (IFD) */
 export const HEALTH_INSURANCE_MAX_SINGLE = 1_800;
 export const HEALTH_INSURANCE_MAX_MARRIED = 3_600;
 export const HEALTH_INSURANCE_PER_CHILD = 700;
+
+/**
+ * Forfaits cantonaux 2026 pour primes d'assurance-maladie + LCA (déduction
+ * cantonale). Valeurs indicatives publiées par les administrations fiscales
+ * cantonales — utilisées si l'utilisateur ne saisit pas ses primes réelles.
+ * Format : { single, married, perChild }.
+ */
+export const HEALTH_INSURANCE_CANTONAL_2026: Record<
+  string,
+  { single: number; married: number; perChild: number }
+> = {
+  GE: { single: 2_400, married: 4_800, perChild: 1_200 },
+  VD: { single: 2_200, married: 4_400, perChild: 1_300 },
+  VS: { single: 2_200, married: 4_400, perChild: 1_100 },
+  FR: { single: 2_000, married: 4_000, perChild: 1_000 },
+  NE: { single: 2_300, married: 4_600, perChild: 1_200 },
+  JU: { single: 2_100, married: 4_200, perChild: 1_100 },
+  BE: { single: 2_600, married: 5_200, perChild: 1_400 },
+  ZH: { single: 2_600, married: 5_200, perChild: 1_300 },
+  BS: { single: 2_400, married: 4_800, perChild: 1_200 },
+  BL: { single: 2_400, married: 4_800, perChild: 1_200 },
+  TI: { single: 2_300, married: 4_600, perChild: 1_200 },
+};
 export const CHILDCARE_MAX_FEDERAL_2026 = 25_500;
 // Cotisations sociales 2026 (parts salarié)
 export const AVS_AI_APG_RATE = 0.053; // AVS 5.3% (AI/APG inclus dans le taux global salarié)
