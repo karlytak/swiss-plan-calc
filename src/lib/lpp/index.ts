@@ -115,7 +115,7 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
 
   for (let i = 0; i < yearsToRetire; i++) {
     const age = input.currentAge + i;
-    const coordinated = Math.max(0, Math.min(salary, insuredCap));
+    const coordinated = Math.max(0, Math.min(salary, insuredCap) - LPP_COORDINATION_DEDUCTION_2026);
     const creditRate = lppCreditRate(age) + extraCredit;
     const credit = coordinated * creditRate;
     const grossInterest = balance * grossReturn;
