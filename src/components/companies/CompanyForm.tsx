@@ -356,13 +356,29 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               control={form.control}
               name="retained_earnings"
               render={({ field }) => (
-                <FormItem className="sm:col-span-2">
+                <FormItem>
                   <FormLabel>Réserves / bénéfices reportés</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="CHF" />
                   </FormControl>
                   <FormDescription>
                     Cumul disponible au bilan, utile pour les comparatifs dividende / salaire.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="headcount_fte"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de collaborateurs (ETP)</FormLabel>
+                  <FormControl>
+                    <NumField value={field.value ?? ""} onChange={field.onChange} suffix="ETP" />
+                  </FormControl>
+                  <FormDescription>
+                    Effectif équivalent temps plein. Indicatif, utilisé pour contextualiser les calculs.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
