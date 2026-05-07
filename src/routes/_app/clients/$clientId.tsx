@@ -238,36 +238,22 @@ function ClientDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => archive.mutate(!client.archived)}
+            onClick={() => setArchiveOpen(true)}
           >
             <Archive className="h-4 w-4" />
             {client.archived ? "Restaurer" : "Archiver"}
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-destructive">
-                <Trash2 className="h-4 w-4" /> Supprimer
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Supprimer ce dossier ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est définitive. Toutes les données associées seront
-                  supprimées.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => remove.mutate()}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Supprimer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive"
+            onClick={() => {
+              if (clientAgeDays > 30) setOldClientOpen(true);
+              else setDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4" /> Supprimer
+          </Button>
         </div>
       </div>
 
