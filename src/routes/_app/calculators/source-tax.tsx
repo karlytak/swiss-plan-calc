@@ -25,6 +25,7 @@ import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -96,7 +97,10 @@ function SourceTaxCalc() {
               </Select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">Barème</Label>
+              <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                <span>Barème</span>
+                <WikiTip articleId="frontaliers" tip="A = célibataire, B = marié monoactif, C = marié biactif, H = famille monoparentale." />
+              </Label>
               <Select value={form.scale} onValueChange={(v) => set("scale", v as SourceScale)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -135,7 +139,8 @@ function SourceTaxCalc() {
                   checked={form.isCrossBorderFR}
                   onCheckedChange={(v) => set("isCrossBorderFR", Boolean(v))}
                 />
-                Frontalier France (accord 4.5 %)
+                <span>Frontalier France (accord 4.5 %)</span>
+                <WikiTip articleId="frontaliers" tip="Frontalier VD/NE/JU/BS/BL/BE/SO/VS : retenue suisse limitée à 4.5 %, imposition principale en France." />
               </label>
             )}
           </div>

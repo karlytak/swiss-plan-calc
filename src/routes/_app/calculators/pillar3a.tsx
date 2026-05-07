@@ -29,6 +29,7 @@ import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -201,7 +202,7 @@ function Pillar3aCalc() {
                 </Select>
               </div>
               <NumField label="Salaire brut annuel" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
-              <NumField label={`Cotisation versée (max ${max.toLocaleString("fr-CH")})`} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} />
+              <NumField label={`Cotisation versée (max ${max.toLocaleString("fr-CH")})`} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} wikiId="p3a-base" wikiTip="Plafond 2026 : 7 258 CHF si affilié LPP, sinon 20 % du revenu (max 36 288 CHF)." />
             </div>
           </CalcCard>
         </div>
@@ -233,8 +234,8 @@ function Pillar3aCalc() {
         </CalcCard>
         <CalcCard title="Retrait étalé sur plusieurs comptes" description="3 à 5 comptes 3a permettent d'éclater l'imposition.">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-            <NumField label="Capital total à retirer" value={form.withdrawalCapital} onChange={(v) => set("withdrawalCapital", v)} />
-            <NumField label="Nombre de comptes" value={form.withdrawalAccounts} onChange={(v) => set("withdrawalAccounts", v)} />
+            <NumField label="Capital total à retirer" value={form.withdrawalCapital} onChange={(v) => set("withdrawalCapital", v)} wikiId="p3a-base" wikiTip="Capital cumulé sur tous les comptes 3a au moment du retrait." />
+            <NumField label="Nombre de comptes" value={form.withdrawalAccounts} onChange={(v) => set("withdrawalAccounts", v)} wikiId="p3a-base" wikiTip="Stratégie : 3 à 5 comptes 3a retirés sur des années différentes pour fractionner l'impôt." />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3">
             <MoneyTile label="Impôt si retrait unique" value={stag.totalTaxSingle} tone="warning" tip="Tout le capital retiré la même année : barème progressif appliqué d'un coup." />
@@ -299,16 +300,23 @@ function NumField({
   onChange,
   step: _step = 1,
   suffix,
+  wikiId,
+  wikiTip,
 }: {
   label: string;
   value: number;
   onChange: (v: number) => void;
   step?: number;
   suffix?: string;
+  wikiId?: string;
+  wikiTip?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
-      <Label className="text-xs font-medium text-muted-foreground">{label}</Label>
+      <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+        <span>{label}</span>
+        {wikiId ? <WikiTip articleId={wikiId} tip={wikiTip ?? label} /> : null}
+      </Label>
       <BaseNumField
         value={String(value)}
         onChange={(v) => onChange(Number(v) || 0)}

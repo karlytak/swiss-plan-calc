@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { z } from "zod";
 import {
   BookOpen,
   Search,
@@ -18,7 +20,12 @@ import {
 } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 
+const searchSchema = z.object({
+  article: fallback(z.string().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/wiki")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Wiki & formation · SwissBroker Pro" }] }),
   component: WikiPage,
 });
@@ -283,8 +290,30 @@ const ARTICLES: Article[] = [
 const CATEGORIES = Array.from(new Set(ARTICLES.map((a) => a.category)));
 
 function WikiPage() {
+  const { article: targetArticle } = Route.useSearch();
   const [q, setQ] = useState("");
   const [cat, setCat] = useState<string | null>(null);
+  const [openItems, setOpenItems] = useState<string[]>([]);
+
+  // Quand on arrive avec ?article=xxx, ouvrir + scroller automatiquement
+  useEffect(() => {
+    if (!targetArticle) return;
+    const found = ARTICLES.find((a) => a.id === targetArticle);
+    if (!found) return;
+    setCat(null);
+    setQ("");
+    setOpenItems((prev) => (prev.includes(targetArticle) ? prev : [...prev, targetArticle]));
+    // Scroll après render
+    const t = setTimeout(() => {
+      const el = document.getElementById(`wiki-${targetArticle}`);
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+        el.classList.add("ring-2", "ring-primary", "rounded-xl");
+        setTimeout(() => el.classList.remove("ring-2", "ring-primary", "rounded-xl"), 2200);
+      }
+    }, 120);
+    return () => clearTimeout(t);
+  }, [targetArticle]);
 
   const filtered = useMemo(() => {
     const t = q.trim().toLowerCase();
@@ -358,9 +387,19 @@ function WikiPage() {
                 {category}
               </h2>
               <div className="rounded-2xl border border-border bg-card shadow-card">
-                <Accordion type="multiple" className="w-full">
+                <Accordion
+                  type="multiple"
+                  className="w-full"
+                  value={openItems}
+                  onValueChange={setOpenItems}
+                >
                   {items.map((a) => (
-                    <AccordionItem key={a.id} value={a.id} className="border-b last:border-0 px-4">
+                    <AccordionItem
+                      key={a.id}
+                      value={a.id}
+                      id={`wiki-${a.id}`}
+                      className="border-b last:border-0 px-4 transition-shadow"
+                    >
                       <AccordionTrigger className="text-sm font-medium hover:no-underline">
                         <div className="flex items-center gap-2 text-left">
                           <ChevronRight className="h-3.5 w-3.5 text-primary" />
