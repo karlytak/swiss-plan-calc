@@ -238,8 +238,8 @@ function VestedBenefitsCalc() {
                 </div>
                 <p className="mt-1 text-xs text-muted-foreground">{p.strategy.description}</p>
                 <div className="mt-4 grid grid-cols-2 gap-3">
-                  <MoneyTile label="Capital final" value={p.finalBalance} tone="primary" big compact />
-                  <MoneyTile label="Gains nets" value={p.totalGains} tone="success" big compact />
+                  <MoneyTile label="Capital final" value={p.finalBalance} tone="primary" big compact tip="Solde estimé à la date du retrait, intérêts composés inclus." />
+                  <MoneyTile label="Gains nets" value={p.totalGains} tone="success" big compact tip="Gain final net après tous frais et impôts." />
                 </div>
                 <dl className="mt-4 space-y-1.5 text-xs">
                   <Line2 label="Rendement net annualisé" value={`${p.netReturn} %`} />

@@ -140,11 +140,11 @@ function SourceTaxCalc() {
       <div className="space-y-4 md:col-span-2">
         <CalcCard title="Retenue à la source">
           <Row>
-            <PctTile label="Taux appliqué" value={result.rate} tone="primary" />
-            <MoneyTile label="Impôt mensuel" value={result.monthlyTax} tone="primary" big />
+            <PctTile label="Taux appliqué" value={result.rate} tone="primary" tip="Taux d'imposition à la source effectivement appliqué (barème + canton)." />
+            <MoneyTile label="Impôt mensuel" value={result.monthlyTax} tone="primary" big tip="Impôt à la source prélevé chaque mois sur le salaire brut." />
           </Row>
           <div className="mt-3">
-            <MoneyTile label="Impôt annuel (×12)" value={result.annualTax} tone="default" />
+            <MoneyTile label="Impôt annuel (×12)" value={result.annualTax} tone="default" tip="Impôt annualisé = impôt mensuel × 12." />
           </div>
           {result.crossBorderNote && (
             <p className="mt-3 text-xs text-muted-foreground">{result.crossBorderNote}</p>
