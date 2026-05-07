@@ -172,12 +172,12 @@ function LppCalc() {
             <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumField label="Âge actuel" value={form.currentAge} onChange={(v) => set("currentAge", v)} />
               <NumField label="Âge retraite" value={form.retirementAge} onChange={(v) => set("retirementAge", v)} />
-              <NumField label="Avoir LPP actuel (CHF)" value={form.currentBalance} onChange={(v) => set("currentBalance", v)} />
-              <NumField label="Rendement brut (%/an)" value={form.expectedReturnRate} onChange={(v) => set("expectedReturnRate", v)} step={0.1} />
+              <NumField label="Avoir LPP actuel (CHF)" value={form.currentBalance} onChange={(v) => set("currentBalance", v)} wikiId="lpp-coordination" wikiTip="Capital LPP cumulé visible sur votre certificat de prévoyance." />
+              <NumField label="Rendement brut (%/an)" value={form.expectedReturnRate} onChange={(v) => set("expectedReturnRate", v)} step={0.1} wikiId="lpp-credits" wikiTip="Taux d'intérêt servi par la caisse de pension (min. légal 1.25 % en 2026)." />
               <NumField label="Frais TER + admin (%/an)" value={form.feeRate} onChange={(v) => set("feeRate", v)} step={0.05} />
               <NumField label="Croissance salariale (%/an)" value={form.salaryGrowthRate} onChange={(v) => set("salaryGrowthRate", v)} step={0.1} />
-              <NumField label="Taux conversion à la retraite (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} />
-              <NumField label="Bonifications surobligatoires (%)" value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} />
+              <NumField label="Taux conversion à la retraite (%)" value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip="Taux qui transforme votre capital LPP en rente annuelle viagère." />
+              <NumField label="Bonifications surobligatoires (%)" value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} wikiId="lpp-credits" wikiTip="Bonifications complémentaires offertes par votre caisse au-delà du minimum légal." />
             </div>
             <p className="mt-3 text-xs text-muted-foreground">
               Rendement net effectif appliqué : <strong>{projection.netReturnRate.toFixed(2)}%</strong> par an.
