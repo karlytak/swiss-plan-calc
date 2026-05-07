@@ -10,6 +10,7 @@ import {
   Scale,
   ShieldCheck,
   HeartHandshake,
+  Building2,
   ArrowRight,
 } from "lucide-react";
 import { CalcCard } from "@/components/calculators/CalcUI";
@@ -79,6 +80,12 @@ const ITEMS = [
     icon: TrendingUp,
     title: "Rente vs capital",
     desc: "Compare rente LPP à vie ou retrait en capital + placement.",
+  },
+  {
+    to: "/calculators/director-compensation" as const,
+    icon: Building2,
+    title: "Salaire / dividende dirigeant",
+    desc: "Comparateur de stratégies de rémunération pour dirigeants Sàrl/SA : salaire, dividendes, réserves.",
   },
 ];
 
