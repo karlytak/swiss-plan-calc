@@ -10,6 +10,7 @@ import {
   Scale,
   ShieldCheck,
   HeartHandshake,
+  Building2,
   ArrowRight,
 } from "lucide-react";
 import { CalcCard } from "@/components/calculators/CalcUI";

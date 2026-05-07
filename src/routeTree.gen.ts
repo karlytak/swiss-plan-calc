@@ -32,6 +32,7 @@ import { Route as AppCalculatorsRetirementRouteImport } from './routes/_app/calc
 import { Route as AppCalculatorsPillar3aRouteImport } from './routes/_app/calculators/pillar3a'
 import { Route as AppCalculatorsLppRouteImport } from './routes/_app/calculators/lpp'
 import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calculators/income-tax'
+import { Route as AppCalculatorsDirectorCompensationRouteImport } from './routes/_app/calculators/director-compensation'
 import { Route as AppCalculatorsCrossBorderRouteImport } from './routes/_app/calculators/cross-border'
 import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
 import { Route as AppCalculatorsAvsAiRouteImport } from './routes/_app/calculators/avs-ai'
@@ -155,6 +156,12 @@ const AppCalculatorsIncomeTaxRoute = AppCalculatorsIncomeTaxRouteImport.update({
   path: '/income-tax',
   getParentRoute: () => AppCalculatorsRoute,
 } as any)
+const AppCalculatorsDirectorCompensationRoute =
+  AppCalculatorsDirectorCompensationRouteImport.update({
+    id: '/director-compensation',
+    path: '/director-compensation',
+    getParentRoute: () => AppCalculatorsRoute,
+  } as any)
 const AppCalculatorsCrossBorderRoute =
   AppCalculatorsCrossBorderRouteImport.update({
     id: '/cross-border',
@@ -202,6 +209,7 @@ export interface FileRoutesByFullPath {
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
+  '/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
   '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
+  '/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
   '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
@@ -262,6 +271,7 @@ export interface FileRoutesById {
   '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
   '/_app/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
+  '/_app/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/_app/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
   '/_app/calculators/lpp': typeof AppCalculatorsLppRoute
   '/_app/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
@@ -294,6 +304,7 @@ export interface FileRouteTypes {
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
     | '/calculators/cross-border'
+    | '/calculators/director-compensation'
     | '/calculators/income-tax'
     | '/calculators/lpp'
     | '/calculators/pillar3a'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
     | '/calculators/cross-border'
+    | '/calculators/director-compensation'
     | '/calculators/income-tax'
     | '/calculators/lpp'
     | '/calculators/pillar3a'
@@ -353,6 +365,7 @@ export interface FileRouteTypes {
     | '/_app/calculators/avs-ai'
     | '/_app/calculators/canton-compare'
     | '/_app/calculators/cross-border'
+    | '/_app/calculators/director-compensation'
     | '/_app/calculators/income-tax'
     | '/_app/calculators/lpp'
     | '/_app/calculators/pillar3a'
@@ -542,6 +555,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsIncomeTaxRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/_app/calculators/director-compensation': {
+      id: '/_app/calculators/director-compensation'
+      path: '/director-compensation'
+      fullPath: '/calculators/director-compensation'
+      preLoaderRoute: typeof AppCalculatorsDirectorCompensationRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
     '/_app/calculators/cross-border': {
       id: '/_app/calculators/cross-border'
       path: '/cross-border'
@@ -591,6 +611,7 @@ interface AppCalculatorsRouteChildren {
   AppCalculatorsAvsAiRoute: typeof AppCalculatorsAvsAiRoute
   AppCalculatorsCantonCompareRoute: typeof AppCalculatorsCantonCompareRoute
   AppCalculatorsCrossBorderRoute: typeof AppCalculatorsCrossBorderRoute
+  AppCalculatorsDirectorCompensationRoute: typeof AppCalculatorsDirectorCompensationRoute
   AppCalculatorsIncomeTaxRoute: typeof AppCalculatorsIncomeTaxRoute
   AppCalculatorsLppRoute: typeof AppCalculatorsLppRoute
   AppCalculatorsPillar3aRoute: typeof AppCalculatorsPillar3aRoute
@@ -605,6 +626,8 @@ const AppCalculatorsRouteChildren: AppCalculatorsRouteChildren = {
   AppCalculatorsAvsAiRoute: AppCalculatorsAvsAiRoute,
   AppCalculatorsCantonCompareRoute: AppCalculatorsCantonCompareRoute,
   AppCalculatorsCrossBorderRoute: AppCalculatorsCrossBorderRoute,
+  AppCalculatorsDirectorCompensationRoute:
+    AppCalculatorsDirectorCompensationRoute,
   AppCalculatorsIncomeTaxRoute: AppCalculatorsIncomeTaxRoute,
   AppCalculatorsLppRoute: AppCalculatorsLppRoute,
   AppCalculatorsPillar3aRoute: AppCalculatorsPillar3aRoute,
@@ -674,12 +697,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
-}
