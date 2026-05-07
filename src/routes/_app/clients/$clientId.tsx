@@ -561,6 +561,76 @@ function ClientDetailPage() {
         </TabsContent>
 
       </Tabs>
+
+      <ArchiveConfirmDialog
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title={client.archived ? "Restaurer ce client ?" : "Archiver ce client ?"}
+        description={
+          client.archived
+            ? "Le client redeviendra visible dans la liste principale."
+            : "Le client n'apparaîtra plus dans la liste principale, mais reste accessible depuis le filtre « Archivés »."
+        }
+        confirmLabel={client.archived ? "Restaurer" : "Archiver"}
+        onConfirm={() => archive.mutate(!client.archived)}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        expectedText={`${client.first_name} ${client.last_name}`}
+        title="Supprimer définitivement ce client ?"
+        description={
+          <span>
+            Toutes les données du dossier seront perdues : informations personnelles,
+            calculs, scénarios, simulations.
+          </span>
+        }
+        onConfirm={() => remove.mutate()}
+      />
+
+      <AlertDialog open={oldClientOpen} onOpenChange={setOldClientOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Action sécurisée requise
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  Ce client existe depuis plus de 30 jours et peut contenir des informations
+                  importantes (calculs, scénarios, historique). Pour protéger l'intégrité du
+                  dossier, la suppression directe n'est pas disponible.
+                </p>
+                <p>Vous pouvez à la place :</p>
+                <ul className="list-inside list-disc text-sm">
+                  <li>
+                    <strong>Archiver</strong> le client : il n'apparaîtra plus dans la liste
+                    mais reste accessible si besoin.
+                  </li>
+                  <li>
+                    Le contacter et le faire passer par un effacement RGPD (à venir dans une
+                    prochaine version).
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setOldClientOpen(false);
+                setArchiveOpen(true);
+              }}
+              className="bg-amber-500 text-white hover:bg-amber-600"
+            >
+              Archiver le client
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
