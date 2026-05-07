@@ -68,9 +68,11 @@ import { getSelectableCantons, type SelectableCantonCode } from "@/lib/swiss/can
 import {
   computeAllStrategies,
   computeStrategy,
+  computeStrategyFromAbsolute,
   recommendBestStrategy,
 } from "@/lib/director-compensation";
 import type {
+  AbsoluteAllocation,
   CompensationResult,
   CompensationStrategy,
   DirectorInputs,
