@@ -262,6 +262,30 @@ function DirectorCompensationCalc() {
                   wikiId="dirigeant"
                   wikiTip="Résultat de la société AVANT toute rémunération du dirigeant. C'est le « gâteau » à répartir entre salaire, dividende et réserves."
                 />
+                <NumField
+                  label="Réserve cible à conserver en société (CHF/an)"
+                  value={inputs.reserveTarget ?? 0}
+                  onChange={(v) => setField("reserveTarget", v)}
+                  hint="Optionnel — montant prélevé en priorité sur le bénéfice avant la répartition salaire/dividende."
+                  wikiId="dirigeant"
+                  wikiTip="Si renseigné, la réserve cible est déduite du bénéfice total avant le calcul des stratégies. Le reliquat est réparti entre salaire et dividendes."
+                />
+                {(inputs.reserveTarget ?? 0) > 0 && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
+                    <div className="flex justify-between"><span>Bénéfice total</span><strong className="tabular-nums">{formatCHF(inputs.totalProfit)}</strong></div>
+                    <div className="flex justify-between text-muted-foreground"><span>− Réserve cible</span><span className="tabular-nums">{formatCHF(inputs.reserveTarget ?? 0)}</span></div>
+                    <div className="mt-1 flex justify-between border-t border-border pt-1"><span>Disponible salaire + dividendes</span><strong className="tabular-nums text-primary">{formatCHF(availableProfit)}</strong></div>
+                    {availableProfit <= 0 && (
+                      <p className="mt-2 text-warning">⚠️ Réserve cible ≥ bénéfice total : aucune répartition possible.</p>
+                    )}
+                  </div>
+                )}
+                {headcount != null && headcount > 0 && (
+                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2 text-xs text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    Société comptant <strong className="text-foreground">{headcount}</strong> collaborateur(s) (ETP).
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <SelectField
                     label="Canton siège société"
