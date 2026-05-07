@@ -129,6 +129,9 @@ function ClientDetailPage() {
   });
 
   const [noteBody, setNoteBody] = useState("");
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [oldClientOpen, setOldClientOpen] = useState(false);
   const addNote = useMutation({
     mutationFn: async () => {
       if (!user || !noteBody.trim()) return;
