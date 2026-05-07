@@ -420,7 +420,28 @@ function ClientDetailPage() {
               />
             </Card>
           </div>
-        </TabsContent>
+          {client.work_status === "director" && linkedCompany && (
+            <Card title={`Rémunération via ${linkedCompany.legal_name}`}>
+              <Row
+                label="Forme juridique"
+                value={LEGAL_FORM_LABELS[linkedCompany.legal_form]}
+              />
+              <Row label="Salaire annuel reçu" value={formatCHF(client.gross_annual_salary)} />
+              <Row label="Bonus / 13e" value={formatCHF(client.bonus)} />
+              <Row label="Autres revenus" value={formatCHF(client.other_income)} />
+              <div className="mt-3">
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    to="/companies/$companyId"
+                    params={{ companyId: linkedCompany.id }}
+                  >
+                    <Building2 className="h-3.5 w-3.5" />
+                    Voir la fiche société
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+          )}
 
         <TabsContent value="patrimoine" className="mt-4 space-y-6">
           {dashboard?.hasEnoughData && <DashboardWealthSummary dashboard={dashboard} />}
