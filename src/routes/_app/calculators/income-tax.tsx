@@ -47,6 +47,7 @@ function IncomeTaxCalculator() {
     status: "single" as IncomeTaxInput["status"],
     confession: "none" as NonNullable<IncomeTaxInput["confession"]>,
     children: 0,
+    age: 40,
     grossSalary: 100_000,
     spouseGrossSalary: 0,
     bonus: 0,
@@ -243,8 +244,9 @@ function IncomeTaxCalculator() {
         <CalcCard title="Détail revenu imposable">
           <dl className="space-y-2 text-sm">
             <Line label="Revenu brut" value={formatCHF(result.grossIncome)} />
-            <Line label="− AVS / AI / APG / AC" value={formatCHF(-result.deductions.avs)} />
-            <Line label="− LPP" value={formatCHF(-result.deductions.lpp)} />
+            <Line label="− AVS / AI / APG (5.3 %)" value={formatCHF(-result.deductions.avs)} />
+            <Line label="− Assurance chômage" value={formatCHF(-result.deductions.ac)} />
+            <Line label="− LPP part salarié" value={formatCHF(-result.deductions.lpp)} />
             <Line label="− 3a" value={formatCHF(-result.deductions.pillar3a)} />
             <Line label="− Rachat LPP" value={formatCHF(-result.deductions.lppBuyback)} />
             <Line label="− Frais professionnels" value={formatCHF(-result.deductions.professional)} />
