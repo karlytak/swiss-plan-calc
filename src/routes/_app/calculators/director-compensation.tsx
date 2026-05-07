@@ -20,9 +20,17 @@ import {
   Info,
   Sparkles,
   TrendingUp,
+  TrendingDown,
   Building2,
   User,
+  Users,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 import { supabase } from "@/integrations/supabase/client";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
