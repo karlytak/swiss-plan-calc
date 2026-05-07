@@ -275,10 +275,13 @@ function DirectorCompensationCalc() {
                     label="Âge dirigeant"
                     value={inputs.age}
                     onChange={(v) => setField("age", v)}
+                    wikiId="lpp-credits"
+                    wikiTip="Détermine la tranche de bonification LPP (7 % / 10 % / 15 % / 18 %)."
                   />
                   <div className="space-y-1.5">
-                    <Label className="text-xs font-medium text-muted-foreground">
-                      Plan LPP
+                    <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                      <span>Plan LPP</span>
+                      <WikiTip articleId="lpp-coordination" tip="Obligatoire = plafond 90 720 CHF, taux légaux. Plan cadre / 1e = surobligatoire au choix de l'employeur, jusqu'à 900 000 CHF assurés." />
                     </Label>
                     <Select
                       value={inputs.lppPlan}
@@ -296,8 +299,9 @@ function DirectorCompensationCalc() {
                 </div>
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
                   <div className="space-y-0.5">
-                    <Label className="text-sm font-medium">
-                      Participation qualifiée (≥ 10 %)
+                    <Label className="flex items-center gap-1.5 text-sm font-medium">
+                      <span>Participation qualifiée (≥ 10 %)</span>
+                      <WikiTip articleId="dirigeant" tip="≥ 10 % du capital = imposition privilégiée des dividendes (RFFA) : 70 % imposable au fédéral, 50-70 % cantonal selon canton." />
                     </Label>
                     <p className="text-xs text-muted-foreground">
                       Active l'imposition partielle des dividendes (RFFA).
