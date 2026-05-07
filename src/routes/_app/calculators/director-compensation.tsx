@@ -20,9 +20,17 @@ import {
   Info,
   Sparkles,
   TrendingUp,
+  TrendingDown,
   Building2,
   User,
+  Users,
 } from "lucide-react";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 import { supabase } from "@/integrations/supabase/client";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
@@ -60,9 +68,11 @@ import { getSelectableCantons, type SelectableCantonCode } from "@/lib/swiss/can
 import {
   computeAllStrategies,
   computeStrategy,
+  computeStrategyFromAbsolute,
   recommendBestStrategy,
 } from "@/lib/director-compensation";
 import type {
+  AbsoluteAllocation,
   CompensationResult,
   CompensationStrategy,
   DirectorInputs,
@@ -134,6 +144,14 @@ function DirectorCompensationCalc() {
     age: 40,
     lppPlan: "mandatory",
     qualifiedHolding: true,
+    reserveTarget: 0,
+  });
+
+  // Situation actuelle (répartition réelle déclarée par le dirigeant)
+  const [hasCurrent, setHasCurrent] = useState(false);
+  const [current, setCurrent] = useState<AbsoluteAllocation>({
+    grossSalary: 100_000,
+    dividends: 30_000,
   });
 
   // Hydratation depuis client + société (une seule fois)
@@ -166,8 +184,14 @@ function DirectorCompensationCalc() {
           )
         : prev.age,
     }));
+    if (linkedClient?.gross_annual_salary != null) {
+      setCurrent((p) => ({ ...p, grossSalary: Number(linkedClient.gross_annual_salary) }));
+      setHasCurrent(true);
+    }
     setHydrated(true);
   }, [linkedClient, linkedCompany, hydrated]);
+
+  const headcount = (linkedCompany as (Company & { headcount_fte?: number | null }) | null)?.headcount_fte ?? null;
 
   // Stratégie personnalisée
   const [custom, setCustom] = useState<CompensationStrategy>({
@@ -185,11 +209,24 @@ function DirectorCompensationCalc() {
     () => computeStrategy(inputs, custom),
     [inputs, custom],
   );
-  const allResults = useMemo(
+  const currentResult = useMemo(
+    () => (hasCurrent ? computeStrategyFromAbsolute(inputs, current, "Situation actuelle") : null),
+    [hasCurrent, inputs, current],
+  );
+  const strategiesForCompare = useMemo(
     () => [...presetResults, customResult],
     [presetResults, customResult],
   );
-  const recommendation = useMemo(() => recommendBestStrategy(allResults), [allResults]);
+  const recommendation = useMemo(
+    () => recommendBestStrategy(strategiesForCompare),
+    [strategiesForCompare],
+  );
+  const tableResults = useMemo(
+    () => (currentResult ? [currentResult, ...strategiesForCompare] : strategiesForCompare),
+    [currentResult, strategiesForCompare],
+  );
+
+  const availableProfit = Math.max(0, inputs.totalProfit - (inputs.reserveTarget ?? 0));
 
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
@@ -225,6 +262,30 @@ function DirectorCompensationCalc() {
                   wikiId="dirigeant"
                   wikiTip="Résultat de la société AVANT toute rémunération du dirigeant. C'est le « gâteau » à répartir entre salaire, dividende et réserves."
                 />
+                <NumField
+                  label="Réserve cible à conserver en société (CHF/an)"
+                  value={inputs.reserveTarget ?? 0}
+                  onChange={(v) => setField("reserveTarget", v)}
+                  hint="Optionnel — montant prélevé en priorité sur le bénéfice avant la répartition salaire/dividende."
+                  wikiId="dirigeant"
+                  wikiTip="Si renseigné, la réserve cible est déduite du bénéfice total avant le calcul des stratégies. Le reliquat est réparti entre salaire et dividendes."
+                />
+                {(inputs.reserveTarget ?? 0) > 0 && (
+                  <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
+                    <div className="flex justify-between"><span>Bénéfice total</span><strong className="tabular-nums">{formatCHF(inputs.totalProfit)}</strong></div>
+                    <div className="flex justify-between text-muted-foreground"><span>− Réserve cible</span><span className="tabular-nums">{formatCHF(inputs.reserveTarget ?? 0)}</span></div>
+                    <div className="mt-1 flex justify-between border-t border-border pt-1"><span>Disponible salaire + dividendes</span><strong className="tabular-nums text-primary">{formatCHF(availableProfit)}</strong></div>
+                    {availableProfit <= 0 && (
+                      <p className="mt-2 text-warning">⚠️ Réserve cible ≥ bénéfice total : aucune répartition possible.</p>
+                    )}
+                  </div>
+                )}
+                {headcount != null && headcount > 0 && (
+                  <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2 text-xs text-muted-foreground">
+                    <Users className="h-3.5 w-3.5" />
+                    Société comptant <strong className="text-foreground">{headcount}</strong> collaborateur(s) (ETP).
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-3">
                   <SelectField
                     label="Canton siège société"
@@ -321,6 +382,41 @@ function DirectorCompensationCalc() {
             >
               <CustomStrategySliders value={custom} onChange={setCustom} />
             </CalcCard>
+
+            <CalcCard
+              title="Situation actuelle du client"
+              description="Renseignez la rémunération réelle pour comparer avec les stratégies optimisées."
+            >
+              <Accordion type="single" collapsible defaultValue={hasCurrent ? "cur" : undefined}>
+                <AccordionItem value="cur" className="border-b-0">
+                  <AccordionTrigger className="py-2 text-sm">
+                    {hasCurrent ? "Modifier la situation actuelle" : "Saisir la situation actuelle"}
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-3">
+                    <div className="flex items-center gap-2 text-xs">
+                      <Switch checked={hasCurrent} onCheckedChange={setHasCurrent} />
+                      <span>Inclure la situation actuelle dans le comparatif</span>
+                    </div>
+                    <NumField
+                      label="Salaire brut actuel (CHF/an)"
+                      value={current.grossSalary}
+                      onChange={(v) => setCurrent((p) => ({ ...p, grossSalary: v }))}
+                    />
+                    <NumField
+                      label="Dividendes actuels (CHF/an)"
+                      value={current.dividends}
+                      onChange={(v) => setCurrent((p) => ({ ...p, dividends: v }))}
+                    />
+                    <NumField
+                      label="Réserves laissées en société (CHF/an, optionnel)"
+                      value={current.retained ?? 0}
+                      onChange={(v) => setCurrent((p) => ({ ...p, retained: v || undefined }))}
+                      hint="Laissez vide pour calcul automatique."
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            </CalcCard>
           </div>
 
           {/* Results */}
@@ -329,20 +425,26 @@ function DirectorCompensationCalc() {
               best={recommendation.best}
               reason={recommendation.reason}
               totalProfit={inputs.totalProfit}
+              current={currentResult}
+              clientName={linkedClient ? `${linkedClient.first_name} ${linkedClient.last_name}` : null}
             />
 
             <CalcCard
               title="Comparatif des stratégies"
               description="Mode réaliste : les dividendes sont cappés au bénéfice net après IS si nécessaire."
             >
-              <ComparisonTable results={allResults} bestLabel={recommendation.best.strategy.label} />
+              <ComparisonTable
+                results={tableResults}
+                bestLabel={recommendation.best.strategy.label}
+                currentLabel={currentResult?.strategy.label}
+              />
             </CalcCard>
 
             <CalcCard
               title="Visualisation : répartition du bénéfice"
               description="Pour chaque stratégie : impôts & cotisations, net dirigeant, réserves société."
             >
-              <ComparisonChart results={allResults} />
+              <ComparisonChart results={tableResults} />
             </CalcCard>
           </div>
         </div>
@@ -576,10 +678,15 @@ function effectivePct(r: CompensationResult): { s: number; d: number; rr: number
 function ComparisonTable({
   results,
   bestLabel,
+  currentLabel,
 }: {
   results: CompensationResult[];
   bestLabel?: string;
+  currentLabel?: string;
 }) {
+  const currentRow = currentLabel
+    ? results.find((r) => r.strategy.label === currentLabel)
+    : undefined;
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -597,20 +704,27 @@ function ComparisonTable({
         <TableBody>
           {results.map((r, idx) => {
             const isBest = r.strategy.label === bestLabel;
+            const isCurrent = currentLabel != null && r.strategy.label === currentLabel;
             const eff = effectivePct(r);
             const adjusted = r.company.dividendShortfall;
             return (
               <TableRow
                 key={idx}
-                className={cn(isBest && "bg-success/5 hover:bg-success/10")}
+                className={cn(
+                  isBest && "bg-success/5 hover:bg-success/10",
+                  isCurrent && "bg-muted/40 hover:bg-muted/60",
+                )}
               >
                 <TableCell>
                   <div className="flex flex-col">
                     <div className="flex items-center gap-1.5 font-medium">
                       {r.strategy.label}
+                      {isCurrent && (
+                        <Badge variant="outline" className="text-[10px]">Actuel</Badge>
+                      )}
                       {isBest && (
                         <Badge variant="secondary" className="bg-success/15 text-success-foreground text-[10px]">
-                          <Sparkles className="mr-1 h-3 w-3" /> Optimal
+                          <Sparkles className="mr-1 h-3 w-3" /> Recommandée
                         </Badge>
                       )}
                     </div>
@@ -656,8 +770,43 @@ function ComparisonTable({
               </TableRow>
             );
           })}
+          {currentRow && (
+            <TableRow className="border-t-2 border-primary/30 bg-primary/5">
+              <TableCell className="text-xs font-semibold uppercase text-muted-foreground">
+                Δ vs actuel
+              </TableCell>
+              <TableCell colSpan={6} className="text-[11px] text-muted-foreground">
+                Net dirigeant actuel : {formatCHF(currentRow.directorNet)}. Détail des écarts ci-dessous.
+              </TableCell>
+            </TableRow>
+          )}
         </TableBody>
       </Table>
+      {currentRow && (
+        <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {results
+            .filter((r) => r.strategy.label !== currentLabel)
+            .map((r, i) => {
+              const delta = r.directorNet - currentRow.directorNet;
+              const positive = delta >= 0;
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    "flex items-center justify-between rounded-lg border p-2 text-xs",
+                    positive ? "border-success/40 bg-success/5" : "border-destructive/30 bg-destructive/5",
+                  )}
+                >
+                  <span className="font-medium">{r.strategy.label}</span>
+                  <span className={cn("inline-flex items-center gap-1 tabular-nums font-semibold", positive ? "text-success-foreground" : "text-destructive")}>
+                    {positive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    {positive ? "+" : ""}{formatCHF(delta)}
+                  </span>
+                </div>
+              );
+            })}
+        </div>
+      )}
     </div>
   );
 }
@@ -706,10 +855,14 @@ function RecommendationCard({
   best,
   reason,
   totalProfit,
+  current,
+  clientName,
 }: {
   best: CompensationResult;
   reason: string;
   totalProfit: number;
+  current: CompensationResult | null;
+  clientName: string | null;
 }) {
   const salaryRatio = totalProfit > 0 ? best.company.totalSalaryCost / totalProfit : 0;
   const lowSalaryWarning = salaryRatio < 0.5 && best.company.totalSalaryCost > 0;
@@ -734,6 +887,25 @@ function RecommendationCard({
         <MoneyTile label="Dividendes" value={best.company.dividendsPaid} tone="primary" tip="Montant brut versé en dividendes au dirigeant (avant imposition partielle)." />
         <MoneyTile label="Réserves" value={best.retainedInCompany} tone="default" tip="Bénéfice net après IS conservé dans la société (renforce les fonds propres, pas imposé chez le dirigeant)." />
       </div>
+      {current && (
+        <div className="mt-5 rounded-xl border border-primary/30 bg-card/60 p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-primary">
+            💡 Recommandation pour {clientName ?? "ce dirigeant"}
+          </div>
+          <p className="mt-2 text-sm leading-relaxed">
+            Passer de la situation actuelle (salaire {formatCHF(current.company.grossSalary)} / dividendes {formatCHF(current.company.dividendsPaid)})
+            à la stratégie <strong>{best.strategy.label}</strong> (salaire {formatCHF(best.company.grossSalary)} / dividendes {formatCHF(best.company.dividendsPaid)}) permettrait :
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            <DeltaTile label="Économie fiscale annuelle" value={current.totalTaxAndCharges - best.totalTaxAndCharges} positiveIsGood />
+            <DeltaTile label="Net dirigeant supplémentaire / an" value={best.directorNet - current.directorNet} positiveIsGood />
+            <DeltaTile label="Cumul sur 10 ans" value={(best.directorNet - current.directorNet) * 10} positiveIsGood />
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+            ⚠️ Recommandation INDICATIVE. Vérifier avec un fiscaliste les contraintes spécifiques (salaire usuel pour la branche, historique fiscal, statut LPP, etc.).
+          </p>
+        </div>
+      )}
       {lowSalaryWarning && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
@@ -811,6 +983,22 @@ function LegalDisclaimer() {
           <em>participation qualifiée</em> dépendent de l'appréciation de l'AFC et
           du canton.
         </div>
+      </div>
+    </div>
+  );
+}
+
+function DeltaTile({ label, value, positiveIsGood }: { label: string; value: number; positiveIsGood?: boolean }) {
+  const positive = value >= 0;
+  const good = positiveIsGood ? positive : !positive;
+  return (
+    <div className={cn(
+      "rounded-lg border p-3",
+      good ? "border-success/40 bg-success/5" : "border-destructive/30 bg-destructive/5",
+    )}>
+      <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={cn("mt-1 text-base font-semibold tabular-nums", good ? "text-success-foreground" : "text-destructive")}>
+        {positive ? "+" : ""}{formatCHF(value)}
       </div>
     </div>
   );

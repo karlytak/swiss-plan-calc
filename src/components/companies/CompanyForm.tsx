@@ -58,6 +58,7 @@ const schema = z.object({
   annual_revenue: z.string().optional(),
   annual_profit: z.string().optional(),
   retained_earnings: z.string().optional(),
+  headcount_fte: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -95,6 +96,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
       annual_revenue: fromNum(initial?.annual_revenue),
       annual_profit: fromNum(initial?.annual_profit),
       retained_earnings: fromNum(initial?.retained_earnings),
+      headcount_fte: fromNum((initial as Company & { headcount_fte?: number | null })?.headcount_fte ?? null),
       notes: initial?.notes ?? "",
     },
   });
@@ -112,6 +114,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
         annual_revenue: toNum(raw.annual_revenue),
         annual_profit: toNum(raw.annual_profit),
         retained_earnings: toNum(raw.retained_earnings),
+        headcount_fte: toNum(raw.headcount_fte),
         notes: parsed.notes?.trim() ? parsed.notes.trim() : null,
       };
 
@@ -353,13 +356,29 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               control={form.control}
               name="retained_earnings"
               render={({ field }) => (
-                <FormItem className="sm:col-span-2">
+                <FormItem>
                   <FormLabel>Réserves / bénéfices reportés</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="CHF" />
                   </FormControl>
                   <FormDescription>
                     Cumul disponible au bilan, utile pour les comparatifs dividende / salaire.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="headcount_fte"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre de collaborateurs (ETP)</FormLabel>
+                  <FormControl>
+                    <NumField value={field.value ?? ""} onChange={field.onChange} suffix="ETP" />
+                  </FormControl>
+                  <FormDescription>
+                    Effectif équivalent temps plein. Indicatif, utilisé pour contextualiser les calculs.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>

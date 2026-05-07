@@ -105,32 +105,37 @@ export function computeStrategy(
   validateStrategy(strategy, warnings);
 
   const totalProfit = Math.max(0, inputs.totalProfit);
+  const reserveTarget = Math.max(0, inputs.reserveTarget ?? 0);
+  let availableProfit = totalProfit;
+  if (reserveTarget > 0) {
+    if (reserveTarget >= totalProfit) {
+      warnings.push(
+        `Réserve cible (${round(reserveTarget)} CHF) supérieure ou égale au bénéfice ` +
+          `total (${round(totalProfit)} CHF) : aucune répartition salaire/dividende possible.`,
+      );
+      availableProfit = 0;
+    } else {
+      availableProfit = totalProfit - reserveTarget;
+    }
+  }
 
   // ── Côté société ────────────────────────────────────────────────────────
-  // On résout le salaire de manière à ce que :
-  //   salaire_brut + charges_employeur(salaire_brut) = pct_salaire × bénéfice_total
-  // Comme charges_employeur est ~linéaire en grossSalary (sauf plafonds AC/LPP),
-  // on inverse approximativement par itération (2 passes suffisent).
-  const salaryBudget = totalProfit * (strategy.salaryPct / 100);
+  const salaryBudget = availableProfit * (strategy.salaryPct / 100);
   const grossSalary = solveGrossSalaryFromBudget(salaryBudget, inputs);
   const employerCharges = computeEmployerCharges(grossSalary, inputs);
   const totalSalaryCost = grossSalary + employerCharges.total;
 
-  const profitBeforeCorporateTax = Math.max(0, totalProfit - totalSalaryCost);
+  const profitBeforeCorporateTax = Math.max(0, availableProfit - totalSalaryCost);
   const corporateTax = profitBeforeCorporateTax * CORPORATE_TAX_RATE[inputs.companyCanton];
   const netProfitAfterTax = profitBeforeCorporateTax - corporateTax;
 
-  const dividendsTargeted = totalProfit * (strategy.dividendPct / 100);
-  const retainedTargeted = totalProfit * (strategy.retainedPct / 100);
+  const dividendsTargeted = availableProfit * (strategy.dividendPct / 100);
+  const retainedTargeted = availableProfit * (strategy.retainedPct / 100);
 
   let dividendsPaid = dividendsTargeted;
   let retainedActual = retainedTargeted;
   let dividendShortfall = false;
 
-  // Mode "Réaliste" : le bénéfice net après IS doit couvrir dividendes + réserves.
-  // Si dividendes ciblés > net dispo, on cappe les dividendes au max disponible.
-  // Le delta non distribuable correspond aux charges sociales+IS additionnelles
-  // déjà consommées : il est annoté comme "ajusté" pour transparence.
   if (dividendsTargeted > netProfitAfterTax + 1) {
     dividendShortfall = true;
     const delta = dividendsTargeted - netProfitAfterTax;
@@ -143,9 +148,11 @@ export function computeStrategy(
         `charges sociales et l'impôt société).`,
     );
   } else if (dividendsTargeted + retainedTargeted > netProfitAfterTax + 1) {
-    // Dividendes OK mais réserves cibles dépassent le solde restant.
     retainedActual = Math.max(0, netProfitAfterTax - dividendsTargeted);
   }
+
+  // Réserve cible ajoutée à la réserve effective.
+  retainedActual += reserveTarget;
 
   if (strategy.salaryPct < 50 && grossSalary > 0) {
     warnings.push(
@@ -162,7 +169,7 @@ export function computeStrategy(
     corporateTax: round(corporateTax),
     netProfitAfterTax: round(netProfitAfterTax),
     dividendsTargeted: round(dividendsTargeted),
-    retainedTargeted: round(retainedTargeted),
+    retainedTargeted: round(retainedTargeted + reserveTarget),
     dividendShortfall,
     dividendsPaid: round(dividendsPaid),
     retainedActual: round(retainedActual),
@@ -239,6 +246,103 @@ export function computeAllStrategies(
     list.push({ ...customStrategy, label: customStrategy.label ?? "Personnalisée" });
   }
   return list.map((s) => computeStrategy(inputs, s));
+}
+
+/**
+ * Calcule un résultat à partir d'une répartition ABSOLUE en CHF
+ * (modélise la situation actuelle réelle d'un dirigeant).
+ */
+export function computeStrategyFromAbsolute(
+  inputs: DirectorInputs,
+  abs: import("./types").AbsoluteAllocation,
+  label = "Situation actuelle",
+): CompensationResult {
+  const warnings: string[] = [];
+  const totalProfit = Math.max(0, inputs.totalProfit);
+  const grossSalary = Math.max(0, abs.grossSalary);
+  const dividendsTargeted = Math.max(0, abs.dividends);
+
+  const employerCharges = computeEmployerCharges(grossSalary, inputs);
+  const totalSalaryCost = grossSalary + employerCharges.total;
+
+  const profitBeforeCorporateTax = Math.max(0, totalProfit - totalSalaryCost);
+  const corporateTax = profitBeforeCorporateTax * CORPORATE_TAX_RATE[inputs.companyCanton];
+  const netProfitAfterTax = profitBeforeCorporateTax - corporateTax;
+
+  let dividendsPaid = dividendsTargeted;
+  let dividendShortfall = false;
+  if (dividendsTargeted > netProfitAfterTax + 1) {
+    dividendShortfall = true;
+    dividendsPaid = Math.max(0, netProfitAfterTax);
+    warnings.push(
+      `Situation actuelle : dividendes saisis (${round(dividendsTargeted)} CHF) ` +
+        `supérieurs au bénéfice net après IS (${round(netProfitAfterTax)} CHF). ` +
+        `Cappés à ${round(dividendsPaid)} CHF.`,
+    );
+  }
+  const retainedActual =
+    abs.retained != null
+      ? Math.max(0, abs.retained)
+      : Math.max(0, netProfitAfterTax - dividendsPaid);
+
+  const employeeCharges = computeEmployeeCharges(grossSalary, inputs);
+  const netSalary = grossSalary - employeeCharges.total;
+  const fractions = dividendTaxableFractions(inputs.directorCanton, inputs.qualifiedHolding);
+  const taxableSalaryBase = Math.max(0, grossSalary - employeeCharges.total);
+  const taxableIncomeIFD = taxableSalaryBase + dividendsPaid * fractions.federal;
+  const taxableIncomeICC = taxableSalaryBase + dividendsPaid * fractions.cantonal;
+  const ifd = computeIFD(taxableIncomeIFD, inputs.status);
+  const cc = computeCantonalCommunal({
+    canton: inputs.directorCanton,
+    taxableIncome: taxableIncomeICC,
+    status: inputs.status,
+    children: inputs.children ?? 0,
+    confession: inputs.confession,
+    communalMultiplier: inputs.directorCommunalMultiplier,
+  });
+  const totalIncomeTax = ifd + cc.cantonal + cc.communal + cc.church;
+  const netCash = netSalary + dividendsPaid - totalIncomeTax;
+  const totalTaxAndCharges =
+    employerCharges.total + corporateTax + employeeCharges.total + totalIncomeTax;
+
+  return {
+    strategy: { salaryPct: 0, dividendPct: 0, retainedPct: 0, label },
+    inputs,
+    company: {
+      grossSalary: round(grossSalary),
+      employerCharges,
+      totalSalaryCost: round(totalSalaryCost),
+      profitBeforeCorporateTax: round(profitBeforeCorporateTax),
+      corporateTax: round(corporateTax),
+      netProfitAfterTax: round(netProfitAfterTax),
+      dividendsTargeted: round(dividendsTargeted),
+      retainedTargeted: round(retainedActual),
+      dividendShortfall,
+      dividendsPaid: round(dividendsPaid),
+      retainedActual: round(retainedActual),
+    },
+    director: {
+      grossSalary: round(grossSalary),
+      employeeCharges,
+      netSalary: round(netSalary),
+      dividendsReceived: round(dividendsPaid),
+      taxableIncomeIFD: round(taxableIncomeIFD),
+      taxableIncomeICC: round(taxableIncomeICC),
+      dividendFederalFraction: fractions.federal,
+      dividendCantonalFraction: fractions.cantonal,
+      ifd: round(ifd),
+      cantonal: round(cc.cantonal),
+      communal: round(cc.communal),
+      church: round(cc.church),
+      totalIncomeTax: round(totalIncomeTax),
+      netCash: round(netCash),
+    },
+    totalTaxAndCharges: round(totalTaxAndCharges),
+    directorNet: round(netCash),
+    retainedInCompany: round(retainedActual),
+    reconciliation: round(netCash + retainedActual + totalTaxAndCharges - totalProfit),
+    warnings,
+  };
 }
 
 export function recommendBestStrategy(results: CompensationResult[]): {
