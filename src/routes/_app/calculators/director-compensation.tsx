@@ -887,6 +887,25 @@ function RecommendationCard({
         <MoneyTile label="Dividendes" value={best.company.dividendsPaid} tone="primary" tip="Montant brut versé en dividendes au dirigeant (avant imposition partielle)." />
         <MoneyTile label="Réserves" value={best.retainedInCompany} tone="default" tip="Bénéfice net après IS conservé dans la société (renforce les fonds propres, pas imposé chez le dirigeant)." />
       </div>
+      {current && (
+        <div className="mt-5 rounded-xl border border-primary/30 bg-card/60 p-4">
+          <div className="text-xs font-semibold uppercase tracking-wider text-primary">
+            💡 Recommandation pour {clientName ?? "ce dirigeant"}
+          </div>
+          <p className="mt-2 text-sm leading-relaxed">
+            Passer de la situation actuelle (salaire {formatCHF(current.company.grossSalary)} / dividendes {formatCHF(current.company.dividendsPaid)})
+            à la stratégie <strong>{best.strategy.label}</strong> (salaire {formatCHF(best.company.grossSalary)} / dividendes {formatCHF(best.company.dividendsPaid)}) permettrait :
+          </p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
+            <DeltaTile label="Économie fiscale annuelle" value={current.totalTaxAndCharges - best.totalTaxAndCharges} positiveIsGood />
+            <DeltaTile label="Net dirigeant supplémentaire / an" value={best.directorNet - current.directorNet} positiveIsGood />
+            <DeltaTile label="Cumul sur 10 ans" value={(best.directorNet - current.directorNet) * 10} positiveIsGood />
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+            ⚠️ Recommandation INDICATIVE. Vérifier avec un fiscaliste les contraintes spécifiques (salaire usuel pour la branche, historique fiscal, statut LPP, etc.).
+          </p>
+        </div>
+      )}
       {lowSalaryWarning && (
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
