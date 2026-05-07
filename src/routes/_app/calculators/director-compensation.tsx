@@ -773,14 +773,11 @@ function ComparisonTable({
           {currentRow && (
             <TableRow className="border-t-2 border-primary/30 bg-primary/5">
               <TableCell className="text-xs font-semibold uppercase text-muted-foreground">
-                Δ vs situation actuelle
+                Δ vs actuel
               </TableCell>
-              {results.map((r, i) => null) /* placeholder */}
-              <TableCell colSpan={5} className="text-[11px] text-muted-foreground">
-                Comparaison du net dirigeant par rapport à la situation actuelle ({formatCHF(currentRow.directorNet)}).
+              <TableCell colSpan={6} className="text-[11px] text-muted-foreground">
+                Net dirigeant actuel : {formatCHF(currentRow.directorNet)}. Détail des écarts ci-dessous.
               </TableCell>
-              <TableCell className="text-right text-xs">—</TableCell>
-              <TableCell className="text-right text-xs">—</TableCell>
             </TableRow>
           )}
         </TableBody>
