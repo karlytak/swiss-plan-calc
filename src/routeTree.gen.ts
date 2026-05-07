@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
+import { Route as AppWikiRouteImport } from './routes/_app/wiki'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCompaniesRouteImport } from './routes/_app/companies'
@@ -58,6 +59,11 @@ const SharedTokenRoute = SharedTokenRouteImport.update({
   id: '/shared/$token',
   path: '/shared/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AppWikiRoute = AppWikiRouteImport.update({
+  id: '/wiki',
+  path: '/wiki',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppHistoryRoute = AppHistoryRouteImport.update({
   id: '/history',
@@ -205,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/companies': typeof AppCompaniesRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
+  '/wiki': typeof AppWikiRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -234,6 +241,7 @@ export interface FileRoutesByTo {
   '/account': typeof AppAccountRoute
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
+  '/wiki': typeof AppWikiRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -267,6 +275,7 @@ export interface FileRoutesById {
   '/_app/companies': typeof AppCompaniesRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/history': typeof AppHistoryRoute
+  '/_app/wiki': typeof AppWikiRoute
   '/shared/$token': typeof SharedTokenRoute
   '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -300,6 +309,7 @@ export interface FileRouteTypes {
     | '/companies'
     | '/dashboard'
     | '/history'
+    | '/wiki'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -329,6 +339,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/dashboard'
     | '/history'
+    | '/wiki'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -361,6 +372,7 @@ export interface FileRouteTypes {
     | '/_app/companies'
     | '/_app/dashboard'
     | '/_app/history'
+    | '/_app/wiki'
     | '/shared/$token'
     | '/_app/calculators/avs-ai'
     | '/_app/calculators/canton-compare'
@@ -421,6 +433,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/shared/$token'
       preLoaderRoute: typeof SharedTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/_app/wiki': {
+      id: '/_app/wiki'
+      path: '/wiki'
+      fullPath: '/wiki'
+      preLoaderRoute: typeof AppWikiRouteImport
+      parentRoute: typeof AppRoute
     }
     '/_app/history': {
       id: '/_app/history'
@@ -666,6 +685,7 @@ interface AppRouteChildren {
   AppCompaniesRoute: typeof AppCompaniesRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
   AppHistoryRoute: typeof AppHistoryRoute
+  AppWikiRoute: typeof AppWikiRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRoute
   AppClientsNewRoute: typeof AppClientsNewRoute
   AppClientsIndexRoute: typeof AppClientsIndexRoute
@@ -679,6 +699,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCompaniesRoute: AppCompaniesRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
   AppHistoryRoute: AppHistoryRoute,
+  AppWikiRoute: AppWikiRoute,
   AppClientsClientIdRoute: AppClientsClientIdRoute,
   AppClientsNewRoute: AppClientsNewRoute,
   AppClientsIndexRoute: AppClientsIndexRoute,
