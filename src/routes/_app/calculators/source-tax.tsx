@@ -139,7 +139,8 @@ function SourceTaxCalc() {
                   checked={form.isCrossBorderFR}
                   onCheckedChange={(v) => set("isCrossBorderFR", Boolean(v))}
                 />
-                Frontalier France (accord 4.5 %)
+                <span>Frontalier France (accord 4.5 %)</span>
+                <WikiTip articleId="frontaliers" tip="Frontalier VD/NE/JU/BS/BL/BE/SO/VS : retenue suisse limitée à 4.5 %, imposition principale en France." />
               </label>
             )}
           </div>
