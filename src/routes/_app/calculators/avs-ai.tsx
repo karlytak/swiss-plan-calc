@@ -26,6 +26,7 @@ import {
 } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
+import { WikiTip } from "@/components/calculators/WikiTip";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
