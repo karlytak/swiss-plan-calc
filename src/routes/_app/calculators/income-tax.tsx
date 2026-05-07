@@ -175,36 +175,50 @@ function IncomeTaxCalculator() {
               label="Cotisations 3a (CHF)"
               value={form.pillar3aContributions}
               onChange={(v) => setField("pillar3aContributions", v)}
+              wikiId="p3a-base"
+              wikiTip="Salarié LPP : max 7 258 CHF (2026), 100 % déductible. Indépendant sans LPP : 20 % du revenu, max 36 288 CHF."
             />
             <NumField
               label="Rachat LPP (CHF)"
               value={form.lppBuyback}
               onChange={(v) => setField("lppBuyback", v)}
+              wikiId="lpp-rachat"
+              wikiTip="Déductible à 100 %. Capital bloqué 3 ans avant retrait en capital. Plafond sur certificat LPP."
             />
             <NumField
               label="Intérêts hypothécaires (CHF)"
               value={form.mortgageInterest}
               onChange={(v) => setField("mortgageInterest", v)}
+              wikiId="valeur-locative"
+              wikiTip="Déductibles à 100 %. Couplés à la valeur locative ajoutée au revenu."
             />
             <NumField
               label="Entretien immobilier (CHF)"
               value={form.realEstateMaintenance}
               onChange={(v) => setField("realEstateMaintenance", v)}
+              wikiId="valeur-locative"
+              wikiTip="Forfait 10 ou 20 % du loyer théorique selon âge du bien, ou frais réels. Travaux à valeur ajoutée non déductibles."
             />
             <NumField
               label="Fortune nette (CHF)"
               value={form.netWealth}
               onChange={(v) => setField("netWealth", v)}
+              wikiId="fortune"
+              wikiTip="Fortune nette imposable (actifs - dettes). Avoirs LPP / 3a exonérés tant que non retirés."
             />
             <NumField
               label="Capacité de rachat LPP (CHF)"
               value={form.lppBuybackCapacity}
               onChange={(v) => setField("lppBuybackCapacity", v)}
+              wikiId="lpp-rachat"
+              wikiTip="Différence entre l'avoir LPP cible et l'avoir actuel (figure sur le certificat LPP)."
             />
             <NumField
               label="Capital 3a accumulé (CHF)"
               value={form.pillar3aBalance}
               onChange={(v) => setField("pillar3aBalance", v)}
+              wikiId="p3a-base"
+              wikiTip="Solde total cumulé sur vos comptes 3a (banque + assurance)."
             />
           </div>
         </CalcCard>
