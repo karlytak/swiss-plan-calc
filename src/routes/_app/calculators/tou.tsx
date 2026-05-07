@@ -182,12 +182,12 @@ function TOUCalc() {
             <NumField label="Enfants à charge" value={form.children} onChange={(v) => set("children", v)} />
             <NumField label="Salaire annuel (CHF)" value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
             <NumField label="Bonus (CHF)" value={form.bonus} onChange={(v) => set("bonus", v)} />
-            <NumField label="IS retenue annuelle (CHF)" value={form.sourceTaxAnnual} onChange={(v) => set("sourceTaxAnnual", v)} />
-            <NumField label="Cotisations 3a" value={form.pillar3aContributions} onChange={(v) => set("pillar3aContributions", v)} />
-            <NumField label="Rachat LPP" value={form.lppBuyback} onChange={(v) => set("lppBuyback", v)} />
-            <NumField label="Intérêts hypothécaires" value={form.mortgageInterest} onChange={(v) => set("mortgageInterest", v)} />
-            <NumField label="Entretien immobilier" value={form.realEstateMaintenance} onChange={(v) => set("realEstateMaintenance", v)} />
-            <NumField label="Primes maladie / LCA" value={form.healthInsurancePremiums} onChange={(v) => set("healthInsurancePremiums", v)} />
+            <NumField label="IS retenue annuelle (CHF)" value={form.sourceTaxAnnual} onChange={(v) => set("sourceTaxAnnual", v)} wikiId="frontaliers" wikiTip="Total impôt à la source prélevé sur l'année (figure sur le certificat de salaire)." />
+            <NumField label="Cotisations 3a" value={form.pillar3aContributions} onChange={(v) => set("pillar3aContributions", v)} wikiId="p3a-base" wikiTip="Salarié LPP : max 7 258 CHF (2026). Déductible uniquement avec la TOU." />
+            <NumField label="Rachat LPP" value={form.lppBuyback} onChange={(v) => set("lppBuyback", v)} wikiId="lpp-rachat" wikiTip="Déductible à 100 % via TOU. Capital bloqué 3 ans." />
+            <NumField label="Intérêts hypothécaires" value={form.mortgageInterest} onChange={(v) => set("mortgageInterest", v)} wikiId="valeur-locative" wikiTip="Déductibles à 100 % via TOU. Couplés à la valeur locative." />
+            <NumField label="Entretien immobilier" value={form.realEstateMaintenance} onChange={(v) => set("realEstateMaintenance", v)} wikiId="valeur-locative" wikiTip="Forfait 10 ou 20 % du loyer théorique selon âge du bien, ou frais réels." />
+            <NumField label="Primes maladie / LCA" value={form.healthInsurancePremiums} onChange={(v) => set("healthInsurancePremiums", v)} wikiId="ifd-icc" wikiTip="Déduction plafonnée variable selon canton et situation." />
           </div>
         </CalcCard>
       </div>
