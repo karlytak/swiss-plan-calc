@@ -91,7 +91,7 @@ function TOUCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue", body: "Compare l'impôt à la source et la taxation ordinaire ultérieure (TOU)." },
-    { title: "Éligibilité", body: "Seuil de 90 pour cent de vos revenus mondiaux gagnés en Suisse, plus résidence UE/AELE." },
+    { title: "Éligibilité", body: "Seuil de 90 % de vos revenus mondiaux gagnés en Suisse, plus résidence UE/AELE." },
     { title: "Verdict", body: "Si la TOU est moins chère ET vous êtes éligible, déposez la demande avant le 31 mars de l'année suivante." }
   ];
 

@@ -134,7 +134,7 @@ function Pillar3aCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue dans le calculateur 3e pilier", body: "Compare l'effet du 3a (lié, déductible, sortie limitée) et du 3b (libre, fiscalisé, souple)." },
-    { title: "Plafonds 3a 2026", body: "7 258 CHF pour salariés affiliés LPP, 36 288 CHF pour indépendants sans LPP (max 20 pour cent du revenu)." },
+    { title: "Plafonds 3a 2026", body: "7 258 CHF pour salariés affiliés LPP, 36 288 CHF pour indépendants sans LPP (max 20 % du revenu)." },
     { title: "Hypothèses", body: "Rendement, durée et tranche marginale d'imposition pour estimer l'économie fiscale annuelle." },
     { title: "3e pilier B", body: "Versement libre, retrait à tout moment, mais primes non déductibles. Intéressant pour défiscaliser via assurance-vie ou compléter le 3a saturé." }
   ];

@@ -88,7 +88,7 @@ function RetirementCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue", body: "Compare la rente viagère LPP et le retrait du capital." },
-    { title: "Taux de conversion", body: "Pour 2026 : 6.0 pour cent sur la part obligatoire (en baisse continue). Vérifiez le taux de votre caisse." },
+    { title: "Taux de conversion", body: "Pour 2026 : 6.0 % sur la part obligatoire (en baisse continue). Vérifiez le taux de votre caisse." },
     { title: "Hypothèses", body: "Espérance de vie, rendement post-retraite, fiscalité du capital — paramètres clés du verdict." }
   ];
 
