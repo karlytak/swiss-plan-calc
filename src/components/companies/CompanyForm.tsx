@@ -43,28 +43,25 @@ const schema = z.object({
   legal_form: z.enum(["sarl", "sa", "cooperative", "association", "other"]),
   ide_number: z
     .string()
-    .trim()
     .optional()
-    .transform((v) => (v ? v : undefined))
-    .refine((v) => !v || IDE_REGEX.test(v), "Format attendu : CHE-XXX.XXX.XXX"),
-  vat_number: z.string().trim().optional().transform((v) => (v ? v : undefined)),
-  canton: z.string().trim().optional().transform((v) => (v ? v : undefined)),
+    .refine((v) => !v || !v.trim() || IDE_REGEX.test(v.trim()), "Format attendu : CHE-XXX.XXX.XXX"),
+  vat_number: z.string().optional(),
+  canton: z.string().optional(),
   founding_year: z
     .string()
-    .trim()
     .optional()
-    .transform((v) => (v ? Number(v) : undefined))
-    .refine(
-      (v) => v === undefined || (Number.isInteger(v) && v >= 1800 && v <= currentYear + 1),
-      `Année entre 1800 et ${currentYear + 1}`,
-    ),
+    .refine((v) => {
+      if (!v || !v.trim()) return true;
+      const n = Number(v);
+      return Number.isInteger(n) && n >= 1800 && n <= currentYear + 1;
+    }, `Année entre 1800 et ${currentYear + 1}`),
   annual_revenue: z.string().optional(),
   annual_profit: z.string().optional(),
   retained_earnings: z.string().optional(),
   notes: z.string().optional(),
 });
 
-type FormValues = z.input<typeof schema>;
+type FormValues = z.infer<typeof schema>;
 
 function toNum(v: string | undefined): number | null {
   if (!v || v.trim() === "") return null;
