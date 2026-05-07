@@ -64,7 +64,7 @@ function SourceTaxCalc() {
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue", body: "Estimation de l'impôt à la source (barèmes A/B/C/H selon situation)." },
     { title: "Barème", body: "A = célibataire, B = marié monoactif, C = marié biactif, H = famille monoparentale." },
-    { title: "TOU", body: "Si vous gagnez plus de 90 pour cent de vos revenus en Suisse, vous pouvez demander la TOU pour récupérer vos déductions." }
+    { title: "TOU", body: "Si vous gagnez plus de 90 % de vos revenus en Suisse, vous pouvez demander la TOU pour récupérer vos déductions." }
   ];
 
 

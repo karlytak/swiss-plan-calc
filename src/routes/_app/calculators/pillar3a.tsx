@@ -134,7 +134,7 @@ function Pillar3aCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: "Bienvenue dans le calculateur 3e pilier", body: "Compare l'effet du 3a (lié, déductible, sortie limitée) et du 3b (libre, fiscalisé, souple)." },
-    { title: "Plafonds 3a 2026", body: "7 258 CHF pour salariés affiliés LPP, 36 288 CHF pour indépendants sans LPP (max 20 pour cent du revenu)." },
+    { title: "Plafonds 3a 2026", body: "7 258 CHF pour salariés affiliés LPP, 36 288 CHF pour indépendants sans LPP (max 20 % du revenu)." },
     { title: "Hypothèses", body: "Rendement, durée et tranche marginale d'imposition pour estimer l'économie fiscale annuelle." },
     { title: "3e pilier B", body: "Versement libre, retrait à tout moment, mais primes non déductibles. Intéressant pour défiscaliser via assurance-vie ou compléter le 3a saturé." }
   ];
@@ -154,11 +154,11 @@ function Pillar3aCalc() {
         <div className="mt-2 grid gap-3 sm:grid-cols-2">
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-primary">Pilier 3a (lié)</div>
-            <p className="mt-1 text-xs text-muted-foreground">Cotisations <strong>déductibles du revenu imposable</strong> (max 7'''258 CHF avec LPP, 36'''288 CHF indépendant). Capital bloqué jusqu'''à 5 ans avant l'''âge AVS. Imposé à taux réduit au retrait.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Cotisations <strong>déductibles du revenu imposable</strong> (max 7'258 CHF avec LPP, 36'288 CHF indépendant). Capital bloqué jusqu'à 5 ans avant l'âge AVS. Imposé à taux réduit au retrait.</p>
           </div>
           <div>
             <div className="text-xs font-semibold uppercase tracking-wider text-primary">Pilier 3b (libre)</div>
-            <p className="mt-1 text-xs text-muted-foreground">Épargne libre : assurance-vie, compte épargne, fonds. <strong>Pas de déduction</strong> à l'''entrée mais aucun plafond, capital disponible à tout moment, et retrait <strong>généralement exonéré</strong> d'''impôt sur le revenu.</p>
+            <p className="mt-1 text-xs text-muted-foreground">Épargne libre : assurance-vie, compte épargne, fonds. <strong>Pas de déduction</strong> à l'entrée mais aucun plafond, capital disponible à tout moment, et retrait <strong>généralement exonéré</strong> d'impôt sur le revenu.</p>
           </div>
         </div>
       </div>
@@ -260,7 +260,7 @@ function Pillar3aCalc() {
             </div>
             <p className="text-[11px] text-muted-foreground">
               Pas de déduction fiscale, mais capital disponible à tout moment et retrait
-              normalement exonéré d'''impôt sur le revenu (selon produit et durée).
+              normalement exonéré d'impôt sur le revenu (selon produit et durée).
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3">
