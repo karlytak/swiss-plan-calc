@@ -166,7 +166,7 @@ function LppCalc() {
               Rendement net effectif appliqué : <strong>{projection.netReturnRate.toFixed(2)}%</strong> par an.
             </p>
             <div className="mt-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-[11px] leading-relaxed text-foreground/80">
-              <p className="font-semibold text-foreground">📘 Note pédagogique — plan LPP standard vs cadre</p>
+              <p className="font-semibold text-foreground">📘 Note pédagogique : plan LPP standard vs cadre</p>
               <p className="mt-1">
                 Par défaut le calcul applique le <strong>minimum légal LPP</strong> :
                 rendement <strong>1.25 %</strong> (taux min. 2026), plafond salaire

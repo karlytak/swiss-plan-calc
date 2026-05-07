@@ -318,7 +318,7 @@ function CantonCompareCalc() {
                 formatter={(v: number, _: string, props) => {
                   const isZG = props.payload.code === ZG_CODE;
                   const label = isZG
-                    ? `${props.payload.name} · ${props.payload.effective}% — Hors Suisse romande.`
+                    ? `${props.payload.name} · ${props.payload.effective}% · Hors Suisse romande.`
                     : `${props.payload.name} · ${props.payload.effective}%`;
                   return [formatCHF(v), label];
                 }}
@@ -343,9 +343,9 @@ function CantonCompareCalc() {
             <Sparkles className="mt-0.5 h-3.5 w-3.5 shrink-0 text-success" aria-hidden />
             <span className="font-semibold text-foreground shrink-0">ZG · Zoug</span>
             <span className="min-w-0 flex-1 text-muted-foreground break-words">
-              <span className="sm:hidden">— Référence fiscalité optimisée</span>
+              <span className="sm:hidden">Référence fiscalité optimisée</span>
               <span className="hidden sm:inline">
-                — Référence fiscalité optimisée (hors scope domicile v1, {romandsCount} cantons romands au-dessus)
+                Référence fiscalité optimisée (hors scope domicile v1, {romandsCount} cantons romands au-dessus)
               </span>
             </span>
           </div>
@@ -354,7 +354,7 @@ function CantonCompareCalc() {
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <Legend color="var(--success)" label="Canton le plus avantageux (Romandie)" />
           <Legend color="var(--primary)" label="Cantons romands" />
-          <Legend color="var(--success)" label="Zoug — référence fiscale" opacity={0.65} />
+          <Legend color="var(--success)" label="Zoug · référence fiscale" opacity={0.65} />
         </div>
       </CalcCard>
 

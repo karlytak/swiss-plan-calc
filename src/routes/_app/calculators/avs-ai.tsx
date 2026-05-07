@@ -38,7 +38,7 @@ export const Route = createFileRoute("/_app/calculators/avs-ai")({
       {
         name: "description",
         content:
-          "Estimation de la rente AVS/AI 2026 (1er pilier) — couple, plafonnement, AVS21.",
+          "Estimation de la rente AVS/AI 2026 (1er pilier) : couple, plafonnement, AVS21.",
       },
     ],
   }),
@@ -251,7 +251,7 @@ function AvsAiCalc() {
             {projection.cappedCouple ? (
               <p className="mt-3 rounded-md bg-warning/10 p-2 text-xs text-warning-foreground">
                 ⚠️ Plafond couple appliqué (
-                {AVS_2026.maxCoupleMonthlyPension.toLocaleString("fr-CH")} CHF/mois) —
+                {AVS_2026.maxCoupleMonthlyPension.toLocaleString("fr-CH")} CHF/mois) :
                 réduction proportionnelle des deux rentes individuelles.
               </p>
             ) : null}
@@ -307,8 +307,8 @@ function AvsAiCalc() {
             {AVS_2026.maxMonthlyPension.toLocaleString("fr-CH")} CHF/mois).
           </li>
           <li>
-            • Approximation par interpolation 2 segments — marge d'erreur ±3 % vs caisse de
-            compensation.
+            • Approximation par interpolation 2 segments (marge d'erreur ±3 % vs caisse de
+            compensation).
           </li>
           <li>
             • Bonifications éducatives / d'assistance et splitting AVS officiel non modélisés.

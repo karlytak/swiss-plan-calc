@@ -316,7 +316,7 @@ function DirectorCompensationCalc() {
             </CalcCard>
 
             <CalcCard
-              title="Visualisation — répartition du bénéfice"
+              title="Visualisation : répartition du bénéfice"
               description="Pour chaque stratégie : impôts & cotisations, net dirigeant, réserves société."
             >
               <ComparisonChart results={allResults} />
@@ -483,7 +483,21 @@ function CustomStrategySliders({
           <div className="font-semibold">{value.dividendPct.toFixed(0)} %</div>
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-2">
-          <div className="text-[10px] uppercase text-muted-foreground">Réserves</div>
+          <div className="flex items-center justify-center gap-1 text-[10px] uppercase text-muted-foreground">
+            Réserves
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="h-3 w-3" />
+              </TooltipTrigger>
+              <TooltipContent className="max-w-xs text-xs">
+                Part du bénéfice net (après impôt société) <strong>laissée dans la société</strong>{" "}
+                au lieu d'être versée au dirigeant. Elle alimente les fonds propres (réserves
+                légales ou libres) et reste mobilisable plus tard : auto financement, achat de
+                matériel, dividendes futurs, vente de la société, etc. Aucun impôt sur le revenu
+                pour le dirigeant tant qu'elle reste en société.
+              </TooltipContent>
+            </Tooltip>
+          </div>
           <div className="font-semibold">{value.retainedPct.toFixed(0)} %</div>
         </div>
       </div>
@@ -753,7 +767,7 @@ function LegalDisclaimer() {
           <strong className="text-foreground">Avertissement.</strong> Les résultats
           sont des <strong>estimations indicatives</strong> basées sur les paramètres
           fiscaux et sociaux 2024-2026 (à reconfirmer pour le millésime fiscal final).
-          Les multiplicateurs communaux utilisés sont ceux du chef-lieu cantonal —
+          Les multiplicateurs communaux utilisés sont ceux du chef-lieu cantonal :
           la précision communale exacte sera disponible dans une prochaine version.
           Ce calcul ne remplace pas l'analyse d'un expert fiscal ou d'une fiduciaire.
           Les notions de <em>salaire usuel</em>, <em>dividende dissimulé</em> et{" "}

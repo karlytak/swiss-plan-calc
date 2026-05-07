@@ -106,7 +106,7 @@ function RetirementCalc() {
                   </SelectContent>
                 </Select>
                 <p className="text-[10px] text-muted-foreground">
-                  Canton de l'institution au moment du retrait — peut différer du canton de domicile
+                  Canton de l'institution au moment du retrait, qui peut différer du canton de domicile
                   (transfert vers une institution en canton à fiscalité favorable, ex. Zoug).
                 </p>
               </div>
