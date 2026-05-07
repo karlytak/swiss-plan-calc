@@ -152,6 +152,7 @@ function IncomeTaxCalculator() {
               </Select>
             </Field>
             <NumField label="Nombre d'enfants" value={form.children} onChange={(v) => setField("children", v)} />
+            <NumField label="Âge du contribuable" value={form.age} onChange={(v) => setField("age", v)} wikiId="lpp-credits" wikiTip="Détermine la bonification LPP (7 % à 25-34 ans, 10 % à 35-44, 15 % à 45-54, 18 % à 55-65). Part salarié = 50 % de la bonification." />
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
