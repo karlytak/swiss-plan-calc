@@ -59,12 +59,15 @@ export function CalcCard({
   children,
   className,
   tilt = false,
+  tip,
 }: {
   title?: string;
   description?: string;
   children: ReactNode;
   className?: string;
   tilt?: boolean;
+  /** Tooltip optionnel affiché à côté du titre */
+  tip?: ReactNode;
 }) {
   const tiltRef = useParallaxTilt<HTMLDivElement>({ max: 3, scale: 1.004 });
   const fallbackRef = useRef<HTMLDivElement>(null);
@@ -79,7 +82,27 @@ export function CalcCard({
     >
       {title ? (
         <div className="mb-4">
-          <h3 className="text-base font-semibold tracking-tight">{title}</h3>
+          <h3 className="flex items-center gap-1.5 text-base font-semibold tracking-tight">
+            {title}
+            {tip ? (
+              <TooltipProvider delayDuration={150}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
+                      aria-label="Aide"
+                    >
+                      <Info className="h-3.5 w-3.5" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs text-left text-[11px] leading-snug">
+                    {tip}
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            ) : null}
+          </h3>
           {description ? (
             <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
           ) : null}
