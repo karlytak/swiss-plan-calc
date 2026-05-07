@@ -18,7 +18,7 @@ import {
   projectPillar3a,
   staggeredWithdrawal,
 } from "@/lib/pillar3";
-import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
+import { CalcCard, MoneyTile, Row, InfoLabel } from "@/components/calculators/CalcUI";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportPillar3aPdf } from "@/lib/pdf/reports";
