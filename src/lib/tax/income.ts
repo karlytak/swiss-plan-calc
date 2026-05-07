@@ -8,6 +8,7 @@ import {
   CANTON_SCALES,
   type CCComputeResult,
 } from "./cantons";
+import { LPP_2026 } from "@/lib/lpp/parameters-2026";
 
 export interface IncomeTaxInput {
   /** Code canton */
