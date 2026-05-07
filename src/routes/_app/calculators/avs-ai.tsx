@@ -269,12 +269,12 @@ function AvsAiCalc() {
                 </p>
               </div>
             )}
-          </CalcCard>
+          </CalcCard></div>
         </div>
 
         {/* === RÉSULTATS === */}
         <div className="space-y-4 md:col-span-2">
-          <CalcCard title="Rente prévisionnelle" tilt>
+          <div data-guide="avs-result"><CalcCard title="Rente prévisionnelle" tilt>
             {form.isCouple && projection.combinedMonthlyPension !== undefined ? (
               <Row>
                 <MoneyTile
