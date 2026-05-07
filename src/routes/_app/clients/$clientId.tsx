@@ -33,7 +33,6 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -60,6 +59,11 @@ import {
   DashboardPension,
   DashboardWealthSummary,
 } from "@/components/clients/ClientDashboardSections";
+import { ClientCompanyCard } from "@/components/clients/ClientCompanyCard";
+import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
+import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
+import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
+import { AlertTriangle, Building2 } from "lucide-react";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
@@ -125,6 +129,9 @@ function ClientDetailPage() {
   });
 
   const [noteBody, setNoteBody] = useState("");
+  const [archiveOpen, setArchiveOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [oldClientOpen, setOldClientOpen] = useState(false);
   const addNote = useMutation({
     mutationFn: async () => {
       if (!user || !noteBody.trim()) return;
@@ -154,6 +161,21 @@ function ClientDetailPage() {
     ? { client: data.client, pension: data.pension, assets: data.assets }
     : null;
   const dashboard = useClientDashboard(bundle);
+
+  const companyId = data?.client.company_id ?? null;
+  const { data: linkedCompany } = useQuery({
+    queryKey: ["client-linked-company", clientId, companyId],
+    enabled: !!companyId,
+    queryFn: async () => {
+      const { data: c, error } = await supabase
+        .from("companies")
+        .select("*")
+        .eq("id", companyId!)
+        .maybeSingle();
+      if (error) throw error;
+      return c as Company | null;
+    },
+  });
 
   if (isLoading) {
     return (
@@ -188,6 +210,9 @@ function ClientDetailPage() {
     (Number(assets?.mortgage_debt ?? 0));
   const children = parseChildren(client.children);
   const optimizations = dashboard?.suggestions ?? [];
+  const clientAgeDays = Math.floor(
+    (Date.now() - new Date(client.created_at).getTime()) / 86400000,
+  );
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -234,36 +259,22 @@ function ClientDetailPage() {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => archive.mutate(!client.archived)}
+            onClick={() => setArchiveOpen(true)}
           >
             <Archive className="h-4 w-4" />
             {client.archived ? "Restaurer" : "Archiver"}
           </Button>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" className="text-destructive">
-                <Trash2 className="h-4 w-4" /> Supprimer
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Supprimer ce dossier ?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Cette action est définitive. Toutes les données associées seront
-                  supprimées.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Annuler</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => remove.mutate()}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Supprimer
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-destructive"
+            onClick={() => {
+              if (clientAgeDays > 30) setOldClientOpen(true);
+              else setDeleteOpen(true);
+            }}
+          >
+            <Trash2 className="h-4 w-4" /> Supprimer
+          </Button>
         </div>
       </div>
 
@@ -335,6 +346,13 @@ function ClientDetailPage() {
               <Row label="NPA" value={client.postal_code ?? "—"} />
             </Card>
           </div>
+          {client.work_status === "director" && (
+            <ClientCompanyCard
+              clientId={clientId}
+              companyId={client.company_id}
+              companyRole={client.company_role}
+            />
+          )}
         </TabsContent>
 
         <TabsContent value="fiscal" className="mt-4 space-y-6">
@@ -402,6 +420,28 @@ function ClientDetailPage() {
               />
             </Card>
           </div>
+          {client.work_status === "director" && linkedCompany && (
+            <Card title={`Rémunération via ${linkedCompany.legal_name}`}>
+              <Row
+                label="Forme juridique"
+                value={LEGAL_FORM_LABELS[linkedCompany.legal_form]}
+              />
+              <Row label="Salaire annuel reçu" value={formatCHF(client.gross_annual_salary)} />
+              <Row label="Bonus / 13e" value={formatCHF(client.bonus)} />
+              <Row label="Autres revenus" value={formatCHF(client.other_income)} />
+              <div className="mt-3">
+                <Button asChild size="sm" variant="outline">
+                  <Link
+                    to="/companies/$companyId"
+                    params={{ companyId: linkedCompany.id }}
+                  >
+                    <Building2 className="h-3.5 w-3.5" />
+                    Voir la fiche société
+                  </Link>
+                </Button>
+              </div>
+            </Card>
+          )}
         </TabsContent>
 
         <TabsContent value="patrimoine" className="mt-4 space-y-6">
@@ -521,6 +561,76 @@ function ClientDetailPage() {
         </TabsContent>
 
       </Tabs>
+
+      <ArchiveConfirmDialog
+        open={archiveOpen}
+        onOpenChange={setArchiveOpen}
+        title={client.archived ? "Restaurer ce client ?" : "Archiver ce client ?"}
+        description={
+          client.archived
+            ? "Le client redeviendra visible dans la liste principale."
+            : "Le client n'apparaîtra plus dans la liste principale, mais reste accessible depuis le filtre « Archivés »."
+        }
+        confirmLabel={client.archived ? "Restaurer" : "Archiver"}
+        onConfirm={() => archive.mutate(!client.archived)}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        expectedText={`${client.first_name} ${client.last_name}`}
+        title="Supprimer définitivement ce client ?"
+        description={
+          <span>
+            Toutes les données du dossier seront perdues : informations personnelles,
+            calculs, scénarios, simulations.
+          </span>
+        }
+        onConfirm={() => remove.mutate()}
+      />
+
+      <AlertDialog open={oldClientOpen} onOpenChange={setOldClientOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
+              Action sécurisée requise
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-2">
+                <p>
+                  Ce client existe depuis plus de 30 jours et peut contenir des informations
+                  importantes (calculs, scénarios, historique). Pour protéger l'intégrité du
+                  dossier, la suppression directe n'est pas disponible.
+                </p>
+                <p>Vous pouvez à la place :</p>
+                <ul className="list-inside list-disc text-sm">
+                  <li>
+                    <strong>Archiver</strong> le client : il n'apparaîtra plus dans la liste
+                    mais reste accessible si besoin.
+                  </li>
+                  <li>
+                    Le contacter et le faire passer par un effacement RGPD (à venir dans une
+                    prochaine version).
+                  </li>
+                </ul>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setOldClientOpen(false);
+                setArchiveOpen(true);
+              }}
+              className="bg-amber-500 text-white hover:bg-amber-600"
+            >
+              Archiver le client
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
