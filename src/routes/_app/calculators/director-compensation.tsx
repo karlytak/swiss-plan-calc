@@ -144,6 +144,14 @@ function DirectorCompensationCalc() {
     age: 40,
     lppPlan: "mandatory",
     qualifiedHolding: true,
+    reserveTarget: 0,
+  });
+
+  // Situation actuelle (répartition réelle déclarée par le dirigeant)
+  const [hasCurrent, setHasCurrent] = useState(false);
+  const [current, setCurrent] = useState<AbsoluteAllocation>({
+    grossSalary: 100_000,
+    dividends: 30_000,
   });
 
   // Hydratation depuis client + société (une seule fois)
@@ -176,8 +184,14 @@ function DirectorCompensationCalc() {
           )
         : prev.age,
     }));
+    if (linkedClient?.gross_annual_salary != null) {
+      setCurrent((p) => ({ ...p, grossSalary: Number(linkedClient.gross_annual_salary) }));
+      setHasCurrent(true);
+    }
     setHydrated(true);
   }, [linkedClient, linkedCompany, hydrated]);
+
+  const headcount = (linkedCompany as (Company & { headcount_fte?: number | null }) | null)?.headcount_fte ?? null;
 
   // Stratégie personnalisée
   const [custom, setCustom] = useState<CompensationStrategy>({
@@ -195,11 +209,24 @@ function DirectorCompensationCalc() {
     () => computeStrategy(inputs, custom),
     [inputs, custom],
   );
-  const allResults = useMemo(
+  const currentResult = useMemo(
+    () => (hasCurrent ? computeStrategyFromAbsolute(inputs, current, "Situation actuelle") : null),
+    [hasCurrent, inputs, current],
+  );
+  const strategiesForCompare = useMemo(
     () => [...presetResults, customResult],
     [presetResults, customResult],
   );
-  const recommendation = useMemo(() => recommendBestStrategy(allResults), [allResults]);
+  const recommendation = useMemo(
+    () => recommendBestStrategy(strategiesForCompare),
+    [strategiesForCompare],
+  );
+  const tableResults = useMemo(
+    () => (currentResult ? [currentResult, ...strategiesForCompare] : strategiesForCompare),
+    [currentResult, strategiesForCompare],
+  );
+
+  const availableProfit = Math.max(0, inputs.totalProfit - (inputs.reserveTarget ?? 0));
 
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
