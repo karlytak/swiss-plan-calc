@@ -12,10 +12,16 @@ import {
 } from "@/components/ui/hover-card";
 
 /**
- * Pastille d'aide visible (badge bleu "i") qui ouvre une bulle au survol OU au clic.
- * Beaucoup plus visible qu'une icône fantôme — pensé pour ne jamais passer inaperçu.
+ * Pastille d'aide TRÈS visible (badge bleu "i") qui ouvre une bulle
+ * au survol ET au clic. Pensée pour ne jamais passer inaperçue.
  */
-export function HelpDot({ tip, size = "sm" }: { tip: ReactNode; size?: "sm" | "md" }) {
+export function HelpDot({
+  tip,
+  size = "sm",
+}: {
+  tip: ReactNode;
+  size?: "sm" | "md";
+}) {
   const dim = size === "md" ? "h-5 w-5" : "h-4 w-4";
   const icon = size === "md" ? "h-3 w-3" : "h-2.5 w-2.5";
   return (
@@ -46,10 +52,6 @@ export function HelpDot({ tip, size = "sm" }: { tip: ReactNode; size?: "sm" | "m
   );
 }
 
-/**
- * Label avec icône info + tooltip explicatif.
- * À utiliser sur tous les champs/résultats où une explication métier aide à éviter une perte de temps.
- */
 export function InfoLabel({
   children,
   tip,
@@ -60,30 +62,15 @@ export function InfoLabel({
   className?: string;
 }) {
   return (
-    <TooltipProvider delayDuration={150}>
-      <Label
-        className={cn(
-          "flex items-center gap-1 text-xs font-medium text-muted-foreground",
-          className,
-        )}
-      >
-        <span>{children}</span>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              className="inline-flex h-3.5 w-3.5 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
-              aria-label="Aide"
-            >
-              <Info className="h-3 w-3" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent className="max-w-xs text-left text-[11px] leading-snug">
-            {tip}
-          </TooltipContent>
-        </Tooltip>
-      </Label>
-    </TooltipProvider>
+    <Label
+      className={cn(
+        "flex items-center gap-1.5 text-xs font-medium text-muted-foreground",
+        className,
+      )}
+    >
+      <span>{children}</span>
+      <HelpDot tip={tip} />
+    </Label>
   );
 }
 
@@ -100,7 +87,6 @@ export function CalcCard({
   children: ReactNode;
   className?: string;
   tilt?: boolean;
-  /** Tooltip optionnel affiché à côté du titre */
   tip?: ReactNode;
 }) {
   const tiltRef = useParallaxTilt<HTMLDivElement>({ max: 3, scale: 1.004 });
@@ -116,26 +102,9 @@ export function CalcCard({
     >
       {title ? (
         <div className="mb-4">
-          <h3 className="flex items-center gap-1.5 text-base font-semibold tracking-tight">
+          <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight">
             {title}
-            {tip ? (
-              <TooltipProvider delayDuration={150}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button
-                      type="button"
-                      className="inline-flex h-4 w-4 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
-                      aria-label="Aide"
-                    >
-                      <Info className="h-3.5 w-3.5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs text-left text-[11px] leading-snug">
-                    {tip}
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            ) : null}
+            {tip ? <HelpDot tip={tip} size="md" /> : null}
           </h3>
           {description ? (
             <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
@@ -178,26 +147,9 @@ export function StatTile({
         toneCls,
       )}
     >
-      <div className="flex items-center gap-1 text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
+      <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase leading-tight tracking-wider text-muted-foreground transition-colors group-hover:text-foreground/80">
         <span>{label}</span>
-        {tip ? (
-          <TooltipProvider delayDuration={150}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  className="inline-flex h-3 w-3 items-center justify-center rounded-full text-muted-foreground/70 transition-colors hover:text-primary"
-                  aria-label="Aide"
-                >
-                  <Info className="h-2.5 w-2.5" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs text-left text-[11px] leading-snug normal-case tracking-normal">
-                {tip}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        ) : null}
+        {tip ? <HelpDot tip={tip} /> : null}
       </div>
       <div
         className={cn(
@@ -227,7 +179,6 @@ export function MoneyTile({
   hint?: string;
   tone?: "default" | "primary" | "success" | "warning";
   big?: boolean;
-  /** Si true, n'affiche pas le préfixe "CHF" devant le montant */
   compact?: boolean;
   tip?: ReactNode;
 }) {
