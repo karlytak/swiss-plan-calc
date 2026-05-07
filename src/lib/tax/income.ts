@@ -274,6 +274,7 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
     taxableIncomeIFD,
     deductions: {
       avs: avsTotal,
+      ac: acTotal,
       lpp: lppTotal,
       pillar3a,
       lppBuyback,
