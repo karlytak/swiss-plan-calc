@@ -134,6 +134,21 @@ function Pillar3aCalc() {
   return (
     <div className="space-y-6">
       {client && <ClientLinkBanner client={client} />}
+
+      <div className="rounded-xl border border-primary/30 bg-primary/5 p-4 text-sm">
+        <div className="font-semibold">3e pilier en Suisse : deux régimes complémentaires</div>
+        <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-primary">Pilier 3a (lié)</div>
+            <p className="mt-1 text-xs text-muted-foreground">Cotisations <strong>déductibles du revenu imposable</strong> (max 7'''258 CHF avec LPP, 36'''288 CHF indépendant). Capital bloqué jusqu'''à 5 ans avant l'''âge AVS. Imposé à taux réduit au retrait.</p>
+          </div>
+          <div>
+            <div className="text-xs font-semibold uppercase tracking-wider text-primary">Pilier 3b (libre)</div>
+            <p className="mt-1 text-xs text-muted-foreground">Épargne libre : assurance-vie, compte épargne, fonds. <strong>Pas de déduction</strong> à l'''entrée mais aucun plafond, capital disponible à tout moment, et retrait <strong>généralement exonéré</strong> d'''impôt sur le revenu.</p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title="Cotisation 3a annuelle" description="Plafond 2026 : 7'258 CHF (LPP) ou 36'288 CHF (indépendant).">
