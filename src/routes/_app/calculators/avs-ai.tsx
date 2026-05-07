@@ -165,10 +165,15 @@ function AvsAiCalc() {
                   label="Année de naissance"
                   value={form.birthYear}
                   onChange={(v) => set("birthYear", v)}
+                  wikiId="avs-base"
+                  wikiTip="Détermine l'âge AVS de référence (AVS21 : 64/65 ans selon genre)."
                 />
               </div>
               <div data-guide="avs-gender" className="space-y-1.5">
-                <Label className="text-xs font-medium text-muted-foreground">Genre</Label>
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <span>Genre</span>
+                  <WikiTip articleId="avs-base" tip="AVS21 : femmes nées 1961-1969 voient leur âge de référence relevé progressivement de 64 à 65 ans." />
+                </Label>
                 <Select
                   value={form.gender}
                   onValueChange={(v) => set("gender", v as Gender)}
@@ -188,6 +193,8 @@ function AvsAiCalc() {
                   label="Année de début de cotisation"
                   value={form.contributionStartYear}
                   onChange={(v) => set("contributionStartYear", v)}
+                  wikiId="avs-base"
+                  wikiTip="Année de la 1re cotisation AVS. Échelle 44 = rente complète. Chaque année manquante = environ 1/44 perdu."
                 />
               </div>
               <div data-guide="avs-retirement-year">
@@ -195,6 +202,8 @@ function AvsAiCalc() {
                   label="Année de retraite envisagée"
                   value={form.retirementYear}
                   onChange={(v) => set("retirementYear", v)}
+                  wikiId="avs-anticipation"
+                  wikiTip="Anticipation : -6.8 % par année. Ajournement : +5.2 % à +31.5 % selon durée."
                 />
               </div>
               <div data-guide="avs-income">
@@ -203,6 +212,8 @@ function AvsAiCalc() {
                   value={form.averageAnnualIncome}
                   onChange={(v) => set("averageAnnualIncome", v)}
                   suffix="CHF"
+                  wikiId="avs-base"
+                  wikiTip="Moyenne indexée des revenus AVS. Au-delà du plafond, la rente est plafonnée à la rente max OFAS."
                 />
               </div>
             </div>
