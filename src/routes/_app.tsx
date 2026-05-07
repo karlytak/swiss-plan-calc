@@ -57,6 +57,7 @@ const NAV = [
   { to: "/clients", label: "Clients", icon: Users },
   { to: "/companies", label: "Sociétés", icon: Building2 },
   { to: "/calculators", label: "Calculateurs", icon: Calculator },
+  { to: "/wiki", label: "Wiki & formation", icon: BookOpen },
   { to: "/history", label: "Historique", icon: Bookmark },
   { to: "/account", label: "Mon profil", icon: UserCircle },
 ] as const;
