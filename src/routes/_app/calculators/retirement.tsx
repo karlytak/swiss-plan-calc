@@ -197,9 +197,6 @@ function RetirementCalc() {
 function NumField({
   label,
   value,
-function NumField({
-  label,
-  value,
   onChange,
   step: _step = 1,
   suffix,
