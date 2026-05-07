@@ -14,12 +14,10 @@ export function computeLppInsuredSalary(
   grossSalary: number,
   insuredSalaryCap = LPP_MAX_INSURED_SALARY_2026,
 ): number {
-  return Math.round(
-    Math.max(
-      0,
-      Math.min(grossSalary - LPP_COORDINATION_DEDUCTION_2026, insuredSalaryCap),
-    ),
-  );
+  // Salaire coordonné = min(salaire brut ; plafond assuré) − déduction de coordination.
+  // La déduction s'applique APRÈS le plafonnement au salaire assuré maximal.
+  const cappedSalary = Math.min(grossSalary, insuredSalaryCap);
+  return Math.round(Math.max(0, cappedSalary - LPP_COORDINATION_DEDUCTION_2026));
 }
 
 /** Bonifications de vieillesse LPP · barème légal */
@@ -117,7 +115,7 @@ export function projectLPP(input: LPPProjectionInput): LPPProjectionResult {
 
   for (let i = 0; i < yearsToRetire; i++) {
     const age = input.currentAge + i;
-    const coordinated = Math.max(0, Math.min(salary, insuredCap));
+    const coordinated = Math.max(0, Math.min(salary, insuredCap) - LPP_COORDINATION_DEDUCTION_2026);
     const creditRate = lppCreditRate(age) + extraCredit;
     const credit = coordinated * creditRate;
     const grossInterest = balance * grossReturn;
