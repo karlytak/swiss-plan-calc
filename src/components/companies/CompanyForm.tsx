@@ -114,6 +114,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
         annual_revenue: toNum(raw.annual_revenue),
         annual_profit: toNum(raw.annual_profit),
         retained_earnings: toNum(raw.retained_earnings),
+        headcount_fte: toNum(raw.headcount_fte),
         notes: parsed.notes?.trim() ? parsed.notes.trim() : null,
       };
 
