@@ -1,5 +1,5 @@
 // Wizard partagé (création + édition) · 5 étapes.
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Save, Loader2, Plus, X } from "lucide-react";
