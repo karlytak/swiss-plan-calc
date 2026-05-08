@@ -79,6 +79,7 @@ function BrandMark() {
 
 function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const t = useT();
   return (
     <nav className="flex-1 space-y-1 px-3 py-4">
       {NAV.map((item) => {
@@ -98,7 +99,7 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
             )}
           >
             <item.icon className="h-4 w-4" />
-            {item.label}
+            {t(item.labelKey)}
           </Link>
         );
       })}
@@ -107,21 +108,23 @@ function NavLinks({ onNavigate }: { onNavigate?: () => void }) {
 }
 
 function UserFooter({ email, onSignOut }: { email: string; onSignOut: () => Promise<void> }) {
+  const t = useT();
   return (
     <div className="border-t border-sidebar-border p-3">
       <div className="mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-xs">
         <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
         <span className="truncate text-muted-foreground">{email}</span>
       </div>
+      <LanguageSwitcher />
       <Button
         type="button"
         variant="ghost"
         size="sm"
-        className="w-full justify-start gap-2 text-sidebar-foreground/70"
+        className="mt-1 w-full justify-start gap-2 text-sidebar-foreground/70"
         onClick={onSignOut}
       >
         <LogOut className="h-4 w-4" />
-        Se déconnecter
+        {t("nav.signout")}
       </Button>
     </div>
   );
