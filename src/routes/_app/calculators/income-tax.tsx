@@ -290,36 +290,95 @@ function IncomeTaxCalculator() {
       </div>
 
       <div className="space-y-4 md:col-span-2">
-        <CalcCard title="Résultat fiscal" description="Estimation barèmes 2026.">
-          <Row>
-            <MoneyTile label="Impôt total" value={result.totalTax} tone="primary" big tip="Somme IFD + cantonal + communal + paroissial sur la base imposable." />
-            <PctTile label="Taux effectif" value={result.effectiveRate} tone="primary" tip="Impôt total / revenu imposable. Taux moyen réellement payé." />
-          </Row>
-          <div className="mt-3 grid grid-cols-2 gap-3">
-            <MoneyTile label="IFD" value={result.ifd} tip="Impôt fédéral direct, barème progressif fédéral identique dans toute la Suisse." />
-            <MoneyTile label="Cantonal" value={result.cantonal} tip="Part cantonale de l'impôt sur le revenu (barème du canton)." />
-            <MoneyTile label="Communal" value={result.communal} tip="Part communale de l'impôt (multiplicateur de la commune appliqué à l'impôt cantonal)." />
-            <MoneyTile label="Paroissial" value={result.church} tip="Impôt ecclésiastique cantonal (selon confession et canton)." />
-            <MoneyTile label="Fortune" value={result.wealthTax} tip="Impôt cantonal et communal sur la fortune nette imposable." />
-            <PctTile label="Taux marginal" value={result.marginalRate} tone="warning" tip="Taux d'impôt sur le prochain franc gagné. Sert pour optimiser une déduction." />
-          </div>
-        </CalcCard>
+        {isFrCrossBorder && (
+          <CalcCard title="Frontalier français — accord 1983" description="Imposition principale en France.">
+            <dl className="space-y-2 text-sm">
+              <Line label="Revenu brut" value={formatCHF(form.grossSalary)} />
+              <Line label="Retenue à la source suisse (4,5 %)" value={formatCHF(-frCrossBorderRetention)} />
+              <div className="my-2 border-t border-border" />
+              <Line label="→ Imposition principale en France" value="—" bold />
+            </dl>
+            <p className="mt-3 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+              Cantons signataires de l'accord 1983 : VD, VS, NE, JU, FR, BE.
+              La retenue suisse est rétrocédée à l'État français. L'imposition
+              définitive du salaire est calculée par l'administration française
+              au barème français (déclaration des revenus). Pour estimation côté
+              français, utiliser le calculateur d'impôt français (V2 à venir).
+            </p>
+          </CalcCard>
+        )}
 
-        <CalcCard title="Détail revenu imposable">
-          <dl className="space-y-2 text-sm">
-            <Line label="Revenu brut" value={formatCHF(result.grossIncome)} />
-            <Line label="− AVS / AI / APG (5.3 %)" value={formatCHF(-result.deductions.avs)} />
-            <Line label="− Assurance chômage" value={formatCHF(-result.deductions.ac)} />
-            <Line label="− LPP part salarié" value={formatCHF(-result.deductions.lpp)} />
-            <Line label="− 3a" value={formatCHF(-result.deductions.pillar3a)} />
-            <Line label="− Rachat LPP" value={formatCHF(-result.deductions.lppBuyback)} />
-            <Line label="− Frais professionnels" value={formatCHF(-result.deductions.professional)} />
-            <Line label="− Assurance maladie" value={formatCHF(-result.deductions.healthInsurance)} />
-            <Line label="− Hypothèque & immo" value={formatCHF(-(result.deductions.mortgage + result.deductions.realEstate))} />
-            <div className="my-2 border-t border-border" />
-            <Line label="Revenu imposable" value={formatCHF(result.taxableIncomeCC)} bold />
-          </dl>
-        </CalcCard>
+        {isSourceLike && sourceTax && (
+          <CalcCard
+            title={
+              form.taxStatus === "cross_border_ge"
+                ? "Frontalier Genève — imposition à la source"
+                : "Imposition à la source"
+            }
+            description={`Barème IS canton ${form.canton}.`}
+          >
+            <Row>
+              <MoneyTile label="Impôt à la source / an" value={sourceTax.annualTax} tone="primary" big />
+              <PctTile label="Taux moyen" value={sourceTax.rate} tone="primary" />
+            </Row>
+            <dl className="mt-3 space-y-2 text-sm">
+              <Line label="Salaire brut annuel" value={formatCHF(form.grossSalary)} />
+              <Line label="Salaire brut mensuel" value={formatCHF(monthlyGross)} />
+              <Line label="Impôt mensuel" value={formatCHF(sourceTax.monthlyTax)} />
+            </dl>
+            <p className="mt-3 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
+              Barème IS appliqué directement sur le brut, déductions intégrées
+              forfaitairement. Si le client est quasi-résident (≥ 90 % des revenus
+              en Suisse), il peut demander la <strong>TOU (Taxation Ordinaire
+              Ultérieure)</strong> pour bénéficier des déductions réelles (3a,
+              primes maladie, frais professionnels, intérêts, rachats LPP).
+              Bascule à effectuer chaque année avant le 31 mars de l'année
+              suivante auprès de l'administration cantonale.
+            </p>
+          </CalcCard>
+        )}
+
+        {isOrdinary && (
+          <>
+            <CalcCard title="Résultat fiscal" description="Estimation barèmes 2026.">
+              <Row>
+                <MoneyTile label="Impôt total" value={result.totalTax} tone="primary" big tip="Somme IFD + cantonal + communal + paroissial sur la base imposable." />
+                <PctTile label="Taux effectif" value={result.effectiveRate} tone="primary" tip="Impôt total / revenu imposable. Taux moyen réellement payé." />
+              </Row>
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <MoneyTile label="IFD" value={result.ifd} tip="Impôt fédéral direct, barème progressif fédéral identique dans toute la Suisse." />
+                <MoneyTile label="Cantonal" value={result.cantonal} tip="Part cantonale de l'impôt sur le revenu (barème du canton)." />
+                <MoneyTile label="Communal" value={result.communal} tip="Part communale de l'impôt (multiplicateur de la commune appliqué à l'impôt cantonal)." />
+                <MoneyTile label="Paroissial" value={result.church} tip="Impôt ecclésiastique cantonal (selon confession et canton)." />
+                <MoneyTile label="Fortune" value={result.wealthTax} tip="Impôt cantonal et communal sur la fortune nette imposable." />
+                <PctTile label="Taux marginal" value={result.marginalRate} tone="warning" tip="Taux d'impôt sur le prochain franc gagné. Sert pour optimiser une déduction." />
+              </div>
+              {form.taxStatus === "tou" && (
+                <p className="mt-3 rounded-md bg-primary/5 p-3 text-xs text-muted-foreground">
+                  Mode TOU : déductions ordinaires appliquées rétroactivement.
+                  L'IS prélevé en cours d'année est imputé sur l'impôt final ;
+                  le solde (négatif ou positif) est régularisé par l'administration.
+                </p>
+              )}
+            </CalcCard>
+
+            <CalcCard title="Détail revenu imposable">
+              <dl className="space-y-2 text-sm">
+                <Line label="Revenu brut" value={formatCHF(result.grossIncome)} />
+                <Line label="− AVS / AI / APG (5.3 %)" value={formatCHF(-result.deductions.avs)} />
+                <Line label="− Assurance chômage" value={formatCHF(-result.deductions.ac)} />
+                <Line label="− LPP part salarié" value={formatCHF(-result.deductions.lpp)} />
+                <Line label="− 3a" value={formatCHF(-result.deductions.pillar3a)} />
+                <Line label="− Rachat LPP" value={formatCHF(-result.deductions.lppBuyback)} />
+                <Line label="− Frais professionnels" value={formatCHF(-result.deductions.professional)} />
+                <Line label="− Assurance maladie" value={formatCHF(-result.deductions.healthInsurance)} />
+                <Line label="− Hypothèque & immo" value={formatCHF(-(result.deductions.mortgage + result.deductions.realEstate))} />
+                <div className="my-2 border-t border-border" />
+                <Line label="Revenu imposable" value={formatCHF(result.taxableIncomeCC)} bold />
+              </dl>
+            </CalcCard>
+          </>
+        )}
       </div>
 
       <div className="lg:col-span-5">
