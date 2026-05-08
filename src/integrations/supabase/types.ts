@@ -737,11 +737,8 @@ export type Database = {
         | "retirement"
         | "canton_compare"
       tax_status:
-        | "ordinary_resident"
+        | "resident"
         | "source_taxed"
-        | "cross_border_g"
-        | "quasi_resident"
-        | "non_taxable"
         | "cross_border_fr_1983"
         | "cross_border_ge"
         | "tou"
@@ -924,11 +921,8 @@ export const Constants = {
         "canton_compare",
       ],
       tax_status: [
-        "ordinary_resident",
+        "resident",
         "source_taxed",
-        "cross_border_g",
-        "quasi_resident",
-        "non_taxable",
         "cross_border_fr_1983",
         "cross_border_ge",
         "tou",
