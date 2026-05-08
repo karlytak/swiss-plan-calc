@@ -99,6 +99,30 @@ function IncomeTaxCalculator() {
     { title: "Déductions", body: "3a, rachat LPP, intérêts hypothécaires, primes maladie : à renseigner pour le calcul net." }
   ];
 
+  // Mode d'imposition : ordinaire (résident + TOU) ou source / frontalier.
+  const isOrdinary = form.taxStatus === "ordinary_resident" || form.taxStatus === "tou";
+  const isFrCrossBorder = form.taxStatus === "cross_border_fr_1983";
+  const isSourceLike =
+    form.taxStatus === "source_taxed" ||
+    form.taxStatus === "cross_border_ge" ||
+    form.taxStatus === "cross_border_g";
+
+  const monthlyGross = form.grossSalary / 12;
+  const sourceTax = useMemo(
+    () =>
+      isSourceLike
+        ? computeSourceTax({
+            monthlyGross,
+            canton: form.canton,
+            scale: inferSourceScale(form.status, (form.spouseGrossSalary ?? 0) > 0),
+            children: form.children,
+            church: form.confession === "catholic" || form.confession === "protestant",
+          })
+        : null,
+    [isSourceLike, monthlyGross, form.canton, form.status, form.spouseGrossSalary, form.children, form.confession],
+  );
+  const frCrossBorderRetention = isFrCrossBorder ? Math.round(form.grossSalary * 0.045) : 0;
+
 
 
   return (
