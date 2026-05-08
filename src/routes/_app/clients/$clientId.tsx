@@ -111,6 +111,21 @@ function ClientDetailPage() {
     },
   });
 
+  const confirmMigratedMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("clients")
+        .update({ tax_status_migrated: false })
+        .eq("id", clientId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Statut fiscal vérifié");
+      qc.invalidateQueries({ queryKey: ["client", clientId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const remove = useMutation({
     mutationFn: async () => {
       await supabase.from("client_notes").delete().eq("client_id", clientId);
@@ -277,6 +292,27 @@ function ClientDetailPage() {
           </Button>
         </div>
       </div>
+
+      {client.tax_status_migrated && (
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-100">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">Statut fiscal migré automatiquement vers « Frontalier français – accord 1983 ».</p>
+            <p className="mt-1 text-amber-800/90 dark:text-amber-100/80">
+              Si ce client est frontalier Genève (régime spécifique), veuillez ajuster manuellement via Modifier.
+            </p>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            className="border-amber-400 bg-white/60 hover:bg-white dark:bg-transparent"
+            disabled={confirmMigratedMutation.isPending}
+            onClick={() => confirmMigratedMutation.mutate()}
+          >
+            Marquer comme vérifié
+          </Button>
+        </div>
+      )}
 
       {/* KPI summary */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

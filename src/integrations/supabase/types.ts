@@ -238,6 +238,7 @@ export type Database = {
           spouse_gross_annual_salary: number | null
           spouse_last_name: string | null
           tax_status: Database["public"]["Enums"]["tax_status"]
+          tax_status_migrated: boolean
           updated_at: string
           work_status: Database["public"]["Enums"]["work_status"]
         }
@@ -275,6 +276,7 @@ export type Database = {
           spouse_gross_annual_salary?: number | null
           spouse_last_name?: string | null
           tax_status?: Database["public"]["Enums"]["tax_status"]
+          tax_status_migrated?: boolean
           updated_at?: string
           work_status?: Database["public"]["Enums"]["work_status"]
         }
@@ -312,6 +314,7 @@ export type Database = {
           spouse_gross_annual_salary?: number | null
           spouse_last_name?: string | null
           tax_status?: Database["public"]["Enums"]["tax_status"]
+          tax_status_migrated?: boolean
           updated_at?: string
           work_status?: Database["public"]["Enums"]["work_status"]
         }
