@@ -1,6 +1,6 @@
 // Wizard partagé (création + édition) · 5 étapes.
 import { useMemo, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, Save, Loader2, Plus, X } from "lucide-react";
 import { z } from "zod";
@@ -220,6 +220,7 @@ export interface ClientWizardProps {
 export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const [step, setStep] = useState(1);
   const [form, setForm] = useState<FormState>(() => initialForm(initial));
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -337,6 +338,12 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
       return savedId;
     },
     onSuccess: (savedId) => {
+      // Invalidation large : fiche, bundle (calculateurs), listes, vues d'édition.
+      qc.invalidateQueries({ queryKey: ["client", savedId] });
+      qc.invalidateQueries({ queryKey: ["client-bundle", savedId] });
+      qc.invalidateQueries({ queryKey: ["client-edit", savedId] });
+      qc.invalidateQueries({ queryKey: ["client-full", savedId] });
+      qc.invalidateQueries({ queryKey: ["clients"] });
       toast.success(mode === "edit" ? "Client mis à jour" : "Client créé");
       navigate({ to: "/clients/$clientId", params: { clientId: savedId } });
     },
