@@ -17,17 +17,17 @@ export type OptimizationCategory = "lpp" | "3a" | "canton" | "wealth" | "withdra
  * Statut fiscal du contribuable — détermine si les déductions
  * (rachat LPP, 3a, etc.) sont automatiquement appliquées ou non.
  *
- * - `ordinary_resident` / `quasi_resident` : déductions OK (taxation ordinaire).
+ * - `resident` / `tou` : déductions OK (taxation ordinaire).
  * - `source_taxed` : déductions NON automatiques (rectification IS ou TOU requise).
- * - `cross_border_g` : règles spécifiques par convention (DE/FR/IT/AT).
- * - `non_taxable` : aucune économie fiscale possible.
+ * - `cross_border_fr_1983` : imposé en France ; déductions suisses sans effet.
+ * - `cross_border_ge` : IS au barème normal GE ; déductions limitées.
  */
 export type TaxStatusContext =
-  | "ordinary_resident"
+  | "resident"
   | "source_taxed"
-  | "cross_border_g"
-  | "quasi_resident"
-  | "non_taxable";
+  | "cross_border_fr_1983"
+  | "cross_border_ge"
+  | "tou";
 
 export type WorkStatusContext =
   | "employee"
@@ -115,14 +115,14 @@ ${common}`,
 function crossBorderWarning(): Optimization["warning"] {
   return {
     severity: "warning",
-    title: "Frontalier (permis G) — règles conventionnelles spécifiques",
-    body: "La déductibilité dépend de la convention de double imposition (DE/FR/IT/AT) et du pays d'imposition principal. Vérifier au cas par cas avant de recommander l'opération.",
+    title: "Frontalier — règles conventionnelles spécifiques",
+    body: "La déductibilité dépend du régime fiscal applicable (accord 1983 pour les frontaliers français, IS au barème normal pour Genève). Valider l'éligibilité au cas par cas selon le pays d'imposition principal.",
   };
 }
 
 /** Le statut fiscal autorise-t-il les déductions de manière automatique ? */
 function deductionsAreAutomatic(s?: TaxStatusContext): boolean {
-  return s === undefined || s === "ordinary_resident" || s === "quasi_resident";
+  return s === undefined || s === "resident" || s === "tou";
 }
 
 export function runOptimizer(input: OptimizerInput): Optimization[] {
@@ -131,13 +131,8 @@ export function runOptimizer(input: OptimizerInput): Optimization[] {
   const status = input.taxInput.status;
   const taxStatus = input.taxStatus;
 
-  // Si non imposable, aucune optimisation fiscale n'a de sens.
-  if (taxStatus === "non_taxable") {
-    return [];
-  }
-
   const isSource = taxStatus === "source_taxed";
-  const isCrossBorder = taxStatus === "cross_border_g";
+  const isCrossBorder = taxStatus === "cross_border_fr_1983" || taxStatus === "cross_border_ge";
   const needsWarning = isSource || isCrossBorder;
 
   // 1) RACHAT LPP · si capacité disponible
