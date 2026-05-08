@@ -84,6 +84,7 @@ export function toIncomeTaxInput(b: ClientBundle) {
   const children = parseChildren(b.client.children);
   return {
     canton: b.client.canton ?? undefined,
+    taxStatus: b.client.tax_status,
     status: mapStatus(b.client, children.length > 0),
     confession: mapConfession(b.client),
     children: children.length,
