@@ -57,6 +57,8 @@ import {
   type Company,
   type LegalForm,
 } from "@/lib/companies/types";
+import { useT } from "@/contexts/LanguageContext";
+import { tCanton } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_app/companies/")({
   head: () => ({ meta: [{ title: "Sociétés · SwissBroker Pro" }] }),
@@ -64,6 +66,7 @@ export const Route = createFileRoute("/_app/companies/")({
 });
 
 function CompaniesListPage() {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -112,7 +115,7 @@ function CompaniesListPage() {
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
-      toast.success(vars.archived ? "Société archivée" : "Société restaurée");
+      toast.success(vars.archived ? t("companies.toast.archived") : t("companies.toast.restored"));
       qc.invalidateQueries({ queryKey: ["companies"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -125,7 +128,7 @@ function CompaniesListPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Société supprimée");
+      toast.success(t("companies.toast.deleted"));
       setPendingDelete(null);
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["clients"] });
@@ -148,14 +151,12 @@ function CompaniesListPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Sociétés</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gérez les PME de vos clients dirigeants : identité, finances, dirigeants rattachés.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("companies.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("companies.subtitle")}</p>
         </div>
         <Button onClick={() => navigate({ to: "/companies/new" })} className="shadow-elegant">
           <PlusCircle className="h-4 w-4" />
-          Nouvelle société
+          {t("companies.new")}
         </Button>
       </div>
 
@@ -166,7 +167,7 @@ function CompaniesListPage() {
             <Input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher par raison sociale, IDE, canton…"
+              placeholder={t("companies.search.placeholder")}
               className="pl-9"
             />
           </div>
@@ -175,7 +176,7 @@ function CompaniesListPage() {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Toutes formes</SelectItem>
+              <SelectItem value="all">{t("companies.filter.all_forms")}</SelectItem>
               {LEGAL_FORM_OPTIONS.map((o) => (
                 <SelectItem key={o.value} value={o.value}>
                   {o.label}
@@ -186,15 +187,15 @@ function CompaniesListPage() {
         </div>
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "archived")}>
           <TabsList>
-            <TabsTrigger value="active">Actives</TabsTrigger>
-            <TabsTrigger value="archived">Archivées</TabsTrigger>
+            <TabsTrigger value="active">{t("companies.tab.active")}</TabsTrigger>
+            <TabsTrigger value="archived">{t("companies.tab.archived")}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card shadow-card">
         {isLoading ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">Chargement…</div>
+          <div className="p-12 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
         ) : filtered.length === 0 ? (
           <EmptyState
             onCreate={() => navigate({ to: "/companies/new" })}
@@ -204,11 +205,11 @@ function CompaniesListPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Raison sociale</TableHead>
-                <TableHead className="hidden md:table-cell">Forme</TableHead>
-                <TableHead className="hidden lg:table-cell">Canton siège</TableHead>
-                <TableHead className="hidden md:table-cell">Dirigeants</TableHead>
-                <TableHead className="hidden lg:table-cell">Année</TableHead>
+                <TableHead>{t("companies.col.legal_name")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("companies.col.form")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("companies.col.canton")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("companies.col.directors")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("companies.col.year")}</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
@@ -236,7 +237,7 @@ function CompaniesListPage() {
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
                       {c.canton
-                        ? `${c.canton} · ${CANTON_BY_CODE[c.canton]?.name ?? ""}`
+                        ? `${c.canton} · ${tCanton(c.canton) || CANTON_BY_CODE[c.canton]?.name || ""}`
                         : "—"}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -263,18 +264,18 @@ function CompaniesListPage() {
                               })
                             }
                           >
-                            <Pencil className="h-4 w-4" /> Modifier
+                            <Pencil className="h-4 w-4" /> {t("clients.action.edit")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => archive.mutate({ id: c.id, archived: !c.archived })}
                           >
                             {c.archived ? (
                               <>
-                                <ArchiveRestore className="h-4 w-4" /> Restaurer
+                                <ArchiveRestore className="h-4 w-4" /> {t("clients.action.restore")}
                               </>
                             ) : (
                               <>
-                                <Archive className="h-4 w-4" /> Archiver
+                                <Archive className="h-4 w-4" /> {t("clients.action.archive")}
                               </>
                             )}
                           </DropdownMenuItem>
@@ -283,7 +284,7 @@ function CompaniesListPage() {
                             className="text-destructive focus:text-destructive"
                             onClick={() => setPendingDelete(c)}
                           >
-                            <Trash2 className="h-4 w-4" /> Supprimer
+                            <Trash2 className="h-4 w-4" /> {t("clients.action.delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -299,20 +300,18 @@ function CompaniesListPage() {
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer cette société ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("companies.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est définitive. <strong>{pendingDelete?.legal_name}</strong> sera
-              supprimée. Les clients dirigeants rattachés ne seront pas supprimés mais leur
-              rattachement sera retiré.
+              {t("companies.delete.desc", { name: pendingDelete?.legal_name ?? "" })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => pendingDelete && remove.mutate(pendingDelete.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Supprimer définitivement
+              {t("companies.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -322,20 +321,19 @@ function CompaniesListPage() {
 }
 
 function EmptyState({ onCreate, hasSearch }: { onCreate: () => void; hasSearch: boolean }) {
+  const t = useT();
   return (
     <div className="p-12 text-center">
       <Building2 className="mx-auto h-8 w-8 text-primary" />
       <h3 className="mt-3 text-lg font-semibold">
-        {hasSearch ? "Aucune société trouvée" : "Aucune société enregistrée"}
+        {hasSearch ? t("companies.empty.searching") : t("companies.empty.title")}
       </h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        {hasSearch
-          ? "Essayez d'élargir votre recherche ou changez le filtre de forme juridique."
-          : "Les sociétés vous permettent de gérer les dirigeants de PME et faire des comparatifs dividende / salaire / bénéfices."}
+        {hasSearch ? t("companies.empty.search.desc") : t("companies.empty.desc")}
       </p>
       {!hasSearch && (
         <Button className="mt-4" onClick={onCreate}>
-          <PlusCircle className="h-4 w-4" /> Créer ma première société
+          <PlusCircle className="h-4 w-4" /> {t("companies.empty.cta")}
         </Button>
       )}
     </div>

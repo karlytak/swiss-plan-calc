@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useT } from "@/contexts/LanguageContext";
 
 const layoutSearchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -32,23 +33,24 @@ export const Route = createFileRoute("/_app/calculators")({
 });
 
 const TABS = [
-  { to: "/calculators", label: "Vue d'ensemble", icon: Calculator, exact: true as boolean },
-  { to: "/calculators/avs-ai", label: "1er pilier AVS/AI", icon: HeartHandshake, exact: false as boolean },
-  { to: "/calculators/lpp", label: "2e pilier LPP & rachats", icon: Landmark, exact: false as boolean },
-  { to: "/calculators/pillar3a", label: "3e pilier A & B", icon: PiggyBank, exact: false as boolean },
-  { to: "/calculators/income-tax", label: "Impôt revenu & fortune", icon: Coins, exact: false as boolean },
-  { to: "/calculators/source-tax", label: "Impôt à la source", icon: Wallet, exact: false as boolean },
-  { to: "/calculators/canton-compare", label: "Comparateur cantonal", icon: Map, exact: false as boolean },
-  { to: "/calculators/retirement", label: "Rente vs capital", icon: TrendingUp, exact: false as boolean },
+  { to: "/calculators", labelKey: "calc.tab.overview", icon: Calculator, exact: true as boolean },
+  { to: "/calculators/avs-ai", labelKey: "calc.tab.avs", icon: HeartHandshake, exact: false as boolean },
+  { to: "/calculators/lpp", labelKey: "calc.tab.lpp", icon: Landmark, exact: false as boolean },
+  { to: "/calculators/pillar3a", labelKey: "calc.tab.pillar3a", icon: PiggyBank, exact: false as boolean },
+  { to: "/calculators/income-tax", labelKey: "calc.tab.income_tax", icon: Coins, exact: false as boolean },
+  { to: "/calculators/source-tax", labelKey: "calc.tab.source_tax", icon: Wallet, exact: false as boolean },
+  { to: "/calculators/canton-compare", labelKey: "calc.tab.canton_compare", icon: Map, exact: false as boolean },
+  { to: "/calculators/retirement", labelKey: "calc.tab.retirement", icon: TrendingUp, exact: false as boolean },
 ] as const;
 
 function CalculatorsLayout() {
+  const t = useT();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const { clientId } = Route.useSearch();
   const tabSearch = clientId ? { clientId } : undefined;
   const currentTab =
-    [...TABS].reverse().find((t) => (t.exact ? pathname === t.to : pathname.startsWith(t.to)))?.to ??
+    [...TABS].reverse().find((tab) => (tab.exact ? pathname === tab.to : pathname.startsWith(tab.to)))?.to ??
     "/calculators";
   const inClientContext = Boolean(clientId);
   return (
@@ -64,13 +66,11 @@ function CalculatorsLayout() {
         {inClientContext && (
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/40 bg-primary/15 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-primary">
             <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
-            Mode dossier client
+            {t("calc.client_mode")}
           </div>
         )}
-        <h1 className="text-3xl font-bold tracking-tight">Calculateurs</h1>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Simulations rapides · barèmes 2026 · IFD, ICC, source, LPP, 3a, comparateur cantonal.
-        </p>
+        <h1 className="text-3xl font-bold tracking-tight">{t("nav.calculators")}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t("calc.subtitle")}</p>
       </div>
 
       {/* Mobile: select fallback for quick switching */}
@@ -80,9 +80,9 @@ function CalculatorsLayout() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {TABS.map((t) => (
-              <SelectItem key={t.to} value={t.to}>
-                {t.label}
+            {TABS.map((tab) => (
+              <SelectItem key={tab.to} value={tab.to}>
+                {t(tab.labelKey)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -92,12 +92,12 @@ function CalculatorsLayout() {
       {/* Tablet+: horizontal scrollable tab bar */}
       <div className="-mx-4 mb-6 hidden overflow-x-auto px-4 sm:mx-0 sm:block sm:px-0">
         <nav className="flex min-w-max gap-1 rounded-xl border border-border bg-card/50 p-1">
-          {TABS.map((t) => {
-            const active = t.exact ? pathname === t.to : pathname.startsWith(t.to);
+          {TABS.map((tab) => {
+            const active = tab.exact ? pathname === tab.to : pathname.startsWith(tab.to);
             return (
               <Link
-                key={t.to}
-                to={t.to}
+                key={tab.to}
+                to={tab.to}
                 search={tabSearch}
                 className={cn(
                   "flex items-center gap-2 whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors",
@@ -106,8 +106,8 @@ function CalculatorsLayout() {
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
               >
-                <t.icon className="h-4 w-4" />
-                {t.label}
+                <tab.icon className="h-4 w-4" />
+                {t(tab.labelKey)}
               </Link>
             );
           })}

@@ -47,6 +47,8 @@ import { CANTON_BY_CODE } from "@/lib/swiss/cantons";
 import { TAX_STATUS_LABELS, CIVIL_STATUS_LABELS } from "@/lib/swiss/enums";
 import { ageFromDob, type Client } from "@/lib/clients/types";
 import { formatCHF } from "@/lib/format";
+import { useT } from "@/contexts/LanguageContext";
+import { tCanton } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_app/clients/")({
   head: () => ({ meta: [{ title: "Clients · SwissBroker Pro" }] }),
@@ -54,6 +56,7 @@ export const Route = createFileRoute("/_app/clients/")({
 });
 
 function ClientsListPage() {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -81,7 +84,7 @@ function ClientsListPage() {
       if (error) throw error;
     },
     onSuccess: (_d, vars) => {
-      toast.success(vars.archived ? "Client archivé" : "Client restauré");
+      toast.success(vars.archived ? t("clients.toast.archived") : t("clients.toast.restored"));
       qc.invalidateQueries({ queryKey: ["clients"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -99,7 +102,7 @@ function ClientsListPage() {
       if (error) throw error;
     },
     onSuccess: () => {
-      toast.success("Client supprimé");
+      toast.success(t("clients.toast.deleted"));
       setPendingDelete(null);
       qc.invalidateQueries({ queryKey: ["clients"] });
     },
@@ -121,14 +124,12 @@ function ClientsListPage() {
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Clients</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Gérez vos dossiers : identité, fiscalité, prévoyance, patrimoine.
-          </p>
+          <h1 className="text-3xl font-bold tracking-tight">{t("clients.title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("clients.subtitle")}</p>
         </div>
         <Button onClick={() => navigate({ to: "/clients/new" })} className="shadow-elegant">
           <PlusCircle className="h-4 w-4" />
-          Nouveau client
+          {t("clients.new")}
         </Button>
       </div>
 
@@ -138,32 +139,32 @@ function ClientsListPage() {
           <Input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Rechercher par nom, email, commune…"
+            placeholder={t("clients.search.placeholder")}
             className="pl-9"
           />
         </div>
         <Tabs value={filter} onValueChange={(v) => setFilter(v as "active" | "archived")}>
           <TabsList>
-            <TabsTrigger value="active">Actifs</TabsTrigger>
-            <TabsTrigger value="archived">Archivés</TabsTrigger>
+            <TabsTrigger value="active">{t("clients.tab.active")}</TabsTrigger>
+            <TabsTrigger value="archived">{t("clients.tab.archived")}</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
 
       <div className="mt-6 rounded-2xl border border-border bg-card shadow-card">
         {isLoading ? (
-          <div className="p-12 text-center text-sm text-muted-foreground">Chargement…</div>
+          <div className="p-12 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
         ) : filtered.length === 0 ? (
           <EmptyState onCreate={() => navigate({ to: "/clients/new" })} hasSearch={!!search} />
         ) : (
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Nom</TableHead>
-                <TableHead className="hidden md:table-cell">État civil</TableHead>
-                <TableHead className="hidden lg:table-cell">Canton / Commune</TableHead>
-                <TableHead className="hidden md:table-cell">Statut fiscal</TableHead>
-                <TableHead className="hidden lg:table-cell text-right">Revenu brut</TableHead>
+                <TableHead>{t("clients.col.name")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("clients.col.civil_status")}</TableHead>
+                <TableHead className="hidden lg:table-cell">{t("clients.col.canton")}</TableHead>
+                <TableHead className="hidden md:table-cell">{t("clients.col.tax_status")}</TableHead>
+                <TableHead className="hidden lg:table-cell text-right">{t("clients.col.gross")}</TableHead>
                 <TableHead className="w-12" />
               </TableRow>
             </TableHeader>
@@ -181,7 +182,7 @@ function ClientsListPage() {
                         {c.last_name.toUpperCase()} {c.first_name}
                       </div>
                       <div className="text-xs text-muted-foreground">
-                        {age !== null ? `${age} ans` : "—"}
+                        {age !== null ? t("clients.row.years", { n: age }) : "—"}
                         {c.email ? ` · ${c.email}` : ""}
                       </div>
                     </TableCell>
@@ -189,7 +190,7 @@ function ClientsListPage() {
                       {CIVIL_STATUS_LABELS[c.civil_status]}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                      {c.canton ? `${c.canton} · ${CANTON_BY_CODE[c.canton]?.name ?? ""}` : "—"}
+                      {c.canton ? `${c.canton} · ${tCanton(c.canton) || CANTON_BY_CODE[c.canton]?.name || ""}` : "—"}
                       {c.commune ? <div className="text-xs">{c.commune}</div> : null}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
@@ -216,18 +217,18 @@ function ClientsListPage() {
                               })
                             }
                           >
-                            <Pencil className="h-4 w-4" /> Modifier
+                            <Pencil className="h-4 w-4" /> {t("clients.action.edit")}
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => archive.mutate({ id: c.id, archived: !c.archived })}
                           >
                             {c.archived ? (
                               <>
-                                <ArchiveRestore className="h-4 w-4" /> Restaurer
+                                <ArchiveRestore className="h-4 w-4" /> {t("clients.action.restore")}
                               </>
                             ) : (
                               <>
-                                <Archive className="h-4 w-4" /> Archiver
+                                <Archive className="h-4 w-4" /> {t("clients.action.archive")}
                               </>
                             )}
                           </DropdownMenuItem>
@@ -236,7 +237,7 @@ function ClientsListPage() {
                             className="text-destructive focus:text-destructive"
                             onClick={() => setPendingDelete(c)}
                           >
-                            <Trash2 className="h-4 w-4" /> Supprimer
+                            <Trash2 className="h-4 w-4" /> {t("clients.action.delete")}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -252,23 +253,20 @@ function ClientsListPage() {
       <AlertDialog open={!!pendingDelete} onOpenChange={(o) => !o && setPendingDelete(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Supprimer ce dossier ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("clients.delete.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              Cette action est définitive. Toutes les données (prévoyance, patrimoine,
-              scénarios, notes) liées à{" "}
-              <strong>
-                {pendingDelete?.first_name} {pendingDelete?.last_name}
-              </strong>{" "}
-              seront supprimées.
+              {t("clients.delete.desc", {
+                name: `${pendingDelete?.first_name ?? ""} ${pendingDelete?.last_name ?? ""}`.trim(),
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={() => pendingDelete && remove.mutate(pendingDelete.id)}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Supprimer définitivement
+              {t("clients.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -278,20 +276,19 @@ function ClientsListPage() {
 }
 
 function EmptyState({ onCreate, hasSearch }: { onCreate: () => void; hasSearch: boolean }) {
+  const t = useT();
   return (
     <div className="p-12 text-center">
       <Users className="mx-auto h-8 w-8 text-primary" />
       <h3 className="mt-3 text-lg font-semibold">
-        {hasSearch ? "Aucun client trouvé" : "Aucun dossier client"}
+        {hasSearch ? t("clients.empty.searching") : t("clients.empty.title")}
       </h3>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-        {hasSearch
-          ? "Essayez d'élargir votre recherche."
-          : "Créez votre premier dossier pour démarrer simulations et optimisations."}
+        {hasSearch ? t("clients.empty.search.desc") : t("clients.empty.desc")}
       </p>
       {!hasSearch && (
         <Button className="mt-4" onClick={onCreate}>
-          <PlusCircle className="h-4 w-4" /> Créer un client
+          <PlusCircle className="h-4 w-4" /> {t("clients.empty.cta")}
         </Button>
       )}
     </div>

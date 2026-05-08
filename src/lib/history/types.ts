@@ -27,7 +27,9 @@ export interface HistoryKpi {
   unit?: "CHF" | "%" | null;
 }
 
-export const KIND_LABELS: Record<SimulationKind, string> = {
+import { t } from "@/lib/i18n";
+
+const KIND_LABELS_FR: Record<SimulationKind, string> = {
   income_tax: "Impôt revenu & fortune",
   source_tax: "Impôt à la source",
   lpp: "LPP & rachats",
@@ -35,6 +37,14 @@ export const KIND_LABELS: Record<SimulationKind, string> = {
   retirement: "Rente vs capital",
   canton_compare: "Comparateur cantonal",
 };
+
+// Proxy i18n : `KIND_LABELS[k]` reste valide partout, mais résout via t() au runtime.
+export const KIND_LABELS: Record<SimulationKind, string> = new Proxy(KIND_LABELS_FR, {
+  get(target, prop: string) {
+    if (!(prop in target)) return (target as Record<string, string>)[prop];
+    return t(`history.kind.${prop}`, undefined, (target as Record<string, string>)[prop]);
+  },
+}) as Record<SimulationKind, string>;
 
 export const KIND_ROUTES: Record<SimulationKind, string> = {
   income_tax: "/calculators/income-tax",
