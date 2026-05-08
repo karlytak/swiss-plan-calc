@@ -111,6 +111,21 @@ function ClientDetailPage() {
     },
   });
 
+  const confirmMigratedMutation = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase
+        .from("clients")
+        .update({ tax_status_migrated: false })
+        .eq("id", clientId);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Statut fiscal vérifié");
+      qc.invalidateQueries({ queryKey: ["client", clientId] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const remove = useMutation({
     mutationFn: async () => {
       await supabase.from("client_notes").delete().eq("client_id", clientId);
