@@ -47,6 +47,8 @@ import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
 import { suggestTaxStatus } from "@/lib/clients/suggest-tax-status";
 import { formatCHF } from "@/lib/format";
 import { computeLppInsuredSalary, LPP_COORDINATION_DEDUCTION_2026, LPP_MAX_INSURED_SALARY_2026 } from "@/lib/lpp";
+import { CountryCombobox } from "@/components/ui/country-combobox";
+import { CommuneAutocomplete } from "@/components/ui/commune-autocomplete";
 
 const STEPS = [
   { id: 1, title: "Identité", desc: "Informations personnelles" },
@@ -551,12 +553,10 @@ function StepIdentity({ form, update, errors }: StepProps) {
         </Select>
       </Field>
       <Field label="Nationalité" htmlFor="nat">
-        <Input
+        <CountryCombobox
           id="nat"
           value={form.nationality}
-          onChange={(e) => update("nationality", e.target.value.toUpperCase())}
-          maxLength={3}
-          placeholder="CH"
+          onChange={(code) => update("nationality", code)}
         />
       </Field>
       <Field label="Email" htmlFor="em" error={errors?.email}>
@@ -598,12 +598,10 @@ function StepFiscal({ form, update, errors }: StepProps) {
   return (
     <div className="grid gap-4 sm:grid-cols-2">
       <Field label="Pays de résidence" htmlFor="cor">
-        <Input
+        <CountryCombobox
           id="cor"
           value={form.country_of_residence}
-          onChange={(e) => update("country_of_residence", e.target.value.toUpperCase())}
-          maxLength={3}
-          placeholder="CH / FR / DE / IT"
+          onChange={(code) => update("country_of_residence", code)}
         />
       </Field>
       <Field
@@ -634,12 +632,16 @@ function StepFiscal({ form, update, errors }: StepProps) {
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Commune" htmlFor="com">
-        <Input
+      <Field
+        label="Commune"
+        htmlFor="com"
+        hint={form.canton ? "Saisie libre acceptée si commune absente de la liste" : undefined}
+      >
+        <CommuneAutocomplete
           id="com"
           value={form.commune}
-          onChange={(e) => update("commune", e.target.value)}
-          maxLength={80}
+          onChange={(v) => update("commune", v)}
+          canton={form.canton}
         />
       </Field>
       <Field label="Code postal (NPA)" htmlFor="npa">

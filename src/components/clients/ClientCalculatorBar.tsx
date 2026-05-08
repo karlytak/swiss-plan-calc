@@ -10,6 +10,7 @@ import {
   Sun,
   Vault,
   HeartHandshake,
+  TrendingUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Client } from "@/lib/clients/types";
