@@ -44,6 +44,7 @@ import {
 } from "@/lib/swiss/enums";
 import type { Child, Client } from "@/lib/clients/types";
 import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
+import { suggestTaxStatus } from "@/lib/clients/suggest-tax-status";
 import { formatCHF } from "@/lib/format";
 import { computeLppInsuredSalary, LPP_COORDINATION_DEDUCTION_2026, LPP_MAX_INSURED_SALARY_2026 } from "@/lib/lpp";
 
