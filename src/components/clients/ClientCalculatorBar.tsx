@@ -63,6 +63,15 @@ export function ClientCalculatorBar({ client }: { client: Client }) {
   const visible = CHIPS.filter(
     (c) => (!c.show || c.show(client)) && !workRules.hiddenCalculators.has(c.to),
   );
+  // Le calculateur dirigeant n'apparaît que si le client est dirigeant ET
+  // rattaché à une société (companyId nécessaire pour préfill).
+  const showDirector =
+    client.work_status === "director" && Boolean(client.company_id);
+
+  // Insère la chip dirigeant entre "Comparateur cantons" et "TOU".
+  const beforeTou = visible.filter((c) => c.to !== "/calculators/tou");
+  const tou = visible.find((c) => c.to === "/calculators/tou");
+
   return (
     <div className="rounded-lg border bg-card p-3">
       <div className="mb-2 flex items-center gap-2 text-xs font-medium text-muted-foreground">
@@ -70,7 +79,7 @@ export function ClientCalculatorBar({ client }: { client: Client }) {
         Lancer un calcul pré-rempli
       </div>
       <div className="flex flex-wrap gap-2">
-        {visible.map(({ to, label, icon: Icon }) => (
+        {beforeTou.map(({ to, label, icon: Icon }) => (
           <Link
             key={to}
             to={to}
@@ -81,6 +90,27 @@ export function ClientCalculatorBar({ client }: { client: Client }) {
             {label}
           </Link>
         ))}
+        {showDirector && (
+          <Link
+            to="/calculators/director-compensation"
+            search={{ clientId: client.id, companyId: client.company_id! }}
+            className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+          >
+            <TrendingUp className="h-3.5 w-3.5" />
+            Comparateur dirigeant
+          </Link>
+        )}
+        {tou && (
+          <Link
+            key={tou.to}
+            to={tou.to}
+            search={{ clientId: client.id }}
+            className="inline-flex items-center gap-1.5 rounded-full border bg-background px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary"
+          >
+            <tou.icon className="h-3.5 w-3.5" />
+            {tou.label}
+          </Link>
+        )}
       </div>
     </div>
   );
