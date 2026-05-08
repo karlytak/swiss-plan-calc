@@ -143,6 +143,14 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
       toast.success(mode === "create" ? "Société créée" : "Modifications enregistrées");
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["company", company.id] });
+      // Synchro fiche client ↔ calculateur dirigeant : toute modif société
+      // (bénéfice, canton, forme juridique…) doit se refléter immédiatement
+      // sur les fiches clients dirigeants liés.
+      qc.invalidateQueries({ queryKey: ["client-company"] });
+      qc.invalidateQueries({ queryKey: ["client-linked-company"] });
+      qc.invalidateQueries({ queryKey: ["director-comp-link"] });
+      qc.invalidateQueries({ queryKey: ["client-bundle"] });
+      qc.invalidateQueries({ queryKey: ["client-full"] });
       navigate({ to: "/companies/$companyId", params: { companyId: company.id } });
     },
     onError: (e: Error) => toast.error(e.message),
