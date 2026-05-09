@@ -5,6 +5,8 @@ import type { Client, ClientPension, ClientAssets } from "@/lib/clients/types";
 import { parseChildren } from "@/lib/clients/types";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import { PILLAR_3A_MAX_2026_LPP } from "@/lib/tax/income";
+import { t } from "@/lib/i18n";
+
 
 export type ScenarioId =
   | "baseline"
