@@ -98,43 +98,41 @@ export function SaveSimulationButton({
       <DialogTrigger asChild>
         <Button variant="outline" className="shine gap-2">
           <Bookmark className="h-4 w-4" />
-          Sauvegarder
+          {t("common.save")}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Sauvegarder cette simulation</DialogTitle>
-          <DialogDescription>
-            Retrouvez-la dans l'historique pour la consulter, la régénérer ou la comparer.
-          </DialogDescription>
+          <DialogTitle>{t("save_sim.title")}</DialogTitle>
+          <DialogDescription>{t("save_sim.description")}</DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-2">
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">Titre</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("save_sim.field.title")}</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={defaultTitle ?? "Ex: M. Dupont · variante 3a max"}
+              placeholder={defaultTitle ?? t("save_sim.placeholder.title")}
             />
           </div>
           <div className="space-y-1.5">
-            <Label className="text-xs font-medium text-muted-foreground">Note (optionnel)</Label>
+            <Label className="text-xs font-medium text-muted-foreground">{t("save_sim.field.note")}</Label>
             <Textarea
               rows={3}
               value={note}
               onChange={(e) => setNote(e.target.value)}
-              placeholder="Hypothèses, contexte client, à comparer avec…"
+              placeholder={t("save_sim.placeholder.note")}
             />
           </div>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <div className="space-y-1.5">
-              <Label className="text-xs font-medium text-muted-foreground">Client (optionnel)</Label>
+              <Label className="text-xs font-medium text-muted-foreground">{t("save_sim.field.client")}</Label>
               <Select value={clientId} onValueChange={setClientId}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Aucun</SelectItem>
+                  <SelectItem value="none">{t("save_sim.client.none")}</SelectItem>
                   {clients.map((c) => (
                     <SelectItem key={c.id} value={c.id}>
                       {c.last_name} {c.first_name}
@@ -145,23 +143,23 @@ export function SaveSimulationButton({
             </div>
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">
-                Tags (séparés par virgule)
+                {t("save_sim.field.tags")}
               </Label>
               <Input
                 value={tagsRaw}
                 onChange={(e) => setTagsRaw(e.target.value)}
-                placeholder="3a, optimisation, 2026"
+                placeholder={t("save_sim.placeholder.tags")}
               />
             </div>
           </div>
         </div>
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>
-            Annuler
+            {t("common.cancel")}
           </Button>
           <Button onClick={() => save.mutate()} disabled={save.isPending}>
             {save.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Sauvegarder
+            {t("common.save")}
           </Button>
         </DialogFooter>
       </DialogContent>
