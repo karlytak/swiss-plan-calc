@@ -286,6 +286,7 @@ export const en: Record<string, string> = {
   "dash.fallback.broker": "broker",
 
   // === My profile ===
+  "account.head.title": "My Profile · SwissBroker Pro",
   "account.title": "My profile",
   "account.subtitle": "This information appears on the PDF reports generated for your clients.",
   "account.brokerage_name": "Brokerage name",
