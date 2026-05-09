@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
@@ -22,6 +21,7 @@ import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportIncomeTaxPdf } from "@/lib/pdf/reports";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useAuth } from "@/contexts/AuthContext";
+import { useT } from "@/contexts/LanguageContext";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
@@ -41,6 +41,7 @@ export const Route = createFileRoute("/_app/calculators/income-tax")({
 });
 
 function IncomeTaxCalculator() {
+  const t = useT();
   const { clientId } = Route.useSearch();
   const { client, prefill } = usePrefillFromClient(clientId, "income-tax");
 
@@ -94,9 +95,9 @@ function IncomeTaxCalculator() {
     });
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
-    { title: "Bienvenue", body: "Estimation rapide de l'impôt sur le revenu fédéral, cantonal et communal." },
-    { title: "Situation civile", body: "Détermine le barème (célibataire, marié, famille monoparentale)." },
-    { title: "Déductions", body: "3a, rachat LPP, intérêts hypothécaires, primes maladie : à renseigner pour le calcul net." }
+    { title: t("calc.income_tax.guide.s1.title"), body: t("calc.income_tax.guide.s1.body") },
+    { title: t("calc.income_tax.guide.s2.title"), body: t("calc.income_tax.guide.s2.body") },
+    { title: t("calc.income_tax.guide.s3.title"), body: t("calc.income_tax.guide.s3.body") },
   ];
 
   // Mode d'imposition : ordinaire (résident + TOU) ou source / frontalier.
@@ -122,13 +123,10 @@ function IncomeTaxCalculator() {
   );
   const frCrossBorderRetention = isFrCrossBorder ? Math.round(form.grossSalary * 0.045) : 0;
 
-
-
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
-      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide impôt revenu" />
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.income_tax.guide.title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
-
 
       {client && (
         <div className="md:col-span-5">
@@ -136,9 +134,9 @@ function IncomeTaxCalculator() {
         </div>
       )}
       <div className="md:col-span-3">
-        <CalcCard title="Situation" description="Renseignez votre profil fiscal.">
+        <CalcCard title={t("calc.income_tax.section.situation")} description={t("calc.income_tax.section.situation.desc")}>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Canton" wikiId="ifd-icc" wikiTip="Détermine le barème ICC, le coefficient cantonal et le multiplicateur communal.">
+            <Field label={t("calc.income_tax.field.canton")} wikiId="ifd-icc" wikiTip={t("calc.income_tax.tip.canton")}>
               <Select value={form.canton} onValueChange={(v) => setField("canton", v)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
@@ -151,9 +149,9 @@ function IncomeTaxCalculator() {
               </Select>
             </Field>
             <Field
-              label="Statut fiscal"
+              label={t("calc.income_tax.field.tax_status")}
               wikiId="ifd-icc"
-              wikiTip="Détermine le mode d'imposition : taxation ordinaire (déductions complètes), imposition à la source (barème IS), frontalier français accord 1983 (4,5 % rétrocédés à la France), ou TOU (rétroactif vers la taxation ordinaire pour quasi-résidents)."
+              wikiTip={t("calc.income_tax.tip.tax_status")}
             >
               <Select
                 value={form.taxStatus}
@@ -167,20 +165,20 @@ function IncomeTaxCalculator() {
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Situation civile" wikiId="ifd-icc" wikiTip="Marié = splitting partiel (barème plus favorable). Famille monoparentale = barème spécial.">
+            <Field label={t("calc.income_tax.field.civil_status")} wikiId="ifd-icc" wikiTip={t("calc.income_tax.tip.civil_status")}>
               <Select
                 value={form.status}
                 onValueChange={(v) => setField("status", v as IncomeTaxInput["status"])}
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="single">Célibataire</SelectItem>
-                  <SelectItem value="married">Marié·e</SelectItem>
-                  <SelectItem value="single_with_children">Famille monoparentale</SelectItem>
+                  <SelectItem value="single">{t("calc.status.single")}</SelectItem>
+                  <SelectItem value="married">{t("calc.status.married")}</SelectItem>
+                  <SelectItem value="single_with_children">{t("calc.status.single_with_children")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
-            <Field label="Confession" wikiId="ifd-icc" wikiTip="Catholique ou protestante = impôt ecclésiastique ajouté (selon canton).">
+            <Field label={t("calc.income_tax.field.confession")} wikiId="ifd-icc" wikiTip={t("calc.income_tax.tip.confession")}>
               <Select
                 value={form.confession}
                 onValueChange={(v) =>
@@ -189,46 +187,46 @@ function IncomeTaxCalculator() {
               >
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">Aucune</SelectItem>
-                  <SelectItem value="catholic">Catholique romaine</SelectItem>
-                  <SelectItem value="protestant">Protestante</SelectItem>
-                  <SelectItem value="other">Autre</SelectItem>
+                  <SelectItem value="none">{t("calc.confession.none")}</SelectItem>
+                  <SelectItem value="catholic">{t("calc.confession.catholic")}</SelectItem>
+                  <SelectItem value="protestant">{t("calc.confession.protestant")}</SelectItem>
+                  <SelectItem value="other">{t("calc.confession.other")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
-            <NumField label="Nombre d'enfants" value={form.children} onChange={(v) => setField("children", v)} />
-            <NumField label="Âge du contribuable" value={form.age} onChange={(v) => setField("age", v)} wikiId="lpp-credits" wikiTip="Détermine la bonification LPP (7 % à 25-34 ans, 10 % à 35-44, 15 % à 45-54, 18 % à 55-65). Part salarié = 50 % de la bonification." />
-            <Field label="Plan LPP" wikiId="lpp-base" wikiTip="Obligatoire : plafond 90 720 CHF. Cadres : sur-obligatoire jusqu'à ~362 880 CHF. 1e : individualisé jusqu'à 860 000 CHF. Impacte la part salarié déductible.">
+            <NumField label={t("calc.income_tax.field.children")} value={form.children} onChange={(v) => setField("children", v)} />
+            <NumField label={t("calc.income_tax.field.age")} value={form.age} onChange={(v) => setField("age", v)} wikiId="lpp-credits" wikiTip={t("calc.income_tax.tip.age")} />
+            <Field label={t("calc.income_tax.field.lpp_plan")} wikiId="lpp-base" wikiTip={t("calc.income_tax.tip.lpp_plan")}>
               <Select value={form.lppPlan} onValueChange={(v) => setField("lppPlan", v as typeof form.lppPlan)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="mandatory">Obligatoire (plafond 90 720)</SelectItem>
-                  <SelectItem value="cadres">Cadres / sur-obligatoire</SelectItem>
-                  <SelectItem value="1e">Plan 1e (jusqu'à 860 000)</SelectItem>
+                  <SelectItem value="mandatory">{t("calc.lpp_plan.mandatory")}</SelectItem>
+                  <SelectItem value="cadres">{t("calc.lpp_plan.cadres")}</SelectItem>
+                  <SelectItem value="1e">{t("calc.lpp_plan.1e")}</SelectItem>
                 </SelectContent>
               </Select>
             </Field>
             <NumField
-              label="Primes maladie réelles (CHF, optionnel)"
+              label={t("calc.income_tax.field.health_premiums")}
               value={form.healthInsurancePremiums}
               onChange={(v) => setField("healthInsurancePremiums", v)}
               wikiId="ifd-icc"
-              wikiTip="Si renseigné, remplace le forfait cantonal. Sinon : forfait cantonal 2026 appliqué automatiquement (GE 2 400 / VD 2 200 / FR 2 000 / NE 2 300 / BE 2 600 / ZH 2 600…)."
+              wikiTip={t("calc.income_tax.tip.health_premiums")}
             />
           </div>
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <NumField label="Salaire brut annuel (CHF)" value={form.grossSalary} onChange={(v) => setField("grossSalary", v)} />
+            <NumField label={t("calc.income_tax.field.gross_salary")} value={form.grossSalary} onChange={(v) => setField("grossSalary", v)} />
             {form.status === "married" && (
               <NumField
-                label="Salaire brut conjoint (CHF)"
+                label={t("calc.income_tax.field.spouse_salary")}
                 value={form.spouseGrossSalary}
                 onChange={(v) => setField("spouseGrossSalary", v)}
               />
             )}
-            <NumField label="Bonus (CHF)" value={form.bonus} onChange={(v) => setField("bonus", v)} />
+            <NumField label={t("calc.income_tax.field.bonus")} value={form.bonus} onChange={(v) => setField("bonus", v)} />
             <NumField
-              label="Autres revenus (CHF)"
+              label={t("calc.income_tax.field.other_income")}
               value={form.otherIncome}
               onChange={(v) => setField("otherIncome", v)}
             />
@@ -236,53 +234,53 @@ function IncomeTaxCalculator() {
 
           <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
             <NumField
-              label="Cotisations 3a (CHF)"
+              label={t("calc.income_tax.field.p3a")}
               value={form.pillar3aContributions}
               onChange={(v) => setField("pillar3aContributions", v)}
               wikiId="p3a-base"
-              wikiTip="Salarié LPP : max 7 258 CHF (2026), 100 % déductible. Indépendant sans LPP : 20 % du revenu, max 36 288 CHF."
+              wikiTip={t("calc.income_tax.tip.p3a")}
             />
             <NumField
-              label="Rachat LPP (CHF)"
+              label={t("calc.income_tax.field.lpp_buyback")}
               value={form.lppBuyback}
               onChange={(v) => setField("lppBuyback", v)}
               wikiId="lpp-rachat"
-              wikiTip="Déductible à 100 %. Capital bloqué 3 ans avant retrait en capital. Plafond sur certificat LPP."
+              wikiTip={t("calc.income_tax.tip.lpp_buyback")}
             />
             <NumField
-              label="Intérêts hypothécaires (CHF)"
+              label={t("calc.income_tax.field.mortgage")}
               value={form.mortgageInterest}
               onChange={(v) => setField("mortgageInterest", v)}
               wikiId="valeur-locative"
-              wikiTip="Déductibles à 100 %. Couplés à la valeur locative ajoutée au revenu."
+              wikiTip={t("calc.income_tax.tip.mortgage")}
             />
             <NumField
-              label="Entretien immobilier (CHF)"
+              label={t("calc.income_tax.field.maintenance")}
               value={form.realEstateMaintenance}
               onChange={(v) => setField("realEstateMaintenance", v)}
               wikiId="valeur-locative"
-              wikiTip="Forfait 10 ou 20 % du loyer théorique selon âge du bien, ou frais réels. Travaux à valeur ajoutée non déductibles."
+              wikiTip={t("calc.income_tax.tip.maintenance")}
             />
             <NumField
-              label="Fortune nette (CHF)"
+              label={t("calc.income_tax.field.wealth")}
               value={form.netWealth}
               onChange={(v) => setField("netWealth", v)}
               wikiId="fortune"
-              wikiTip="Fortune nette imposable (actifs - dettes). Avoirs LPP / 3a exonérés tant que non retirés."
+              wikiTip={t("calc.income_tax.tip.wealth")}
             />
             <NumField
-              label="Capacité de rachat LPP (CHF)"
+              label={t("calc.income_tax.field.lpp_buyback_capacity")}
               value={form.lppBuybackCapacity}
               onChange={(v) => setField("lppBuybackCapacity", v)}
               wikiId="lpp-rachat"
-              wikiTip="Différence entre l'avoir LPP cible et l'avoir actuel (figure sur le certificat LPP)."
+              wikiTip={t("calc.income_tax.tip.lpp_buyback_capacity")}
             />
             <NumField
-              label="Capital 3a accumulé (CHF)"
+              label={t("calc.income_tax.field.p3a_balance")}
               value={form.pillar3aBalance}
               onChange={(v) => setField("pillar3aBalance", v)}
               wikiId="p3a-base"
-              wikiTip="Solde total cumulé sur vos comptes 3a (banque + assurance)."
+              wikiTip={t("calc.income_tax.tip.p3a_balance")}
             />
           </div>
         </CalcCard>
@@ -290,19 +288,15 @@ function IncomeTaxCalculator() {
 
       <div className="space-y-4 md:col-span-2">
         {isFrCrossBorder && (
-          <CalcCard title="Frontalier français — accord 1983" description="Imposition principale en France.">
+          <CalcCard title={t("calc.income_tax.fr_cb.title")} description={t("calc.income_tax.fr_cb.desc")}>
             <dl className="space-y-2 text-sm">
-              <Line label="Revenu brut" value={formatCHF(form.grossSalary)} />
-              <Line label="Retenue à la source suisse (4,5 %)" value={formatCHF(-frCrossBorderRetention)} />
+              <Line label={t("calc.income_tax.fr_cb.gross")} value={formatCHF(form.grossSalary)} />
+              <Line label={t("calc.income_tax.fr_cb.retention")} value={formatCHF(-frCrossBorderRetention)} />
               <div className="my-2 border-t border-border" />
-              <Line label="→ Imposition principale en France" value="—" bold />
+              <Line label={t("calc.income_tax.fr_cb.fr_main")} value="—" bold />
             </dl>
             <p className="mt-3 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-              Cantons signataires de l'accord 1983 : VD, VS, NE, JU, FR, BE.
-              La retenue suisse est rétrocédée à l'État français. L'imposition
-              définitive du salaire est calculée par l'administration française
-              au barème français (déclaration des revenus). Pour estimation côté
-              français, utiliser le calculateur d'impôt français (V2 à venir).
+              {t("calc.income_tax.fr_cb.note")}
             </p>
           </CalcCard>
         )}
@@ -311,69 +305,61 @@ function IncomeTaxCalculator() {
           <CalcCard
             title={
               form.taxStatus === "cross_border_ge"
-                ? "Frontalier Genève — imposition à la source"
-                : "Imposition à la source"
+                ? t("calc.income_tax.source.title_ge")
+                : t("calc.income_tax.source.title")
             }
-            description={`Barème IS canton ${form.canton}.`}
+            description={t("calc.income_tax.source.desc", { canton: form.canton })}
           >
             <Row>
-              <MoneyTile label="Impôt à la source / an" value={sourceTax.annualTax} tone="primary" big />
-              <PctTile label="Taux moyen" value={sourceTax.rate} tone="primary" />
+              <MoneyTile label={t("calc.income_tax.source.annual")} value={sourceTax.annualTax} tone="primary" big />
+              <PctTile label={t("calc.income_tax.source.rate")} value={sourceTax.rate} tone="primary" />
             </Row>
             <dl className="mt-3 space-y-2 text-sm">
-              <Line label="Salaire brut annuel" value={formatCHF(form.grossSalary)} />
-              <Line label="Salaire brut mensuel" value={formatCHF(monthlyGross)} />
-              <Line label="Impôt mensuel" value={formatCHF(sourceTax.monthlyTax)} />
+              <Line label={t("calc.income_tax.source.gross_year")} value={formatCHF(form.grossSalary)} />
+              <Line label={t("calc.income_tax.source.gross_month")} value={formatCHF(monthlyGross)} />
+              <Line label={t("calc.income_tax.source.tax_month")} value={formatCHF(sourceTax.monthlyTax)} />
             </dl>
             <p className="mt-3 rounded-md bg-muted/50 p-3 text-xs text-muted-foreground">
-              Barème IS appliqué directement sur le brut, déductions intégrées
-              forfaitairement. Si le client est quasi-résident (≥ 90 % des revenus
-              en Suisse), il peut demander la <strong>TOU (Taxation Ordinaire
-              Ultérieure)</strong> pour bénéficier des déductions réelles (3a,
-              primes maladie, frais professionnels, intérêts, rachats LPP).
-              Bascule à effectuer chaque année avant le 31 mars de l'année
-              suivante auprès de l'administration cantonale.
+              {t("calc.income_tax.source.note")}
             </p>
           </CalcCard>
         )}
 
         {isOrdinary && (
           <>
-            <CalcCard title="Résultat fiscal" description="Estimation barèmes 2026.">
+            <CalcCard title={t("calc.income_tax.result.title")} description={t("calc.income_tax.result.desc")}>
               <Row>
-                <MoneyTile label="Impôt total" value={result.totalTax} tone="primary" big tip="Somme IFD + cantonal + communal + paroissial sur la base imposable." />
-                <PctTile label="Taux effectif" value={result.effectiveRate} tone="primary" tip="Impôt total / revenu imposable. Taux moyen réellement payé." />
+                <MoneyTile label={t("calc.income_tax.tile.total")} value={result.totalTax} tone="primary" big tip={t("calc.income_tax.tip.total")} />
+                <PctTile label={t("calc.income_tax.tile.effective")} value={result.effectiveRate} tone="primary" tip={t("calc.income_tax.tip.effective")} />
               </Row>
               <div className="mt-3 grid grid-cols-2 gap-3">
-                <MoneyTile label="IFD" value={result.ifd} tip="Impôt fédéral direct, barème progressif fédéral identique dans toute la Suisse." />
-                <MoneyTile label="Cantonal" value={result.cantonal} tip="Part cantonale de l'impôt sur le revenu (barème du canton)." />
-                <MoneyTile label="Communal" value={result.communal} tip="Part communale de l'impôt (multiplicateur de la commune appliqué à l'impôt cantonal)." />
-                <MoneyTile label="Paroissial" value={result.church} tip="Impôt ecclésiastique cantonal (selon confession et canton)." />
-                <MoneyTile label="Fortune" value={result.wealthTax} tip="Impôt cantonal et communal sur la fortune nette imposable." />
-                <PctTile label="Taux marginal" value={result.marginalRate} tone="warning" tip="Taux d'impôt sur le prochain franc gagné. Sert pour optimiser une déduction." />
+                <MoneyTile label={t("calc.income_tax.tile.ifd")} value={result.ifd} tip={t("calc.income_tax.tip.ifd")} />
+                <MoneyTile label={t("calc.income_tax.tile.cantonal")} value={result.cantonal} tip={t("calc.income_tax.tip.cantonal")} />
+                <MoneyTile label={t("calc.income_tax.tile.communal")} value={result.communal} tip={t("calc.income_tax.tip.communal")} />
+                <MoneyTile label={t("calc.income_tax.tile.church")} value={result.church} tip={t("calc.income_tax.tip.church")} />
+                <MoneyTile label={t("calc.income_tax.tile.wealth")} value={result.wealthTax} tip={t("calc.income_tax.tip.wealth_tile")} />
+                <PctTile label={t("calc.income_tax.tile.marginal")} value={result.marginalRate} tone="warning" tip={t("calc.income_tax.tip.marginal")} />
               </div>
               {form.taxStatus === "tou" && (
                 <p className="mt-3 rounded-md bg-primary/5 p-3 text-xs text-muted-foreground">
-                  Mode TOU : déductions ordinaires appliquées rétroactivement.
-                  L'IS prélevé en cours d'année est imputé sur l'impôt final ;
-                  le solde (négatif ou positif) est régularisé par l'administration.
+                  {t("calc.income_tax.tou.note")}
                 </p>
               )}
             </CalcCard>
 
-            <CalcCard title="Détail revenu imposable">
+            <CalcCard title={t("calc.income_tax.detail.title")}>
               <dl className="space-y-2 text-sm">
-                <Line label="Revenu brut" value={formatCHF(result.grossIncome)} />
-                <Line label="− AVS / AI / APG (5.3 %)" value={formatCHF(-result.deductions.avs)} />
-                <Line label="− Assurance chômage" value={formatCHF(-result.deductions.ac)} />
-                <Line label="− LPP part salarié" value={formatCHF(-result.deductions.lpp)} />
-                <Line label="− 3a" value={formatCHF(-result.deductions.pillar3a)} />
-                <Line label="− Rachat LPP" value={formatCHF(-result.deductions.lppBuyback)} />
-                <Line label="− Frais professionnels" value={formatCHF(-result.deductions.professional)} />
-                <Line label="− Assurance maladie" value={formatCHF(-result.deductions.healthInsurance)} />
-                <Line label="− Hypothèque & immo" value={formatCHF(-(result.deductions.mortgage + result.deductions.realEstate))} />
+                <Line label={t("calc.income_tax.detail.gross")} value={formatCHF(result.grossIncome)} />
+                <Line label={t("calc.income_tax.detail.avs")} value={formatCHF(-result.deductions.avs)} />
+                <Line label={t("calc.income_tax.detail.ac")} value={formatCHF(-result.deductions.ac)} />
+                <Line label={t("calc.income_tax.detail.lpp")} value={formatCHF(-result.deductions.lpp)} />
+                <Line label={t("calc.income_tax.detail.p3a")} value={formatCHF(-result.deductions.pillar3a)} />
+                <Line label={t("calc.income_tax.detail.lpp_buyback")} value={formatCHF(-result.deductions.lppBuyback)} />
+                <Line label={t("calc.income_tax.detail.professional")} value={formatCHF(-result.deductions.professional)} />
+                <Line label={t("calc.income_tax.detail.health")} value={formatCHF(-result.deductions.healthInsurance)} />
+                <Line label={t("calc.income_tax.detail.mortgage")} value={formatCHF(-(result.deductions.mortgage + result.deductions.realEstate))} />
                 <div className="my-2 border-t border-border" />
-                <Line label="Revenu imposable" value={formatCHF(result.taxableIncomeCC)} bold />
+                <Line label={t("calc.income_tax.detail.taxable")} value={formatCHF(result.taxableIncomeCC)} bold />
               </dl>
             </CalcCard>
           </>
