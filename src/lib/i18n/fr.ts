@@ -239,6 +239,7 @@ export const fr: Record<string, string> = {
   "wiki.footer": "Les paramètres légaux affichés (plafonds, taux, barèmes) sont mis à jour pour l'année fiscale 2026.",
 
   // === Dashboard ===
+  "dash.head.title": "Tableau de bord · SwissBroker Pro",
   "dash.greet.night": "Bonne nuit",
   "dash.greet.morning": "Bonjour",
   "dash.greet.afternoon": "Bel après-midi",
@@ -284,6 +285,7 @@ export const fr: Record<string, string> = {
   "dash.fallback.broker": "courtier",
 
   // === Mon profil ===
+  "account.head.title": "Mon profil · SwissBroker Pro",
   "account.title": "Mon profil",
   "account.subtitle": "Ces informations apparaissent sur les rapports PDF générés pour vos clients.",
   "account.brokerage_name": "Nom du cabinet",
