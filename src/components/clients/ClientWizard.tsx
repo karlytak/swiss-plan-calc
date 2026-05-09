@@ -739,19 +739,20 @@ function StepFiscal({ form, update, errors }: StepProps) {
 }
 
 function StepActivity({ form, update }: StepProps) {
+  const t = useT();
   const rules = getWorkStatusRules(form.work_status);
   const salaryLabel = rules.isSelfEmployed && form.work_status === "self_employed"
-    ? "Revenu net annuel (indépendant)"
+    ? t("wizard.field.salary.self")
     : rules.isRetired
-      ? "Rentes annuelles totales (AVS + LPP)"
-      : "Salaire annuel brut";
+      ? t("wizard.field.salary.retired")
+      : t("wizard.field.salary.employee");
   const otherIncomeLabel = rules.isRetired
-    ? "Autres revenus (loyers, dividendes…)"
-    : "Autres revenus";
+    ? t("wizard.field.other_income.retired")
+    : t("wizard.field.other_income");
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Statut professionnel">
+      <Field label={t("wizard.field.work_status")}>
         <Select
           value={form.work_status}
           onValueChange={(v) => update("work_status", v as WorkStatus)}
@@ -769,7 +770,7 @@ function StepActivity({ form, update }: StepProps) {
         </Select>
       </Field>
       {rules.hasSalary && (
-        <Field label="Taux d'activité" htmlFor="ar">
+        <Field label={t("wizard.field.activity_rate")} htmlFor="ar">
           <NumField
             id="ar"
             value={form.activity_rate}
@@ -779,7 +780,7 @@ function StepActivity({ form, update }: StepProps) {
         </Field>
       )}
       {rules.hasSalary && !rules.isSelfEmployed && (
-        <Field label="Employeur" htmlFor="emp">
+        <Field label={t("wizard.field.employer")} htmlFor="emp">
           <Input
             id="emp"
             value={form.employer}
@@ -799,7 +800,7 @@ function StepActivity({ form, update }: StepProps) {
         </Field>
       )}
       {rules.hasSalary && !rules.isSelfEmployed && (
-        <Field label="Bonus / 13e" htmlFor="bn">
+        <Field label={t("wizard.field.bonus")} htmlFor="bn">
           <NumField
             id="bn"
             value={form.bonus}
