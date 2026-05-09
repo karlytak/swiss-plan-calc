@@ -6,6 +6,7 @@ import {
   loadStoredLanguage,
   persistLanguage,
   setActiveLanguage,
+  detectBrowserLanguage,
 } from "@/lib/i18n/active";
 import { t as translate, type TranslationParams } from "@/lib/i18n";
 import type { AppLanguage } from "@/lib/i18n/types";
@@ -25,6 +26,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     if (stored) {
       setActiveLanguage(stored);
       return stored;
+    }
+    const browser = detectBrowserLanguage();
+    if (browser) {
+      setActiveLanguage(browser);
+      return browser;
     }
     return getActiveLanguage();
   });
