@@ -8,6 +8,7 @@ import {
   AlertDialogCancel,
   AlertDialogAction,
 } from "@/components/ui/alert-dialog";
+import { useT } from "@/contexts/LanguageContext";
 
 interface ArchiveConfirmDialogProps {
   open: boolean;
@@ -23,9 +24,10 @@ export function ArchiveConfirmDialog({
   onOpenChange,
   title,
   description,
-  confirmLabel = "Archiver",
+  confirmLabel,
   onConfirm,
 }: ArchiveConfirmDialogProps) {
+  const t = useT();
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
@@ -34,12 +36,12 @@ export function ArchiveConfirmDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             onClick={() => void onConfirm()}
             className="bg-amber-500 text-white hover:bg-amber-600"
           >
-            {confirmLabel}
+            {confirmLabel ?? t("archive.default_label")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
