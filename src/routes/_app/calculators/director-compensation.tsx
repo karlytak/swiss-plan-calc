@@ -788,11 +788,15 @@ function ComparisonTable({
 }
 
 function ComparisonChart({ results }: { results: CompensationResult[] }) {
+  const t = useT();
+  const kTax = t("calc.dir.chart.taxes");
+  const kNet = t("calc.dir.chart.net");
+  const kRes = t("calc.dir.chart.reserves");
   const data = results.map((r) => ({
     name: r.strategy.label ?? "",
-    "Impôts & cotisations": Math.round(r.totalTaxAndCharges),
-    "Net dirigeant": Math.round(r.directorNet),
-    "Réserves société": Math.round(r.retainedInCompany),
+    [kTax]: Math.round(r.totalTaxAndCharges),
+    [kNet]: Math.round(r.directorNet),
+    [kRes]: Math.round(r.retainedInCompany),
   }));
   return (
     <div className="h-80 w-full">
@@ -800,10 +804,7 @@ function ComparisonChart({ results }: { results: CompensationResult[] }) {
         <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 5 }}>
           <CartesianGrid stroke="var(--border)" strokeOpacity={0.4} />
           <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-          <YAxis
-            tick={{ fontSize: 11 }}
-            tickFormatter={(v) => `${Math.round(v / 1000)}k`}
-          />
+          <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${Math.round(v / 1000)}k`} />
           <RTooltip
             contentStyle={{
               background: "var(--card)",
@@ -814,13 +815,13 @@ function ComparisonChart({ results }: { results: CompensationResult[] }) {
             formatter={(v: number) => formatCHF(v)}
           />
           <Legend wrapperStyle={{ fontSize: 12 }} />
-          <Bar dataKey="Impôts & cotisations" stackId="a" fill="var(--destructive)">
+          <Bar dataKey={kTax} stackId="a" fill="var(--destructive)">
             {data.map((_, i) => (
               <Cell key={i} fill="var(--destructive)" />
             ))}
           </Bar>
-          <Bar dataKey="Net dirigeant" stackId="a" fill="var(--success, var(--primary))" />
-          <Bar dataKey="Réserves société" stackId="a" fill="var(--primary)" />
+          <Bar dataKey={kNet} stackId="a" fill="var(--success, var(--primary))" />
+          <Bar dataKey={kRes} stackId="a" fill="var(--primary)" />
         </BarChart>
       </ResponsiveContainer>
     </div>
