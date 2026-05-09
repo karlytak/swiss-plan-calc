@@ -232,11 +232,11 @@ function DirectorCompensationCalc() {
 
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
-    { title: "Bienvenue dans le comparateur Dirigeant", body: "Ce mode guide explique comment optimiser le mix salaire / dividende / réserves pour un dirigeant de société." },
-    { title: "Bénéfice avant rémunération", body: "Le résultat de la société AVANT de vous verser quoi que ce soit. C'est le gâteau à répartir." },
-    { title: "Stratégies", body: "100% salaire (max LPP/AVS), 100% dividende (économie sociale), équilibré (best-of) ou personnalisée. Chaque option a un impact différent sur cotisations sociales et impôt." },
-    { title: "Réserves", body: "Bénéfice net (après IS) laissé dans la société au lieu d'être distribué. Ne crée pas d'impôt personnel et finance les futures distributions ou un rachat de parts." },
-    { title: "Comparatif", body: "Coût total (cotisations + impôt société + impôt personnel) et net en poche pour chaque stratégie." },
+    { title: t("calc.dir.guide.s1.title"), body: t("calc.dir.guide.s1.body") },
+    { title: t("calc.dir.guide.s2.title"), body: t("calc.dir.guide.s2.body") },
+    { title: t("calc.dir.guide.s3.title"), body: t("calc.dir.guide.s3.body") },
+    { title: t("calc.dir.guide.s4.title"), body: t("calc.dir.guide.s4.body") },
+    { title: t("calc.dir.guide.s5.title"), body: t("calc.dir.guide.s5.body") },
   ];
 
   return (
