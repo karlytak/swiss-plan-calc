@@ -39,6 +39,7 @@ export function SaveSimulationButton({
   defaultTitle?: string;
 }) {
   const { user } = useAuth();
+  const t = useT();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState(defaultTitle ?? "");
