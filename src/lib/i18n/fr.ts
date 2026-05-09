@@ -78,6 +78,8 @@ export const fr: Record<string, string> = {
   "save_sim.error.unauth": "Non authentifié",
   "save_sim.default_title": "Simulation",
   "client_link.back_to_file": "Retour à la fiche",
+  "client_link.simulation_for": "Simulation pour",
+  "client_link.prefilled_badge": "Pré-rempli depuis dossier",
   "archive.default_label": "Archiver",
   "delete.default_label": "Supprimer définitivement",
 
