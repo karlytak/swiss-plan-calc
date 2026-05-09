@@ -6,6 +6,7 @@ import { createPortal } from "react-dom";
 import { Sparkles, ArrowRight, ArrowLeft, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useT } from "@/contexts/LanguageContext";
 
 export type GuideStep = {
   /** Id ciblé via data-guide="..." sur l'élément à surligner. Optionnel pour intro/outro. */
