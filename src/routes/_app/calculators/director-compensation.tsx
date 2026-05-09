@@ -200,7 +200,7 @@ function DirectorCompensationCalc() {
     salaryPct: 60,
     dividendPct: 30,
     retainedPct: 10,
-    label: "Personnalisée",
+    label: t("calc.dir.custom.label"),
   });
 
   const setField = <K extends keyof DirectorInputs>(k: K, v: DirectorInputs[K]) =>
