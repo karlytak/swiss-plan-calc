@@ -17,6 +17,7 @@ export type GuideStep = {
 
 /** Bouton à placer dans la barre d'action d'un calculateur. */
 export function GuideToggleButton({ onClick }: { onClick: () => void }) {
+  const t = useT();
   return (
     <Button
       type="button"
@@ -26,7 +27,7 @@ export function GuideToggleButton({ onClick }: { onClick: () => void }) {
       className="gap-1.5 border-primary/40 bg-primary/5 text-primary hover:bg-primary hover:text-primary-foreground"
     >
       <Sparkles className="h-3.5 w-3.5" />
-      Mode guide
+      {t("common.guide_mode")}
     </Button>
   );
 }
