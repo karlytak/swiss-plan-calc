@@ -36,13 +36,15 @@ export function GuideMode({
   open,
   onClose,
   steps,
-  title = "Mode guide",
+  title,
 }: {
   open: boolean;
   onClose: () => void;
   steps: GuideStep[];
   title?: string;
 }) {
+  const t = useT();
+  const effectiveTitle = title ?? t("common.guide_mode");
   const [i, setI] = useState(0);
   const step = steps[i];
 
