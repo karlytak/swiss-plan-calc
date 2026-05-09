@@ -239,6 +239,7 @@ export const it: Record<string, string> = {
   "wiki.quick.companies.desc": "Dirigenti & dividendi",
   "wiki.footer": "I parametri legali visualizzati (plafond, aliquote, tariffe) sono aggiornati per l'anno fiscale 2026.",
 
+  "dash.head.title": "Dashboard · SwissBroker Pro",
   // === Dashboard ===
   "dash.greet.night": "Buona notte",
   "dash.greet.morning": "Buongiorno",

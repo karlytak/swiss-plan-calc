@@ -239,6 +239,7 @@ export const de: Record<string, string> = {
   "wiki.quick.calculators.desc": "11 Fachmodule",
   "wiki.quick.companies.title": "Unternehmen",
   "wiki.quick.companies.desc": "Geschäftsführer & Dividenden",
+  "dash.head.title": "Dashboard · SwissBroker Pro",
   "wiki.footer": "Die angezeigten gesetzlichen Parameter (Maxima, Sätze, Tarife) sind für das Steuerjahr 2026 aktualisiert.",
 
   // === Dashboard ===

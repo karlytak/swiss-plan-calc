@@ -239,6 +239,7 @@ export const en: Record<string, string> = {
   "wiki.quick.companies.desc": "Directors & dividends",
   "wiki.footer": "The legal parameters shown (caps, rates, scales) are updated for the 2026 tax year.",
 
+  "dash.head.title": "Dashboard · SwissBroker Pro",
   // === Dashboard ===
   "dash.greet.night": "Good night",
   "dash.greet.morning": "Good morning",
