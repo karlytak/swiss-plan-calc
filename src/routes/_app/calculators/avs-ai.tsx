@@ -28,7 +28,6 @@ import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { useT } from "@/contexts/LanguageContext";
-import { formatNumberCH } from "@/lib/i18n/format";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
