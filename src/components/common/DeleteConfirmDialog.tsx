@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useT } from "@/contexts/LanguageContext";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -29,9 +30,10 @@ export function DeleteConfirmDialog({
   expectedText,
   title,
   description,
-  confirmLabel = "Supprimer définitivement",
+  confirmLabel,
   onConfirm,
 }: DeleteConfirmDialogProps) {
+  const t = useT();
   const [typed, setTyped] = useState("");
 
   useEffect(() => {
@@ -50,7 +52,7 @@ export function DeleteConfirmDialog({
               <div>{description}</div>
               <div className="space-y-2">
                 <Label htmlFor="delete-confirm-input" className="text-xs text-foreground">
-                  Pour confirmer, tapez exactement :{" "}
+                  {t("delete.confirm_prompt")}{" "}
                   <span className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">
                     {expectedText}
                   </span>
@@ -67,7 +69,7 @@ export function DeleteConfirmDialog({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Annuler</AlertDialogCancel>
+          <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
           <AlertDialogAction
             disabled={!matches}
             onClick={(e) => {
@@ -79,10 +81,11 @@ export function DeleteConfirmDialog({
             }}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
           >
-            {confirmLabel}
+            {confirmLabel ?? t("delete.default_label")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
   );
 }
+
