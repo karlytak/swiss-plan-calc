@@ -1284,6 +1284,8 @@ export const de: Record<string, string> = {
   "wizard.accounts.balance": "Saldo",
   "wizard.accounts.total": "Total:",
   "wizard.accounts.add": "Konto hinzufügen",
+  "wizard.accounts.institution.placeholder": "UBS, Swiss Life, VIAC…",
+  "wizard.children.first_name.placeholder": "Vorname",
 
   // === LOT 6 — Firmenformular ===
   "company_form.head.new": "Neue Firma · SwissBroker Pro",

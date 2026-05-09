@@ -49,14 +49,18 @@ import { formatCHF } from "@/lib/format";
 import { computeLppInsuredSalary, LPP_COORDINATION_DEDUCTION_2026, LPP_MAX_INSURED_SALARY_2026 } from "@/lib/lpp";
 import { CountryCombobox } from "@/components/ui/country-combobox";
 import { CommuneAutocomplete } from "@/components/ui/commune-autocomplete";
+import { useT } from "@/contexts/LanguageContext";
 
-const STEPS = [
-  { id: 1, title: "Identité", desc: "Informations personnelles" },
-  { id: 2, title: "Fiscalité", desc: "Domicile et imposition" },
-  { id: 3, title: "Activité", desc: "Profession et revenus" },
-  { id: 4, title: "Famille", desc: "Conjoint et enfants" },
-  { id: 5, title: "Patrimoine & prévoyance", desc: "LPP, 3a, fortune" },
-] as const;
+const STEP_IDS = [1, 2, 3, 4, 5] as const;
+const STEP_KEYS = {
+  1: { title: "wizard.step.identity.title", desc: "wizard.step.identity.desc" },
+  2: { title: "wizard.step.fiscal.title", desc: "wizard.step.fiscal.desc" },
+  3: { title: "wizard.step.activity.title", desc: "wizard.step.activity.desc" },
+  4: { title: "wizard.step.family.title", desc: "wizard.step.family.desc" },
+  5: { title: "wizard.step.patrimoine.title", desc: "wizard.step.patrimoine.desc" },
+} as const;
+const STEP_COUNT = 5;
+
 
 export interface PensionAccount {
   institution: string;
@@ -221,6 +225,7 @@ export interface ClientWizardProps {
 }
 
 export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
@@ -263,7 +268,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Non authentifié");
+      if (!user) throw new Error(t("wizard.toast.unauth"));
       const payload = {
         broker_id: user.id,
         first_name: form.first_name.trim(),
@@ -369,7 +374,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
       qc.invalidateQueries({ queryKey: ["client-edit", savedId] });
       qc.invalidateQueries({ queryKey: ["client-full", savedId] });
       qc.invalidateQueries({ queryKey: ["clients"] });
-      toast.success(mode === "edit" ? "Client mis à jour" : "Client créé");
+      toast.success(mode === "edit" ? t("wizard.toast.updated") : t("wizard.toast.created"));
       navigate({ to: "/clients/$clientId", params: { clientId: savedId } });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -381,7 +386,18 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
     if (!result.success) {
       const errs: Record<string, string> = {};
       for (const issue of result.error.issues) {
-        errs[issue.path[0] as string] = issue.message;
+        const field = issue.path[0] as string;
+        const errKey =
+          field === "first_name"
+            ? "wizard.error.first_name"
+            : field === "last_name"
+              ? "wizard.error.last_name"
+              : field === "email"
+                ? "wizard.error.email"
+                : field === "canton"
+                  ? "wizard.error.canton"
+                  : null;
+        errs[field] = errKey ? t(errKey) : issue.message;
       }
       setErrors(errs);
       return false;
@@ -392,11 +408,11 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
 
   const next = () => {
     if (!validateStep(step)) return;
-    if (step < STEPS.length) setStep(step + 1);
+    if (step < STEP_COUNT) setStep(step + 1);
   };
   const prev = () => step > 1 && setStep(step - 1);
   const submit = () => {
-    for (let i = 1; i <= STEPS.length; i++) {
+    for (let i = 1; i <= STEP_COUNT; i++) {
       if (!validateStep(i)) {
         setStep(i);
         return;
@@ -405,44 +421,45 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
     save.mutate();
   };
 
-  const progress = useMemo(() => (step / STEPS.length) * 100, [step]);
-  const current = STEPS[step - 1];
+  const progress = useMemo(() => (step / STEP_COUNT) * 100, [step]);
+  const currentTitle = t(STEP_KEYS[step as 1 | 2 | 3 | 4 | 5].title);
+  const currentDesc = t(STEP_KEYS[step as 1 | 2 | 3 | 4 | 5].desc);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            {mode === "edit" ? "Modifier le client" : "Nouveau client"}
+            {mode === "edit" ? t("wizard.title.edit") : t("wizard.title.new")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Étape {step} sur {STEPS.length} · {current.title}
-            <span className="text-muted-foreground/70"> · {current.desc}</span>
+            {t("wizard.step_of", { step, total: STEP_COUNT })} · {currentTitle}
+            <span className="text-muted-foreground/70"> · {currentDesc}</span>
           </p>
         </div>
         <Button variant="ghost" onClick={() => navigate({ to: "/clients" })}>
-          Annuler
+          {t("common.cancel")}
         </Button>
       </div>
 
       <Progress value={progress} className="mt-4 h-1.5" />
 
       <div className="mt-6 hidden grid-cols-5 gap-2 sm:grid">
-        {STEPS.map((s) => (
+        {STEP_IDS.map((id) => (
           <button
-            key={s.id}
+            key={id}
             type="button"
-            onClick={() => setStep(s.id)}
+            onClick={() => setStep(id)}
             className={`rounded-lg border px-3 py-2 text-left text-xs transition-colors ${
-              s.id === step
+              id === step
                 ? "border-primary bg-primary/5"
-                : s.id < step
+                : id < step
                   ? "border-border bg-muted/40"
                   : "border-border bg-card"
             }`}
           >
-            <div className="font-semibold">{s.id}. {s.title}</div>
-            <div className="mt-0.5 text-muted-foreground">{s.desc}</div>
+            <div className="font-semibold">{id}. {t(STEP_KEYS[id].title)}</div>
+            <div className="mt-0.5 text-muted-foreground">{t(STEP_KEYS[id].desc)}</div>
           </button>
         ))}
       </div>
@@ -457,11 +474,11 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
 
       <div className="mt-6 flex items-center justify-between">
         <Button variant="outline" onClick={prev} disabled={step === 1}>
-          <ChevronLeft className="h-4 w-4" /> Précédent
+          <ChevronLeft className="h-4 w-4" /> {t("common.previous")}
         </Button>
-        {step < STEPS.length ? (
+        {step < STEP_COUNT ? (
           <Button onClick={next}>
-            Suivant <ChevronRight className="h-4 w-4" />
+            {t("common.next")} <ChevronRight className="h-4 w-4" />
           </Button>
         ) : (
           <Button onClick={submit} disabled={save.isPending} className="shadow-elegant">
@@ -470,7 +487,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
             ) : (
               <Save className="h-4 w-4" />
             )}
-            {mode === "edit" ? "Enregistrer" : "Créer le dossier"}
+            {mode === "edit" ? t("wizard.btn.save") : t("wizard.btn.create")}
           </Button>
         )}
       </div>
@@ -510,9 +527,10 @@ function Field({
 }
 
 function StepIdentity({ form, update, errors }: StepProps) {
+  const t = useT();
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Prénom" htmlFor="fn" error={errors?.first_name}>
+      <Field label={t("wizard.field.first_name")} htmlFor="fn" error={errors?.first_name}>
         <Input
           id="fn"
           value={form.first_name}
@@ -520,7 +538,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={80}
         />
       </Field>
-      <Field label="Nom" htmlFor="ln" error={errors?.last_name}>
+      <Field label={t("wizard.field.last_name")} htmlFor="ln" error={errors?.last_name}>
         <Input
           id="ln"
           value={form.last_name}
@@ -528,7 +546,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={80}
         />
       </Field>
-      <Field label="Date de naissance" htmlFor="dob">
+      <Field label={t("wizard.field.dob")} htmlFor="dob">
         <Input
           id="dob"
           type="date"
@@ -536,7 +554,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           onChange={(e) => update("date_of_birth", e.target.value)}
         />
       </Field>
-      <Field label="Genre">
+      <Field label={t("wizard.field.gender")}>
         <Select
           value={form.gender || "unset"}
           onValueChange={(v) => update("gender", v === "unset" ? "" : (v as Gender))}
@@ -545,21 +563,21 @@ function StepIdentity({ form, update, errors }: StepProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="unset">Non renseigné</SelectItem>
+            <SelectItem value="unset">{t("wizard.field.gender.unset")}</SelectItem>
             {Object.entries(GENDER_LABELS).map(([k, v]) => (
               <SelectItem key={k} value={k}>{v}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Nationalité" htmlFor="nat">
+      <Field label={t("wizard.field.nationality")} htmlFor="nat">
         <CountryCombobox
           id="nat"
           value={form.nationality}
           onChange={(code) => update("nationality", code)}
         />
       </Field>
-      <Field label="Email" htmlFor="em" error={errors?.email}>
+      <Field label={t("wizard.field.email")} htmlFor="em" error={errors?.email}>
         <Input
           id="em"
           type="email"
@@ -568,10 +586,10 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={255}
         />
       </Field>
-      <Field label="Téléphone" htmlFor="ph">
+      <Field label={t("wizard.field.phone")} htmlFor="ph">
         <PhoneInput id="ph" value={form.phone} onChange={(v) => update("phone", v)} />
       </Field>
-      <Field label="Permis de séjour">
+      <Field label={t("wizard.field.permit")}>
         <Select value={form.permit} onValueChange={(v) => update("permit", v as Permit)}>
           <SelectTrigger>
             <SelectValue />
@@ -590,6 +608,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
 }
 
 function StepFiscal({ form, update, errors }: StepProps) {
+  const t = useT();
   const isSource =
     form.tax_status === "source_taxed" ||
     form.tax_status === "cross_border_fr_1983" ||
@@ -597,7 +616,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
     form.tax_status === "tou";
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Pays de résidence" htmlFor="cor">
+      <Field label={t("wizard.field.country_residence")} htmlFor="cor">
         <CountryCombobox
           id="cor"
           value={form.country_of_residence}
@@ -605,17 +624,17 @@ function StepFiscal({ form, update, errors }: StepProps) {
         />
       </Field>
       <Field
-        label="Canton de travail"
+        label={t("wizard.field.canton_work")}
         error={errors?.canton}
         hint={
           form.canton && !isSelectableCanton(form.canton)
-            ? `⚠ Le canton "${form.canton}" n'est pas disponible en v1 (Suisse romande). Sélectionnez un canton romand pour activer les calculs.`
+            ? t("wizard.field.canton.warn", { code: form.canton })
             : undefined
         }
       >
         <Select value={form.canton} onValueChange={(v) => update("canton", v)}>
           <SelectTrigger>
-            <SelectValue placeholder="Sélectionner un canton" />
+            <SelectValue placeholder={t("wizard.field.canton.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             {getSelectableCantons().map((c) => (
@@ -626,16 +645,16 @@ function StepFiscal({ form, update, errors }: StepProps) {
             {form.canton && !isSelectableCanton(form.canton) && (
               <SelectItem value={form.canton} disabled>
                 {form.canton} ·{" "}
-                {CANTON_BY_CODE[form.canton]?.name ?? form.canton} (hors scope v1)
+                {CANTON_BY_CODE[form.canton]?.name ?? form.canton} {t("wizard.field.canton.out_of_scope")}
               </SelectItem>
             )}
           </SelectContent>
         </Select>
       </Field>
       <Field
-        label="Commune"
+        label={t("wizard.field.commune")}
         htmlFor="com"
-        hint={form.canton ? "Saisie libre acceptée si commune absente de la liste" : undefined}
+        hint={form.canton ? t("wizard.field.commune.hint") : undefined}
       >
         <CommuneAutocomplete
           id="com"
@@ -644,7 +663,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           canton={form.canton}
         />
       </Field>
-      <Field label="Code postal (NPA)" htmlFor="npa">
+      <Field label={t("wizard.field.npa")} htmlFor="npa">
         <Input
           id="npa"
           value={form.postal_code}
@@ -652,7 +671,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           maxLength={10}
         />
       </Field>
-      <Field label="Statut fiscal">
+      <Field label={t("wizard.field.tax_status")}>
         <Select
           value={form.tax_status}
           onValueChange={(v) => update("tax_status", v as TaxStatus)}
@@ -670,13 +689,13 @@ function StepFiscal({ form, update, errors }: StepProps) {
         </Select>
       </Field>
       {isSource ? (
-        <Field label="Barème impôt à la source" hint="Sélectionner selon situation familiale">
+        <Field label={t("wizard.field.source_scale")} hint={t("wizard.field.source_scale.hint")}>
           <Select
             value={form.source_tax_scale}
             onValueChange={(v) => update("source_tax_scale", v as SourceTaxScale)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionner" />
+              <SelectValue placeholder={t("wizard.field.source_scale.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {SOURCE_TAX_SCALES.map((s) => (
@@ -690,7 +709,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
       ) : (
         <div />
       )}
-      <Field label="Confession">
+      <Field label={t("wizard.field.confession")}>
         <Select
           value={form.confession}
           onValueChange={(v) => update("confession", v as Confession)}
@@ -707,7 +726,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Paroisse (si pertinent)" htmlFor="par">
+      <Field label={t("wizard.field.parish")} htmlFor="par">
         <Input
           id="par"
           value={form.parish}
@@ -720,19 +739,20 @@ function StepFiscal({ form, update, errors }: StepProps) {
 }
 
 function StepActivity({ form, update }: StepProps) {
+  const t = useT();
   const rules = getWorkStatusRules(form.work_status);
   const salaryLabel = rules.isSelfEmployed && form.work_status === "self_employed"
-    ? "Revenu net annuel (indépendant)"
+    ? t("wizard.field.salary.self")
     : rules.isRetired
-      ? "Rentes annuelles totales (AVS + LPP)"
-      : "Salaire annuel brut";
+      ? t("wizard.field.salary.retired")
+      : t("wizard.field.salary.employee");
   const otherIncomeLabel = rules.isRetired
-    ? "Autres revenus (loyers, dividendes…)"
-    : "Autres revenus";
+    ? t("wizard.field.other_income.retired")
+    : t("wizard.field.other_income");
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Statut professionnel">
+      <Field label={t("wizard.field.work_status")}>
         <Select
           value={form.work_status}
           onValueChange={(v) => update("work_status", v as WorkStatus)}
@@ -750,7 +770,7 @@ function StepActivity({ form, update }: StepProps) {
         </Select>
       </Field>
       {rules.hasSalary && (
-        <Field label="Taux d'activité" htmlFor="ar">
+        <Field label={t("wizard.field.activity_rate")} htmlFor="ar">
           <NumField
             id="ar"
             value={form.activity_rate}
@@ -760,7 +780,7 @@ function StepActivity({ form, update }: StepProps) {
         </Field>
       )}
       {rules.hasSalary && !rules.isSelfEmployed && (
-        <Field label="Employeur" htmlFor="emp">
+        <Field label={t("wizard.field.employer")} htmlFor="emp">
           <Input
             id="emp"
             value={form.employer}
@@ -780,7 +800,7 @@ function StepActivity({ form, update }: StepProps) {
         </Field>
       )}
       {rules.hasSalary && !rules.isSelfEmployed && (
-        <Field label="Bonus / 13e" htmlFor="bn">
+        <Field label={t("wizard.field.bonus")} htmlFor="bn">
           <NumField
             id="bn"
             value={form.bonus}
@@ -806,6 +826,7 @@ function StepFamily({
   update,
   isMarried,
 }: StepProps & { isMarried: boolean }) {
+  const t = useT();
   const addChild = () =>
     update("children", [
       ...form.children,
@@ -825,7 +846,7 @@ function StepFamily({
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="État civil">
+        <Field label={t("wizard.field.civil_status")}>
           <Select
             value={form.civil_status}
             onValueChange={(v) => update("civil_status", v as CivilStatus)}
@@ -848,30 +869,30 @@ function StepFamily({
         <>
           <Separator />
           <div>
-            <h3 className="text-sm font-semibold">Conjoint</h3>
+            <h3 className="text-sm font-semibold">{t("wizard.spouse.title")}</h3>
             <div className="mt-3 grid gap-4 sm:grid-cols-2">
-              <Field label="Prénom du conjoint">
+              <Field label={t("wizard.spouse.first_name")}>
                 <Input
                   value={form.spouse_first_name}
                   onChange={(e) => update("spouse_first_name", e.target.value)}
                   maxLength={80}
                 />
               </Field>
-              <Field label="Nom du conjoint">
+              <Field label={t("wizard.spouse.last_name")}>
                 <Input
                   value={form.spouse_last_name}
                   onChange={(e) => update("spouse_last_name", e.target.value)}
                   maxLength={80}
                 />
               </Field>
-              <Field label="Date de naissance">
+              <Field label={t("wizard.spouse.dob")}>
                 <Input
                   type="date"
                   value={form.spouse_date_of_birth}
                   onChange={(e) => update("spouse_date_of_birth", e.target.value)}
                 />
               </Field>
-              <Field label="Salaire annuel brut conjoint">
+              <Field label={t("wizard.spouse.salary")}>
                 <NumField
                   value={form.spouse_gross_annual_salary}
                   onChange={(v) => update("spouse_gross_annual_salary", v)}
@@ -886,14 +907,14 @@ function StepFamily({
       <Separator />
       <div>
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Enfants à charge</h3>
+          <h3 className="text-sm font-semibold">{t("wizard.children.title")}</h3>
           <Button type="button" variant="outline" size="sm" onClick={addChild}>
-            <Plus className="h-4 w-4" /> Ajouter
+            <Plus className="h-4 w-4" /> {t("wizard.children.add")}
           </Button>
         </div>
         {form.children.length === 0 ? (
           <p className="mt-3 text-sm text-muted-foreground">
-            Aucun enfant · ajoutez les enfants à charge pour ajuster les déductions fiscales.
+            {t("wizard.children.empty")}
           </p>
         ) : (
           <div className="mt-3 space-y-3">
@@ -902,7 +923,7 @@ function StepFamily({
                 <Input
                   value={c.first_name}
                   onChange={(e) => updateChild(i, { first_name: e.target.value })}
-                  placeholder="Prénom"
+                  placeholder={t("wizard.children.first_name.placeholder")}
                   maxLength={80}
                 />
                 <Input
@@ -915,7 +936,7 @@ function StepFamily({
                     checked={c.in_household}
                     onCheckedChange={(v) => updateChild(i, { in_household: !!v })}
                   />
-                  Au foyer
+                  {t("wizard.children.in_household")}
                 </label>
                 <Button
                   type="button"
@@ -940,7 +961,9 @@ function StepPatrimoine({
   update,
   workStatus,
 }: StepProps & { workStatus: WorkStatus }) {
+  const t = useT();
   const rules = getWorkStatusRules(workStatus);
+  const shortLabel = t(`enum.work_status.${workStatus}`);
   const netSelfIncome = Number(form.gross_annual_salary) || 0;
   const cap3a = rules.hasLPP
     ? rules.pillar3aCap
@@ -952,16 +975,16 @@ function StepPatrimoine({
     <div className="space-y-6">
       {rules.hasLPP ? (
         <div>
-          <h3 className="text-sm font-semibold">2e pilier (LPP)</h3>
+          <h3 className="text-sm font-semibold">{t("wizard.lpp.title")}</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <Field label="Avoir LPP actuel">
+            <Field label={t("wizard.lpp.balance")}>
               <NumField
                 value={form.lpp_current_balance}
                 onChange={(v) => update("lpp_current_balance", v)}
                 suffix="CHF"
               />
             </Field>
-            <Field label="Salaire assuré LPP">
+            <Field label={t("wizard.lpp.insured")}>
               <NumField
                 value={form.lpp_insured_salary}
                 onChange={(v) => update("lpp_insured_salary", v)}
@@ -969,7 +992,7 @@ function StepPatrimoine({
               />
             </Field>
             {rules.canBuybackLPP && (
-              <Field label="Capacité de rachat LPP" hint="Maximum mentionné par la caisse">
+              <Field label={t("wizard.lpp.buyback")} hint={t("wizard.lpp.buyback.hint")}>
                 <NumField
                   value={form.lpp_max_buyback}
                   onChange={(v) => update("lpp_max_buyback", v)}
@@ -977,7 +1000,7 @@ function StepPatrimoine({
                 />
               </Field>
             )}
-            <Field label="Plan LPP">
+            <Field label={t("wizard.lpp.plan")}>
               <Select value={form.lpp_plan} onValueChange={(v) => update("lpp_plan", v as LppPlan)}>
                 <SelectTrigger>
                   <SelectValue />
@@ -995,16 +1018,14 @@ function StepPatrimoine({
         </div>
       ) : !rules.isRetired ? (
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
-          Statut <strong>{rules.shortLabel}</strong> : pas d'affiliation LPP obligatoire.
-          {rules.isSelfEmployed
-            ? " Le client peut s'affilier facultativement à une institution de prévoyance."
-            : ""}
+          {t("wizard.lpp.no_aff", { label: shortLabel })}
+          {rules.isSelfEmployed ? t("wizard.lpp.self_optional") : ""}
         </div>
       ) : (
         <div>
-          <h3 className="text-sm font-semibold">2e pilier (LPP) · capital restant</h3>
+          <h3 className="text-sm font-semibold">{t("wizard.lpp.title_retired")}</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
-            <Field label="Capital LPP non retiré">
+            <Field label={t("wizard.lpp.balance_remaining")}>
               <NumField
                 value={form.lpp_current_balance}
                 onChange={(v) => update("lpp_current_balance", v)}
@@ -1018,11 +1039,11 @@ function StepPatrimoine({
       <Separator />
       {cap3a > 0 ? (
         <div>
-          <h3 className="text-sm font-semibold">3e pilier (3a)</h3>
+          <h3 className="text-sm font-semibold">{t("wizard.p3a.title")}</h3>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <Field
-              label="Versement annuel 3a"
-              hint={`Plafond 2026 ${rules.shortLabel.toLowerCase()} : ${formatCHF(cap3a)}`}
+              label={t("wizard.p3a.contribution")}
+              hint={t("wizard.p3a.cap_hint", { label: shortLabel.toLowerCase(), amount: formatCHF(cap3a) })}
             >
               <NumField
                 value={form.pillar_3a_annual_contribution}
@@ -1032,24 +1053,24 @@ function StepPatrimoine({
             </Field>
           </div>
           <PensionAccountsEditor
-            label="Comptes 3a existants"
-            hint="Saisis chaque compte 3a (banque ou assurance) avec son solde actuel."
+            label={t("wizard.p3a.accounts.label")}
+            hint={t("wizard.p3a.accounts.hint")}
             value={form.pillar_3a_accounts}
             onChange={(v) => update("pillar_3a_accounts", v)}
           />
         </div>
       ) : (
         <div className="rounded-lg border border-dashed border-muted-foreground/30 bg-muted/20 p-3 text-xs text-muted-foreground">
-          Statut <strong>{rules.shortLabel}</strong> : versement 3a non applicable
-          {rules.isRetired ? " (au-delà de l'âge AVS)" : " (pas de revenu d'activité)"}.
+          {t("wizard.p3a.not_applicable", { label: shortLabel })}
+          {rules.isRetired ? t("wizard.p3a.reason.retired") : t("wizard.p3a.reason.no_income")}.
         </div>
       )}
 
       <Separator />
       <div>
-        <h3 className="text-sm font-semibold">Comptes de libre passage</h3>
+        <h3 className="text-sm font-semibold">{t("wizard.vested.title")}</h3>
         <p className="mt-1 text-xs text-muted-foreground">
-          Anciens 2e pilier transférés sur des comptes/polices de libre passage (changement d'emploi, indépendance, etc.).
+          {t("wizard.vested.desc")}
         </p>
         <PensionAccountsEditor
           value={form.vested_benefits_accounts}
@@ -1059,30 +1080,30 @@ function StepPatrimoine({
 
       <Separator />
       <div>
-        <h3 className="text-sm font-semibold">Patrimoine</h3>
+        <h3 className="text-sm font-semibold">{t("wizard.assets.title")}</h3>
         <div className="mt-3 grid gap-4 sm:grid-cols-2">
-          <Field label="Comptes bancaires">
+          <Field label={t("wizard.assets.bank")}>
             <NumField
               value={form.bank_accounts}
               onChange={(v) => update("bank_accounts", v)}
               suffix="CHF"
             />
           </Field>
-          <Field label="Titres / portefeuille">
+          <Field label={t("wizard.assets.securities")}>
             <NumField
               value={form.securities}
               onChange={(v) => update("securities", v)}
               suffix="CHF"
             />
           </Field>
-          <Field label="Bien immobilier (valeur fiscale)">
+          <Field label={t("wizard.assets.realestate")}>
             <NumField
               value={form.real_estate_value}
               onChange={(v) => update("real_estate_value", v)}
               suffix="CHF"
             />
           </Field>
-          <Field label="Dette hypothécaire">
+          <Field label={t("wizard.assets.mortgage")}>
             <NumField
               value={form.mortgage_debt}
               onChange={(v) => update("mortgage_debt", v)}
@@ -1106,6 +1127,7 @@ function PensionAccountsEditor({
   label?: string;
   hint?: string;
 }) {
+  const t = useT();
   const total = value.reduce((s, a) => s + (Number(a.balance) || 0), 0);
   const add = () => onChange([...value, { institution: "", balance: 0 }]);
   const remove = (i: number) => onChange(value.filter((_, idx) => idx !== i));
@@ -1117,21 +1139,21 @@ function PensionAccountsEditor({
       {label && <div className="text-xs font-medium text-muted-foreground">{label}</div>}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
       {value.length === 0 ? (
-        <p className="text-xs italic text-muted-foreground">Aucun compte enregistré.</p>
+        <p className="text-xs italic text-muted-foreground">{t("wizard.accounts.empty")}</p>
       ) : (
         <div className="space-y-2">
           {value.map((a, i) => (
             <div key={i} className="flex items-end gap-2">
               <div className="flex-1">
-                <Label className="text-[11px] text-muted-foreground">Institution</Label>
+                <Label className="text-[11px] text-muted-foreground">{t("wizard.accounts.institution")}</Label>
                 <Input
                   value={a.institution}
                   onChange={(e) => patch(i, { institution: e.target.value })}
-                  placeholder="UBS, Swiss Life, VIAC…"
+                  placeholder={t("wizard.accounts.institution.placeholder")}
                 />
               </div>
               <div className="w-40">
-                <Label className="text-[11px] text-muted-foreground">Solde</Label>
+                <Label className="text-[11px] text-muted-foreground">{t("wizard.accounts.balance")}</Label>
                 <NumField
                   value={String(a.balance || "")}
                   onChange={(v) => patch(i, { balance: Number(v) || 0 })}
@@ -1144,12 +1166,12 @@ function PensionAccountsEditor({
             </div>
           ))}
           <div className="text-right text-xs text-muted-foreground">
-            Total : <span className="font-medium text-foreground">{formatCHF(total)}</span>
+            {t("wizard.accounts.total")} <span className="font-medium text-foreground">{formatCHF(total)}</span>
           </div>
         </div>
       )}
       <Button type="button" variant="outline" size="sm" onClick={add}>
-        <Plus className="h-3.5 w-3.5" /> Ajouter un compte
+        <Plus className="h-3.5 w-3.5" /> {t("wizard.accounts.add")}
       </Button>
     </div>
   );

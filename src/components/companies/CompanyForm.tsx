@@ -27,10 +27,11 @@ import {
 import { NumField } from "@/components/ui/num-field";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useT } from "@/contexts/LanguageContext";
 import { CANTONS } from "@/lib/swiss/cantons";
 import {
   IDE_REGEX,
-  LEGAL_FORM_OPTIONS,
+  getLegalFormOptions,
   normalizeIde,
   type Company,
   type LegalForm,
@@ -39,12 +40,12 @@ import {
 const currentYear = new Date().getFullYear();
 
 const schema = z.object({
-  legal_name: z.string().trim().min(1, "Raison sociale obligatoire"),
+  legal_name: z.string().trim().min(1, "company_form.error.legal_name"),
   legal_form: z.enum(["sarl", "sa", "cooperative", "association", "other"]),
   ide_number: z
     .string()
     .optional()
-    .refine((v) => !v || !v.trim() || IDE_REGEX.test(v.trim()), "Format attendu : CHE-XXX.XXX.XXX"),
+    .refine((v) => !v || !v.trim() || IDE_REGEX.test(v.trim()), "company_form.error.ide"),
   vat_number: z.string().optional(),
   canton: z.string().optional(),
   founding_year: z
@@ -54,7 +55,7 @@ const schema = z.object({
       if (!v || !v.trim()) return true;
       const n = Number(v);
       return Number.isInteger(n) && n >= 1800 && n <= currentYear + 1;
-    }, `Année entre 1800 et ${currentYear + 1}`),
+    }, "company_form.error.year"),
   annual_revenue: z.string().optional(),
   annual_profit: z.string().optional(),
   retained_earnings: z.string().optional(),
@@ -80,9 +81,19 @@ export interface CompanyFormProps {
 }
 
 export function CompanyForm({ mode, initial }: CompanyFormProps) {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
+
+  // Helper : transforme un message d'erreur Zod (clé i18n) en texte localisé.
+  const tErr = (msg: string | undefined): string | undefined => {
+    if (!msg) return undefined;
+    if (msg.startsWith("company_form.")) {
+      return t(msg, { max: currentYear + 1 });
+    }
+    return msg;
+  };
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -119,7 +130,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
       };
 
       if (mode === "create") {
-        if (!user) throw new Error("Non authentifié");
+        if (!user) throw new Error(t("wizard.toast.unauth"));
         const { data, error } = await supabase
           .from("companies")
           .insert({ ...payload, broker_id: user.id })
@@ -129,7 +140,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
         return data as Company;
       }
 
-      if (!initial) throw new Error("Société introuvable");
+      if (!initial) throw new Error(t("company_form.toast.notfound"));
       const { data, error } = await supabase
         .from("companies")
         .update(payload)
@@ -140,12 +151,9 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
       return data as Company;
     },
     onSuccess: (company) => {
-      toast.success(mode === "create" ? "Société créée" : "Modifications enregistrées");
+      toast.success(mode === "create" ? t("company_form.toast.created") : t("company_form.toast.updated"));
       qc.invalidateQueries({ queryKey: ["companies"] });
       qc.invalidateQueries({ queryKey: ["company", company.id] });
-      // Synchro fiche client ↔ calculateur dirigeant : toute modif société
-      // (bénéfice, canton, forme juridique…) doit se refléter immédiatement
-      // sur les fiches clients dirigeants liés.
       qc.invalidateQueries({ queryKey: ["client-company"] });
       qc.invalidateQueries({ queryKey: ["client-linked-company"] });
       qc.invalidateQueries({ queryKey: ["director-comp-link"] });
@@ -157,6 +165,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
   });
 
   const selectableCantons = CANTONS.filter((c) => c.selectable);
+  const legalFormOptions = getLegalFormOptions();
 
   return (
     <Form {...form}>
@@ -175,17 +184,16 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
                 : navigate({ to: "/companies" })
             }
           >
-            <ArrowLeft className="h-4 w-4" /> Retour
+            <ArrowLeft className="h-4 w-4" /> {t("common.back")}
           </Button>
         </div>
 
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
-            {mode === "create" ? "Nouvelle société" : "Modifier la société"}
+            {mode === "create" ? t("company_form.title.new") : t("company_form.title.edit")}
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Identité juridique et données financières annuelles. Les dirigeants se rattachent
-            ensuite depuis leur fiche client.
+            {t("company_form.subtitle")}
           </p>
         </div>
 
@@ -193,20 +201,22 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
           <header className="mb-4 flex items-center gap-2">
             <Building2 className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">Identité</h2>
+            <h2 className="text-base font-semibold">{t("company_form.section.identity")}</h2>
           </header>
 
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="legal_name"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem className="sm:col-span-2">
-                  <FormLabel>Raison sociale *</FormLabel>
+                  <FormLabel>{t("company_form.field.legal_name")}</FormLabel>
                   <FormControl>
                     <Input placeholder="Acme Sàrl" {...field} />
                   </FormControl>
-                  <FormMessage />
+                  {fieldState.error?.message ? (
+                    <p className="text-sm text-destructive">{tErr(fieldState.error.message)}</p>
+                  ) : null}
                 </FormItem>
               )}
             />
@@ -216,7 +226,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="legal_form"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Forme juridique *</FormLabel>
+                  <FormLabel>{t("company_form.field.legal_form")}</FormLabel>
                   <Select value={field.value} onValueChange={field.onChange}>
                     <FormControl>
                       <SelectTrigger>
@@ -224,7 +234,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {LEGAL_FORM_OPTIONS.map((o) => (
+                      {legalFormOptions.map((o) => (
                         <SelectItem key={o.value} value={o.value}>
                           {o.label}
                         </SelectItem>
@@ -241,18 +251,18 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="canton"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Canton du siège</FormLabel>
+                  <FormLabel>{t("company_form.field.canton")}</FormLabel>
                   <Select
                     value={field.value || ""}
                     onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="—" />
+                        <SelectValue placeholder={t("company_form.field.canton.placeholder")} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="__none__">Non renseigné</SelectItem>
+                      <SelectItem value="__none__">{t("company_form.field.canton.none")}</SelectItem>
                       {selectableCantons.map((c) => (
                         <SelectItem key={c.code} value={c.code}>
                           {c.code} · {c.name}
@@ -268,9 +278,9 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
             <FormField
               control={form.control}
               name="ide_number"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Numéro IDE</FormLabel>
+                  <FormLabel>{t("company_form.field.ide")}</FormLabel>
                   <FormControl>
                     <Input
                       placeholder="CHE-123.456.789"
@@ -282,8 +292,10 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
                       }}
                     />
                   </FormControl>
-                  <FormDescription>Format suisse : CHE-XXX.XXX.XXX</FormDescription>
-                  <FormMessage />
+                  <FormDescription>{t("company_form.field.ide.hint")}</FormDescription>
+                  {fieldState.error?.message ? (
+                    <p className="text-sm text-destructive">{tErr(fieldState.error.message)}</p>
+                  ) : null}
                 </FormItem>
               )}
             />
@@ -293,7 +305,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="vat_number"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Numéro TVA</FormLabel>
+                  <FormLabel>{t("company_form.field.vat")}</FormLabel>
                   <FormControl>
                     <Input placeholder="CHE-123.456.789 TVA" {...field} />
                   </FormControl>
@@ -305,9 +317,9 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
             <FormField
               control={form.control}
               name="founding_year"
-              render={({ field }) => (
+              render={({ field, fieldState }) => (
                 <FormItem>
-                  <FormLabel>Année de fondation</FormLabel>
+                  <FormLabel>{t("company_form.field.year")}</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -318,7 +330,9 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  {fieldState.error?.message ? (
+                    <p className="text-sm text-destructive">{tErr(fieldState.error.message)}</p>
+                  ) : null}
                 </FormItem>
               )}
             />
@@ -329,7 +343,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
         <section className="rounded-2xl border border-border bg-card p-6 shadow-card">
           <header className="mb-4 flex items-center gap-2">
             <Coins className="h-4 w-4 text-primary" />
-            <h2 className="text-base font-semibold">Données financières</h2>
+            <h2 className="text-base font-semibold">{t("company_form.section.finance")}</h2>
           </header>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -338,7 +352,7 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="annual_revenue"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Chiffre d'affaires annuel</FormLabel>
+                  <FormLabel>{t("company_form.field.revenue")}</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="CHF" />
                   </FormControl>
@@ -351,11 +365,11 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="annual_profit"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Bénéfice annuel</FormLabel>
+                  <FormLabel>{t("company_form.field.profit")}</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="CHF" />
                   </FormControl>
-                  <FormDescription>Avant distribution éventuelle de dividende.</FormDescription>
+                  <FormDescription>{t("company_form.field.profit.hint")}</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -365,12 +379,12 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="retained_earnings"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Réserves / bénéfices reportés</FormLabel>
+                  <FormLabel>{t("company_form.field.reserves")}</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="CHF" />
                   </FormControl>
                   <FormDescription>
-                    Cumul disponible au bilan, utile pour les comparatifs dividende / salaire.
+                    {t("company_form.field.reserves.hint")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -381,12 +395,12 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
               name="headcount_fte"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Nombre de collaborateurs (ETP)</FormLabel>
+                  <FormLabel>{t("company_form.field.fte")}</FormLabel>
                   <FormControl>
                     <NumField value={field.value ?? ""} onChange={field.onChange} suffix="ETP" />
                   </FormControl>
                   <FormDescription>
-                    Effectif équivalent temps plein. Indicatif, utilisé pour contextualiser les calculs.
+                    {t("company_form.field.fte.hint")}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
@@ -402,9 +416,9 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
             name="notes"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Notes internes</FormLabel>
+                <FormLabel>{t("company_form.field.notes")}</FormLabel>
                 <FormControl>
-                  <Textarea rows={4} placeholder="Contexte, particularités…" {...field} />
+                  <Textarea rows={4} placeholder={t("company_form.field.notes.placeholder")} {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -422,11 +436,11 @@ export function CompanyForm({ mode, initial }: CompanyFormProps) {
                 : navigate({ to: "/companies" })
             }
           >
-            Annuler
+            {t("common.cancel")}
           </Button>
           <Button type="submit" disabled={mutation.isPending}>
             {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            {mode === "create" ? "Créer la société" : "Enregistrer"}
+            {mode === "create" ? t("company_form.btn.create") : t("company_form.btn.save")}
           </Button>
         </div>
       </form>
