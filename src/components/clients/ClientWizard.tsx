@@ -608,6 +608,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
 }
 
 function StepFiscal({ form, update, errors }: StepProps) {
+  const t = useT();
   const isSource =
     form.tax_status === "source_taxed" ||
     form.tax_status === "cross_border_fr_1983" ||
@@ -615,7 +616,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
     form.tax_status === "tou";
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Pays de résidence" htmlFor="cor">
+      <Field label={t("wizard.field.country_residence")} htmlFor="cor">
         <CountryCombobox
           id="cor"
           value={form.country_of_residence}
@@ -623,17 +624,17 @@ function StepFiscal({ form, update, errors }: StepProps) {
         />
       </Field>
       <Field
-        label="Canton de travail"
+        label={t("wizard.field.canton_work")}
         error={errors?.canton}
         hint={
           form.canton && !isSelectableCanton(form.canton)
-            ? `⚠ Le canton "${form.canton}" n'est pas disponible en v1 (Suisse romande). Sélectionnez un canton romand pour activer les calculs.`
+            ? t("wizard.field.canton.warn", { code: form.canton })
             : undefined
         }
       >
         <Select value={form.canton} onValueChange={(v) => update("canton", v)}>
           <SelectTrigger>
-            <SelectValue placeholder="Sélectionner un canton" />
+            <SelectValue placeholder={t("wizard.field.canton.placeholder")} />
           </SelectTrigger>
           <SelectContent>
             {getSelectableCantons().map((c) => (
@@ -644,16 +645,16 @@ function StepFiscal({ form, update, errors }: StepProps) {
             {form.canton && !isSelectableCanton(form.canton) && (
               <SelectItem value={form.canton} disabled>
                 {form.canton} ·{" "}
-                {CANTON_BY_CODE[form.canton]?.name ?? form.canton} (hors scope v1)
+                {CANTON_BY_CODE[form.canton]?.name ?? form.canton} {t("wizard.field.canton.out_of_scope")}
               </SelectItem>
             )}
           </SelectContent>
         </Select>
       </Field>
       <Field
-        label="Commune"
+        label={t("wizard.field.commune")}
         htmlFor="com"
-        hint={form.canton ? "Saisie libre acceptée si commune absente de la liste" : undefined}
+        hint={form.canton ? t("wizard.field.commune.hint") : undefined}
       >
         <CommuneAutocomplete
           id="com"
@@ -662,7 +663,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           canton={form.canton}
         />
       </Field>
-      <Field label="Code postal (NPA)" htmlFor="npa">
+      <Field label={t("wizard.field.npa")} htmlFor="npa">
         <Input
           id="npa"
           value={form.postal_code}
@@ -670,7 +671,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           maxLength={10}
         />
       </Field>
-      <Field label="Statut fiscal">
+      <Field label={t("wizard.field.tax_status")}>
         <Select
           value={form.tax_status}
           onValueChange={(v) => update("tax_status", v as TaxStatus)}
@@ -688,13 +689,13 @@ function StepFiscal({ form, update, errors }: StepProps) {
         </Select>
       </Field>
       {isSource ? (
-        <Field label="Barème impôt à la source" hint="Sélectionner selon situation familiale">
+        <Field label={t("wizard.field.source_scale")} hint={t("wizard.field.source_scale.hint")}>
           <Select
             value={form.source_tax_scale}
             onValueChange={(v) => update("source_tax_scale", v as SourceTaxScale)}
           >
             <SelectTrigger>
-              <SelectValue placeholder="Sélectionner" />
+              <SelectValue placeholder={t("wizard.field.source_scale.placeholder")} />
             </SelectTrigger>
             <SelectContent>
               {SOURCE_TAX_SCALES.map((s) => (
@@ -708,7 +709,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
       ) : (
         <div />
       )}
-      <Field label="Confession">
+      <Field label={t("wizard.field.confession")}>
         <Select
           value={form.confession}
           onValueChange={(v) => update("confession", v as Confession)}
@@ -725,7 +726,7 @@ function StepFiscal({ form, update, errors }: StepProps) {
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Paroisse (si pertinent)" htmlFor="par">
+      <Field label={t("wizard.field.parish")} htmlFor="par">
         <Input
           id="par"
           value={form.parish}
