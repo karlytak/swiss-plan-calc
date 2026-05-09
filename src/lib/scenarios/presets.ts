@@ -72,141 +72,61 @@ export function clientToTaxInput(
   };
 }
 
+// Helpers : labels/descriptions résolus dynamiquement via i18n.
+function L(id: ScenarioId, frLabel: string, frDesc: string, category: ScenarioDef["category"], apply: ScenarioDef["apply"]): ScenarioDef {
+  return {
+    id,
+    category,
+    apply,
+    get label() { return t(`scenario.${id}.label`, undefined, frLabel); },
+    get description() { return t(`scenario.${id}.desc`, undefined, frDesc); },
+  } as ScenarioDef;
+}
+
 export const SCENARIO_PRESETS: ScenarioDef[] = [
-  {
-    id: "baseline",
-    label: "Situation actuelle",
-    description: "Référence · paramètres tels que dans la fiche client.",
-    category: "vie",
-    apply: (b) => ({ ...b }),
-  },
-  {
-    id: "marriage",
-    label: "Mariage",
-    description: "Passage en imposition couple (splitting selon barème cantonal).",
-    category: "vie",
-    apply: (b) => ({ ...b, status: "married" }),
-  },
-  {
-    id: "divorce",
-    label: "Divorce",
-    description: "Retour en célibataire, conjoint retiré.",
-    category: "vie",
-    apply: (b) => ({
-      ...b,
-      status: (b.children ?? 0) > 0 ? "single_with_children" : "single",
-      spouseGrossSalary: 0,
-    }),
-  },
-  {
-    id: "new_child",
-    label: "Naissance d'un enfant",
-    description: "Ajout d'un enfant à charge (déduction sociale + barème famille).",
-    category: "vie",
-    apply: (b) => ({ ...b, children: (b.children ?? 0) + 1 }),
-  },
-  {
-    id: "max_3a",
-    label: "Versement 3a au plafond",
-    description: `Cotisation portée à CHF ${PILLAR_3A_MAX_2026_LPP.toLocaleString("fr-CH")} (affilié LPP).`,
-    category: "prevoyance",
-    apply: (b) => ({ ...b, pillar3aContributions: PILLAR_3A_MAX_2026_LPP }),
-  },
-  {
-    id: "lpp_buyback_full",
-    label: "Rachat LPP (lacune complète)",
-    description: "Versement de la capacité de rachat LPP en une fois.",
-    category: "prevoyance",
-    apply: (b) => ({
-      ...b,
-      // Rachat ajouté dynamiquement par l'appelant via lppBuyback
-      lppBuyback: Math.max(0, b.lppBuyback ?? 0),
-    }),
-  },
-  {
-    id: "retirement_65",
-    label: "Départ retraite ordinaire",
-    description: "Salaire à 0, revenu rente AVS+LPP estimé à 60 % du dernier salaire.",
-    category: "carriere",
-    apply: (b) => {
-      const lastSalary = (b.grossSalary ?? 0) + (b.bonus ?? 0);
-      return {
-        ...b,
-        grossSalary: 0,
-        bonus: 0,
-        otherIncome: Math.round(lastSalary * 0.6),
-        pillar3aContributions: 0,
-        lppBuyback: 0,
-      };
-    },
-  },
-  {
-    id: "move_zg",
-    label: "Déménagement → Zoug",
-    description: "Canton fiscalement parmi les plus avantageux de Suisse.",
-    category: "geo",
-    apply: (b) => ({ ...b, canton: "ZG", communalMultiplier: undefined, cantonalMultiplier: undefined }),
-  },
-  {
-    id: "move_sz",
-    label: "Déménagement → Schwytz",
-    description: "Faible fiscalité cantonale, proche de Zurich.",
-    category: "geo",
-    apply: (b) => ({ ...b, canton: "SZ", communalMultiplier: undefined, cantonalMultiplier: undefined }),
-  },
-  {
-    id: "move_ge",
-    label: "Déménagement → Genève",
-    description: "Comparatif avec un canton à fiscalité élevée.",
-    category: "geo",
-    apply: (b) => ({ ...b, canton: "GE", communalMultiplier: undefined, cantonalMultiplier: undefined }),
-  },
-  {
-    id: "move_vd",
-    label: "Déménagement → Vaud",
-    description: "Lausanne et arc lémanique.",
-    category: "geo",
-    apply: (b) => ({ ...b, canton: "VD", communalMultiplier: undefined, cantonalMultiplier: undefined }),
-  },
-  {
-    id: "move_zh",
-    label: "Déménagement → Zurich",
-    description: "Plus grand canton suisse.",
-    category: "geo",
-    apply: (b) => ({ ...b, canton: "ZH", communalMultiplier: undefined, cantonalMultiplier: undefined }),
-  },
-  {
-    id: "raise_10",
-    label: "Augmentation salaire +10 %",
-    description: "Impact sur progressivité et taux marginal.",
-    category: "carriere",
-    apply: (b) => ({
-      ...b,
-      grossSalary: Math.round((b.grossSalary ?? 0) * 1.1),
-      bonus: Math.round((b.bonus ?? 0) * 1.1),
-    }),
-  },
-  {
-    id: "part_time_80",
-    label: "Passage à 80 %",
-    description: "Réduction du salaire à 80 % du brut actuel.",
-    category: "carriere",
-    apply: (b) => ({
-      ...b,
-      grossSalary: Math.round((b.grossSalary ?? 0) * 0.8),
-      bonus: Math.round((b.bonus ?? 0) * 0.8),
-    }),
-  },
+  L("baseline", "Situation actuelle", "Référence · paramètres tels que dans la fiche client.", "vie", (b) => ({ ...b })),
+  L("marriage", "Mariage", "Passage en imposition couple (splitting selon barème cantonal).", "vie", (b) => ({ ...b, status: "married" })),
+  L("divorce", "Divorce", "Retour en célibataire, conjoint retiré.", "vie", (b) => ({
+    ...b,
+    status: (b.children ?? 0) > 0 ? "single_with_children" : "single",
+    spouseGrossSalary: 0,
+  })),
+  L("new_child", "Naissance d'un enfant", "Ajout d'un enfant à charge (déduction sociale + barème famille).", "vie", (b) => ({ ...b, children: (b.children ?? 0) + 1 })),
+  L("max_3a", "Versement 3a au plafond", `Cotisation portée à CHF ${PILLAR_3A_MAX_2026_LPP.toLocaleString("fr-CH")} (affilié LPP).`, "prevoyance", (b) => ({ ...b, pillar3aContributions: PILLAR_3A_MAX_2026_LPP })),
+  L("lpp_buyback_full", "Rachat LPP (lacune complète)", "Versement de la capacité de rachat LPP en une fois.", "prevoyance", (b) => ({ ...b, lppBuyback: Math.max(0, b.lppBuyback ?? 0) })),
+  L("retirement_65", "Départ retraite ordinaire", "Salaire à 0, revenu rente AVS+LPP estimé à 60 % du dernier salaire.", "carriere", (b) => {
+    const lastSalary = (b.grossSalary ?? 0) + (b.bonus ?? 0);
+    return { ...b, grossSalary: 0, bonus: 0, otherIncome: Math.round(lastSalary * 0.6), pillar3aContributions: 0, lppBuyback: 0 };
+  }),
+  L("move_zg", "Déménagement → Zoug", "Canton fiscalement parmi les plus avantageux de Suisse.", "geo", (b) => ({ ...b, canton: "ZG", communalMultiplier: undefined, cantonalMultiplier: undefined })),
+  L("move_sz", "Déménagement → Schwytz", "Faible fiscalité cantonale, proche de Zurich.", "geo", (b) => ({ ...b, canton: "SZ", communalMultiplier: undefined, cantonalMultiplier: undefined })),
+  L("move_ge", "Déménagement → Genève", "Comparatif avec un canton à fiscalité élevée.", "geo", (b) => ({ ...b, canton: "GE", communalMultiplier: undefined, cantonalMultiplier: undefined })),
+  L("move_vd", "Déménagement → Vaud", "Lausanne et arc lémanique.", "geo", (b) => ({ ...b, canton: "VD", communalMultiplier: undefined, cantonalMultiplier: undefined })),
+  L("move_zh", "Déménagement → Zurich", "Plus grand canton suisse.", "geo", (b) => ({ ...b, canton: "ZH", communalMultiplier: undefined, cantonalMultiplier: undefined })),
+  L("raise_10", "Augmentation salaire +10 %", "Impact sur progressivité et taux marginal.", "carriere", (b) => ({
+    ...b, grossSalary: Math.round((b.grossSalary ?? 0) * 1.1), bonus: Math.round((b.bonus ?? 0) * 1.1),
+  })),
+  L("part_time_80", "Passage à 80 %", "Réduction du salaire à 80 % du brut actuel.", "carriere", (b) => ({
+    ...b, grossSalary: Math.round((b.grossSalary ?? 0) * 0.8), bonus: Math.round((b.bonus ?? 0) * 0.8),
+  })),
 ];
 
 export const SCENARIO_BY_ID: Record<ScenarioId, ScenarioDef> = Object.fromEntries(
   SCENARIO_PRESETS.map((s) => [s.id, s]),
 ) as Record<ScenarioId, ScenarioDef>;
 
-export const CATEGORY_LABELS: Record<ScenarioDef["category"], string> = {
+const CATEGORY_FR: Record<ScenarioDef["category"], string> = {
   vie: "Événements de vie",
   fiscal: "Fiscalité",
   prevoyance: "Prévoyance",
   geo: "Géographie",
   carriere: "Carrière",
 };
+
+export const CATEGORY_LABELS: Record<ScenarioDef["category"], string> = new Proxy(CATEGORY_FR, {
+  get(target, prop: string) {
+    if (!(prop in target)) return (target as Record<string, string>)[prop];
+    return t(`scenario.cat.${prop}`, undefined, (target as Record<string, string>)[prop]);
+  },
+}) as Record<ScenarioDef["category"], string>;
+
