@@ -93,24 +93,24 @@ export const Route = createFileRoute("/_app/calculators/director-compensation")(
   validateSearch: zodValidator(searchSchema),
   head: () => ({
     meta: [
-      { title: "Comparateur salaire / dividende — SwissBroker Pro" },
+      { title: translate("calc.dir.head.title") },
       {
         name: "description",
-        content:
-          "Comparez les stratégies de rémunération salaire / dividendes / réserves d'un dirigeant de société suisse.",
+        content: translate("calc.dir.head.desc"),
       },
     ],
   }),
   component: DirectorCompensationCalc,
 });
 
-const FILING_OPTIONS: { value: FilingStatus; label: string }[] = [
-  { value: "single", label: "Célibataire" },
-  { value: "married", label: "Marié·e" },
-  { value: "single_with_children", label: "Famille monoparentale" },
+const FILING_OPTIONS: { value: FilingStatus; labelKey: string }[] = [
+  { value: "single", labelKey: "calc.status.single" },
+  { value: "married", labelKey: "calc.status.married" },
+  { value: "single_with_children", labelKey: "calc.status.single_with_children" },
 ];
 
 function DirectorCompensationCalc() {
+  const t = useT();
   const { clientId, companyId } = Route.useSearch();
 
   // Charge optionnellement le client + la société depuis l'URL.
