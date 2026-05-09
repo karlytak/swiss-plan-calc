@@ -225,6 +225,7 @@ export interface ClientWizardProps {
 }
 
 export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
+  const t = useT();
   const { user } = useAuth();
   const navigate = useNavigate();
   const qc = useQueryClient();
