@@ -80,6 +80,8 @@ export const de: Record<string, string> = {
   "save_sim.error.unauth": "Nicht authentifiziert",
   "save_sim.default_title": "Simulation",
   "client_link.back_to_file": "Zurück zum Dossier",
+  "client_link.simulation_for": "Simulation für",
+  "client_link.prefilled_badge": "Aus Dossier vorausgefüllt",
   "archive.default_label": "Archivieren",
   "delete.default_label": "Endgültig löschen",
 
