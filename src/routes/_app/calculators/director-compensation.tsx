@@ -841,6 +841,7 @@ function RecommendationCard({
   current: CompensationResult | null;
   clientName: string | null;
 }) {
+  const t = useT();
   const salaryRatio = totalProfit > 0 ? best.company.totalSalaryCost / totalProfit : 0;
   const lowSalaryWarning = salaryRatio < 0.5 && best.company.totalSalaryCost > 0;
 
@@ -852,34 +853,39 @@ function RecommendationCard({
         </div>
         <div className="flex-1">
           <div className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-            Stratégie recommandée
+            {t("calc.dir.reco.label")}
           </div>
           <h3 className="mt-0.5 text-xl font-semibold">{best.strategy.label}</h3>
           <p className="mt-1 text-sm text-muted-foreground">{reason}</p>
         </div>
       </div>
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <MoneyTile label="Net dirigeant" value={best.directorNet} tone="success" big tip="Cash net qui reste au dirigeant après cotisations sociales et impôt sur le revenu." />
-        <MoneyTile label="Salaire brut" value={best.company.grossSalary} tone="default" tip="Salaire brut versé par la société (avant cotisations sociales et impôts)." />
-        <MoneyTile label="Dividendes" value={best.company.dividendsPaid} tone="primary" tip="Montant brut versé en dividendes au dirigeant (avant imposition partielle)." />
-        <MoneyTile label="Réserves" value={best.retainedInCompany} tone="default" tip="Bénéfice net après IS conservé dans la société (renforce les fonds propres, pas imposé chez le dirigeant)." />
+        <MoneyTile label={t("calc.dir.reco.tile.net")} value={best.directorNet} tone="success" big tip={t("calc.dir.reco.tile.net.tip")} />
+        <MoneyTile label={t("calc.dir.reco.tile.gross")} value={best.company.grossSalary} tone="default" tip={t("calc.dir.reco.tile.gross.tip")} />
+        <MoneyTile label={t("calc.dir.reco.tile.div")} value={best.company.dividendsPaid} tone="primary" tip={t("calc.dir.reco.tile.div.tip")} />
+        <MoneyTile label={t("calc.dir.reco.tile.res")} value={best.retainedInCompany} tone="default" tip={t("calc.dir.reco.tile.res.tip")} />
       </div>
       {current && (
         <div className="mt-5 rounded-xl border border-primary/30 bg-card/60 p-4">
           <div className="text-xs font-semibold uppercase tracking-wider text-primary">
-            💡 Recommandation pour {clientName ?? "ce dirigeant"}
+            {t("calc.dir.reco.client.title", { name: clientName ?? t("calc.dir.reco.this_director") })}
           </div>
           <p className="mt-2 text-sm leading-relaxed">
-            Passer de la situation actuelle (salaire {formatCHF(current.company.grossSalary)} / dividendes {formatCHF(current.company.dividendsPaid)})
-            à la stratégie <strong>{best.strategy.label}</strong> (salaire {formatCHF(best.company.grossSalary)} / dividendes {formatCHF(best.company.dividendsPaid)}) permettrait :
+            {t("calc.dir.reco.body", {
+              curSal: formatCHF(current.company.grossSalary),
+              curDiv: formatCHF(current.company.dividendsPaid),
+              strategy: best.strategy.label ?? "",
+              newSal: formatCHF(best.company.grossSalary),
+              newDiv: formatCHF(best.company.dividendsPaid),
+            })}
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-3">
-            <DeltaTile label="Économie fiscale annuelle" value={current.totalTaxAndCharges - best.totalTaxAndCharges} positiveIsGood />
-            <DeltaTile label="Net dirigeant supplémentaire / an" value={best.directorNet - current.directorNet} positiveIsGood />
-            <DeltaTile label="Cumul sur 10 ans" value={(best.directorNet - current.directorNet) * 10} positiveIsGood />
+            <DeltaTile label={t("calc.dir.reco.delta.savings")} value={current.totalTaxAndCharges - best.totalTaxAndCharges} positiveIsGood />
+            <DeltaTile label={t("calc.dir.reco.delta.net")} value={best.directorNet - current.directorNet} positiveIsGood />
+            <DeltaTile label={t("calc.dir.reco.delta.10y")} value={(best.directorNet - current.directorNet) * 10} positiveIsGood />
           </div>
           <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-            📋 Recommandation calculée sur la base des barèmes 2026 et des données saisies. Avant validation finale avec le client, vérifier : caractère « usuel » du salaire pour la branche (théorie du dividende dissimulé, art. 58 CO), pertes fiscales reportées, structure de groupe / intégration fiscale, plans de prévoyance spécifiques (1e, surobligatoire, BVG-cadres).
+            {t("calc.dir.reco.footer")}
           </p>
         </div>
       )}
@@ -887,10 +893,8 @@ function RecommendationCard({
         <div className="mt-4 flex items-start gap-2 rounded-lg border border-warning/40 bg-warning/5 p-3 text-xs">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
           <div>
-            <strong>Attention théorie du dividende dissimulé.</strong> La part salaire
-            ({(salaryRatio * 100).toFixed(0)} % du bénéfice) est inférieure à 50 %.
-            L'AFC peut requalifier une partie des dividendes en salaire si la
-            rémunération n'est pas conforme à l'usage de la branche.
+            <strong>{t("calc.dir.warn.low_salary.title")}</strong>{" "}
+            {t("calc.dir.warn.low_salary.body", { pct: (salaryRatio * 100).toFixed(0) })}
           </div>
         </div>
       )}
@@ -915,10 +919,11 @@ function LinkBanner({
   client: Client | null;
   company: Company | null;
 }) {
+  const t = useT();
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 p-3 text-sm">
       <span className="text-xs font-medium uppercase tracking-wider text-primary">
-        Calcul lié
+        {t("calc.dir.link.label")}
       </span>
       {client && (
         <Link
@@ -945,20 +950,14 @@ function LinkBanner({
 }
 
 function LegalDisclaimer() {
+  const t = useT();
   return (
     <div className="rounded-xl border border-border bg-muted/30 p-4 text-[11px] leading-relaxed text-muted-foreground">
       <div className="flex items-start gap-2">
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
         <div>
-          <strong className="text-foreground">Méthodologie.</strong> Calculs basés sur
-          les barèmes fiscaux et sociaux 2026 (paramètres OFAS / AFC en vigueur). Les
-          multiplicateurs communaux par défaut sont ceux du chef-lieu cantonal — la
-          précision communale exhaustive arrive en V2. Pour les cas complexes
-          (structures de groupe, holdings, revenus internationaux), valider la
-          cohérence des hypothèses avant remise au client. Les notions de{" "}
-          <em>salaire usuel</em>, <em>dividende dissimulé</em> et{" "}
-          <em>participation qualifiée</em> relèvent de l'appréciation de l'AFC et du
-          canton.
+          <strong className="text-foreground">{t("calc.dir.legal.intro")}</strong>{" "}
+          {t("calc.dir.legal.body")}
         </div>
       </div>
     </div>
