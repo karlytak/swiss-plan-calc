@@ -268,7 +268,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!user) throw new Error("Non authentifié");
+      if (!user) throw new Error(t("wizard.toast.unauth"));
       const payload = {
         broker_id: user.id,
         first_name: form.first_name.trim(),
