@@ -6,6 +6,7 @@ import {
   loadStoredLanguage,
   persistLanguage,
   setActiveLanguage,
+  detectBrowserLanguage,
 } from "@/lib/i18n/active";
 import { t as translate, type TranslationParams } from "@/lib/i18n";
 import type { AppLanguage } from "@/lib/i18n/types";
