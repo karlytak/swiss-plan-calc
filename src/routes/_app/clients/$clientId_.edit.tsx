@@ -4,13 +4,16 @@ import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { ClientWizard } from "@/components/clients/ClientWizard";
 import type { Client, ClientPension, ClientAssets } from "@/lib/clients/types";
+import { t } from "@/lib/i18n";
+import { useT } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/_app/clients/$clientId_/edit")({
-  head: () => ({ meta: [{ title: "Modifier client · SwissBroker Pro" }] }),
+  head: () => ({ meta: [{ title: t("wizard.head.edit") }] }),
   component: EditClientPage,
 });
 
 function EditClientPage() {
+  const tt = useT();
   const { clientId } = Route.useParams();
   const navigate = useNavigate();
 
@@ -41,12 +44,12 @@ function EditClientPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-12 text-center">
-        <h1 className="text-xl font-semibold">Client introuvable</h1>
+        <h1 className="text-xl font-semibold">{tt("client_form.notfound")}</h1>
         <button
           onClick={() => navigate({ to: "/clients" })}
           className="mt-4 text-sm text-primary hover:underline"
         >
-          Retour à la liste
+          {tt("client_form.notfound.back")}
         </button>
       </div>
     );

@@ -5,13 +5,16 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { CompanyForm } from "@/components/companies/CompanyForm";
 import type { Company } from "@/lib/companies/types";
+import { t } from "@/lib/i18n";
+import { useT } from "@/contexts/LanguageContext";
 
 export const Route = createFileRoute("/_app/companies/$companyId_/edit")({
-  head: () => ({ meta: [{ title: "Modifier société · SwissBroker Pro" }] }),
+  head: () => ({ meta: [{ title: t("company_form.head.edit") }] }),
   component: EditCompanyPage,
 });
 
 function EditCompanyPage() {
+  const tt = useT();
   const { companyId } = Route.useParams();
   const { data, isLoading, error } = useQuery({
     queryKey: ["company", companyId],
@@ -37,10 +40,10 @@ function EditCompanyPage() {
   if (error || !data) {
     return (
       <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
-        <h1 className="text-2xl font-bold tracking-tight">Société introuvable</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{tt("company_form.notfound")}</h1>
         <Button asChild variant="outline" className="mt-6">
           <Link to="/companies">
-            <ArrowLeft className="h-4 w-4" /> Retour à la liste
+            <ArrowLeft className="h-4 w-4" /> {tt("company_form.notfound.back")}
           </Link>
         </Button>
       </div>
