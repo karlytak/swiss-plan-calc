@@ -26,6 +26,18 @@ export function loadStoredLanguage(): AppLanguage | null {
   return null;
 }
 
+/** Détecte la langue du navigateur (navigator.language) parmi fr/de/en/it. */
+export function detectBrowserLanguage(): AppLanguage | null {
+  if (typeof navigator === "undefined") return null;
+  const langs = [navigator.language, ...(navigator.languages ?? [])];
+  for (const raw of langs) {
+    if (!raw) continue;
+    const code = raw.toLowerCase().slice(0, 2);
+    if (code === "fr" || code === "de" || code === "en" || code === "it") return code;
+  }
+  return null;
+}
+
 export function persistLanguage(lang: AppLanguage): void {
   if (typeof window === "undefined") return;
   try {
