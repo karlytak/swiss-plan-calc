@@ -242,7 +242,7 @@ function DirectorCompensationCalc() {
   return (
     <TooltipProvider delayDuration={150}>
       <div className="space-y-6">
-        <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title="Guide Dirigeant" />
+        <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.dir.guide.title")} />
         <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
         {(linkedClient || linkedCompany) && (
           <LinkBanner client={linkedClient} company={linkedCompany} />
@@ -252,64 +252,64 @@ function DirectorCompensationCalc() {
           {/* Inputs */}
           <div className="space-y-6 lg:col-span-2">
             <CalcCard
-              title="Données société & dirigeant"
-              description="Bénéfice annuel à répartir entre salaire, dividendes et réserves."
+              title={t("calc.dir.card.inputs.title")}
+              description={t("calc.dir.card.inputs.desc")}
             >
               <div className="space-y-4">
                 <NumField
-                  label="Bénéfice annuel total (CHF)"
+                  label={t("calc.dir.field.profit")}
                   value={inputs.totalProfit}
                   onChange={(v) => setField("totalProfit", v)}
-                  hint="Avant charges sociales et impôt société"
+                  hint={t("calc.dir.field.profit.hint")}
                   wikiId="dirigeant"
-                  wikiTip="Résultat de la société AVANT toute rémunération du dirigeant. C'est le « gâteau » à répartir entre salaire, dividende et réserves."
+                  wikiTip={t("calc.dir.field.profit.tip")}
                 />
                 <NumField
-                  label="Réserve cible à conserver en société (CHF/an)"
+                  label={t("calc.dir.field.reserve")}
                   value={inputs.reserveTarget ?? 0}
                   onChange={(v) => setField("reserveTarget", v)}
-                  hint="Optionnel — montant prélevé en priorité sur le bénéfice avant la répartition salaire/dividende."
+                  hint={t("calc.dir.field.reserve.hint")}
                   wikiId="dirigeant"
-                  wikiTip="Si renseigné, la réserve cible est déduite du bénéfice total avant le calcul des stratégies. Le reliquat est réparti entre salaire et dividendes."
+                  wikiTip={t("calc.dir.field.reserve.tip")}
                 />
                 {(inputs.reserveTarget ?? 0) > 0 && (
                   <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
-                    <div className="flex justify-between"><span>Bénéfice total</span><strong className="tabular-nums">{formatCHF(inputs.totalProfit)}</strong></div>
-                    <div className="flex justify-between text-muted-foreground"><span>− Réserve cible</span><span className="tabular-nums">{formatCHF(inputs.reserveTarget ?? 0)}</span></div>
-                    <div className="mt-1 flex justify-between border-t border-border pt-1"><span>Disponible salaire + dividendes</span><strong className="tabular-nums text-primary">{formatCHF(availableProfit)}</strong></div>
+                    <div className="flex justify-between"><span>{t("calc.dir.reserve.total_profit")}</span><strong className="tabular-nums">{formatCHF(inputs.totalProfit)}</strong></div>
+                    <div className="flex justify-between text-muted-foreground"><span>{t("calc.dir.reserve.minus")}</span><span className="tabular-nums">{formatCHF(inputs.reserveTarget ?? 0)}</span></div>
+                    <div className="mt-1 flex justify-between border-t border-border pt-1"><span>{t("calc.dir.reserve.available")}</span><strong className="tabular-nums text-primary">{formatCHF(availableProfit)}</strong></div>
                     {availableProfit <= 0 && (
-                      <p className="mt-2 text-warning">⚠️ Réserve cible ≥ bénéfice total : aucune répartition possible.</p>
+                      <p className="mt-2 text-warning">{t("calc.dir.reserve.warn_zero")}</p>
                     )}
                   </div>
                 )}
                 {headcount != null && headcount > 0 && (
                   <div className="flex items-center gap-2 rounded-lg border border-border bg-muted/30 p-2 text-xs text-muted-foreground">
                     <Users className="h-3.5 w-3.5" />
-                    Société comptant <strong className="text-foreground">{headcount}</strong> collaborateur(s) (ETP).
+                    {t("calc.dir.headcount", { n: headcount })}
                   </div>
                 )}
                 <div className="grid grid-cols-2 gap-3">
                   <SelectField
-                    label="Canton siège société"
+                    label={t("calc.dir.field.canton_company")}
                     value={inputs.companyCanton}
                     onChange={(v) => setField("companyCanton", v as SelectableCantonCode)}
                     wikiId="dirigeant"
-                    wikiTip="Canton du siège : détermine l'impôt sur le bénéfice de la société (IS cantonal + IFD)."
+                    wikiTip={t("calc.dir.field.canton_company.tip")}
                   />
                   <SelectField
-                    label="Canton domicile dirigeant"
+                    label={t("calc.dir.field.canton_director")}
                     value={inputs.directorCanton}
                     onChange={(v) =>
                       setField("directorCanton", v as SelectableCantonCode)
                     }
                     wikiId="dirigeant"
-                    wikiTip="Canton de domicile : détermine l'impôt personnel sur le salaire et le dividende perçus."
+                    wikiTip={t("calc.dir.field.canton_director.tip")}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground">
-                      Situation civile
+                      {t("calc.dir.field.civil_status")}
                     </Label>
                     <Select
                       value={inputs.status}
@@ -321,30 +321,30 @@ function DirectorCompensationCalc() {
                       <SelectContent>
                         {FILING_OPTIONS.map((o) => (
                           <SelectItem key={o.value} value={o.value}>
-                            {o.label}
+                            {t(o.labelKey)}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <NumField
-                    label="Enfants à charge"
+                    label={t("calc.dir.field.children")}
                     value={inputs.children ?? 0}
                     onChange={(v) => setField("children", v)}
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <NumField
-                    label="Âge dirigeant"
+                    label={t("calc.dir.field.age")}
                     value={inputs.age}
                     onChange={(v) => setField("age", v)}
                     wikiId="lpp-credits"
-                    wikiTip="Détermine la tranche de bonification LPP (7 % / 10 % / 15 % / 18 %)."
+                    wikiTip={t("calc.dir.field.age.tip")}
                   />
                   <div className="space-y-1.5">
                     <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                      <span>Plan LPP</span>
-                      <WikiTip articleId="lpp-coordination" tip="Obligatoire = plafond 90 720 CHF, taux légaux. Plan cadre / 1e = surobligatoire au choix de l'employeur, jusqu'à 900 000 CHF assurés." />
+                      <span>{t("calc.dir.field.lpp_plan")}</span>
+                      <WikiTip articleId="lpp-coordination" tip={t("calc.dir.field.lpp_plan.tip")} />
                     </Label>
                     <Select
                       value={inputs.lppPlan}
@@ -354,8 +354,8 @@ function DirectorCompensationCalc() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="mandatory">LPP obligatoire</SelectItem>
-                        <SelectItem value="executive_1e">Plan cadre / 1e</SelectItem>
+                        <SelectItem value="mandatory">{t("calc.dir.lpp.mandatory")}</SelectItem>
+                        <SelectItem value="executive_1e">{t("calc.dir.lpp.executive")}</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -363,11 +363,11 @@ function DirectorCompensationCalc() {
                 <div className="flex items-center justify-between rounded-lg border border-border bg-muted/30 p-3">
                   <div className="space-y-0.5">
                     <Label className="flex items-center gap-1.5 text-sm font-medium">
-                      <span>Participation qualifiée (≥ 10 %)</span>
-                      <WikiTip articleId="dirigeant" tip="≥ 10 % du capital = imposition privilégiée des dividendes (RFFA) : 70 % imposable au fédéral, 50-70 % cantonal selon canton." />
+                      <span>{t("calc.dir.field.qualified")}</span>
+                      <WikiTip articleId="dirigeant" tip={t("calc.dir.field.qualified.tip")} />
                     </Label>
                     <p className="text-xs text-muted-foreground">
-                      Active l'imposition partielle des dividendes (RFFA).
+                      {t("calc.dir.field.qualified.hint")}
                     </p>
                   </div>
                   <Switch
@@ -379,41 +379,41 @@ function DirectorCompensationCalc() {
             </CalcCard>
 
             <CalcCard
-              title="Stratégie personnalisée"
-              description="Ajustez la répartition. Les 3 leviers font toujours 100 %."
+              title={t("calc.dir.card.custom.title")}
+              description={t("calc.dir.card.custom.desc")}
             >
               <CustomStrategySliders value={custom} onChange={setCustom} />
             </CalcCard>
 
             <CalcCard
-              title="Situation actuelle du client"
-              description="Renseignez la rémunération réelle pour comparer avec les stratégies optimisées."
+              title={t("calc.dir.card.current.title")}
+              description={t("calc.dir.card.current.desc")}
             >
               <Accordion type="single" collapsible defaultValue={hasCurrent ? "cur" : undefined}>
                 <AccordionItem value="cur" className="border-b-0">
                   <AccordionTrigger className="py-2 text-sm">
-                    {hasCurrent ? "Modifier la situation actuelle" : "Saisir la situation actuelle"}
+                    {hasCurrent ? t("calc.dir.current.edit") : t("calc.dir.current.set")}
                   </AccordionTrigger>
                   <AccordionContent className="space-y-3">
                     <div className="flex items-center gap-2 text-xs">
                       <Switch checked={hasCurrent} onCheckedChange={setHasCurrent} />
-                      <span>Inclure la situation actuelle dans le comparatif</span>
+                      <span>{t("calc.dir.current.include")}</span>
                     </div>
                     <NumField
-                      label="Salaire brut actuel (CHF/an)"
+                      label={t("calc.dir.current.salary")}
                       value={current.grossSalary}
                       onChange={(v) => setCurrent((p) => ({ ...p, grossSalary: v }))}
                     />
                     <NumField
-                      label="Dividendes actuels (CHF/an)"
+                      label={t("calc.dir.current.dividends")}
                       value={current.dividends}
                       onChange={(v) => setCurrent((p) => ({ ...p, dividends: v }))}
                     />
                     <NumField
-                      label="Réserves laissées en société (CHF/an, optionnel)"
+                      label={t("calc.dir.current.retained")}
                       value={current.retained ?? 0}
                       onChange={(v) => setCurrent((p) => ({ ...p, retained: v || undefined }))}
-                      hint="Laissez vide pour calcul automatique."
+                      hint={t("calc.dir.current.retained.hint")}
                     />
                   </AccordionContent>
                 </AccordionItem>
@@ -432,8 +432,8 @@ function DirectorCompensationCalc() {
             />
 
             <CalcCard
-              title="Comparatif des stratégies"
-              description="Mode réaliste : les dividendes sont cappés au bénéfice net après IS si nécessaire."
+              title={t("calc.dir.card.compare.title")}
+              description={t("calc.dir.card.compare.desc")}
             >
               <ComparisonTable
                 results={tableResults}
@@ -443,8 +443,8 @@ function DirectorCompensationCalc() {
             </CalcCard>
 
             <CalcCard
-              title="Visualisation : répartition du bénéfice"
-              description="Pour chaque stratégie : impôts & cotisations, net dirigeant, réserves société."
+              title={t("calc.dir.card.chart.title")}
+              description={t("calc.dir.card.chart.desc")}
             >
               <ComparisonChart results={tableResults} />
             </CalcCard>
