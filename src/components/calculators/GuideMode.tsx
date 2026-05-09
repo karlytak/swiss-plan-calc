@@ -104,14 +104,14 @@ export function GuideMode({
           <div className="flex items-center gap-2 text-primary">
             <Info className="h-4 w-4" />
             <span className="text-[11px] font-semibold uppercase tracking-wider">
-              {title} · {i + 1}/{steps.length}
+              {effectiveTitle} · {i + 1}/{steps.length}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
-            aria-label="Fermer"
+            aria-label={t("common.close")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -145,11 +145,11 @@ export function GuideMode({
             className="gap-1"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
-            Précédent
+            {t("common.previous")}
           </Button>
           {isLast ? (
             <Button type="button" size="sm" onClick={onClose} className="gap-1">
-              Terminer
+              {t("common.guide_finish")}
             </Button>
           ) : (
             <Button
@@ -158,7 +158,7 @@ export function GuideMode({
               onClick={() => setI((x) => Math.min(steps.length - 1, x + 1))}
               className="gap-1"
             >
-              Suivant
+              {t("common.next")}
               <ArrowRight className="h-3.5 w-3.5" />
             </Button>
           )}
