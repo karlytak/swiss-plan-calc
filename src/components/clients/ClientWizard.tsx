@@ -527,9 +527,10 @@ function Field({
 }
 
 function StepIdentity({ form, update, errors }: StepProps) {
+  const t = useT();
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <Field label="Prénom" htmlFor="fn" error={errors?.first_name}>
+      <Field label={t("wizard.field.first_name")} htmlFor="fn" error={errors?.first_name}>
         <Input
           id="fn"
           value={form.first_name}
@@ -537,7 +538,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={80}
         />
       </Field>
-      <Field label="Nom" htmlFor="ln" error={errors?.last_name}>
+      <Field label={t("wizard.field.last_name")} htmlFor="ln" error={errors?.last_name}>
         <Input
           id="ln"
           value={form.last_name}
@@ -545,7 +546,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={80}
         />
       </Field>
-      <Field label="Date de naissance" htmlFor="dob">
+      <Field label={t("wizard.field.dob")} htmlFor="dob">
         <Input
           id="dob"
           type="date"
@@ -553,7 +554,7 @@ function StepIdentity({ form, update, errors }: StepProps) {
           onChange={(e) => update("date_of_birth", e.target.value)}
         />
       </Field>
-      <Field label="Genre">
+      <Field label={t("wizard.field.gender")}>
         <Select
           value={form.gender || "unset"}
           onValueChange={(v) => update("gender", v === "unset" ? "" : (v as Gender))}
@@ -562,21 +563,21 @@ function StepIdentity({ form, update, errors }: StepProps) {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="unset">Non renseigné</SelectItem>
+            <SelectItem value="unset">{t("wizard.field.gender.unset")}</SelectItem>
             {Object.entries(GENDER_LABELS).map(([k, v]) => (
               <SelectItem key={k} value={k}>{v}</SelectItem>
             ))}
           </SelectContent>
         </Select>
       </Field>
-      <Field label="Nationalité" htmlFor="nat">
+      <Field label={t("wizard.field.nationality")} htmlFor="nat">
         <CountryCombobox
           id="nat"
           value={form.nationality}
           onChange={(code) => update("nationality", code)}
         />
       </Field>
-      <Field label="Email" htmlFor="em" error={errors?.email}>
+      <Field label={t("wizard.field.email")} htmlFor="em" error={errors?.email}>
         <Input
           id="em"
           type="email"
@@ -585,10 +586,10 @@ function StepIdentity({ form, update, errors }: StepProps) {
           maxLength={255}
         />
       </Field>
-      <Field label="Téléphone" htmlFor="ph">
+      <Field label={t("wizard.field.phone")} htmlFor="ph">
         <PhoneInput id="ph" value={form.phone} onChange={(v) => update("phone", v)} />
       </Field>
-      <Field label="Permis de séjour">
+      <Field label={t("wizard.field.permit")}>
         <Select value={form.permit} onValueChange={(v) => update("permit", v as Permit)}>
           <SelectTrigger>
             <SelectValue />
