@@ -374,7 +374,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
       qc.invalidateQueries({ queryKey: ["client-edit", savedId] });
       qc.invalidateQueries({ queryKey: ["client-full", savedId] });
       qc.invalidateQueries({ queryKey: ["clients"] });
-      toast.success(mode === "edit" ? "Client mis à jour" : "Client créé");
+      toast.success(mode === "edit" ? t("wizard.toast.updated") : t("wizard.toast.created"));
       navigate({ to: "/clients/$clientId", params: { clientId: savedId } });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -386,7 +386,18 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
     if (!result.success) {
       const errs: Record<string, string> = {};
       for (const issue of result.error.issues) {
-        errs[issue.path[0] as string] = issue.message;
+        const field = issue.path[0] as string;
+        const errKey =
+          field === "first_name"
+            ? "wizard.error.first_name"
+            : field === "last_name"
+              ? "wizard.error.last_name"
+              : field === "email"
+                ? "wizard.error.email"
+                : field === "canton"
+                  ? "wizard.error.canton"
+                  : null;
+        errs[field] = errKey ? t(errKey) : issue.message;
       }
       setErrors(errs);
       return false;
@@ -397,11 +408,11 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
 
   const next = () => {
     if (!validateStep(step)) return;
-    if (step < STEPS.length) setStep(step + 1);
+    if (step < STEP_COUNT) setStep(step + 1);
   };
   const prev = () => step > 1 && setStep(step - 1);
   const submit = () => {
-    for (let i = 1; i <= STEPS.length; i++) {
+    for (let i = 1; i <= STEP_COUNT; i++) {
       if (!validateStep(i)) {
         setStep(i);
         return;
@@ -410,8 +421,9 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
     save.mutate();
   };
 
-  const progress = useMemo(() => (step / STEPS.length) * 100, [step]);
-  const current = STEPS[step - 1];
+  const progress = useMemo(() => (step / STEP_COUNT) * 100, [step]);
+  const currentTitle = t(STEP_KEYS[step as 1 | 2 | 3 | 4 | 5].title);
+  const currentDesc = t(STEP_KEYS[step as 1 | 2 | 3 | 4 | 5].desc);
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
