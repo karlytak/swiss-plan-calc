@@ -490,7 +490,485 @@ const DE: WikiArticle[] = [
   },
 ];
 
-const BY_LANG: Partial<Record<AppLanguage, WikiArticle[]>> = { fr: FR, de: DE };
+// =====================================================================
+// EN — Swiss English, official terminology
+// =====================================================================
+const EN: WikiArticle[] = [
+  {
+    id: "demarrage",
+    category: "Getting started",
+    title: "First steps in SwissBroker Pro",
+    tags: ["intro", "broker", "client"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Create a client</strong>: Clients menu → New client. Fill in identity, canton, marital status, salary.</li>
+        <li><strong>Run a calculation</strong>: from the client file, pick a calculator in the side bar (auto pre-fill).</li>
+        <li><strong>Save</strong>: «Save» button at the bottom of every calculator. Available again in History.</li>
+        <li><strong>Export</strong>: PDF button to generate a client-ready report.</li>
+        <li><strong>Guide mode</strong>: button at the top right of every calculator. Interactive field tour.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "wiki-clients",
+    category: "Getting started",
+    title: "Client file: what to fill in?",
+    tags: ["client", "data"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Canton + commune</strong>: essential for communal multipliers and the cantonal/communal tax scale.</li>
+        <li><strong>Marital status + denomination</strong>: affects the scale (married = partial splitting) and church tax.</li>
+        <li><strong>Permit</strong>: B / G permits trigger withholding tax.</li>
+        <li><strong>Pension</strong>: BVG savings, buy-back potential, 3a/3b accounts. Used for BVG, vested benefits, retirement.</li>
+        <li><strong>Wealth</strong>: real estate, securities, accounts. Used for wealth tax and imputed rental value.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "avs-base",
+    category: "1st pillar · AHV / IV",
+    title: "How the AHV pension works",
+    tags: ["AHV", "IV", "1st pillar", "retirement"],
+    body: (
+      <>
+        <p>The AHV pension depends on two parameters: the <strong>number of contribution years</strong> (scale 44) and the <strong>average annual income</strong>.</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>Mandatory contribution from age 18 (with income) or 21 (without income).</li>
+          <li><strong>Scale 44</strong> = full pension. Each missing year = roughly 1/44 of pension lost.</li>
+          <li><strong>Min pension 2026</strong>: CHF 1,260/month · <strong>max</strong>: CHF 2,520/month (single).</li>
+          <li><strong>Couple ceiling</strong>: 150% of the individual maximum pension (CHF 3,780).</li>
+          <li>Educational (children &lt; 16) and care credits added to the average income.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "avs-anticipation",
+    category: "1st pillar · AHV / IV",
+    title: "Drawing the AHV pension early or deferring it",
+    tags: ["AHV", "early", "deferral"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Early withdrawal</strong> 1 to 2 years: permanent reduction of 6.8% per year drawn early.</li>
+        <li><strong>Deferral</strong> 1 to 5 years: supplement of 5.2% to 31.5% depending on duration.</li>
+        <li>Contributions remain due up to the reference age even with early withdrawal.</li>
+        <li>Profitability check: weighing the supplement against residual life expectancy.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "lpp-coordination",
+    category: "2nd pillar · BVG & buy-backs",
+    title: "Coordinated salary and coordination deduction",
+    tags: ["BVG", "coordinated salary"],
+    body: (
+      <>
+        <p>The <strong>coordinated salary</strong> is the basis on which the pension fund computes retirement credits.</p>
+        <p className="mt-2 font-mono text-xs bg-muted/50 p-2 rounded">coordinated salary = min(gross; insured ceiling 90,720) − deduction 26,460</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>The deduction applies <strong>after</strong> capping at the maximum insured salary.</li>
+          <li>BVG entry threshold 2026: CHF 22,680/year.</li>
+          <li>Extra-mandatory funds (executives, 1e plans) may exceed 90,720.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "lpp-credits",
+    category: "2nd pillar · BVG & buy-backs",
+    title: "Retirement credits by age band",
+    tags: ["BVG", "credits"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>25 to 34</strong>: 7% of the coordinated salary</li>
+        <li><strong>35 to 44</strong>: 10%</li>
+        <li><strong>45 to 54</strong>: 15%</li>
+        <li><strong>55 to 65</strong>: 18%</li>
+        <li>Paid 50/50 employee/employer (legal minimum). Many funds offer more on the employer side.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "lpp-rachat",
+    category: "2nd pillar · BVG & buy-backs",
+    title: "BVG buy-backs: a major tax lever",
+    tags: ["BVG", "buy-back", "tax"],
+    body: (
+      <>
+        <p>A buy-back is <strong>100% deductible</strong> from taxable income and capitalized in the fund at the BVG minimum rate.</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li><strong>3-year lock-up</strong>: capital bought back cannot be withdrawn as a lump sum for 3 years (otherwise tax recapture).</li>
+          <li>The <strong>buy-back potential</strong> is shown on the BVG certificate (gap between target and current savings).</li>
+          <li>Best to spread over several years to stay in the top marginal bracket.</li>
+          <li>Typical tax saving: 25 to 40% of the buy-back depending on canton and income.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "lpp-conversion",
+    category: "2nd pillar · BVG & buy-backs",
+    title: "Conversion rate: pension vs lump-sum",
+    tags: ["BVG", "conversion", "retirement"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Statutory rate 2026</strong>: 6.8% (steadily decreasing, some funds already apply 5.5%).</li>
+        <li>CHF 500,000 capital × 6.8% = CHF 34,000 lifetime annual pension.</li>
+        <li><strong>Pension</strong>: lifelong security + spouse's pension, but 100% taxed.</li>
+        <li><strong>Lump-sum</strong>: flexibility + transmission to heirs, but taxed once (reduced rate) then becomes taxable wealth.</li>
+        <li>50/50 mix often optimal. Irrevocable decision, usually announced 3 years before retirement.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "p3a-base",
+    category: "3rd pillar · A & B",
+    title: "Pillar 3a: ceilings and rules",
+    tags: ["3a", "deduction", "tax"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Employee with BVG</strong>: CHF 7,258/year (2026), 100% deductible.</li>
+        <li><strong>Self-employed without BVG</strong>: 20% of net income, max CHF 36,288.</li>
+        <li>Capital locked until 5 years before the AHV reference age.</li>
+        <li>Taxed at withdrawal at a <strong>reduced separate rate</strong> (about 1/5 of the ordinary scale).</li>
+        <li>Strategy: open 3 to 5 Pillar 3a accounts and withdraw them in different years to spread the tax.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "p3b-base",
+    category: "3rd pillar · A & B",
+    title: "Pillar 3b: free life insurance and savings",
+    tags: ["3b", "free savings"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>No ceiling</strong>, capital available at any time.</li>
+        <li><strong>No income deduction</strong> (except cantons GE and FR with modest caps).</li>
+        <li>Withdrawal <strong>generally exempt</strong> from income tax if contract ≥ 5 years and signed before age 66.</li>
+        <li>Accumulated capital is part of taxable wealth.</li>
+        <li>Useful for: extra saving once Pillar 3a is full, estate planning, financing a pre-retirement project.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "frontaliers",
+    category: "Cross-border workers & withholding tax",
+    title: "Withholding tax vs ordinary assessment",
+    tags: ["withholding", "cross-border", "subsequent"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Permit B/G + income &lt; 120,000</strong>: withholding tax by default (scale A/B/C depending on situation).</li>
+        <li><strong>Subsequent ordinary assessment (TOU)</strong>: option to request ordinary assessment if ≥ 90% of worldwide income is Swiss.</li>
+        <li>Allows deduction of Pillar 3a, BVG buy-backs, mortgage interest, actual professional expenses.</li>
+        <li>Request to be filed by 31 March of the following year. Irrevocable commitment for the following years.</li>
+        <li><strong>Cross-border workers VD/GE</strong>: 4.5% withholding rebated to France. Main taxation in France.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "ifd-icc",
+    category: "Tax",
+    title: "DFT, cantonal/communal, multipliers: the tax trinity",
+    tags: ["DFT", "cantonal/communal", "communal"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>DFT</strong> (Direct Federal Tax): single national scale, max 11.5%.</li>
+        <li><strong>Cantonal/communal tax</strong>: cantonal base scale × cantonal coefficient × communal multiplier.</li>
+        <li>Vaud example: scale × 154.5 (canton) × 78 (Lausanne) / 100.</li>
+        <li><strong>Church tax</strong>: added if a denomination is declared (Catholic, Protestant).</li>
+        <li>Typical total burden: 18 to 35% depending on canton, commune and income.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "fortune",
+    category: "Tax",
+    title: "Wealth tax: base and exemptions",
+    tags: ["wealth", "assets"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li>Base: all assets (real estate at tax value, accounts, securities, vehicles, 3b).</li>
+        <li><strong>Exempt</strong>: BVG and Pillar 3a savings as long as not withdrawn.</li>
+        <li>Debts (mortgage, loans) 100% deductible.</li>
+        <li>Cantonal progressive rate, generally 0.1 to 0.7% of net wealth.</li>
+        <li>Tax shield in some cantons (GE, VD): total tax ≤ 60% of income.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "valeur-locative",
+    category: "Tax",
+    title: "Imputed rental value and real estate deductions",
+    tags: ["real estate", "imputed rental value"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li>Owner-occupier: <strong>imputed rental value</strong> added to income (60 to 70% of theoretical rent).</li>
+        <li>Deductions: mortgage interest, maintenance costs (flat rate 10 or 20% depending on age of the property, or actual costs).</li>
+        <li>Value-adding works not deductible (except energy works in some cantons).</li>
+        <li>National reform underway: imputed rental value may be abolished in the medium term.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "dirigeant",
+    category: "Company director",
+    title: "Salary vs dividend: two-level optimization",
+    tags: ["director", "dividend", "LLC", "Plc"],
+    body: (
+      <>
+        <p>For a director-shareholder, the salary/dividend trade-off plays on:</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li><strong>Salary</strong>: social charges (12.8% AHV/IV/EO employee + employer, BVG 7-18%), deductible at company level.</li>
+          <li><strong>Dividend</strong>: no social charges but <strong>economic double taxation</strong> (corporate tax + private tax).</li>
+          <li><strong>Privileged taxation</strong>: with participation ≥ 10%, dividends taxed at 50% (federal) and 50-70% (cantonal).</li>
+          <li>Rule of thumb: cover BVG/AHV needs with a "realistic" salary, then take the surplus as a dividend.</li>
+          <li>Watch out for the <strong>arm's-length salary</strong> challenged by AHV if too low (recovery + fine possible).</li>
+        </ul>
+      </>
+    ),
+  },
+];
+
+// =====================================================================
+// IT — Italiano svizzero, terminologia ufficiale
+// =====================================================================
+const IT: WikiArticle[] = [
+  {
+    id: "demarrage",
+    category: "Per iniziare",
+    title: "Primi passi in SwissBroker Pro",
+    tags: ["intro", "broker", "cliente"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Creare un cliente</strong>: menu Clienti → Nuovo cliente. Inserire identità, cantone, stato civile, stipendio.</li>
+        <li><strong>Avviare un calcolo</strong>: dalla pratica cliente, scegliere un calcolatore nella barra laterale (precompilazione automatica).</li>
+        <li><strong>Salvare</strong>: pulsante «Salva» in fondo a ogni calcolatore. Reperibile nello Storico.</li>
+        <li><strong>Esportare</strong>: pulsante PDF per generare un rapporto pronto da inviare al cliente.</li>
+        <li><strong>Modalità guidata</strong>: pulsante in alto a destra di ogni calcolatore. Visita interattiva dei campi.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "wiki-clients",
+    category: "Per iniziare",
+    title: "Pratica cliente: cosa inserire?",
+    tags: ["cliente", "dati"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Cantone + comune</strong>: indispensabile per i moltiplicatori comunali e la tariffa cantonale/comunale.</li>
+        <li><strong>Stato civile + confessione</strong>: incide sulla tariffa (coniugato = splitting parziale) e sull'imposta di culto.</li>
+        <li><strong>Permesso</strong>: i permessi B / G fanno scattare l'imposta alla fonte.</li>
+        <li><strong>Previdenza</strong>: averi LPP, potenziale di riscatto, conti 3a/3b. Utile per LPP, libero passaggio, pensionamento.</li>
+        <li><strong>Patrimonio</strong>: immobili, titoli, conti. Utile per l'imposta sulla sostanza e il valore locativo.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "avs-base",
+    category: "1° pilastro · AVS / AI",
+    title: "Come funziona la rendita AVS",
+    tags: ["AVS", "AI", "1° pilastro", "pensionamento"],
+    body: (
+      <>
+        <p>La rendita AVS dipende da due parametri: il <strong>numero di anni di contribuzione</strong> (scala 44) e il <strong>reddito annuo medio determinante</strong>.</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>Obbligo contributivo dai 18 anni (con reddito) o 21 anni (senza reddito).</li>
+          <li><strong>Scala 44</strong> = rendita completa. Ogni anno mancante = circa 1/44 di rendita persa.</li>
+          <li><strong>Rendita minima 2026</strong>: 1'260 CHF/mese · <strong>massima</strong>: 2'520 CHF/mese (singolo).</li>
+          <li><strong>Tetto coniugi</strong>: 150 % della rendita massima individuale (3'780 CHF).</li>
+          <li>Accrediti per compiti educativi (figli &lt; 16 anni) e di assistenza aggiunti al reddito determinante.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "avs-anticipation",
+    category: "1° pilastro · AVS / AI",
+    title: "Anticipare o differire la rendita AVS",
+    tags: ["AVS", "anticipazione", "differimento"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Anticipazione</strong> di 1 o 2 anni: riduzione definitiva del 6,8 % per anno anticipato.</li>
+        <li><strong>Differimento</strong> di 1 a 5 anni: supplemento dal 5,2 % al 31,5 % a seconda della durata.</li>
+        <li>I contributi restano dovuti fino all'età di riferimento anche in caso di anticipazione.</li>
+        <li>Calcolo di redditività: confronto tra supplemento e speranza di vita residua.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "lpp-coordination",
+    category: "2° pilastro · LPP & riscatti",
+    title: "Salario coordinato e deduzione di coordinamento",
+    tags: ["LPP", "salario coordinato"],
+    body: (
+      <>
+        <p>Il <strong>salario coordinato</strong> è la base su cui la cassa pensione calcola gli accrediti di vecchiaia.</p>
+        <p className="mt-2 font-mono text-xs bg-muted/50 p-2 rounded">salario coordinato = min(lordo; massimo assicurato 90'720) − deduzione 26'460</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li>La deduzione si applica <strong>dopo</strong> il limite del salario massimo assicurato.</li>
+          <li>Soglia d'entrata LPP 2026: 22'680 CHF/anno.</li>
+          <li>Casse sovraobbligatorie (quadri, piani 1e) possono superare i 90'720.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "lpp-credits",
+    category: "2° pilastro · LPP & riscatti",
+    title: "Accrediti di vecchiaia per fascia d'età",
+    tags: ["LPP", "accrediti"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>25 a 34 anni</strong>: 7 % del salario coordinato</li>
+        <li><strong>35 a 44 anni</strong>: 10 %</li>
+        <li><strong>45 a 54 anni</strong>: 15 %</li>
+        <li><strong>55 a 65 anni</strong>: 18 %</li>
+        <li>Versati 50/50 dipendente/datore di lavoro (minimo legale). Molte casse fanno di più sul lato datore.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "lpp-rachat",
+    category: "2° pilastro · LPP & riscatti",
+    title: "Riscatti LPP: leva fiscale importante",
+    tags: ["LPP", "riscatto", "fiscalità"],
+    body: (
+      <>
+        <p>Un riscatto è <strong>deducibile al 100 %</strong> dal reddito imponibile e capitalizzato nella cassa al tasso minimo LPP.</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li><strong>Blocco di 3 anni</strong>: il capitale riscattato non è prelevabile come capitale per 3 anni (altrimenti ripresa fiscale).</li>
+          <li>Il <strong>potenziale di riscatto</strong> è indicato sul certificato LPP (differenza tra avere obiettivo e attuale).</li>
+          <li>Conviene scaglionare su più anni per restare nella fascia marginale alta.</li>
+          <li>Risparmio fiscale tipico: 25 - 40 % del riscatto secondo cantone e reddito.</li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    id: "lpp-conversion",
+    category: "2° pilastro · LPP & riscatti",
+    title: "Aliquota di conversione: rendita vs capitale",
+    tags: ["LPP", "conversione", "pensionamento"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Aliquota legale 2026</strong>: 6,8 % (in calo continuo, alcune casse applicano già 5,5 %).</li>
+        <li>Capitale di 500'000 CHF × 6,8 % = 34'000 CHF di rendita annua vitalizia.</li>
+        <li><strong>Rendita</strong>: sicurezza a vita + rendita per coniuge, ma imposta al 100 %.</li>
+        <li><strong>Capitale</strong>: flessibilità + trasmissione agli eredi, ma imposto una volta (aliquota ridotta) poi sostanza imponibile.</li>
+        <li>Mix 50/50 spesso ottimale. Decisione irrevocabile, in genere da annunciare 3 anni prima del pensionamento.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "p3a-base",
+    category: "3° pilastro · A & B",
+    title: "Pilastro 3a: massimali e regole",
+    tags: ["3a", "deduzione", "fiscalità"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Salariato con LPP</strong>: 7'258 CHF/anno (2026), deducibile al 100 %.</li>
+        <li><strong>Indipendente senza LPP</strong>: 20 % del reddito netto, max 36'288 CHF.</li>
+        <li>Capitale bloccato fino a 5 anni prima dell'età di riferimento AVS.</li>
+        <li>Imposto al prelievo a <strong>aliquota ridotta separata</strong> (in media 1/5 della tariffa ordinaria).</li>
+        <li>Strategia: aprire 3 - 5 conti 3a e prelevarli in anni diversi per scaglionare l'imposta.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "p3b-base",
+    category: "3° pilastro · A & B",
+    title: "Pilastro 3b: assicurazione vita libera e risparmio",
+    tags: ["3b", "risparmio libero"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Nessun massimale</strong>, capitale disponibile in ogni momento.</li>
+        <li><strong>Nessuna deduzione</strong> dal reddito (eccetto cantoni GE e FR con tetti modesti).</li>
+        <li>Prelievo <strong>generalmente esente</strong> dall'imposta sul reddito se contratto ≥ 5 anni e sottoscritto prima dei 66 anni.</li>
+        <li>Capitale cumulato entra nella sostanza imponibile.</li>
+        <li>Utile per: risparmiare oltre il 3a saturato, pianificare la successione, finanziare un progetto pre-pensionamento.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "frontaliers",
+    category: "Frontalieri & imposta alla fonte",
+    title: "Imposta alla fonte vs ordinaria",
+    tags: ["fonte", "frontaliere", "TOU"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>Permesso B/G + reddito &lt; 120'000</strong>: imposta alla fonte per impostazione predefinita (tariffa A/B/C secondo la situazione).</li>
+        <li><strong>TOU (Tassazione ordinaria ulteriore)</strong>: possibilità di chiedere la tassazione ordinaria se ≥ 90 % del reddito mondiale è svizzero.</li>
+        <li>Permette di dedurre 3a, riscatti LPP, interessi ipotecari, spese professionali effettive.</li>
+        <li>Domanda da depositare entro il 31 marzo dell'anno successivo. Impegno irrevocabile per gli anni seguenti.</li>
+        <li><strong>Frontalieri VD/GE</strong>: ritenuta del 4,5 % retrocessa alla Francia. Tassazione principale in Francia.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "ifd-icc",
+    category: "Fiscalità",
+    title: "IFD, ICC, moltiplicatori: la trinità fiscale",
+    tags: ["IFD", "ICC", "comunale"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li><strong>IFD</strong> (Imposta federale diretta): tariffa unica nazionale, max 11,5 %.</li>
+        <li><strong>ICC</strong> (Imposta cantonale e comunale): tariffa cantonale di base × coefficiente cantonale × moltiplicatore comunale.</li>
+        <li>Esempio Vaud: tariffa × 154,5 (cantone) × 78 (Losanna) / 100.</li>
+        <li><strong>Imposta di culto</strong>: aggiunta se confessione dichiarata (cattolica, protestante).</li>
+        <li>Carico totale tipico: 18 - 35 % secondo cantone, comune e reddito.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "fortune",
+    category: "Fiscalità",
+    title: "Imposta sulla sostanza: base ed esenzioni",
+    tags: ["sostanza", "patrimonio"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li>Base: tutti i beni (immobili al valore fiscale, conti, titoli, veicoli, 3b).</li>
+        <li><strong>Esente</strong>: averi LPP e 3a finché non prelevati.</li>
+        <li>Debiti (ipoteca, prestiti) deducibili al 100 %.</li>
+        <li>Aliquota cantonale progressiva, in genere 0,1 - 0,7 % del netto.</li>
+        <li>Scudo fiscale in alcuni cantoni (GE, VD): imposta totale ≤ 60 % del reddito.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "valeur-locative",
+    category: "Fiscalità",
+    title: "Valore locativo e deduzioni immobiliari",
+    tags: ["immobili", "valore locativo"],
+    body: (
+      <ul className="list-disc pl-5 space-y-1.5">
+        <li>Proprietario occupante: <strong>valore locativo</strong> aggiunto al reddito (60 - 70 % della pigione teorica).</li>
+        <li>Deduzioni: interessi ipotecari, spese di manutenzione (forfait 10 o 20 % secondo l'età dell'immobile, o spese effettive).</li>
+        <li>Lavori a valore aggiunto non deducibili (eccetto energetici in alcuni cantoni).</li>
+        <li>Riforma nazionale in corso: il valore locativo potrebbe essere abolito a medio termine.</li>
+      </ul>
+    ),
+  },
+  {
+    id: "dirigeant",
+    category: "Dirigente di società",
+    title: "Salario vs dividendo: ottimizzazione su due livelli",
+    tags: ["dirigente", "dividendo", "Sagl", "SA"],
+    body: (
+      <>
+        <p>Per un dirigente azionista, l'arbitraggio salario/dividendo agisce su:</p>
+        <ul className="mt-2 list-disc pl-5 space-y-1">
+          <li><strong>Salario</strong>: oneri sociali (12,8 % AVS/AI/IPG dipendente + datore, LPP 7-18 %), deducibile per la società.</li>
+          <li><strong>Dividendo</strong>: nessun onere sociale ma <strong>doppia imposizione economica</strong> (imposta società + imposta privato).</li>
+          <li><strong>Imposizione privilegiata</strong>: con partecipazione ≥ 10 %, dividendi tassati al 50 % (federale) e 50-70 % (cantonale).</li>
+          <li>Regola pratica: coprire il fabbisogno LPP/AVS con un salario «realistico», poi prelevare l'eccedenza come dividendo.</li>
+          <li>Attenzione al <strong>salario d'uso</strong> contestato dall'AVS se troppo basso (ripresa + multa possibile).</li>
+        </ul>
+      </>
+    ),
+  },
+];
+
+const BY_LANG: Partial<Record<AppLanguage, WikiArticle[]>> = { fr: FR, de: DE, en: EN, it: IT };
 
 export function getWikiArticles(lang: AppLanguage): WikiArticle[] {
   return BY_LANG[lang] ?? FR;
