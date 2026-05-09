@@ -528,8 +528,7 @@ function CustomStrategySliders({
   value: CompensationStrategy;
   onChange: (v: CompensationStrategy) => void;
 }) {
-  // Slider principal : salaire vs reste (dividendes + réserves).
-  // Sous-slider : dans le "reste", part dividendes vs réserves.
+  const t = useT();
   const salaryPct = value.salaryPct;
   const remainder = 100 - salaryPct;
   const dividendShareOfRemainder =
@@ -571,34 +570,25 @@ function CustomStrategySliders({
       <div>
         <div className="mb-2 flex items-center justify-between">
           <Label className="flex items-center gap-1.5 text-sm font-medium">
-            Part « salaire » (coût total société)
+            {t("calc.dir.custom.salary")}
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-3.5 w-3.5 text-muted-foreground" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs text-xs">
-                Le pourcentage « salaire » représente le <strong>coût total société</strong> (salaire
-                brut + charges sociales employeur). Exemple : 70 % sur 200 000 CHF de bénéfice =
-                140 000 CHF de coût salarial total, soit ~124 000 CHF de salaire brut versé +
-                ~16 000 CHF de charges sociales employeur.
+                {t("calc.dir.custom.salary.tip")}
               </TooltipContent>
             </Tooltip>
           </Label>
           <span className="text-sm font-semibold tabular-nums">{salaryPct.toFixed(0)} %</span>
         </div>
-        <Slider
-          value={[salaryPct]}
-          min={0}
-          max={100}
-          step={5}
-          onValueChange={([v]) => setSalary(v)}
-        />
+        <Slider value={[salaryPct]} min={0} max={100} step={5} onValueChange={([v]) => setSalary(v)} />
       </div>
 
       <div>
         <div className="mb-2 flex items-center justify-between">
           <Label className="text-sm font-medium">
-            Du restant ({remainder.toFixed(0)} %), part « dividendes »
+            {t("calc.dir.custom.remainder", { pct: remainder.toFixed(0) })}
           </Label>
           <span className="text-sm font-semibold tabular-nums">
             {dividendShareOfRemainder.toFixed(0)} %
@@ -616,26 +606,22 @@ function CustomStrategySliders({
 
       <div className="grid grid-cols-3 gap-2 text-center text-xs">
         <div className="rounded-lg border border-border bg-muted/30 p-2">
-          <div className="text-[10px] uppercase text-muted-foreground">Salaire</div>
+          <div className="text-[10px] uppercase text-muted-foreground">{t("calc.dir.custom.label.salary")}</div>
           <div className="font-semibold">{value.salaryPct.toFixed(0)} %</div>
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-2">
-          <div className="text-[10px] uppercase text-muted-foreground">Dividendes</div>
+          <div className="text-[10px] uppercase text-muted-foreground">{t("calc.dir.custom.label.dividends")}</div>
           <div className="font-semibold">{value.dividendPct.toFixed(0)} %</div>
         </div>
         <div className="rounded-lg border border-border bg-muted/30 p-2">
           <div className="flex items-center justify-center gap-1 text-[10px] uppercase text-muted-foreground">
-            Réserves
+            {t("calc.dir.custom.label.reserves")}
             <Tooltip>
               <TooltipTrigger>
                 <Info className="h-3 w-3" />
               </TooltipTrigger>
               <TooltipContent className="max-w-xs text-xs">
-                Part du bénéfice net (après impôt société) <strong>laissée dans la société</strong>{" "}
-                au lieu d'être versée au dirigeant. Elle alimente les fonds propres (réserves
-                légales ou libres) et reste mobilisable plus tard : auto financement, achat de
-                matériel, dividendes futurs, vente de la société, etc. Aucun impôt sur le revenu
-                pour le dirigeant tant qu'elle reste en société.
+                {t("calc.dir.custom.reserves.tip")}
               </TooltipContent>
             </Tooltip>
           </div>
@@ -644,7 +630,7 @@ function CustomStrategySliders({
       </div>
 
       <div>
-        <div className="mb-1.5 text-xs font-medium text-muted-foreground">Présets</div>
+        <div className="mb-1.5 text-xs font-medium text-muted-foreground">{t("calc.dir.custom.presets")}</div>
         <div className="flex flex-wrap gap-1.5">
           {presets.map((p) => (
             <button
