@@ -49,14 +49,18 @@ import { formatCHF } from "@/lib/format";
 import { computeLppInsuredSalary, LPP_COORDINATION_DEDUCTION_2026, LPP_MAX_INSURED_SALARY_2026 } from "@/lib/lpp";
 import { CountryCombobox } from "@/components/ui/country-combobox";
 import { CommuneAutocomplete } from "@/components/ui/commune-autocomplete";
+import { useT } from "@/contexts/LanguageContext";
 
-const STEPS = [
-  { id: 1, title: "Identité", desc: "Informations personnelles" },
-  { id: 2, title: "Fiscalité", desc: "Domicile et imposition" },
-  { id: 3, title: "Activité", desc: "Profession et revenus" },
-  { id: 4, title: "Famille", desc: "Conjoint et enfants" },
-  { id: 5, title: "Patrimoine & prévoyance", desc: "LPP, 3a, fortune" },
-] as const;
+const STEP_IDS = [1, 2, 3, 4, 5] as const;
+const STEP_KEYS = {
+  1: { title: "wizard.step.identity.title", desc: "wizard.step.identity.desc" },
+  2: { title: "wizard.step.fiscal.title", desc: "wizard.step.fiscal.desc" },
+  3: { title: "wizard.step.activity.title", desc: "wizard.step.activity.desc" },
+  4: { title: "wizard.step.family.title", desc: "wizard.step.family.desc" },
+  5: { title: "wizard.step.patrimoine.title", desc: "wizard.step.patrimoine.desc" },
+} as const;
+const STEP_COUNT = 5;
+
 
 export interface PensionAccount {
   institution: string;
