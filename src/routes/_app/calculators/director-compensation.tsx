@@ -212,8 +212,8 @@ function DirectorCompensationCalc() {
     [inputs, custom],
   );
   const currentResult = useMemo(
-    () => (hasCurrent ? computeStrategyFromAbsolute(inputs, current, "Situation actuelle") : null),
-    [hasCurrent, inputs, current],
+    () => (hasCurrent ? computeStrategyFromAbsolute(inputs, current, t("calc.dir.current.label")) : null),
+    [hasCurrent, inputs, current, t],
   );
   const strategiesForCompare = useMemo(
     () => [...presetResults, customResult],
