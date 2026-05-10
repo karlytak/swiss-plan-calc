@@ -271,6 +271,7 @@ function LppCalc() {
                 label={t("calc.lpp.projected_capital")}
                 value={projection.projectedBalance}
                 hint={t("calc.lpp.projected_hint")}
+                tip={t("calc.lpp.projected_capital.tip")}
                 tone="primary"
                 big
               />
@@ -287,6 +288,7 @@ function LppCalc() {
                 label={t("calc.lpp.balance_no_yield")}
                 value={projection.projectedBalanceNoYield}
                 hint={t("calc.lpp.balance_no_yield_hint", { val: formatCHF(projection.projectedBalance - projection.projectedBalanceNoYield) })}
+                tip={t("calc.lpp.balance_no_yield.tip")}
                 tone="default"
               />
             </div>
