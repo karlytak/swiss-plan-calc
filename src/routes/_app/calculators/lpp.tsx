@@ -216,6 +216,44 @@ function LppCalc() {
               <NumField label={t("calc.lpp.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.lpp.tip.conversion")} />
               <NumField label={t("calc.lpp.field.extra_credit")} value={form.extraCreditRate} onChange={(v) => set("extraCreditRate", v)} step={0.5} wikiId="lpp-credits" wikiTip={t("calc.lpp.tip.extra_credit")} />
             </div>
+
+            {/* Mode rétroactif — visible uniquement si avoir LPP courant = 0 */}
+            {form.currentBalance === 0 && (
+              <div className="mt-4 rounded-lg border border-warning/30 bg-warning/5 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-1">
+                    <Label className="text-xs font-semibold text-foreground">
+                      {t("calc.lpp.retro.toggle")}
+                    </Label>
+                    <p className="mt-0.5 text-[11px] text-muted-foreground">
+                      {t("calc.lpp.retro.toggle_help")}
+                    </p>
+                  </div>
+                  <Switch
+                    checked={form.retroactiveMode}
+                    onCheckedChange={(v) => set("retroactiveMode", v)}
+                  />
+                </div>
+                {form.retroactiveMode && (
+                  <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    <NumField
+                      label={t("calc.lpp.retro.entry_age")}
+                      value={form.entryAge}
+                      onChange={(v) => set("entryAge", v)}
+                    />
+                    <div className="rounded-md border border-border bg-card p-2 text-[11px]">
+                      <div className="text-muted-foreground">{t("calc.lpp.retro.estimated")}</div>
+                      <div className="mt-0.5 font-semibold tabular-nums text-foreground">
+                        {formatCHF(effectiveCurrentBalance)}
+                      </div>
+                    </div>
+                    <p className="sm:col-span-2 text-[11px] text-muted-foreground">
+                      {t("calc.lpp.retro.note", { from: form.entryAge })}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             <p className="mt-3 text-xs text-muted-foreground">
               {t("calc.lpp.net_return", { rate: projection.netReturnRate.toFixed(2) })}
             </p>
