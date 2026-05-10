@@ -79,7 +79,16 @@ function LppCalc() {
     status: "single" as IncomeTaxInput["status"],
     children: 0,
     buybackCapacity: 60_000,
+    actualBuyback: 60_000,
     buybackYears: 3,
+    // Mode rétroactif (uniquement quand currentBalance = 0)
+    retroactiveMode: false,
+    entryAge: 25,
+    // Enrichissement fiscal pour le plan de rachat
+    spouseGrossSalary: 0,
+    pillar3aContributions: 0,
+    healthInsurancePremiums: 0,
+    confession: "none" as NonNullable<IncomeTaxInput["confession"]>,
   });
   useHydrateFormFromPrefill(prefill, setForm);
   const [insuredSalaryManual, setInsuredSalaryManual] = useState(false);
@@ -103,29 +112,58 @@ function LppCalc() {
     }));
   };
 
+  // Avoir LPP effectif (inclut estimation rétroactive si activée)
+  const effectiveCurrentBalance = useMemo(() => {
+    if (form.retroactiveMode && form.currentBalance === 0) {
+      return estimateRetroactiveLppBalance({
+        entryAge: form.entryAge,
+        currentAge: form.currentAge,
+        insuredSalary: form.insuredSalary,
+      });
+    }
+    return form.currentBalance;
+  }, [form.retroactiveMode, form.currentBalance, form.entryAge, form.currentAge, form.insuredSalary]);
+
+  const actualBuybackCapped = Math.min(form.actualBuyback, form.buybackCapacity);
+  const buybackExceedsCapacity = form.actualBuyback > form.buybackCapacity;
+
   const projection = useMemo(
     () =>
       projectLPP({
         ...form,
-        yearlyBuyback: Math.round(form.buybackCapacity / Math.max(1, form.buybackYears)),
+        currentBalance: effectiveCurrentBalance,
+        yearlyBuyback: Math.round(actualBuybackCapped / Math.max(1, form.buybackYears)),
         buybackYears: form.buybackYears,
         insuredSalaryCap: form.insuredSalaryCap,
       }),
+    [form, effectiveCurrentBalance, actualBuybackCapped],
+  );
+
+  // IncomeTaxInput enrichi : conjoint + 3a + primes maladie + confession
+  const enrichedTaxInput: IncomeTaxInput = useMemo(
+    () => ({
+      canton: form.canton,
+      status: form.status,
+      grossSalary: form.grossSalary,
+      spouseGrossSalary: form.status === "married" ? form.spouseGrossSalary : 0,
+      children: form.children,
+      age: form.currentAge,
+      pillar3aContributions: form.pillar3aContributions,
+      healthInsurancePremiums: form.healthInsurancePremiums || undefined,
+      confession: form.confession,
+    }),
     [form],
   );
+
   const buybackPlan = useMemo(
     () =>
       simulateBuybackPlan({
         buybackCapacity: form.buybackCapacity,
+        actualBuyback: actualBuybackCapped,
         years: Math.max(1, form.buybackYears),
-        taxInput: {
-          canton: form.canton,
-          status: form.status,
-          grossSalary: form.grossSalary,
-          children: form.children,
-        },
+        taxInput: enrichedTaxInput,
       }),
-    [form],
+    [form.buybackCapacity, form.buybackYears, actualBuybackCapped, enrichedTaxInput],
   );
 
   const { user } = useAuth();
