@@ -30,7 +30,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
-import { projectLPP, simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
+import { projectLPP, simulateBuybackPlan, computeLppInsuredSalary, estimateRetroactiveLppBalance } from "@/lib/lpp";
 import { LPP_2026 } from "@/lib/lpp/parameters-2026";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { formatCHF } from "@/lib/format";
