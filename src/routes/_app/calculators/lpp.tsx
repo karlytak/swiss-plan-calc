@@ -19,7 +19,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Calculator, Info, RotateCcw, Pencil } from "lucide-react";
+import { Calculator, Info, RotateCcw, Pencil, History as HistoryIcon, AlertTriangle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { tCanton } from "@/lib/i18n";
 import {
   Select,
   SelectContent,
