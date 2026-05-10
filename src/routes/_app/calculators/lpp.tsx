@@ -350,9 +350,49 @@ function LppCalc() {
                   </SelectContent>
                 </Select>
               </div>
-              <NumField label={t("calc.lpp.field.children")} value={form.children} onChange={(v) => set("children", v)} />
+              <NumField label={t("calc.lpp.field.children")} value={form.children} onChange={(v) => set("children", v)} wikiTip={t("calc.lpp.tip.children")} />
               <NumField label={t("calc.lpp.field.buyback_capacity")} value={form.buybackCapacity} onChange={(v) => set("buybackCapacity", v)} wikiId="lpp-rachat" wikiTip={t("calc.lpp.tip.buyback_capacity")} />
+              <NumField label={t("calc.lpp.field.actual_buyback")} value={form.actualBuyback} onChange={(v) => set("actualBuyback", v)} wikiTip={t("calc.lpp.tip.actual_buyback")} />
               <NumField label={t("calc.lpp.field.buyback_years")} value={form.buybackYears} onChange={(v) => set("buybackYears", v)} wikiId="lpp-rachat" wikiTip={t("calc.lpp.tip.buyback_years")} />
+            </div>
+
+            {buybackExceedsCapacity && (
+              <div className="mt-3 flex items-start gap-2 rounded-md border border-warning/40 bg-warning/10 p-2 text-[11px] text-foreground">
+                <AlertTriangle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" />
+                <span>{t("calc.lpp.actual_buyback.warning", { cap: formatCHF(form.buybackCapacity) })}</span>
+              </div>
+            )}
+
+            {/* Enrichissement fiscal pour calcul précis du marginal */}
+            <div className="mt-4 rounded-lg border border-border/60 bg-muted/30 p-3">
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("calc.lpp.fiscal.title")}
+              </div>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                {t("calc.lpp.fiscal.help")}
+              </p>
+              <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {form.status === "married" && (
+                  <NumField
+                    label={t("calc.lpp.field.spouse_salary")}
+                    value={form.spouseGrossSalary}
+                    onChange={(v) => set("spouseGrossSalary", v)}
+                    wikiTip={t("calc.lpp.tip.spouse_salary")}
+                  />
+                )}
+                <NumField
+                  label={t("calc.lpp.field.pillar3a_year")}
+                  value={form.pillar3aContributions}
+                  onChange={(v) => set("pillar3aContributions", v)}
+                  wikiTip={t("calc.lpp.tip.pillar3a_year")}
+                />
+                <NumField
+                  label={t("calc.lpp.field.health_premiums")}
+                  value={form.healthInsurancePremiums}
+                  onChange={(v) => set("healthInsurancePremiums", v)}
+                  wikiTip={t("calc.lpp.tip.health_premiums")}
+                />
+              </div>
             </div>
           </CalcCard>
         </div>
@@ -365,6 +405,14 @@ function LppCalc() {
             <p className="mt-2 text-xs text-muted-foreground">
               {t("calc.lpp.avg_return", { pct: buybackPlan.averageReturn })}
             </p>
+            <div className="mt-2 rounded-md border border-primary/30 bg-primary/5 p-2 text-[11px] leading-relaxed text-foreground/90">
+              {t("calc.lpp.marginal_effective", {
+                rate: buybackPlan.effectiveMarginalRate,
+                status: t(`calc.status.${form.status}`),
+                canton: tCanton(form.canton),
+                income: formatCHF(buybackPlan.baselineTaxableIncome),
+              })}
+            </div>
             <div className="mt-4 space-y-2 text-sm">
               {buybackPlan.yearly.map((y) => (
                 <div key={y.year} className="flex items-center justify-between border-t border-border/50 pt-2 first:border-t-0 first:pt-0">
