@@ -62,6 +62,8 @@ export interface CantonTaxScale {
    * sans réécrire ligne par ligne tous les paliers.
    */
   calibrationFactor?: number;
+  /** Calibration spécifique au barème married/famille (sinon = calibrationFactor). */
+  calibrationFactorMarried?: number;
   /**
    * Mode splitting (couple / famille monoparentale).
    * - "married_scale" (défaut) : utilise `married` directement.
