@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useClientFiscalSnapshot } from "@/hooks/useClientFiscalSnapshot";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import {
@@ -50,6 +51,16 @@ function RetirementCalc() {
     rentMarginalRate: 25,
   });
   useHydrateFormFromPrefill(prefill, setForm);
+
+  // Pré-remplir le taux marginal depuis la dernière simulation fiscale du client
+  const { data: snapshot } = useClientFiscalSnapshot(clientId);
+  const marginalAutofilled = useRef(false);
+  useEffect(() => {
+    if (snapshot && !marginalAutofilled.current) {
+      setForm((f) => ({ ...f, rentMarginalRate: Math.round(snapshot.marginalRateEstimate * 10) / 10 }));
+      marginalAutofilled.current = true;
+    }
+  }, [snapshot]);
 
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
@@ -138,7 +149,14 @@ function RetirementCalc() {
               <NumField label={t("calc.retirement.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.conversion_rate")} />
               <NumField label={t("calc.retirement.field.life_years")} value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.life_years")} />
               <NumField label={t("calc.retirement.field.return_rate")} value={form.selfReturnRate} onChange={(v) => set("selfReturnRate", v)} step={0.1} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.return_rate")} />
-              <NumField label={t("calc.retirement.field.marginal_rate")} value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.marginal_rate")} />
+              <div className="space-y-1">
+                <NumField label={t("calc.retirement.field.marginal_rate")} value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} suffix="%" wikiId="lpp-conversion" wikiTip="Le taux marginal correspond à l'impôt prélevé sur chaque franc supplémentaire de revenu (ici, la rente LPP), en fonction de la situation fiscale globale du client. Estimé depuis sa situation actuelle, ajustez selon vos hypothèses pour la retraite." />
+                <p className="text-[10px] text-muted-foreground">
+                  {snapshot
+                    ? `Estimé depuis la dernière simulation (taux moyen ${snapshot.averageRate.toFixed(1)} %, marge sécurité +5 pts). Modifiable.`
+                    : "Hypothèse standard 25 %. Ajustez selon le profil retraite du client."}
+                </p>
+              </div>
             </div>
           </CalcCard>
         </div>
@@ -173,6 +191,9 @@ function RetirementCalc() {
       <div className="rounded-2xl border border-success/30 bg-success/5 p-5">
         <div className="text-xs font-medium uppercase tracking-wider text-success-foreground/80">{t("calc.retirement.reco.title")}</div>
         <p className="mt-1 text-sm">{reco}</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Cette comparaison repose sur les hypothèses ci-dessus (espérance de vie, rendement, fiscalité). Une modification de ces paramètres peut changer la recommandation.
+        </p>
       </div>
 
       <div className="flex flex-wrap justify-end gap-2">

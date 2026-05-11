@@ -47,7 +47,16 @@ export interface NumFieldProps
 export const NumField = React.forwardRef<HTMLInputElement, NumFieldProps>(
   ({ value, onChange, suffix, className, onFocus, onBlur, ...rest }, ref) => {
     const [focused, setFocused] = React.useState(false);
-    const display = focused ? value.replace(".", ",") : format(value);
+    // Tampon local pendant le focus pour préserver "5," / "5." / "" en cours de frappe
+    // même si le parent re-sérialise la valeur en number.
+    const [buffer, setBuffer] = React.useState<string>(value);
+
+    // Sync depuis le parent uniquement hors focus (ne casse pas la saisie en cours).
+    React.useEffect(() => {
+      if (!focused) setBuffer(value);
+    }, [value, focused]);
+
+    const display = focused ? buffer.replace(".", ",") : format(buffer);
 
     return (
       <div className="relative">
@@ -57,15 +66,25 @@ export const NumField = React.forwardRef<HTMLInputElement, NumFieldProps>(
           value={display}
           onFocus={(e) => {
             setFocused(true);
-            // Sélectionne tout pour permettre l'écrasement immédiat (plus de 0 qui colle)
+            setBuffer(value);
             requestAnimationFrame(() => e.target.select());
             onFocus?.(e);
           }}
           onBlur={(e) => {
             setFocused(false);
+            // Normalise au blur (ex "5," → "5", "5." → "5")
+            const normalized = buffer.replace(/[.,]$/, "");
+            setBuffer(normalized);
+            if (normalized !== value) onChange(normalized);
             onBlur?.(e);
           }}
-          onChange={(e) => onChange(normalize(e.target.value))}
+          onChange={(e) => {
+            const norm = normalize(e.target.value);
+            setBuffer(norm);
+            // On propage immédiatement sauf si on est en train de taper le séparateur final
+            // (parent peut convertir "5." en number → 5, mais le tampon garde "5.")
+            onChange(norm);
+          }}
           className={cn(suffix && "pr-12", "tabular-nums", className)}
           {...rest}
         />

@@ -12,6 +12,7 @@ export interface BrokerHeader {
   primaryColor?: string; // hex
   accentColor?: string; // hex
   footerNote?: string;
+  logoDataUrl?: string; // base64 data URL du logo cabinet (PNG/JPG)
 }
 
 export interface PdfHeaderInfo extends BrokerHeader {
@@ -53,27 +54,37 @@ export class ReportPdf {
   }
 
   private drawHeader() {
-    const { doc, margin, pageWidth, primary, muted } = this;
+    const { doc, margin, pageWidth, primary } = this;
     // Bandeau couleur charte courtier
     doc.setFillColor(...primary);
     doc.rect(0, 0, pageWidth, 32, "F");
 
-    // Cabinet (en gros) ou nom courtier
+    // Logo cabinet (haut gauche) si disponible
+    let textOffsetX = margin;
+    if (this.header.logoDataUrl) {
+      try {
+        const fmt = this.header.logoDataUrl.includes("image/jpeg") ? "JPEG" : "PNG";
+        doc.addImage(this.header.logoDataUrl, fmt, margin, 4, 22, 22);
+        textOffsetX = margin + 26;
+      } catch {
+        // logo invalide : on ignore
+      }
+    }
+
     const cabinet = this.header.brokerageName?.trim();
     const brokerName = this.header.brokerName?.trim();
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(15);
-    doc.text(cabinet || brokerName || "Rapport de simulation", margin, 11);
+    doc.text(cabinet || brokerName || "Rapport de simulation", textOffsetX, 11);
 
-    // Ligne contact courtier
     doc.setFont("helvetica", "normal");
     doc.setFontSize(9);
     const contactParts: string[] = [];
     if (cabinet && brokerName) contactParts.push(brokerName);
     if (this.header.brokerEmail) contactParts.push(this.header.brokerEmail);
     if (this.header.brokerPhone) contactParts.push(this.header.brokerPhone);
-    if (contactParts.length) doc.text(contactParts.join(" · "), margin, 17);
+    if (contactParts.length) doc.text(contactParts.join(" · "), textOffsetX, 17);
 
     // Date à droite
     doc.setFontSize(9);
@@ -93,7 +104,7 @@ export class ReportPdf {
 
     // Sous-titre sous le bandeau
     if (this.header.subtitle) {
-      doc.setTextColor(...muted);
+      doc.setTextColor(this.muted[0], this.muted[1], this.muted[2]);
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
       doc.text(this.header.subtitle, margin, 40);

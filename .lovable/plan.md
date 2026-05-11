@@ -1,106 +1,124 @@
-# Plan — PDFs personnalisables, fiche client enrichie, libre passage
+## Plan global — 6 chantiers
 
-## 1. Profil courtier — champs et personnalisation PDF
+### 1. Bug saisie virgules dans les champs % (rapide)
 
-**Migration `profiles`** : ajouter
-- `company_name TEXT` (déjà couvert par `brokerage_name`, on le réutilise — pas de nouveau champ)
-- `pdf_primary_color TEXT` (hex, défaut `#0F4C81`)
-- `pdf_accent_color TEXT` (hex, défaut `#3B82F6`)
-- `pdf_footer_note TEXT` (mention légale optionnelle)
+**Cause** : dans les wrappers locaux `NumField` (retirement.tsx, lpp.tsx, pillar3a.tsx, etc.), la valeur est stockée en `number` dans le state et re-sérialisée via `String(value)` à chaque keystroke. Quand l'utilisateur tape `5,` → normalize → `"5."` → `Number("5.") = 5` → state `5` → ré-affiché `"5"` → impossible d'ajouter une décimale.
 
-**Page `/account`** : nouveau bloc « Personnalisation des rapports PDF »
-- 2 color-pickers (primaire / accent) avec aperçu live d'un mini header
-- Champ texte note de pied de page
-- Réutilise `brokerage_name`, `first_name`, `last_name`, `phone`, `email` déjà présents
+**Correctif** : 
+- Modifier le wrapper `NumField` (et les variantes locales dans chaque calculateur) pour conserver une **string locale tampon** (`useState<string>`) qui suit le state numérique parent uniquement quand il diverge réellement (hors focus).
+- Approche plus simple : passer les % en `string` dans le form state des calculateurs (déjà le cas pour income-tax/source-tax via BaseNumField direct). Pour retirement et lpp, refactorer les champs taux pour stocker string et `parseFloat` au moment du calcul.
 
-## 2. Refonte du moteur PDF (`src/lib/pdf/builder.ts`)
+Fichiers : `src/routes/_app/calculators/{retirement,lpp,pillar3a,canton-compare,vested-benefits,avs-ai,cross-border,tou,director-compensation}.tsx`.
 
-Problème actuel : chevauchements de texte, header non personnalisé, pas de logo couleur, pas de séparation logique.
+### 2. Lien Libre Passage → sfbvg.ch
 
-**Nouveau `PdfBuilder`** :
-- Marges normalisées (20mm), grille verticale avec curseur `y` auto-incrémenté → fini les chevauchements (chaque `addSection`/`addKpiTable`/`addParagraph` recalcule la hauteur et déclenche `addPage()` automatique si dépassement)
-- Header coloré (bandeau `pdf_primary_color`) avec : nom complet courtier, cabinet, email/téléphone, et titre du rapport sur fond couleur
-- Footer fixe : pagination + `pdf_footer_note` + date génération
-- API helpers : `addClientBlock(client)`, `addSituationBlock(...)` (situation actuelle), `addProjectionBlock(...)` (projection), `addSimulationBlock(simulation)` (carte par simulation enregistrée)
+Remplacer `https://www.zentralstelle.ch/fr/` par `https://sfbvg.ch/fr/` dans :
+- `src/routes/_app/calculators/vested-benefits.tsx:130`
+- `src/routes/_app/calculators/lpp.tsx:260`
+- Clés i18n `calc.vested.search.cta` et `calc.lpp.search_tip_cta` dans `fr/de/en/it.ts` → texte "sfbvg.ch".
 
-**Hook `useBrokerPdfHeader()`** : lit le profil + cache, retourne `PdfHeaderInfo` enrichi (couleurs + identité) à passer à toutes les fonctions `export*Pdf`.
+### 3. Logo cabinet uploadable + intégration PDF
 
-## 3. Structure de contenu — « Situation vs Projection »
+**Backend** (migration) :
+- Créer bucket Storage public `broker-logos`.
+- RLS : insert/update/delete restreints à `auth.uid()::text = (storage.foldername(name))[1]`, select public.
+- La colonne `logo_url` existe déjà dans `profiles`.
 
-Chaque rapport calculateur reprend la même trame :
+**UI** (`src/routes/_app/account.tsx`) :
+- Section "Logo du cabinet" : upload PNG/JPG/SVG, max 2 Mo, preview, suppression.
+- Upload vers `broker-logos/{userId}/logo.{ext}`, stocker l'URL publique dans `profiles.logo_url`.
 
-```
-1. En-tête courtier (couleur charte)
-2. Identité client (si clientId)
-3. SITUATION ACTUELLE   ← encadré gris clair
-   - Données saisies
-   - Résultats à date
-4. PROJECTION           ← encadré couleur primaire
-   - Hypothèses (durée, rendement, rachats…)
-   - Résultats projetés
-5. RECOMMANDATIONS / KPI clés
-6. Note méthodologique + footer
-```
+**PDF** (`src/lib/pdf/builder.ts` + `useBrokerPdfHeader.ts`) :
+- Charger l'image (fetch → base64) au moment de la génération PDF.
+- `jsPDF.addImage()` en haut à gauche du header (40×40 px), nom du cabinet à droite du logo, couleurs personnalisées en arrière-plan inchangées.
+- Si pas de logo : fallback texte seulement (comportement actuel).
+- Gestion erreurs (logo manquant/inaccessible) : skip sans casser le PDF.
 
-Modification de `src/lib/pdf/reports.ts` : chaque `export*Pdf` regroupe les sections en deux blocs visuels distincts.
+### 4. Refonte calcul impôt à la source (CRITIQUE)
 
-## 4. Rapport client consolidé (multi-simulations)
+**Problème** : `src/lib/tax/source.ts` applique un seul barème au salaire mensuel d'UNE personne. Pour un couple à 100k+80k, le revenu du conjoint est ignoré dans le calcul actuel.
 
-**Nouveau bouton fiche client** : « Exporter rapport global PDF »
-- Récupère toutes les `simulation_history` du client (déjà en place)
-- Génère **un seul PDF** structuré :
-  - Page 1 : couverture + identité + sommaire
-  - Page 2 : synthèse fiscale globale (KPI agrégés)
-  - Pages suivantes : un bloc par simulation enregistrée, regroupé par catégorie (Impôts → Prévoyance → Retraite)
-- Réutilise `extractKpis()` de `src/lib/history/registry.ts`
+**Diagnostic à confirmer** :
+- Le barème `C` actuel n'agrège pas les revenus → résultat ~5 % au lieu de 12-15 %.
+- Mapping marié/2 enfants → barème C2 absent (réductions enfants linéaires hardcodées).
 
-Les simulations non sauvegardées n'apparaissent jamais (comportement déjà correct).
+**Refonte (`src/lib/tax/source.ts`)** :
+- Nouvelle signature `computeSourceTax({ canton, scale, monthlyGross, spouseMonthlyGross?, children, church, isCrossBorderFR, deductions? })`.
+- Si scale=C : calculer le **revenu mensuel combiné** = `monthlyGross + spouseMonthlyGross` (avec plafond conjoint GE = 5 925 CHF/mois selon barème C 2026), retenir le **taux** correspondant au combiné, l'appliquer au revenu propre du contribuable.
+- Recalibrer les courbes barèmes A/B/C/H par régression sur les vrais barèmes ESTV 2026 (charger la grille officielle GE C0/C1/C2/C3 — au moins 20 points pour le C).
+- Code enfants suffixé : C0 (0 enf), C1, C2, C3+ → réductions selon grille.
+- Déductions 3a : impact uniquement via la **demande de TOU** (quasi-résidents) → ne pas baisser le brut mensuel utilisé pour le barème (les barèmes incluent déjà les forfaits).
+- Retour : `{ rate, monthlyTax, annualTax, combinedMonthly, scaleUsed }`.
 
-## 5. Année d'arrivée en Suisse + années de cotisation AVS
+**UI source-tax** (`source-tax.tsx`) :
+- Ajouter champ `spouseMonthlyGross` visible quand `scale === "C"`.
+- Pré-rempli depuis `client.spouse_gross_annual_salary / 12` via `toSourceTaxInput`.
+- Affichage du barème effectif (C2) et du revenu combiné dans les résultats.
 
-**Migration `clients`** : ajouter
-- `arrival_year_ch INTEGER NULL` (résident)
-- `cross_border_start_year INTEGER NULL` (frontalier)
-- `avs_contribution_start_year INTEGER NULL` (override manuel si ≠ arrivée)
+**Mapping client→calculator** (`src/lib/clients/to-calculator-input.ts`) :
+- `toSourceTaxInput` : passer `spouseMonthlyGross`, déduire `children = client.children.length`.
+- `toIncomeTaxInput` : vérifier que le revenu conjoint est bien sommé pour le barème marié (déjà OK en théorie, mais re-tester).
 
-**ClientWizard** : étape « Statut fiscal » → si `tax_status = resident` afficher arrivée Suisse, si `cross_border` afficher début activité CH. Champ optionnel « Début cotisation AVS » (sinon dérivé : max(arrival_year, year_of_18_birthday)).
+**Comparateur cantonal** (`canton-compare.tsx` + `src/lib/tax/cantons.ts`) :
+- Recalculer la charge fiscale annuelle avec le nouveau moteur.
+- Vérifier le calcul "Impôt prestation LPP à la retraite" : confirmer formule (taux LPP cantonal × capital, séparé de l'IFD prestation).
 
-**`toAvsAiInput`** : mappe `contributionStartYear` depuis le client → le champ se pré-remplit ET reste persistant (il vient du dossier client, pas d'un état local volatile).
+### 5. Connexion calculateurs — taux marginal partagé
 
-**Calculateur AVS standalone** (sans clientId) : on garde la valeur en `localStorage` (clé `avs.contributionStartYear`) pour qu'elle ne s'efface pas entre sessions.
+**Approche** : "Dernière simulation enregistrée" (choisi par l'utilisateur).
 
-## 6. Recherche d'avoir libre passage (oubli passage précédent)
+**Création** `src/hooks/useClientFiscalSnapshot.ts` :
+- Input : `clientId`.
+- Query Supabase : dernière `simulation_history` où `client_id = clientId AND kind IN ('income_tax','source_tax')` ordonné par `created_at DESC LIMIT 1`.
+- Retourne `{ averageRate, marginalRateEstimate, lastUpdated, source }` ou `null`.
+- `marginalRateEstimate = Math.min(averageRate + 5, 40)`.
 
-Sur `/calculators/vested-benefits` et dans la wiki :
-- Bloc info avec lien officiel **Centrale du 2ᵉ pilier** : `https://www.zentralstelle.ch/fr/`
-- Texte explicatif : démarche gratuite pour retrouver les avoirs LPP/libre passage oubliés
-- Bouton CTA externe (target=_blank, rel=noopener)
-- Tooltip dans `LppCalculator` (avoir actuel = 0) suggérant cette recherche
-- Traduit FR/DE/EN/IT
+**Intégration `retirement.tsx`** :
+- Au montage, si `clientId` présent : charger snapshot. Si dispo, pré-remplir `rentMarginalRate` avec `marginalRateEstimate` (sauf si utilisateur a déjà modifié manuellement).
+- Tooltip à côté du champ : « Le taux marginal correspond à l'impôt prélevé sur chaque franc supplémentaire de revenu… Estimé depuis la situation fiscale actuelle, ajustez selon vos hypothèses. »
+- Sous la recommandation : « Cette comparaison repose sur les hypothèses ci-dessus (espérance de vie, rendement, fiscalité). Une modification de ces paramètres peut changer la recommandation. »
+- Si pas de snapshot : valeur par défaut `25 %` + tooltip "hypothèse standard".
 
-## Détails techniques
+**Sauvegarder summary enrichi** : s'assurer que `SaveSimulationButton` pour income-tax/source-tax stocke bien `averageRate` dans `summary` (sinon ajouter).
 
-| Fichier | Action |
-|---|---|
-| `supabase/migrations/...` | ALTER profiles + ALTER clients (3 champs chacune) |
-| `src/routes/_app/account.tsx` | bloc personnalisation PDF (couleurs + footer) |
-| `src/lib/pdf/builder.ts` | refonte avec curseur y auto + couleurs dynamiques |
-| `src/lib/pdf/reports.ts` | sections Situation/Projection systématiques |
-| `src/lib/pdf/client-report.ts` (nouveau) | rapport global multi-simulations |
-| `src/hooks/useBrokerPdfHeader.ts` (nouveau) | charge profil + couleurs |
-| `src/components/clients/ClientWizard.tsx` | nouveaux champs années |
-| `src/lib/clients/to-calculator-input.ts` | mappe nouveaux champs vers AVS |
-| `src/routes/_app/calculators/avs-ai.tsx` | localStorage fallback |
-| `src/routes/_app/calculators/vested-benefits.tsx` | bloc recherche centrale 2P |
-| `src/routes/_app/calculators/lpp.tsx` | tooltip recherche centrale 2P si avoir = 0 |
-| `src/lib/i18n/{fr,de,en,it}.ts` | nouvelles clés (~40) |
+### 6. Société — module "Rachats LPP du dirigeant"
 
-## Périmètre exclu
-- Pas de logo image uploadable (uniquement couleurs + texte) — peut être ajouté ultérieurement
-- Pas de templates PDF multiples — un seul layout, juste recoloré
+**Nouveau** dans `src/routes/_app/calculators/director-compensation.tsx` :
+- Section "Stratégie rachats LPP" après dividendes/salaire.
+- Inputs : capacité de rachat (depuis client_pension), rachat annuel souhaité, horizon (1 an / 5 ans / jusqu'à retraite), age courant + age retraite (55 ou 65).
+- Logique (`src/lib/director-compensation/index.ts`) :
+  - Montant à sortir = rachat annuel + charges sociales évitées (le rachat se fait via salaire brut, pas dividende).
+  - Économie d'impôt personnel = rachat × taux marginal (depuis snapshot).
+  - Économie sur 5 ans / horizon retraite (cumul).
+  - Comparaison vs dividende équivalent (impôt dividende ~70% imposé).
+- Tableau récapitulatif : Année 1 / 5 ans / Total retraite avec montant sortie société / économie fiscale / capital LPP gagné.
+- Tooltip explicatif + intégration dans le PDF director-compensation.
 
-## Validation finale en preview
-1. Account → modifier couleurs → exporter un PDF impôt revenu → vérifier header coloré
-2. Fiche client avec 3 simulations enregistrées → bouton « rapport global » → 1 PDF cohérent
-3. Wizard client → renseigner arrivée 2018 → AVS calculator pré-rempli → quitter/revenir → valeur conservée
-4. Calculateur libre passage → lien centrale 2P visible et cliquable
+---
+
+### Ordre d'implémentation
+
+1. **Bug virgules %** + **lien sfbvg** (quick wins, 10 min).
+2. **Refonte impôt source** + adaptation `source-tax.tsx` + `canton-compare.tsx` (chantier le plus long, le plus impactant).
+3. **Snapshot fiscal partagé** + intégration retirement (taux marginal).
+4. **Logo cabinet** : migration storage + UI account + intégration PDF.
+5. **Module rachats LPP dirigeant** dans director-compensation.
+
+Validation finale : tester le cas Genève marié 2 enfants 100k+80k → impôt source annuel attendu **~22-27k** (taux ~12-15 %).
+
+### Fichiers impactés
+
+- `supabase/migrations/...` (bucket broker-logos)
+- `src/lib/tax/source.ts` (refonte complète)
+- `src/lib/tax/cantons.ts` (cohérence comparateur)
+- `src/lib/clients/to-calculator-input.ts` (mapping conjoint)
+- `src/lib/director-compensation/index.ts` (+ types)
+- `src/lib/pdf/builder.ts` (logo)
+- `src/hooks/useBrokerPdfHeader.ts` (charger logo base64)
+- `src/hooks/useClientFiscalSnapshot.ts` (NEW)
+- `src/components/ui/num-field.tsx` ou wrappers locaux (fix virgule)
+- `src/routes/_app/account.tsx` (upload logo)
+- `src/routes/_app/calculators/{source-tax,retirement,canton-compare,director-compensation,vested-benefits,lpp}.tsx`
+- `src/lib/i18n/{fr,de,en,it}.ts` (nouvelles clés tooltip + sfbvg)
+
+GO ?
