@@ -83,6 +83,7 @@ import type {
 import type { Client } from "@/lib/clients/types";
 import type { Company } from "@/lib/companies/types";
 import type { FilingStatus } from "@/lib/tax/ifd";
+import { DirectorLppBuybackCard } from "@/components/calculators/DirectorLppBuybackCard";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -442,12 +443,24 @@ function DirectorCompensationCalc() {
               />
             </CalcCard>
 
+
             <CalcCard
               title={t("calc.dir.card.chart.title")}
               description={t("calc.dir.card.chart.desc")}
             >
               <ComparisonChart results={tableResults} />
             </CalcCard>
+
+            <DirectorLppBuybackCard
+              best={recommendation.best}
+              retirementAge={65}
+              initialBalance={
+                Number(
+                  (linkedClient as unknown as { lpp_current_balance?: number } | null)
+                    ?.lpp_current_balance ?? 0,
+                ) || 0
+              }
+            />
           </div>
         </div>
 
