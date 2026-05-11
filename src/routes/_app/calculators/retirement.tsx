@@ -149,7 +149,14 @@ function RetirementCalc() {
               <NumField label={t("calc.retirement.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.conversion_rate")} />
               <NumField label={t("calc.retirement.field.life_years")} value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.life_years")} />
               <NumField label={t("calc.retirement.field.return_rate")} value={form.selfReturnRate} onChange={(v) => set("selfReturnRate", v)} step={0.1} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.return_rate")} />
-              <NumField label={t("calc.retirement.field.marginal_rate")} value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.marginal_rate")} />
+              <div className="space-y-1">
+                <NumField label={t("calc.retirement.field.marginal_rate")} value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} suffix="%" wikiId="lpp-conversion" wikiTip="Le taux marginal correspond à l'impôt prélevé sur chaque franc supplémentaire de revenu (ici, la rente LPP), en fonction de la situation fiscale globale du client. Estimé depuis sa situation actuelle, ajustez selon vos hypothèses pour la retraite." />
+                <p className="text-[10px] text-muted-foreground">
+                  {snapshot
+                    ? `Estimé depuis la dernière simulation (taux moyen ${snapshot.averageRate.toFixed(1)} %, marge sécurité +5 pts). Modifiable.`
+                    : "Hypothèse standard 25 %. Ajustez selon le profil retraite du client."}
+                </p>
+              </div>
             </div>
           </CalcCard>
         </div>
