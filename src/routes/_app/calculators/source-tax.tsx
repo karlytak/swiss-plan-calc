@@ -120,6 +120,19 @@ function SourceTaxCalc() {
                 suffix="CHF"
               />
             </div>
+            {form.scale === "C" && (
+              <div className="space-y-1.5">
+                <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                  <span>Salaire mensuel brut conjoint</span>
+                  <WikiTip articleId="frontaliers" tip="Le barème C détermine le taux sur le revenu mensuel COMBINÉ du ménage, puis l'applique au salaire propre du contribuable. Saisissez le brut mensuel du conjoint." />
+                </Label>
+                <BaseNumField
+                  value={String(form.spouseMonthlyGross)}
+                  onChange={(v) => set("spouseMonthlyGross", Number(v) || 0)}
+                  suffix="CHF"
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-muted-foreground">{t("calc.source_tax.field.children")}</Label>
               <BaseNumField
