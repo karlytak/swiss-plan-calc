@@ -136,10 +136,7 @@ export function DirectorLppBuybackCard({
           </div>
           <div>
             <Label className="text-xs font-medium text-muted-foreground">Montant à racheter (CHF)</Label>
-            <NumField
-              value={String(actualBuyback)}
-              onChange={(v) => setActualBuyback(Math.min(Number(v) || 0, maxBuyback))}
-            />
+            <NumField value={String(actualBuyback)} onChange={handleActualChange} />
             <p className="mt-1 text-[10px] text-muted-foreground">≤ capacité de rachat.</p>
           </div>
         </div>
