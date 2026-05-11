@@ -442,12 +442,24 @@ function DirectorCompensationCalc() {
               />
             </CalcCard>
 
+
             <CalcCard
               title={t("calc.dir.card.chart.title")}
               description={t("calc.dir.card.chart.desc")}
             >
               <ComparisonChart results={tableResults} />
             </CalcCard>
+
+            <DirectorLppBuybackCard
+              best={recommendation.best}
+              retirementAge={65}
+              initialBalance={
+                Number(
+                  (linkedClient as unknown as { lpp_current_balance?: number } | null)
+                    ?.lpp_current_balance ?? 0,
+                ) || 0
+              }
+            />
           </div>
         </div>
 
