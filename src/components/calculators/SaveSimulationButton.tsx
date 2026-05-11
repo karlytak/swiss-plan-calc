@@ -96,7 +96,13 @@ export function SaveSimulationButton({
       setTitle(defaultTitle ?? "");
       setNote("");
       setTagsRaw("");
-      setClientId("none");
+      // Conserver le clientId pré-rempli depuis l'URL
+      if (typeof window !== "undefined") {
+        const cid = new URLSearchParams(window.location.search).get("clientId");
+        setClientId(cid ?? "none");
+      } else {
+        setClientId("none");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });
