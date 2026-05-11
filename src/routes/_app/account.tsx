@@ -27,6 +27,9 @@ function AccountPage() {
     brokerage_name: "",
     phone: "",
     default_canton: "",
+    pdf_primary_color: "#0F4C81",
+    pdf_accent_color: "#3B82F6",
+    pdf_footer_note: "",
   });
 
   useEffect(() => {
@@ -34,7 +37,9 @@ function AccountPage() {
     (async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("first_name,last_name,brokerage_name,phone,default_canton")
+        .select(
+          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note",
+        )
         .eq("id", user.id)
         .maybeSingle();
       if (error) toast.error(t("account.toast.load_error"));
