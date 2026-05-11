@@ -168,7 +168,7 @@ function SourceTaxCalc() {
       </div>
 
       <div className="space-y-4 md:col-span-2">
-        <CalcCard title={t("calc.source_tax.result.title", { scale: form.scale })}>
+        <CalcCard title={t("calc.source_tax.result.title", { scale: result.scaleUsed })}>
           <Row>
             <PctTile label={t("calc.source_tax.result.rate")} value={result.rate} tone="primary" tip={t("calc.source_tax.result.rate.tip")} />
             <MoneyTile label={t("calc.source_tax.result.monthly")} value={result.monthlyTax} tone="primary" big tip={t("calc.source_tax.result.monthly.tip")} />
@@ -176,6 +176,11 @@ function SourceTaxCalc() {
           <div className="mt-3">
             <MoneyTile label={t("calc.source_tax.result.annual")} value={result.annualTax} tone="default" tip={t("calc.source_tax.result.annual.tip")} />
           </div>
+          {form.scale === "C" && (
+            <div className="mt-3 rounded-md border border-primary/20 bg-primary/5 p-2 text-[11px] text-foreground">
+              Barème <strong>{result.scaleUsed}</strong> — taux déterminé sur le revenu mensuel combiné du ménage : <strong>{result.combinedMonthly.toLocaleString("fr-CH")} CHF</strong>, appliqué au salaire propre.
+            </div>
+          )}
           <div className="mt-3 flex gap-2 rounded-md border border-border/60 bg-muted/30 p-2 text-[11px] text-muted-foreground">
             <Info className="mt-0.5 h-3.5 w-3.5 shrink-0" />
             <p>{t("calc.source_tax.tip.linear_approximation")}</p>
