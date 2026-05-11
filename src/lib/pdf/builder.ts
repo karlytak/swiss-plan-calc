@@ -269,50 +269,42 @@ export class ReportPdf {
     return this;
   }
 
-  /** Grille de tuiles : libellé + valeur (CHF) en grand */
+  /** Grille de tuiles : libellé + valeur (CHF) en grand, style "card" moderne */
   metricsGrid(items: Array<{ label: string; value: number | string; tone?: "primary" | "success" | "warning" }>) {
     const cols = items.length <= 2 ? items.length : items.length === 3 ? 3 : 2;
     const rows = Math.ceil(items.length / cols);
-    const gap = 3;
+    const gap = 4;
     const tileW = (this.contentWidth - gap * (cols - 1)) / cols;
-    const tileH = 18;
+    const tileH = 22;
     this.ensureSpace(rows * (tileH + gap) + 2);
     items.forEach((it, idx) => {
       const r = Math.floor(idx / cols);
       const c = idx % cols;
       const x = this.margin + c * (tileW + gap);
       const y = this.cursorY + r * (tileH + gap);
-      const bg =
-        it.tone === "primary"
-          ? ([239, 246, 255] as [number, number, number])
-          : it.tone === "success"
-            ? ([236, 253, 245] as [number, number, number])
-            : it.tone === "warning"
-              ? ([254, 252, 232] as [number, number, number])
-              : ([248, 250, 252] as [number, number, number]);
-      const border =
-        it.tone === "primary"
-          ? this.primary
-          : it.tone === "success"
-            ? ([16, 185, 129] as [number, number, number])
-            : it.tone === "warning"
-              ? ([202, 138, 4] as [number, number, number])
-              : ([226, 232, 240] as [number, number, number]);
-      this.doc.setFillColor(...bg);
-      this.doc.setDrawColor(...border);
-      this.doc.setLineWidth(0.3);
-      this.doc.roundedRect(x, y, tileW, tileH, 1.5, 1.5, "FD");
+      const accent: [number, number, number] =
+        it.tone === "success"
+          ? [16, 185, 129]
+          : it.tone === "warning"
+            ? [202, 138, 4]
+            : this.primary;
+      this.doc.setFillColor(255, 255, 255);
+      this.doc.setDrawColor(...this.border);
+      this.doc.setLineWidth(0.25);
+      this.doc.rect(x, y, tileW, tileH, "FD");
+      this.doc.setFillColor(...accent);
+      this.doc.rect(x, y, 1.5, tileH, "F");
       this.doc.setFont("helvetica", "normal");
-      this.doc.setFontSize(8);
+      this.doc.setFontSize(7.5);
       this.doc.setTextColor(...this.muted);
-      this.doc.text(it.label.toUpperCase(), x + 3, y + 5);
+      this.doc.text(it.label.toUpperCase(), x + 5, y + 6);
       this.doc.setFont("helvetica", "bold");
-      this.doc.setFontSize(13);
+      this.doc.setFontSize(14);
       this.doc.setTextColor(...this.ink);
       const value = typeof it.value === "number" ? formatCHF(it.value) : it.value;
-      this.doc.text(value, x + 3, y + 13);
+      this.doc.text(value, x + 5, y + 16);
     });
-    this.cursorY += rows * (tileH + gap) + 3;
+    this.cursorY += rows * (tileH + gap) + 4;
     return this;
   }
 
@@ -321,51 +313,57 @@ export class ReportPdf {
     return this;
   }
 
-  /** Bandeau "SITUATION ACTUELLE" — encadré gris clair. */
+  /** Bandeau "SITUATION ACTUELLE" — fond gris clair, filet vertical. */
   situationBanner(label = "SITUATION ACTUELLE") {
     this.ensureSpace(10);
     const { doc, margin, contentWidth } = this;
-    doc.setFillColor(241, 245, 249);
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(margin, this.cursorY, contentWidth, 7, 1.5, 1.5, "FD");
+    doc.setFillColor(...this.surface);
+    doc.rect(margin, this.cursorY, contentWidth, 7, "F");
+    doc.setFillColor(148, 163, 184);
+    doc.rect(margin, this.cursorY, 1.5, 7, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(...this.ink);
-    doc.text(label, margin + 3, this.cursorY + 4.8);
+    doc.text(label, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
 
-  /** Bandeau "PROJECTION" — encadré couleur primaire. */
+  /** Bandeau "PROJECTION" — fond couleur primaire, plat. */
   projectionBanner(label = "PROJECTION") {
     this.ensureSpace(10);
     const { doc, margin, contentWidth, primary } = this;
     doc.setFillColor(...primary);
-    doc.roundedRect(margin, this.cursorY, contentWidth, 7, 1.5, 1.5, "F");
+    doc.rect(margin, this.cursorY, contentWidth, 7, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(label, margin + 3, this.cursorY + 4.8);
+    doc.text(label, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
 
   private drawFooter() {
-    const { doc, margin, pageWidth, pageHeight, muted } = this;
+    const { doc, margin, pageWidth, pageHeight, muted, primary } = this;
     const pageCount = doc.getNumberOfPages();
     const current = doc.getCurrentPageInfo().pageNumber;
-    doc.setDrawColor(...muted);
-    doc.setLineWidth(0.2);
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.4);
     doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...muted);
     const note =
       this.header.footerNote?.trim() ||
       "Document de travail · calculs basés sur les barèmes 2026 et les données saisies.";
-    const lines = doc.splitTextToSize(note, pageWidth - margin * 2 - 30) as string[];
-    doc.text(lines.slice(0, 2), margin, pageHeight - 7);
+    const cabinetCenter = this.header.brokerageName?.trim() || this.header.brokerName?.trim() || "";
+    const noteMaxW = pageWidth / 2 - margin - 20;
+    const noteLines = doc.splitTextToSize(note, noteMaxW) as string[];
+    doc.text(noteLines.slice(0, 2), margin, pageHeight - 7);
+    if (cabinetCenter) {
+      doc.text(cabinetCenter, pageWidth / 2, pageHeight - 7, { align: "center" });
+    }
+    doc.setFont("helvetica", "bold");
     doc.text(`Page ${current} / ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: "right" });
   }
 
