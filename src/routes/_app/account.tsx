@@ -88,6 +88,37 @@ function AccountPage() {
     toast.success(t("account.toast.save_success"));
   };
 
+  const onUploadLogo = async (file: File) => {
+    if (!user) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("Logo trop lourd (max 2 Mo).");
+      return;
+    }
+    setUploadingLogo(true);
+    const ext = (file.name.split(".").pop() || "png").toLowerCase();
+    const path = `${user.id}/logo.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("broker-logos")
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) {
+      setUploadingLogo(false);
+      toast.error("Échec de l'upload du logo");
+      return;
+    }
+    const { data: pub } = supabase.storage.from("broker-logos").getPublicUrl(path);
+    const url = `${pub.publicUrl}?v=${Date.now()}`;
+    await supabase.from("profiles").update({ logo_url: url }).eq("id", user.id);
+    setProfile((p) => ({ ...p, logo_url: url }));
+    setUploadingLogo(false);
+    toast.success("Logo mis à jour");
+  };
+
+  const onRemoveLogo = async () => {
+    if (!user) return;
+    await supabase.from("profiles").update({ logo_url: null }).eq("id", user.id);
+    setProfile((p) => ({ ...p, logo_url: "" }));
+    toast.success("Logo retiré");
+  };
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
