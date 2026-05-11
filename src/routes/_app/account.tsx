@@ -40,7 +40,7 @@ function AccountPage() {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note",
+          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note,logo_url",
         )
         .eq("id", user.id)
         .maybeSingle();
