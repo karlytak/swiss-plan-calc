@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   HeartHandshake,
   Building2,
+  LineChart,
   ArrowRight,
 } from "lucide-react";
 import { CalcCard } from "@/components/calculators/CalcUI";
