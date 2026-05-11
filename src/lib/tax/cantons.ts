@@ -442,7 +442,10 @@ export function computeCantonalCommunal(opts: CCComputeOptions): CCComputeResult
   }
 
   // Calibration empirique pour aligner sur les calculateurs officiels 2026
-  const calibration = scale.calibrationFactor ?? 1.0;
+  const calibration =
+    (isMarried || isSingleParent
+      ? scale.calibrationFactorMarried ?? scale.calibrationFactor
+      : scale.calibrationFactor) ?? 1.0;
   simple = simple * calibration;
 
   const cantonalMult = opts.cantonalMultiplier ?? scale.cantonalMultiplier;
