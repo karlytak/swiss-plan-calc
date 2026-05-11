@@ -169,7 +169,7 @@ function SourceTaxCalc() {
         </CalcCard>
       </div>
 
-      <div className="space-y-4 md:col-span-2">
+      <div className="space-y-4 lg:col-span-5">
         <CalcCard title={t("calc.source_tax.result.title", { scale: result.scaleUsed })}>
           <Row>
             <PctTile label={t("calc.source_tax.result.rate")} value={result.rate} tone="primary" tip={t("calc.source_tax.result.rate.tip")} />
@@ -209,6 +209,7 @@ function SourceTaxCalc() {
           />
           <ExportPdfButton onClick={handleExport} />
         </div>
+      </div>
       </div>
     </div>
   );
