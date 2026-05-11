@@ -199,6 +199,49 @@ function AccountPage() {
           </div>
         </div>
 
+        {/* === Logo cabinet === */}
+        <div className="space-y-3 rounded-xl border border-dashed border-border bg-muted/30 p-4">
+          <div>
+            <h2 className="text-sm font-semibold">Logo du cabinet</h2>
+            <p className="text-xs text-muted-foreground">PNG, JPG ou SVG, 2 Mo max. Affiché en haut à gauche de chaque PDF.</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-border bg-white">
+              {profile.logo_url ? (
+                <img src={profile.logo_url} alt="Logo cabinet" className="max-h-full max-w-full object-contain" />
+              ) : (
+                <span className="text-[10px] text-muted-foreground">Aucun logo</span>
+              )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">
+                {uploadingLogo && <Loader2 className="h-3 w-3 animate-spin" />}
+                {profile.logo_url ? "Remplacer le logo" : "Téléverser un logo"}
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/svg+xml"
+                  className="hidden"
+                  onChange={(e) => {
+                    const f = e.target.files?.[0];
+                    if (f) onUploadLogo(f);
+                    e.target.value = "";
+                  }}
+                  disabled={uploadingLogo}
+                />
+              </label>
+              {profile.logo_url && (
+                <button
+                  type="button"
+                  onClick={onRemoveLogo}
+                  className="text-left text-xs text-destructive hover:underline"
+                >
+                  Retirer le logo
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
         {/* === Personnalisation des rapports PDF === */}
         <div className="space-y-4 rounded-xl border border-dashed border-border bg-muted/30 p-4">
           <div>
