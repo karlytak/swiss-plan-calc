@@ -32,6 +32,7 @@ import { Route as AppCalculatorsSourceTaxRouteImport } from './routes/_app/calcu
 import { Route as AppCalculatorsRetirementRouteImport } from './routes/_app/calculators/retirement'
 import { Route as AppCalculatorsPillar3aRouteImport } from './routes/_app/calculators/pillar3a'
 import { Route as AppCalculatorsLppRouteImport } from './routes/_app/calculators/lpp'
+import { Route as AppCalculatorsInvestmentCompareRouteImport } from './routes/_app/calculators/investment-compare'
 import { Route as AppCalculatorsIncomeTaxRouteImport } from './routes/_app/calculators/income-tax'
 import { Route as AppCalculatorsDirectorCompensationRouteImport } from './routes/_app/calculators/director-compensation'
 import { Route as AppCalculatorsCrossBorderRouteImport } from './routes/_app/calculators/cross-border'
@@ -157,6 +158,12 @@ const AppCalculatorsLppRoute = AppCalculatorsLppRouteImport.update({
   path: '/lpp',
   getParentRoute: () => AppCalculatorsRoute,
 } as any)
+const AppCalculatorsInvestmentCompareRoute =
+  AppCalculatorsInvestmentCompareRouteImport.update({
+    id: '/investment-compare',
+    path: '/investment-compare',
+    getParentRoute: () => AppCalculatorsRoute,
+  } as any)
 const AppCalculatorsIncomeTaxRoute = AppCalculatorsIncomeTaxRouteImport.update({
   id: '/income-tax',
   path: '/income-tax',
@@ -218,6 +225,7 @@ export interface FileRoutesByFullPath {
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/calculators/investment-compare': typeof AppCalculatorsInvestmentCompareRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
   '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
   '/calculators/retirement': typeof AppCalculatorsRetirementRoute
@@ -248,6 +256,7 @@ export interface FileRoutesByTo {
   '/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/calculators/investment-compare': typeof AppCalculatorsInvestmentCompareRoute
   '/calculators/lpp': typeof AppCalculatorsLppRoute
   '/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
   '/calculators/retirement': typeof AppCalculatorsRetirementRoute
@@ -282,6 +291,7 @@ export interface FileRoutesById {
   '/_app/calculators/cross-border': typeof AppCalculatorsCrossBorderRoute
   '/_app/calculators/director-compensation': typeof AppCalculatorsDirectorCompensationRoute
   '/_app/calculators/income-tax': typeof AppCalculatorsIncomeTaxRoute
+  '/_app/calculators/investment-compare': typeof AppCalculatorsInvestmentCompareRoute
   '/_app/calculators/lpp': typeof AppCalculatorsLppRoute
   '/_app/calculators/pillar3a': typeof AppCalculatorsPillar3aRoute
   '/_app/calculators/retirement': typeof AppCalculatorsRetirementRoute
@@ -316,6 +326,7 @@ export interface FileRouteTypes {
     | '/calculators/cross-border'
     | '/calculators/director-compensation'
     | '/calculators/income-tax'
+    | '/calculators/investment-compare'
     | '/calculators/lpp'
     | '/calculators/pillar3a'
     | '/calculators/retirement'
@@ -346,6 +357,7 @@ export interface FileRouteTypes {
     | '/calculators/cross-border'
     | '/calculators/director-compensation'
     | '/calculators/income-tax'
+    | '/calculators/investment-compare'
     | '/calculators/lpp'
     | '/calculators/pillar3a'
     | '/calculators/retirement'
@@ -379,6 +391,7 @@ export interface FileRouteTypes {
     | '/_app/calculators/cross-border'
     | '/_app/calculators/director-compensation'
     | '/_app/calculators/income-tax'
+    | '/_app/calculators/investment-compare'
     | '/_app/calculators/lpp'
     | '/_app/calculators/pillar3a'
     | '/_app/calculators/retirement'
@@ -567,6 +580,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsLppRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/_app/calculators/investment-compare': {
+      id: '/_app/calculators/investment-compare'
+      path: '/investment-compare'
+      fullPath: '/calculators/investment-compare'
+      preLoaderRoute: typeof AppCalculatorsInvestmentCompareRouteImport
+      parentRoute: typeof AppCalculatorsRoute
+    }
     '/_app/calculators/income-tax': {
       id: '/_app/calculators/income-tax'
       path: '/income-tax'
@@ -632,6 +652,7 @@ interface AppCalculatorsRouteChildren {
   AppCalculatorsCrossBorderRoute: typeof AppCalculatorsCrossBorderRoute
   AppCalculatorsDirectorCompensationRoute: typeof AppCalculatorsDirectorCompensationRoute
   AppCalculatorsIncomeTaxRoute: typeof AppCalculatorsIncomeTaxRoute
+  AppCalculatorsInvestmentCompareRoute: typeof AppCalculatorsInvestmentCompareRoute
   AppCalculatorsLppRoute: typeof AppCalculatorsLppRoute
   AppCalculatorsPillar3aRoute: typeof AppCalculatorsPillar3aRoute
   AppCalculatorsRetirementRoute: typeof AppCalculatorsRetirementRoute
@@ -648,6 +669,7 @@ const AppCalculatorsRouteChildren: AppCalculatorsRouteChildren = {
   AppCalculatorsDirectorCompensationRoute:
     AppCalculatorsDirectorCompensationRoute,
   AppCalculatorsIncomeTaxRoute: AppCalculatorsIncomeTaxRoute,
+  AppCalculatorsInvestmentCompareRoute: AppCalculatorsInvestmentCompareRoute,
   AppCalculatorsLppRoute: AppCalculatorsLppRoute,
   AppCalculatorsPillar3aRoute: AppCalculatorsPillar3aRoute,
   AppCalculatorsRetirementRoute: AppCalculatorsRetirementRoute,
