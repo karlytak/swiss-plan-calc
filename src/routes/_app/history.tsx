@@ -81,6 +81,7 @@ function HistoryPage() {
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [kindFilter, setKindFilter] = useState<SimulationKind | "all">("all");
+  const [clientFilter, setClientFilter] = useState<string>("all"); // "all" | "none" | <clientId>
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [pendingDelete, setPendingDelete] = useState<HistoryEntry | null>(null);
   const [showCompare, setShowCompare] = useState(false);
@@ -118,6 +119,8 @@ function HistoryPage() {
     const q = search.trim().toLowerCase();
     return entries.filter((e) => {
       if (kindFilter !== "all" && e.kind !== kindFilter) return false;
+      if (clientFilter === "none" && e.client_id) return false;
+      if (clientFilter !== "all" && clientFilter !== "none" && e.client_id !== clientFilter) return false;
       if (!q) return true;
       const hay = [
         e.title,
@@ -130,7 +133,7 @@ function HistoryPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [entries, search, kindFilter, clientsMap]);
+  }, [entries, search, kindFilter, clientFilter, clientsMap]);
 
   const selectedEntries = useMemo(
     () => entries.filter((e) => selected.has(e.id)),
@@ -221,6 +224,18 @@ function HistoryPage() {
                 <SelectItem key={k} value={k}>
                   {KIND_LABELS[k]}
                 </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={clientFilter} onValueChange={setClientFilter}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("history.filter.client.all")}</SelectItem>
+              <SelectItem value="none">{t("history.filter.client.none")}</SelectItem>
+              {Object.entries(clientsMap).map(([id, name]) => (
+                <SelectItem key={id} value={id}>{name}</SelectItem>
               ))}
             </SelectContent>
           </Select>

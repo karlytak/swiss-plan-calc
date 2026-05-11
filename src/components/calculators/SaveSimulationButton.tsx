@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Bookmark, Loader2 } from "lucide-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -47,6 +47,14 @@ export function SaveSimulationButton({
   const [clientId, setClientId] = useState<string>("none");
   const [tagsRaw, setTagsRaw] = useState("");
 
+  // Pré-remplir depuis l'URL si on est lancé depuis une fiche client (?clientId=xxx)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const cid = params.get("clientId");
+    if (cid) setClientId(cid);
+  }, []);
+
   const { data: clients = [] } = useQuery({
     queryKey: ["clients-mini", user?.id],
     enabled: !!user && open,
@@ -88,7 +96,13 @@ export function SaveSimulationButton({
       setTitle(defaultTitle ?? "");
       setNote("");
       setTagsRaw("");
-      setClientId("none");
+      // Conserver le clientId pré-rempli depuis l'URL
+      if (typeof window !== "undefined") {
+        const cid = new URLSearchParams(window.location.search).get("clientId");
+        setClientId(cid ?? "none");
+      } else {
+        setClientId("none");
+      }
     },
     onError: (e: Error) => toast.error(e.message),
   });

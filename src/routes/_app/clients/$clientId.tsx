@@ -63,7 +63,8 @@ import { ClientCompanyCard } from "@/components/clients/ClientCompanyCard";
 import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
 import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
 import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
-import { AlertTriangle, Building2 } from "lucide-react";
+import { AlertTriangle, Building2, ClipboardList } from "lucide-react";
+import { SessionSummaryTab } from "@/components/clients/SessionSummaryTab";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
@@ -337,6 +338,10 @@ function ClientDetailPage() {
       <Tabs defaultValue="overview" className="mt-8">
         <TabsList className="flex h-auto w-full flex-wrap justify-start gap-1 bg-muted p-1">
           <TabsTrigger value="overview">Synthèse</TabsTrigger>
+          <TabsTrigger value="session" className="gap-1">
+            <ClipboardList className="h-3.5 w-3.5" />
+            Synthèse RDV
+          </TabsTrigger>
           <TabsTrigger value="optimizations">
             Optimisations
             {optimizations.length > 0 && (
@@ -351,6 +356,13 @@ function ClientDetailPage() {
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="session" className="mt-4">
+          <SessionSummaryTab
+            clientId={clientId}
+            clientName={`${client.first_name} ${client.last_name}`.trim()}
+          />
+        </TabsContent>
 
         <TabsContent value="optimizations" className="mt-4">
           <OptimizationsPanel
