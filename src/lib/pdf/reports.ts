@@ -31,6 +31,7 @@ export function exportIncomeTaxPdf(args: {
     ...args.header,
   } as PdfHeaderInfo);
 
+  pdf.situationBanner("SITUATION ACTUELLE — IMPÔTS 2026");
   pdf.section("Synthèse");
   pdf.paragraph(
     `Cette simulation estime votre charge fiscale annuelle pour l'année 2026 dans le canton de ${cantonName(input.canton)}. ` +
@@ -106,6 +107,8 @@ export function exportIncomeTaxPdf(args: {
     ["TOTAL", formatCHF(result.totalTax)],
   ]);
 
+  pdf.spacer(3);
+  pdf.projectionBanner("PROJECTION & OPTIMISATIONS");
   pdf.section("Pistes d'optimisation");
   const tips: string[] = [];
   const max3a = 7258;
