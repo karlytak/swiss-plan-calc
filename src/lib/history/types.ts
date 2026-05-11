@@ -37,6 +37,7 @@ const KIND_LABELS_FR: Record<SimulationKind, string> = {
   pillar3a: "Pilier 3a",
   retirement: "Rente vs capital",
   canton_compare: "Comparateur cantonal",
+  investment_compare: "Comparateur d'investissements",
 };
 
 // Proxy i18n : `KIND_LABELS[k]` reste valide partout, mais résout via t() au runtime.
