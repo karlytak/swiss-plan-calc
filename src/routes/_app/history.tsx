@@ -119,6 +119,8 @@ function HistoryPage() {
     const q = search.trim().toLowerCase();
     return entries.filter((e) => {
       if (kindFilter !== "all" && e.kind !== kindFilter) return false;
+      if (clientFilter === "none" && e.client_id) return false;
+      if (clientFilter !== "all" && clientFilter !== "none" && e.client_id !== clientFilter) return false;
       if (!q) return true;
       const hay = [
         e.title,
@@ -131,7 +133,7 @@ function HistoryPage() {
         .toLowerCase();
       return hay.includes(q);
     });
-  }, [entries, search, kindFilter, clientsMap]);
+  }, [entries, search, kindFilter, clientFilter, clientsMap]);
 
   const selectedEntries = useMemo(
     () => entries.filter((e) => selected.has(e.id)),
