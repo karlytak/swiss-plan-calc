@@ -30,7 +30,9 @@ function AccountPage() {
     pdf_primary_color: "#0F4C81",
     pdf_accent_color: "#3B82F6",
     pdf_footer_note: "",
+    logo_url: "" as string,
   });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   useEffect(() => {
     if (!user) return;
