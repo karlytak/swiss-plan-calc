@@ -46,6 +46,7 @@ function SourceTaxCalc() {
     canton: "GE",
     scale: "A" as SourceScale,
     monthlyGross: 8_000,
+    spouseMonthlyGross: 0,
     children: 0,
     church: false,
     isCrossBorderFR: false,
