@@ -63,7 +63,8 @@ import { ClientCompanyCard } from "@/components/clients/ClientCompanyCard";
 import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
 import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
 import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
-import { AlertTriangle, Building2 } from "lucide-react";
+import { AlertTriangle, Building2, ClipboardList } from "lucide-react";
+import { SessionSummaryTab } from "@/components/clients/SessionSummaryTab";
 
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
