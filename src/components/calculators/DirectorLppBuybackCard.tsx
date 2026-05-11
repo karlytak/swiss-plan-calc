@@ -129,7 +129,7 @@ export function DirectorLppBuybackCard({
           </div>
           <div>
             <Label className="text-xs font-medium text-muted-foreground">Capacité de rachat (CHF)</Label>
-            <NumField value={String(maxBuyback)} onChange={(v) => setMaxBuyback(Number(v) || 0)} />
+            <NumField value={String(maxBuyback)} onChange={handleMaxChange} />
             <p className="mt-1 text-[10px] text-muted-foreground">
               Estimée. Saisir le montant exact communiqué par la caisse.
             </p>
