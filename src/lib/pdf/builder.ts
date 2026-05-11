@@ -41,6 +41,14 @@ export class ReportPdf {
   accent: [number, number, number];
   muted = [100, 116, 139] as [number, number, number];
   ink = [15, 23, 42] as [number, number, number];
+  border = [226, 232, 240] as [number, number, number];
+  surface = [248, 250, 252] as [number, number, number];
+
+  // Géométrie en-tête
+  private readonly bandH = 14;
+  private readonly headerH = 40;
+  private readonly logoBoxW = 26;
+  private readonly logoBoxH = 18;
 
   constructor(public header: PdfHeaderInfo) {
     this.doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -50,64 +58,115 @@ export class ReportPdf {
     this.primary = hex(header.primaryColor, [15, 76, 129]);
     this.accent = hex(header.accentColor, [59, 130, 246]);
     this.drawHeader();
-    this.cursorY = 50;
+    this.cursorY = this.headerH + 10;
   }
 
   private drawHeader() {
-    const { doc, margin, pageWidth, primary } = this;
-    // Bandeau couleur charte courtier
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, pageWidth, 32, "F");
+    const { doc, margin, pageWidth, primary, bandH, headerH, logoBoxW, logoBoxH } = this;
 
-    // Logo cabinet (haut gauche) si disponible
-    let textOffsetX = margin;
+    // 1. Bandeau couleur fin (date à droite, mention barèmes à gauche)
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, pageWidth, bandH, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("BARÈMES 2026", margin, bandH / 2 + 1.5);
+    doc.setFontSize(8.5);
+    const dateStr = new Date().toLocaleDateString("fr-CH", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    doc.text(dateStr.toUpperCase(), pageWidth - margin, bandH / 2 + 1.5, { align: "right" });
+
+    // 2. Zone identité + titre (fond blanc)
+    const zoneTop = bandH + 4;
+    let textX = margin;
+
+    // Logo dans une box adaptative (object-fit: contain)
     if (this.header.logoDataUrl) {
       try {
-        const fmt = this.header.logoDataUrl.includes("image/jpeg") ? "JPEG" : "PNG";
-        doc.addImage(this.header.logoDataUrl, fmt, margin, 4, 22, 22);
-        textOffsetX = margin + 26;
+        const props = doc.getImageProperties(this.header.logoDataUrl);
+        const fmt =
+          /jpe?g/i.test(props.fileType || "") || /jpe?g|jpeg/i.test(this.header.logoDataUrl)
+            ? "JPEG"
+            : "PNG";
+        const ratio = (props.width || 1) / (props.height || 1);
+        let drawW = logoBoxW;
+        let drawH = logoBoxW / ratio;
+        if (drawH > logoBoxH) {
+          drawH = logoBoxH;
+          drawW = logoBoxH * ratio;
+        }
+        const dx = margin + (logoBoxW - drawW) / 2;
+        const dy = zoneTop + (logoBoxH - drawH) / 2;
+        doc.addImage(this.header.logoDataUrl, fmt, dx, dy, drawW, drawH, undefined, "FAST");
+        textX = margin + logoBoxW + 6;
       } catch {
-        // logo invalide : on ignore
+        // logo illisible : on ignore
       }
     }
 
     const cabinet = this.header.brokerageName?.trim();
     const brokerName = this.header.brokerName?.trim();
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
-    doc.text(cabinet || brokerName || "Rapport de simulation", textOffsetX, 11);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    const primaryLine = cabinet || brokerName || "Rapport de simulation";
+    const secondaryLine = cabinet && brokerName ? brokerName : undefined;
     const contactParts: string[] = [];
-    if (cabinet && brokerName) contactParts.push(brokerName);
     if (this.header.brokerEmail) contactParts.push(this.header.brokerEmail);
     if (this.header.brokerPhone) contactParts.push(this.header.brokerPhone);
-    if (contactParts.length) doc.text(contactParts.join(" · "), textOffsetX, 17);
 
-    // Date à droite
-    doc.setFontSize(9);
-    doc.text(
-      new Date().toLocaleDateString("fr-CH", { day: "2-digit", month: "long", year: "numeric" }),
-      pageWidth - margin,
-      11,
-      { align: "right" },
-    );
-    doc.setFontSize(8);
-    doc.text("Barèmes 2026", pageWidth - margin, 17, { align: "right" });
+    // Zone titre droite réserve 70 mm — la zone identité prend ce qui reste
+    const titleZoneW = 70;
+    const identityMaxW = Math.max(40, pageWidth - margin - textX - titleZoneW - 6);
 
-    // Titre du rapport (sur fond couleur, bas du bandeau)
+    // Ligne 1 : cabinet (ou nom courtier en fallback)
+    doc.setTextColor(...this.ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(this.header.title, margin, 27);
+    doc.setFontSize(13);
+    const primaryLines = doc.splitTextToSize(primaryLine, identityMaxW) as string[];
+    doc.text(primaryLines[0], textX, zoneTop + 5);
 
-    // Sous-titre sous le bandeau
-    if (this.header.subtitle) {
-      doc.setTextColor(this.muted[0], this.muted[1], this.muted[2]);
+    let yCursor = zoneTop + 10.5;
+    if (secondaryLine) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(this.header.subtitle, margin, 40);
+      doc.setTextColor(...this.ink);
+      const sLines = doc.splitTextToSize(secondaryLine, identityMaxW) as string[];
+      doc.text(sLines[0], textX, yCursor);
+      yCursor += 4.5;
+    }
+
+    if (contactParts.length) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...this.muted);
+      const contactLines = doc.splitTextToSize(contactParts.join("  ·  "), identityMaxW) as string[];
+      doc.text(contactLines[0], textX, yCursor);
+    }
+
+    // 3. Zone titre rapport à droite (right-aligned)
+    const rightX = pageWidth - margin;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...this.muted);
+    doc.text("RAPPORT", rightX, zoneTop + 4, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...this.primary);
+    const titleLines = doc.splitTextToSize(this.header.title, titleZoneW) as string[];
+    doc.text(titleLines.slice(0, 2), rightX, zoneTop + 10, { align: "right" });
+
+    // 4. Filet séparateur fin couleur primaire
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.5);
+    doc.line(margin, headerH - 2, pageWidth - margin, headerH - 2);
+
+    // 5. Sous-titre sous l'en-tête
+    if (this.header.subtitle) {
+      doc.setTextColor(...this.muted);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.text(this.header.subtitle, margin, headerH + 5);
     }
   }
 
