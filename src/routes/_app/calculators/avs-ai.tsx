@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import {
@@ -85,7 +85,7 @@ function AvsAiCalc() {
     }
     return base;
   })();
-  const [form, setForm] = useState(initialForm);
+  const [form, setForm] = useState<typeof initialForm>(initialForm);
 
   // Sauvegarde auto en mode standalone
   useEffect(() => {
