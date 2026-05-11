@@ -105,6 +105,9 @@ interface FormState {
   source_tax_scale: SourceTaxScale | "";
   confession: Confession;
   parish: string;
+  arrival_year_ch: string;
+  cross_border_start_year: string;
+  avs_contribution_start_year: string;
   // Activity
   work_status: WorkStatus;
   activity_rate: string;
@@ -154,6 +157,9 @@ function initialForm(initial?: WizardInitialData): FormState {
     source_tax_scale: (c?.source_tax_scale as SourceTaxScale | null) ?? "",
     confession: c?.confession ?? "none",
     parish: c?.parish ?? "",
+    arrival_year_ch: c?.arrival_year_ch?.toString() ?? "",
+    cross_border_start_year: c?.cross_border_start_year?.toString() ?? "",
+    avs_contribution_start_year: c?.avs_contribution_start_year?.toString() ?? "",
     work_status: c?.work_status ?? "employee",
     activity_rate: c?.activity_rate?.toString() ?? "100",
     employer: c?.employer ?? "",
@@ -287,6 +293,9 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         source_tax_scale: form.source_tax_scale || null,
         confession: form.confession,
         parish: form.parish || null,
+        arrival_year_ch: form.arrival_year_ch ? parseInt(form.arrival_year_ch, 10) : null,
+        cross_border_start_year: form.cross_border_start_year ? parseInt(form.cross_border_start_year, 10) : null,
+        avs_contribution_start_year: form.avs_contribution_start_year ? parseInt(form.avs_contribution_start_year, 10) : null,
         work_status: form.work_status,
         activity_rate: num(form.activity_rate),
         employer: form.employer || null,
