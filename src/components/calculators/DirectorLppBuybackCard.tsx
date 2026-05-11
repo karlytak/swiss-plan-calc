@@ -2,7 +2,7 @@
 // Pour la stratégie recommandée du comparateur dividende/salaire,
 // simule un plan de rachat LPP étalé sur 1 an, 5 ans et jusqu'à la retraite.
 // Affiche économie d'impôt, coût net et ROI fiscal.
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { CalcCard, MoneyTile } from "@/components/calculators/CalcUI";
 import { NumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
