@@ -296,6 +296,26 @@ function LppCalc() {
               <MoneyTile label={t("calc.lpp.fees_total")} value={projection.totalFees} tone="warning" tip={t("calc.lpp.tip.fees_total")} />
               <MoneyTile label={t("calc.lpp.buybacks_total")} value={projection.totalBuybacks} tone="default" tip={t("calc.lpp.tip.buybacks_total")} />
             </div>
+
+            {/* Décomposition pédagogique : d'où vient le capital projeté */}
+            {(() => {
+              const totalCredits = projection.yearly.reduce((s, y) => s + y.credit, 0);
+              const totalInterest = projection.yearly.reduce((s, y) => s + y.interest, 0);
+              const start = effectiveCurrentBalance;
+              return (
+                <div className="mt-4 rounded-lg border border-primary/30 bg-primary/5 p-3 text-[11px] leading-relaxed">
+                  <p className="font-semibold text-foreground">{t("calc.lpp.breakdown.title")}</p>
+                  <div className="mt-2 space-y-1 font-mono text-foreground/80">
+                    <div className="flex justify-between"><span>{t("calc.lpp.breakdown.start")}</span><span className="tabular-nums">{formatCHF(start)}</span></div>
+                    <div className="flex justify-between"><span>+ {t("calc.lpp.breakdown.credits")}</span><span className="tabular-nums">{formatCHF(Math.round(totalCredits))}</span></div>
+                    <div className="flex justify-between"><span>+ {t("calc.lpp.breakdown.interest")}</span><span className="tabular-nums">{formatCHF(Math.round(totalInterest))}</span></div>
+                    <div className="flex justify-between"><span>+ {t("calc.lpp.breakdown.buybacks")}</span><span className="tabular-nums">{formatCHF(projection.totalBuybacks)}</span></div>
+                    <div className="mt-1 flex justify-between border-t border-primary/30 pt-1 font-semibold text-foreground"><span>= {t("calc.lpp.breakdown.total")}</span><span className="tabular-nums">{formatCHF(projection.projectedBalance)}</span></div>
+                  </div>
+                  <p className="mt-2 text-[10px] text-muted-foreground">{t("calc.lpp.breakdown.note")}</p>
+                </div>
+              );
+            })()}
           </CalcCard>
         </div>
       </div>
