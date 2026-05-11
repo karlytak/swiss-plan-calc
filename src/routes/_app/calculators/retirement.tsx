@@ -52,6 +52,16 @@ function RetirementCalc() {
   });
   useHydrateFormFromPrefill(prefill, setForm);
 
+  // Pré-remplir le taux marginal depuis la dernière simulation fiscale du client
+  const { data: snapshot } = useClientFiscalSnapshot(clientId);
+  const marginalAutofilled = useRef(false);
+  useEffect(() => {
+    if (snapshot && !marginalAutofilled.current) {
+      setForm((f) => ({ ...f, rentMarginalRate: Math.round(snapshot.marginalRateEstimate * 10) / 10 }));
+      marginalAutofilled.current = true;
+    }
+  }, [snapshot]);
+
   const set = <K extends keyof typeof form>(k: K, v: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
