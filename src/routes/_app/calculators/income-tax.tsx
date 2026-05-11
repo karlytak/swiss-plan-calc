@@ -286,7 +286,7 @@ function IncomeTaxCalculator() {
         </CalcCard>
       </div>
 
-      <div className="space-y-4 md:col-span-2">
+      <div className="space-y-4 lg:col-span-5">
         {isFrCrossBorder && (
           <CalcCard title={t("calc.income_tax.fr_cb.title")} description={t("calc.income_tax.fr_cb.desc")}>
             <dl className="space-y-2 text-sm">
@@ -365,12 +365,11 @@ function IncomeTaxCalculator() {
           </>
         )}
       </div>
-
-      <div className="lg:col-span-5">
-        <OptimizationsPanel optimizations={optimizations} />
       </div>
 
-      <div className="flex flex-wrap justify-end gap-2 lg:col-span-5">
+      <OptimizationsPanel optimizations={optimizations} />
+
+      <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
           kind="income_tax"
           inputs={form}
