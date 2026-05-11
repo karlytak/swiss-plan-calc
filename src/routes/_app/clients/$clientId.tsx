@@ -357,6 +357,13 @@ function ClientDetailPage() {
           <TabsTrigger value="notes">Notes</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="session" className="mt-4">
+          <SessionSummaryTab
+            clientId={clientId}
+            clientName={`${client.first_name} ${client.last_name}`.trim()}
+          />
+        </TabsContent>
+
         <TabsContent value="optimizations" className="mt-4">
           <OptimizationsPanel
             optimizations={optimizations}
