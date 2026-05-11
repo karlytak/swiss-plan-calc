@@ -227,6 +227,18 @@ function HistoryPage() {
               ))}
             </SelectContent>
           </Select>
+          <Select value={clientFilter} onValueChange={setClientFilter}>
+            <SelectTrigger className="w-[220px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("history.filter.client.all")}</SelectItem>
+              <SelectItem value="none">{t("history.filter.client.none")}</SelectItem>
+              {Object.entries(clientsMap).map(([id, name]) => (
+                <SelectItem key={id} value={id}>{name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           {selected.size > 0 && (
             <Button
               variant="ghost"
