@@ -180,13 +180,17 @@ export class ReportPdf {
   section(title: string) {
     this.ensureSpace(14);
     const { doc, margin, primary } = this;
-    doc.setDrawColor(...primary);
-    doc.setLineWidth(0.6);
-    doc.line(margin, this.cursorY, margin + 6, this.cursorY);
+    // Petit carré couleur primaire à gauche du titre
+    doc.setFillColor(...primary);
+    doc.rect(margin, this.cursorY - 3, 2.5, 2.5, "F");
     doc.setTextColor(...this.ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text(title, margin + 9, this.cursorY + 1);
+    doc.setFontSize(12);
+    doc.text(title, margin + 5, this.cursorY);
+    // Filet fin sous le titre
+    doc.setDrawColor(...this.border);
+    doc.setLineWidth(0.2);
+    doc.line(margin, this.cursorY + 2.5, this.pageWidth - margin, this.cursorY + 2.5);
     this.cursorY += 8;
     return this;
   }
