@@ -83,6 +83,7 @@ import type {
 import type { Client } from "@/lib/clients/types";
 import type { Company } from "@/lib/companies/types";
 import type { FilingStatus } from "@/lib/tax/ifd";
+import { DirectorLppBuybackCard } from "@/components/calculators/DirectorLppBuybackCard";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
