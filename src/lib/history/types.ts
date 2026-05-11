@@ -55,4 +55,5 @@ export const KIND_ROUTES: Record<SimulationKind, string> = {
   pillar3a: "/calculators/pillar3a",
   retirement: "/calculators/retirement",
   canton_compare: "/calculators/canton-compare",
+  investment_compare: "/calculators/investment-compare",
 };
