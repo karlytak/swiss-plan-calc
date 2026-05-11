@@ -41,6 +41,14 @@ export class ReportPdf {
   accent: [number, number, number];
   muted = [100, 116, 139] as [number, number, number];
   ink = [15, 23, 42] as [number, number, number];
+  border = [226, 232, 240] as [number, number, number];
+  surface = [248, 250, 252] as [number, number, number];
+
+  // Géométrie en-tête
+  private readonly bandH = 14;
+  private readonly headerH = 40;
+  private readonly logoBoxW = 26;
+  private readonly logoBoxH = 18;
 
   constructor(public header: PdfHeaderInfo) {
     this.doc = new jsPDF({ unit: "mm", format: "a4" });
@@ -50,64 +58,115 @@ export class ReportPdf {
     this.primary = hex(header.primaryColor, [15, 76, 129]);
     this.accent = hex(header.accentColor, [59, 130, 246]);
     this.drawHeader();
-    this.cursorY = 50;
+    this.cursorY = this.headerH + 10;
   }
 
   private drawHeader() {
-    const { doc, margin, pageWidth, primary } = this;
-    // Bandeau couleur charte courtier
-    doc.setFillColor(...primary);
-    doc.rect(0, 0, pageWidth, 32, "F");
+    const { doc, margin, pageWidth, primary, bandH, headerH, logoBoxW, logoBoxH } = this;
 
-    // Logo cabinet (haut gauche) si disponible
-    let textOffsetX = margin;
+    // 1. Bandeau couleur fin (date à droite, mention barèmes à gauche)
+    doc.setFillColor(...primary);
+    doc.rect(0, 0, pageWidth, bandH, "F");
+    doc.setTextColor(255, 255, 255);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+    doc.text("BARÈMES 2026", margin, bandH / 2 + 1.5);
+    doc.setFontSize(8.5);
+    const dateStr = new Date().toLocaleDateString("fr-CH", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    doc.text(dateStr.toUpperCase(), pageWidth - margin, bandH / 2 + 1.5, { align: "right" });
+
+    // 2. Zone identité + titre (fond blanc)
+    const zoneTop = bandH + 4;
+    let textX = margin;
+
+    // Logo dans une box adaptative (object-fit: contain)
     if (this.header.logoDataUrl) {
       try {
-        const fmt = this.header.logoDataUrl.includes("image/jpeg") ? "JPEG" : "PNG";
-        doc.addImage(this.header.logoDataUrl, fmt, margin, 4, 22, 22);
-        textOffsetX = margin + 26;
+        const props = doc.getImageProperties(this.header.logoDataUrl);
+        const fmt =
+          /jpe?g/i.test(props.fileType || "") || /jpe?g|jpeg/i.test(this.header.logoDataUrl)
+            ? "JPEG"
+            : "PNG";
+        const ratio = (props.width || 1) / (props.height || 1);
+        let drawW = logoBoxW;
+        let drawH = logoBoxW / ratio;
+        if (drawH > logoBoxH) {
+          drawH = logoBoxH;
+          drawW = logoBoxH * ratio;
+        }
+        const dx = margin + (logoBoxW - drawW) / 2;
+        const dy = zoneTop + (logoBoxH - drawH) / 2;
+        doc.addImage(this.header.logoDataUrl, fmt, dx, dy, drawW, drawH, undefined, "FAST");
+        textX = margin + logoBoxW + 6;
       } catch {
-        // logo invalide : on ignore
+        // logo illisible : on ignore
       }
     }
 
     const cabinet = this.header.brokerageName?.trim();
     const brokerName = this.header.brokerName?.trim();
-    doc.setTextColor(255, 255, 255);
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(15);
-    doc.text(cabinet || brokerName || "Rapport de simulation", textOffsetX, 11);
-
-    doc.setFont("helvetica", "normal");
-    doc.setFontSize(9);
+    const primaryLine = cabinet || brokerName || "Rapport de simulation";
+    const secondaryLine = cabinet && brokerName ? brokerName : undefined;
     const contactParts: string[] = [];
-    if (cabinet && brokerName) contactParts.push(brokerName);
     if (this.header.brokerEmail) contactParts.push(this.header.brokerEmail);
     if (this.header.brokerPhone) contactParts.push(this.header.brokerPhone);
-    if (contactParts.length) doc.text(contactParts.join(" · "), textOffsetX, 17);
 
-    // Date à droite
-    doc.setFontSize(9);
-    doc.text(
-      new Date().toLocaleDateString("fr-CH", { day: "2-digit", month: "long", year: "numeric" }),
-      pageWidth - margin,
-      11,
-      { align: "right" },
-    );
-    doc.setFontSize(8);
-    doc.text("Barèmes 2026", pageWidth - margin, 17, { align: "right" });
+    // Zone titre droite réserve 70 mm — la zone identité prend ce qui reste
+    const titleZoneW = 70;
+    const identityMaxW = Math.max(40, pageWidth - margin - textX - titleZoneW - 6);
 
-    // Titre du rapport (sur fond couleur, bas du bandeau)
+    // Ligne 1 : cabinet (ou nom courtier en fallback)
+    doc.setTextColor(...this.ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(14);
-    doc.text(this.header.title, margin, 27);
+    doc.setFontSize(13);
+    const primaryLines = doc.splitTextToSize(primaryLine, identityMaxW) as string[];
+    doc.text(primaryLines[0], textX, zoneTop + 5);
 
-    // Sous-titre sous le bandeau
-    if (this.header.subtitle) {
-      doc.setTextColor(this.muted[0], this.muted[1], this.muted[2]);
+    let yCursor = zoneTop + 10.5;
+    if (secondaryLine) {
       doc.setFont("helvetica", "normal");
       doc.setFontSize(10);
-      doc.text(this.header.subtitle, margin, 40);
+      doc.setTextColor(...this.ink);
+      const sLines = doc.splitTextToSize(secondaryLine, identityMaxW) as string[];
+      doc.text(sLines[0], textX, yCursor);
+      yCursor += 4.5;
+    }
+
+    if (contactParts.length) {
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(8.5);
+      doc.setTextColor(...this.muted);
+      const contactLines = doc.splitTextToSize(contactParts.join("  ·  "), identityMaxW) as string[];
+      doc.text(contactLines[0], textX, yCursor);
+    }
+
+    // 3. Zone titre rapport à droite (right-aligned)
+    const rightX = pageWidth - margin;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(7.5);
+    doc.setTextColor(...this.muted);
+    doc.text("RAPPORT", rightX, zoneTop + 4, { align: "right" });
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(13);
+    doc.setTextColor(...this.primary);
+    const titleLines = doc.splitTextToSize(this.header.title, titleZoneW) as string[];
+    doc.text(titleLines.slice(0, 2), rightX, zoneTop + 10, { align: "right" });
+
+    // 4. Filet séparateur fin couleur primaire
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.5);
+    doc.line(margin, headerH - 2, pageWidth - margin, headerH - 2);
+
+    // 5. Sous-titre sous l'en-tête
+    if (this.header.subtitle) {
+      doc.setTextColor(...this.muted);
+      doc.setFont("helvetica", "normal");
+      doc.setFontSize(9.5);
+      doc.text(this.header.subtitle, margin, headerH + 5);
     }
   }
 
@@ -121,13 +180,17 @@ export class ReportPdf {
   section(title: string) {
     this.ensureSpace(14);
     const { doc, margin, primary } = this;
-    doc.setDrawColor(...primary);
-    doc.setLineWidth(0.6);
-    doc.line(margin, this.cursorY, margin + 6, this.cursorY);
+    // Petit carré couleur primaire à gauche du titre
+    doc.setFillColor(...primary);
+    doc.rect(margin, this.cursorY - 3, 2.5, 2.5, "F");
     doc.setTextColor(...this.ink);
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(13);
-    doc.text(title, margin + 9, this.cursorY + 1);
+    doc.setFontSize(12);
+    doc.text(title, margin + 5, this.cursorY);
+    // Filet fin sous le titre
+    doc.setDrawColor(...this.border);
+    doc.setLineWidth(0.2);
+    doc.line(margin, this.cursorY + 2.5, this.pageWidth - margin, this.cursorY + 2.5);
     this.cursorY += 8;
     return this;
   }
@@ -193,7 +256,7 @@ export class ReportPdf {
       theme: "striped",
       headStyles: { fillColor: this.primary, textColor: 255, fontStyle: "bold", fontSize: 10 },
       styles: { fontSize: 9.5, cellPadding: 2 },
-      alternateRowStyles: { fillColor: [248, 250, 252] },
+      alternateRowStyles: { fillColor: [250, 251, 252] },
       didParseCell: (data) => {
         if (opts?.highlightLast && data.section === "body" && data.row.index === body.length - 1) {
           data.cell.styles.fontStyle = "bold";
@@ -206,50 +269,42 @@ export class ReportPdf {
     return this;
   }
 
-  /** Grille de tuiles : libellé + valeur (CHF) en grand */
+  /** Grille de tuiles : libellé + valeur (CHF) en grand, style "card" moderne */
   metricsGrid(items: Array<{ label: string; value: number | string; tone?: "primary" | "success" | "warning" }>) {
     const cols = items.length <= 2 ? items.length : items.length === 3 ? 3 : 2;
     const rows = Math.ceil(items.length / cols);
-    const gap = 3;
+    const gap = 4;
     const tileW = (this.contentWidth - gap * (cols - 1)) / cols;
-    const tileH = 18;
+    const tileH = 22;
     this.ensureSpace(rows * (tileH + gap) + 2);
     items.forEach((it, idx) => {
       const r = Math.floor(idx / cols);
       const c = idx % cols;
       const x = this.margin + c * (tileW + gap);
       const y = this.cursorY + r * (tileH + gap);
-      const bg =
-        it.tone === "primary"
-          ? ([239, 246, 255] as [number, number, number])
-          : it.tone === "success"
-            ? ([236, 253, 245] as [number, number, number])
-            : it.tone === "warning"
-              ? ([254, 252, 232] as [number, number, number])
-              : ([248, 250, 252] as [number, number, number]);
-      const border =
-        it.tone === "primary"
-          ? this.primary
-          : it.tone === "success"
-            ? ([16, 185, 129] as [number, number, number])
-            : it.tone === "warning"
-              ? ([202, 138, 4] as [number, number, number])
-              : ([226, 232, 240] as [number, number, number]);
-      this.doc.setFillColor(...bg);
-      this.doc.setDrawColor(...border);
-      this.doc.setLineWidth(0.3);
-      this.doc.roundedRect(x, y, tileW, tileH, 1.5, 1.5, "FD");
+      const accent: [number, number, number] =
+        it.tone === "success"
+          ? [16, 185, 129]
+          : it.tone === "warning"
+            ? [202, 138, 4]
+            : this.primary;
+      this.doc.setFillColor(255, 255, 255);
+      this.doc.setDrawColor(...this.border);
+      this.doc.setLineWidth(0.25);
+      this.doc.rect(x, y, tileW, tileH, "FD");
+      this.doc.setFillColor(...accent);
+      this.doc.rect(x, y, 1.5, tileH, "F");
       this.doc.setFont("helvetica", "normal");
-      this.doc.setFontSize(8);
+      this.doc.setFontSize(7.5);
       this.doc.setTextColor(...this.muted);
-      this.doc.text(it.label.toUpperCase(), x + 3, y + 5);
+      this.doc.text(it.label.toUpperCase(), x + 5, y + 6);
       this.doc.setFont("helvetica", "bold");
-      this.doc.setFontSize(13);
+      this.doc.setFontSize(14);
       this.doc.setTextColor(...this.ink);
       const value = typeof it.value === "number" ? formatCHF(it.value) : it.value;
-      this.doc.text(value, x + 3, y + 13);
+      this.doc.text(value, x + 5, y + 16);
     });
-    this.cursorY += rows * (tileH + gap) + 3;
+    this.cursorY += rows * (tileH + gap) + 4;
     return this;
   }
 
@@ -258,51 +313,57 @@ export class ReportPdf {
     return this;
   }
 
-  /** Bandeau "SITUATION ACTUELLE" — encadré gris clair. */
+  /** Bandeau "SITUATION ACTUELLE" — fond gris clair, filet vertical. */
   situationBanner(label = "SITUATION ACTUELLE") {
     this.ensureSpace(10);
     const { doc, margin, contentWidth } = this;
-    doc.setFillColor(241, 245, 249);
-    doc.setDrawColor(203, 213, 225);
-    doc.setLineWidth(0.3);
-    doc.roundedRect(margin, this.cursorY, contentWidth, 7, 1.5, 1.5, "FD");
+    doc.setFillColor(...this.surface);
+    doc.rect(margin, this.cursorY, contentWidth, 7, "F");
+    doc.setFillColor(148, 163, 184);
+    doc.rect(margin, this.cursorY, 1.5, 7, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(...this.ink);
-    doc.text(label, margin + 3, this.cursorY + 4.8);
+    doc.text(label, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
 
-  /** Bandeau "PROJECTION" — encadré couleur primaire. */
+  /** Bandeau "PROJECTION" — fond couleur primaire, plat. */
   projectionBanner(label = "PROJECTION") {
     this.ensureSpace(10);
     const { doc, margin, contentWidth, primary } = this;
     doc.setFillColor(...primary);
-    doc.roundedRect(margin, this.cursorY, contentWidth, 7, 1.5, 1.5, "F");
+    doc.rect(margin, this.cursorY, contentWidth, 7, "F");
     doc.setFont("helvetica", "bold");
-    doc.setFontSize(10);
+    doc.setFontSize(9.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(label, margin + 3, this.cursorY + 4.8);
+    doc.text(label, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
 
   private drawFooter() {
-    const { doc, margin, pageWidth, pageHeight, muted } = this;
+    const { doc, margin, pageWidth, pageHeight, muted, primary } = this;
     const pageCount = doc.getNumberOfPages();
     const current = doc.getCurrentPageInfo().pageNumber;
-    doc.setDrawColor(...muted);
-    doc.setLineWidth(0.2);
+    doc.setDrawColor(...primary);
+    doc.setLineWidth(0.4);
     doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
     doc.setFont("helvetica", "normal");
-    doc.setFontSize(8);
+    doc.setFontSize(7.5);
     doc.setTextColor(...muted);
     const note =
       this.header.footerNote?.trim() ||
       "Document de travail · calculs basés sur les barèmes 2026 et les données saisies.";
-    const lines = doc.splitTextToSize(note, pageWidth - margin * 2 - 30) as string[];
-    doc.text(lines.slice(0, 2), margin, pageHeight - 7);
+    const cabinetCenter = this.header.brokerageName?.trim() || this.header.brokerName?.trim() || "";
+    const noteMaxW = pageWidth / 2 - margin - 20;
+    const noteLines = doc.splitTextToSize(note, noteMaxW) as string[];
+    doc.text(noteLines.slice(0, 2), margin, pageHeight - 7);
+    if (cabinetCenter) {
+      doc.text(cabinetCenter, pageWidth / 2, pageHeight - 7, { align: "center" });
+    }
+    doc.setFont("helvetica", "bold");
     doc.text(`Page ${current} / ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: "right" });
   }
 
