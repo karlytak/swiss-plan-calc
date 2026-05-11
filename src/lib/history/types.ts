@@ -5,7 +5,8 @@ export type SimulationKind =
   | "lpp"
   | "pillar3a"
   | "retirement"
-  | "canton_compare";
+  | "canton_compare"
+  | "investment_compare";
 
 export interface HistoryEntry {
   id: string;
