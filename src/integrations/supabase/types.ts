@@ -761,6 +761,7 @@ export type Database = {
         | "pillar3a"
         | "retirement"
         | "canton_compare"
+        | "investment_compare"
       tax_status:
         | "resident"
         | "source_taxed"
@@ -945,6 +946,7 @@ export const Constants = {
         "pillar3a",
         "retirement",
         "canton_compare",
+        "investment_compare",
       ],
       tax_status: [
         "resident",

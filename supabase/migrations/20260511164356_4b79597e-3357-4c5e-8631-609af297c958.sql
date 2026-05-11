@@ -1,0 +1,1 @@
+ALTER TYPE simulation_kind ADD VALUE IF NOT EXISTS 'investment_compare';
