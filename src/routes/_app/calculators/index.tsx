@@ -33,6 +33,7 @@ const ITEMS = [
   { to: "/calculators/tou" as const, icon: Scale, key: "tou" },
   { to: "/calculators/retirement" as const, icon: TrendingUp, key: "retirement" },
   { to: "/calculators/director-compensation" as const, icon: Building2, key: "director" },
+  { to: "/calculators/investment-compare" as const, icon: LineChart, key: "invcompare" },
   { to: "/calculators/canton-compare" as const, icon: Map, key: "canton_compare" },
 ];
 
