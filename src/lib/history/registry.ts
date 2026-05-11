@@ -222,5 +222,9 @@ export async function regeneratePdf(
       });
       return;
     }
+    case "investment_compare": {
+      // Pas de regénération PDF pour ce calculateur (autonome, pas d'historique côté serveur).
+      return;
+    }
   }
 }
