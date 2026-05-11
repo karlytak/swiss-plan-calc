@@ -5,7 +5,8 @@ export type SimulationKind =
   | "lpp"
   | "pillar3a"
   | "retirement"
-  | "canton_compare";
+  | "canton_compare"
+  | "investment_compare";
 
 export interface HistoryEntry {
   id: string;
@@ -36,6 +37,7 @@ const KIND_LABELS_FR: Record<SimulationKind, string> = {
   pillar3a: "Pilier 3a",
   retirement: "Rente vs capital",
   canton_compare: "Comparateur cantonal",
+  investment_compare: "Comparateur d'investissements",
 };
 
 // Proxy i18n : `KIND_LABELS[k]` reste valide partout, mais résout via t() au runtime.
@@ -53,4 +55,5 @@ export const KIND_ROUTES: Record<SimulationKind, string> = {
   pillar3a: "/calculators/pillar3a",
   retirement: "/calculators/retirement",
   canton_compare: "/calculators/canton-compare",
+  investment_compare: "/calculators/investment-compare",
 };

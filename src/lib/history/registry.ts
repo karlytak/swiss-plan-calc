@@ -61,6 +61,14 @@ export function extractKpis(kind: SimulationKind, summary: SummaryShape): Histor
         { label: "Impôt réf.", value: num(summary.referenceTax), unit: "CHF" },
         { label: "Économie possible", value: num(summary.maxSavings), unit: "CHF" },
       ];
+    case "investment_compare":
+      return [
+        { label: "Différence nette", value: num(summary.netDifference), unit: "CHF" },
+        { label: "Avantage", value: Number(num(summary.pctAdvantage).toFixed(2)), unit: "%" },
+        { label: "Net A", value: num(summary.aFinalNet), unit: "CHF" },
+        { label: "Net B", value: num(summary.bFinalNet), unit: "CHF" },
+        { label: "Gagnant", value: String(summary.winner ?? "—") },
+      ];
   }
 }
 
@@ -212,6 +220,10 @@ export async function regeneratePdf(
         input: inputs as unknown as Parameters<typeof exportCantonComparePdf>[0]["input"],
         rows,
       });
+      return;
+    }
+    case "investment_compare": {
+      // Pas de regénération PDF pour ce calculateur (autonome, pas d'historique côté serveur).
       return;
     }
   }
