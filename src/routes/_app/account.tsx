@@ -50,6 +50,9 @@ function AccountPage() {
           brokerage_name: data.brokerage_name ?? "",
           phone: data.phone ?? "",
           default_canton: data.default_canton ?? "",
+          pdf_primary_color: data.pdf_primary_color ?? "#0F4C81",
+          pdf_accent_color: data.pdf_accent_color ?? "#3B82F6",
+          pdf_footer_note: data.pdf_footer_note ?? "",
         });
       }
       setLoading(false);
@@ -68,6 +71,9 @@ function AccountPage() {
         brokerage_name: profile.brokerage_name.trim() || null,
         phone: profile.phone.trim() || null,
         default_canton: profile.default_canton || null,
+        pdf_primary_color: profile.pdf_primary_color || "#0F4C81",
+        pdf_accent_color: profile.pdf_accent_color || "#3B82F6",
+        pdf_footer_note: profile.pdf_footer_note.trim() || null,
       })
       .eq("id", user.id);
     setSaving(false);
