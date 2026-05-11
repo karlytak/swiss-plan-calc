@@ -193,6 +193,7 @@ function LppCalc() {
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 
       {client && <ClientLinkBanner client={client} />}
+      <FiscalSnapshotBanner clientId={clientId} />
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title={t("calc.lpp.projection_card")} description={t("calc.lpp.projection_desc")}>
