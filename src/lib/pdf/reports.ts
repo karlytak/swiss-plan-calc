@@ -2,13 +2,15 @@
 // Textes explicatifs longs, contexte fiscal suisse, recommandations.
 import { ReportPdf, makeFilename, type PdfHeaderInfo } from "./builder";
 import { formatCHF, formatPct } from "@/lib/format";
+import { t, tCanton } from "@/lib/i18n";
 import type { IncomeTaxBreakdown, IncomeTaxInput } from "@/lib/tax/income";
 import type { LPPProjectionResult, LPPBuybackPlanResult, AnnuityVsLumpSumResult } from "@/lib/lpp";
 import type { Pillar3aProjectionResult, StaggeredWithdrawalResult } from "@/lib/pillar3";
 import type { SourceTaxResult } from "@/lib/tax/source";
+import type { CompensationResult, DirectorInputs } from "@/lib/director-compensation/types";
 import { CANTONS } from "@/lib/swiss/cantons";
 
-const cantonName = (code: string) => CANTONS.find((c) => c.code === code)?.name ?? code;
+const cantonName = (code: string) => tCanton(code) || CANTONS.find((c) => c.code === code)?.name || code;
 const STATUS_LABEL: Record<string, string> = {
   single: "Célibataire",
   married: "Marié·e (imposition commune)",
@@ -26,8 +28,8 @@ export function exportIncomeTaxPdf(args: {
 }) {
   const { input, result } = args;
   const pdf = new ReportPdf({
-    title: "Rapport d'imposition revenu & fortune",
-    subtitle: `Canton de ${cantonName(input.canton)} · barèmes 2026`,
+    title: t("pdf.income.title", undefined, "Rapport d'imposition revenu & fortune"),
+    subtitle: t("pdf.income.subtitle", { canton: cantonName(input.canton) }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -166,8 +168,8 @@ export function exportSourceTaxPdf(args: {
 }) {
   const { input, result } = args;
   const pdf = new ReportPdf({
-    title: "Impôt à la source · simulation",
-    subtitle: `Canton de ${cantonName(input.canton)} · barème ${input.scale}`,
+    title: t("pdf.source.title", undefined, "Impôt à la source · simulation"),
+    subtitle: t("pdf.source.subtitle", { canton: cantonName(input.canton), scale: input.scale }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -246,8 +248,8 @@ export function exportLppPdf(args: {
 }) {
   const { input, projection, buybackPlan } = args;
   const pdf = new ReportPdf({
-    title: "Prévoyance professionnelle (LPP) · Projection complète",
-    subtitle: `Capital et rachats · horizon ${input.retirementAge} ans`,
+    title: t("pdf.lpp.title", undefined, "Prévoyance professionnelle (LPP) · Projection complète"),
+    subtitle: t("pdf.lpp.subtitle", { age: input.retirementAge }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -346,8 +348,8 @@ export function exportPillar3aPdf(args: {
 }) {
   const { input, taxSavings, projection, staggered } = args;
   const pdf = new ReportPdf({
-    title: "Pilier 3a · Stratégie complète",
-    subtitle: `Cotisation, projection et retrait étalé · ${cantonName(input.canton)}`,
+    title: t("pdf.pillar3a.title", undefined, "Pilier 3a · Stratégie complète"),
+    subtitle: t("pdf.pillar3a.subtitle", { canton: cantonName(input.canton) }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -424,8 +426,8 @@ export function exportRetirementPdf(args: {
 }) {
   const { input, lumpTax, compare, reco } = args;
   const pdf = new ReportPdf({
-    title: "Rente ou capital ? · Décision retraite",
-    subtitle: `Capital LPP de ${formatCHF(input.capital)} · ${cantonName(input.canton)}`,
+    title: t("pdf.retirement.title", undefined, "Rente ou capital ? · Décision retraite"),
+    subtitle: t("pdf.retirement.subtitle", { capital: formatCHF(input.capital), canton: cantonName(input.canton) }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -499,8 +501,8 @@ export function exportCantonComparePdf(args: {
 }) {
   const { input, rows } = args;
   const pdf = new ReportPdf({
-    title: "Comparateur cantonal · Charge fiscale 2026",
-    subtitle: `Profil : ${formatCHF(input.grossSalary)} brut, ${STATUS_LABEL[input.status] ?? input.status}`,
+    title: t("pdf.canton.title", undefined, "Comparateur cantonal · Charge fiscale 2026"),
+    subtitle: `${formatCHF(input.grossSalary)} · ${STATUS_LABEL[input.status] ?? input.status}`,
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -570,7 +572,7 @@ export function exportCrossBorderPdf(args: {
 }) {
   const { input, result } = args;
   const pdf = new ReportPdf({
-    title: "Frontalier · Simulation fiscale transfrontalière",
+    title: t("pdf.cross_border.title", undefined, "Frontalier · Simulation fiscale transfrontalière"),
     subtitle: result.regimeLabel,
     ...args.header,
   } as PdfHeaderInfo);
@@ -662,8 +664,8 @@ export function exportTouPdf(args: {
 }) {
   const { input, eligibility, comparison } = args;
   const pdf = new ReportPdf({
-    title: "TOU · Taxation Ordinaire Ultérieure",
-    subtitle: `Quasi-résident · ${cantonName(input.canton)}`,
+    title: t("pdf.tou.title", undefined, "TOU · Taxation Ordinaire Ultérieure"),
+    subtitle: t("pdf.tou.subtitle", { canton: cantonName(input.canton) }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -755,8 +757,12 @@ export function exportVestedBenefitsPdf(args: {
 }) {
   const { input, projections, recommended } = args;
   const pdf = new ReportPdf({
-    title: "Libre passage · Stratégies de placement",
-    subtitle: `Capital ${formatCHF(input.initialBalance)} · horizon ${input.yearsToRetirement} ans · ${cantonName(input.withdrawalCanton)}`,
+    title: t("pdf.vested.title", undefined, "Libre passage · Stratégies de placement"),
+    subtitle: t("pdf.vested.subtitle", {
+      capital: formatCHF(input.initialBalance),
+      years: input.yearsToRetirement,
+      canton: cantonName(input.withdrawalCanton),
+    }),
     ...args.header,
   } as PdfHeaderInfo);
 
@@ -838,4 +844,112 @@ export function exportVestedBenefitsPdf(args: {
   );
 
   pdf.save(makeFilename("libre_passage", input.withdrawalCanton));
+}
+
+// ============================================================================
+// COMPARATEUR DIRIGEANT · SALAIRE / DIVIDENDES / RÉSERVES
+// ============================================================================
+
+export function exportDirectorCompensationPdf(args: {
+  header?: Partial<PdfHeaderInfo>;
+  inputs: DirectorInputs;
+  results: CompensationResult[];
+  recommended: CompensationResult;
+  current?: CompensationResult | null;
+  clientName?: string | null;
+  companyName?: string | null;
+}) {
+  const { inputs, results, recommended, current, clientName, companyName } = args;
+
+  const subtitle = t("pdf.director.subtitle", {
+    company: companyName ?? "—",
+    director: clientName ?? "—",
+    profit: formatCHF(inputs.totalProfit),
+  });
+
+  const pdf = new ReportPdf({
+    title: t("pdf.director.title", undefined, "Comparateur dirigeant · Salaire / Dividendes / Réserves"),
+    subtitle,
+    ...args.header,
+  } as PdfHeaderInfo);
+
+  // -- Synthèse / intro --
+  pdf.section(t("pdf.section.summary", undefined, "Synthèse"));
+  pdf.paragraph(t("pdf.director.intro"));
+
+  pdf.metricsGrid([
+    { label: t("pdf.director.kpi.profit"), value: inputs.totalProfit, tone: "primary" },
+    { label: t("pdf.director.col.net"), value: recommended.directorNet, tone: "success" },
+    { label: t("pdf.director.col.salary_cost"), value: recommended.company.totalSalaryCost },
+    { label: t("pdf.director.col.reserves"), value: recommended.retainedInCompany },
+  ]);
+
+  // -- Paramètres saisis --
+  pdf.section(t("pdf.director.section.params", undefined, "Paramètres saisis"));
+  pdf.kvTable([
+    [t("pdf.director.kpi.profit"), formatCHF(inputs.totalProfit)],
+    [t("pdf.director.kpi.canton_company"), `${inputs.companyCanton} · ${cantonName(inputs.companyCanton)}`],
+    [t("pdf.director.kpi.canton_director"), `${inputs.directorCanton} · ${cantonName(inputs.directorCanton)}`],
+    [t("pdf.director.kpi.civil_status"), t(`calc.status.${inputs.status}`, undefined, inputs.status)],
+    [t("pdf.director.kpi.age"), `${inputs.age}`],
+    [
+      t("pdf.director.kpi.lpp"),
+      inputs.lppPlan === "executive_1e"
+        ? t("calc.dir.lpp.executive", undefined, "Plan cadre / 1e")
+        : t("calc.dir.lpp.mandatory", undefined, "LPP obligatoire"),
+    ],
+    [t("pdf.director.kpi.qualified"), inputs.qualifiedHolding ? "✓" : "—"],
+    ...(inputs.reserveTarget && inputs.reserveTarget > 0
+      ? ([[t("pdf.director.kpi.reserve"), formatCHF(inputs.reserveTarget)]] as Array<[string, string]>)
+      : []),
+  ]);
+
+  // -- Comparatif des stratégies --
+  pdf.section(t("pdf.director.section.compare", undefined, "Comparatif des stratégies"));
+  const allRows = current ? [current, ...results] : results;
+  pdf.table(
+    [
+      t("pdf.director.col.strategy"),
+      t("pdf.director.col.salary_cost"),
+      t("pdf.director.col.dividends"),
+      t("pdf.director.col.corp_tax"),
+      t("pdf.director.col.income_tax"),
+      t("pdf.director.col.reserves"),
+      t("pdf.director.col.net"),
+    ],
+    allRows.map((r) => [
+      (r === recommended ? "★ " : "") + (r.strategy.label ?? ""),
+      formatCHF(r.company.totalSalaryCost),
+      formatCHF(r.company.dividendsPaid),
+      formatCHF(r.company.corporateTax),
+      formatCHF(r.director.totalIncomeTax),
+      formatCHF(r.retainedInCompany),
+      formatCHF(r.directorNet),
+    ]),
+  );
+
+  // -- Recommandation chiffrée --
+  pdf.section(t("pdf.director.section.reco", undefined, "Recommandation chiffrée"));
+  pdf.callout(
+    t("pdf.director.reco.headline", {
+      label: recommended.strategy.label ?? "—",
+      net: formatCHF(recommended.directorNet),
+      charges: formatCHF(recommended.totalTaxAndCharges),
+    }),
+    "success",
+  );
+  if (current) {
+    const gain = recommended.directorNet - current.directorNet;
+    pdf.metricsGrid([
+      { label: t("pdf.director.reco.gain_year"), value: gain, tone: gain >= 0 ? "success" : "warning" },
+      { label: t("pdf.director.reco.gain_10y"), value: gain * 10, tone: gain >= 0 ? "success" : "warning" },
+    ]);
+    pdf.paragraph(t("pdf.director.reco.vs_current"), { italic: true, muted: true });
+  }
+
+  // -- Avertissements légaux --
+  pdf.section(t("pdf.director.section.legal", undefined, "Avertissements légaux"));
+  pdf.callout(t("pdf.director.legal"), "warning");
+
+  pdf.save(makeFilename(t("pdf.director.fname", undefined, "comparateur_dirigeant"), inputs.companyCanton));
 }

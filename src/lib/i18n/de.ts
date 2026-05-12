@@ -1535,4 +1535,73 @@ export const de: Record<string, string> = {
   "calc.lpp.search_tip": "Fehlende Guthaben? Kostenlose Suche bei der Zentralstelle 2. Säule:",
   "calc.lpp.search_tip_cta": "sfbvg.ch",
 
+  // === PDF · Layout-Chrome (Kopf, Banner, Fuss) ===
+  "pdf.chrome.scales": "TARIFE 2026",
+  "pdf.chrome.report": "BERICHT",
+  "pdf.banner.current": "AKTUELLE SITUATION",
+  "pdf.banner.projection": "PROJEKTION",
+  "pdf.footer.default_note":
+    "Arbeitsdokument · Berechnungen basierend auf den Tarifen 2026 und den eingegebenen Daten.",
+  "pdf.footer.page": "Seite {current} / {total}",
+
+  // === PDF · Berichtstitel ===
+  "pdf.income.title": "Bericht Einkommens- & Vermögenssteuer",
+  "pdf.income.subtitle": "Kanton {canton} · Tarife 2026",
+  "pdf.source.title": "Quellensteuer · Simulation",
+  "pdf.source.subtitle": "Kanton {canton} · Tarif {scale}",
+  "pdf.lpp.title": "Berufliche Vorsorge (BVG) · Vollständige Projektion",
+  "pdf.lpp.subtitle": "Kapital und Einkäufe · Horizont {age} Jahre",
+  "pdf.pillar3a.title": "Säule 3a · Gesamtstrategie",
+  "pdf.pillar3a.subtitle": "Beitrag, Projektion und gestaffelter Bezug · {canton}",
+  "pdf.retirement.title": "Rente oder Kapital? · Pensionierungsentscheid",
+  "pdf.retirement.subtitle": "BVG-Kapital von {capital} · {canton}",
+  "pdf.canton.title": "Kantonsvergleich · Steuerbelastung 2026",
+  "pdf.cross_border.title": "Grenzgänger · Grenzüberschreitende Steuersimulation",
+  "pdf.tou.title": "NBU · Nachträgliche ordentliche Besteuerung",
+  "pdf.tou.subtitle": "Quasi-Ansässig · {canton}",
+  "pdf.vested.title": "Freizügigkeit · Anlagestrategien",
+  "pdf.vested.subtitle": "Kapital {capital} · Horizont {years} Jahre · {canton}",
+  "pdf.director.title": "Geschäftsführer-Vergleich · Lohn / Dividende / Reserven",
+  "pdf.director.subtitle": "Gesellschaft {company} · Geschäftsführer {director} · Gewinn {profit}",
+
+  // === PDF · gemeinsame Sektionen ===
+  "pdf.section.summary": "Zusammenfassung",
+  "pdf.section.assumptions": "Angenommene Hypothesen",
+  "pdf.section.recommendation": "Empfehlung",
+  "pdf.section.method": "Methodik & Hinweise",
+
+  // === PDF · Geschäftsführer-Vergleich ===
+  "pdf.director.section.params": "Eingegebene Parameter",
+  "pdf.director.section.compare": "Strategievergleich",
+  "pdf.director.section.reco": "Bezifferte Empfehlung",
+  "pdf.director.section.legal": "Rechtliche Hinweise",
+  "pdf.director.intro":
+    "Dieser Bericht vergleicht mehrere Strategien zur Aufteilung des Jahresgewinns einer Gesellschaft zwischen Lohn, Dividende und Reserven, um das Optimum für den Geschäftsführer und sein Unternehmen gemäss den Steuertarifen 2026 zu ermitteln.",
+  "pdf.director.kpi.profit": "Zu verteilender Gewinn",
+  "pdf.director.kpi.canton_company": "Kanton Gesellschaft",
+  "pdf.director.kpi.canton_director": "Kanton Geschäftsführer",
+  "pdf.director.kpi.civil_status": "Zivilstand",
+  "pdf.director.kpi.age": "Alter Geschäftsführer",
+  "pdf.director.kpi.lpp": "BVG-Plan",
+  "pdf.director.kpi.qualified": "Qualifizierte Beteiligung",
+  "pdf.director.kpi.reserve": "Zielreserve / Jahr",
+  "pdf.director.col.strategy": "Strategie",
+  "pdf.director.col.salary": "Bruttolohn",
+  "pdf.director.col.salary_cost": "Gesamtkosten Gesellschaft",
+  "pdf.director.col.corp_tax": "Gewinnsteuer",
+  "pdf.director.col.dividends": "Dividende",
+  "pdf.director.col.income_tax": "Einkommenssteuer",
+  "pdf.director.col.social": "Sozialabgaben",
+  "pdf.director.col.reserves": "Reserven",
+  "pdf.director.col.net": "Netto Geschäftsführer",
+  "pdf.director.reco.headline":
+    "Empfohlene Strategie: {label}. Netto Geschäftsführer {net}, Gesamtbelastung {charges}.",
+  "pdf.director.reco.gain_year": "Netto-Mehrertrag pro Jahr",
+  "pdf.director.reco.gain_10y": "Kumulierter Gewinn über 10 Jahre",
+  "pdf.director.reco.vs_current": "Vergleich zur aktuellen Situation.",
+  "pdf.director.legal":
+    "Hinweis: Dieser Vergleich basiert auf den Tarifen 2026 und den eingegebenen Annahmen. Prüfen Sie die Branchenüblichkeit des Lohns (Theorie der verdeckten Gewinnausschüttung, Art. 58 OR), bestehende Verlustvorträge, die Konzernstruktur sowie spezielle Vorsorgepläne (1e, überobligatorisch). Eine zu tiefe Lohnentschädigung kann von AHV und Steuerverwaltung umqualifiziert werden.",
+  "pdf.director.fname": "geschaeftsfuehrer_vergleich",
+
+  "pdf.export": "Als PDF exportieren",
 };

@@ -35,6 +35,9 @@ import {
 import { supabase } from "@/integrations/supabase/client";
 import { CalcCard, MoneyTile, Row } from "@/components/calculators/CalcUI";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
+import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { useBrokerPdfHeader } from "@/hooks/useBrokerPdfHeader";
+import { exportDirectorCompensationPdf } from "@/lib/pdf/reports";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { useT } from "@/contexts/LanguageContext";
@@ -113,6 +116,7 @@ const FILING_OPTIONS: { value: FilingStatus; labelKey: string }[] = [
 
 function DirectorCompensationCalc() {
   const t = useT();
+  const brokerHeader = useBrokerPdfHeader();
   const { clientId, companyId } = Route.useSearch();
 
   // Charge optionnellement le client + la société depuis l'URL.
@@ -246,6 +250,19 @@ function DirectorCompensationCalc() {
       <div className="space-y-6">
         <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.dir.guide.title")} />
         <div className="flex justify-end gap-2">
+          <ExportPdfButton
+            onClick={() =>
+              exportDirectorCompensationPdf({
+                header: brokerHeader,
+                inputs,
+                results: strategiesForCompare,
+                recommended: recommendation.best,
+                current: currentResult,
+                clientName: linkedClient ? `${linkedClient.first_name} ${linkedClient.last_name}` : null,
+                companyName: linkedCompany?.legal_name ?? null,
+              })
+            }
+          />
           <SaveSimulationButton
             kind="director_compensation"
             inputs={{ ...inputs, hasCurrent, current, custom }}

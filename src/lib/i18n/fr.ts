@@ -1540,4 +1540,74 @@ export const fr: Record<string, string> = {
   "calc.lpp.search_tip": "Avoir manquant ? Recherche gratuite sur la Centrale du 2ᵉ pilier :",
   "calc.lpp.search_tip_cta": "sfbvg.ch",
 
+  // === PDF · chrome (en-tête, bandeaux, pied de page) ===
+  "pdf.chrome.scales": "BARÈMES 2026",
+  "pdf.chrome.report": "RAPPORT",
+  "pdf.banner.current": "SITUATION ACTUELLE",
+  "pdf.banner.projection": "PROJECTION",
+  "pdf.footer.default_note":
+    "Document de travail · calculs basés sur les barèmes 2026 et les données saisies.",
+  "pdf.footer.page": "Page {current} / {total}",
+
+  // === PDF · titres & sous-titres des rapports ===
+  "pdf.income.title": "Rapport d'imposition revenu & fortune",
+  "pdf.income.subtitle": "Canton de {canton} · barèmes 2026",
+  "pdf.source.title": "Impôt à la source · simulation",
+  "pdf.source.subtitle": "Canton de {canton} · barème {scale}",
+  "pdf.lpp.title": "Prévoyance professionnelle (LPP) · Projection complète",
+  "pdf.lpp.subtitle": "Capital et rachats · horizon {age} ans",
+  "pdf.pillar3a.title": "Pilier 3a · Stratégie complète",
+  "pdf.pillar3a.subtitle": "Cotisation, projection et retrait étalé · {canton}",
+  "pdf.retirement.title": "Rente ou capital ? · Décision retraite",
+  "pdf.retirement.subtitle": "Capital LPP de {capital} · {canton}",
+  "pdf.canton.title": "Comparateur cantonal · Charge fiscale 2026",
+  "pdf.cross_border.title": "Frontalier · Simulation fiscale transfrontalière",
+  "pdf.tou.title": "TOU · Taxation Ordinaire Ultérieure",
+  "pdf.tou.subtitle": "Quasi-résident · {canton}",
+  "pdf.vested.title": "Libre passage · Stratégies de placement",
+  "pdf.vested.subtitle": "Capital {capital} · horizon {years} ans · {canton}",
+  "pdf.director.title": "Comparateur dirigeant · Salaire / Dividendes / Réserves",
+  "pdf.director.subtitle": "Société {company} · dirigeant {director} · bénéfice {profit}",
+
+  // === PDF · sections communes ===
+  "pdf.section.summary": "Synthèse",
+  "pdf.section.assumptions": "Hypothèses retenues",
+  "pdf.section.recommendation": "Recommandation",
+  "pdf.section.method": "Méthodologie & avertissements",
+
+  // === PDF · comparateur dirigeant (rapport dédié) ===
+  "pdf.director.section.params": "Paramètres saisis",
+  "pdf.director.section.compare": "Comparatif des stratégies",
+  "pdf.director.section.reco": "Recommandation chiffrée",
+  "pdf.director.section.legal": "Avertissements légaux",
+  "pdf.director.intro":
+    "Ce rapport compare plusieurs stratégies de répartition du bénéfice annuel d'une société entre salaire, dividendes et réserves, afin d'identifier l'optimum pour le dirigeant et son entreprise selon les barèmes fiscaux 2026.",
+  "pdf.director.kpi.profit": "Bénéfice à répartir",
+  "pdf.director.kpi.canton_company": "Canton société",
+  "pdf.director.kpi.canton_director": "Canton dirigeant",
+  "pdf.director.kpi.civil_status": "Situation civile",
+  "pdf.director.kpi.age": "Âge dirigeant",
+  "pdf.director.kpi.lpp": "Plan LPP",
+  "pdf.director.kpi.qualified": "Participation qualifiée",
+  "pdf.director.kpi.reserve": "Réserve cible / an",
+  "pdf.director.col.strategy": "Stratégie",
+  "pdf.director.col.salary": "Salaire brut",
+  "pdf.director.col.salary_cost": "Coût total société",
+  "pdf.director.col.corp_tax": "IS société",
+  "pdf.director.col.dividends": "Dividendes",
+  "pdf.director.col.income_tax": "Impôt revenu",
+  "pdf.director.col.social": "Cotisations sociales",
+  "pdf.director.col.reserves": "Réserves",
+  "pdf.director.col.net": "Net dirigeant",
+  "pdf.director.reco.headline":
+    "Stratégie recommandée : {label}. Net dirigeant {net}, charges totales {charges}.",
+  "pdf.director.reco.gain_year": "Gain net dirigeant sur 1 an",
+  "pdf.director.reco.gain_10y": "Gain cumulé sur 10 ans",
+  "pdf.director.reco.vs_current": "Comparé à la situation actuelle.",
+  "pdf.director.legal":
+    "Avertissement : ce comparatif s'appuie sur les barèmes 2026 et les hypothèses saisies. Vérifier le caractère « usuel » du salaire pour la branche (théorie du dividende dissimulé, art. 58 CO), les pertes fiscales reportées, la structure de groupe et les plans de prévoyance spécifiques (1e, surobligatoire). Une sous-rémunération salariale peut être requalifiée par l'AVS et le fisc.",
+  "pdf.director.fname": "comparateur_dirigeant",
+
+  // === PDF · libellé bouton export ===
+  "pdf.export": "Exporter en PDF",
 };

@@ -3,6 +3,8 @@
 import jsPDF from "jspdf";
 import autoTable, { type RowInput } from "jspdf-autotable";
 import { formatCHF } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import { getActiveLocale } from "@/lib/i18n/format";
 
 // ---------------------------------------------------------------------------
 // Sanitisation Unicode -> WinAnsi (CP1252) pour la police Helvetica par défaut
@@ -16,6 +18,28 @@ const PDF_CHAR_MAP: Record<string, string> = {
   "\u202F": "'",
   "\u2009": "'",
   "\u2007": "'",
+  // tirets typographiques -> tiret ASCII
+  "\u2010": "-", // hyphen
+  "\u2011": "-", // non-breaking hyphen
+  "\u2012": "-", // figure dash
+  "\u2013": "-", // en-dash
+  "\u2014": "-", // em-dash
+  "\u2015": "-", // horizontal bar
+  "\u2212": "-", // minus sign
+  // guillemets typographiques -> ASCII
+  "\u201C": '"',
+  "\u201D": '"',
+  "\u201E": '"',
+  "\u201F": '"',
+  "\u2018": "'",
+  "\u2019": "'",
+  "\u201A": "'",
+  "\u201B": "'",
+  // ellipses
+  "\u2026": "...",
+  // marques diverses
+  "\u00AB": '"', // « guillemet français ouvrant -> "
+  "\u00BB": '"', // » guillemet français fermant -> "
   // grec (statistiques) -> texte
   "σ": "sigma",
   "Σ": "Sigma",
@@ -162,9 +186,9 @@ export class ReportPdf {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("BARÈMES 2026", margin, bandH / 2 + 1.5);
+    doc.text(t("pdf.chrome.scales", undefined, "BARÈMES 2026"), margin, bandH / 2 + 1.5);
     doc.setFontSize(8.5);
-    const dateStr = new Date().toLocaleDateString("fr-CH", {
+    const dateStr = new Date().toLocaleDateString(getActiveLocale(), {
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -241,7 +265,7 @@ export class ReportPdf {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...this.muted);
-    doc.text("RAPPORT", rightX, zoneTop + 4, { align: "right" });
+    doc.text(t("pdf.chrome.report", undefined, "RAPPORT"), rightX, zoneTop + 4, { align: "right" });
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(...this.primary);
@@ -412,7 +436,8 @@ export class ReportPdf {
   }
 
   /** Bandeau "SITUATION ACTUELLE" — fond gris clair, filet vertical. */
-  situationBanner(label = "SITUATION ACTUELLE") {
+  situationBanner(label?: string) {
+    const text = label ?? t("pdf.banner.current", undefined, "SITUATION ACTUELLE");
     this.ensureSpace(10);
     const { doc, margin, contentWidth } = this;
     doc.setFillColor(...this.surface);
@@ -422,13 +447,14 @@ export class ReportPdf {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(...this.ink);
-    doc.text(label, margin + 4, this.cursorY + 4.8);
+    doc.text(text, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
 
   /** Bandeau "PROJECTION" — fond couleur primaire, plat. */
-  projectionBanner(label = "PROJECTION") {
+  projectionBanner(label?: string) {
+    const text = label ?? t("pdf.banner.projection", undefined, "PROJECTION");
     this.ensureSpace(10);
     const { doc, margin, contentWidth, primary } = this;
     doc.setFillColor(...primary);
@@ -436,7 +462,7 @@ export class ReportPdf {
     doc.setFont("helvetica", "bold");
     doc.setFontSize(9.5);
     doc.setTextColor(255, 255, 255);
-    doc.text(label, margin + 4, this.cursorY + 4.8);
+    doc.text(text, margin + 4, this.cursorY + 4.8);
     this.cursorY += 10;
     return this;
   }
@@ -453,7 +479,11 @@ export class ReportPdf {
     doc.setTextColor(...muted);
     const note =
       this.header.footerNote?.trim() ||
-      "Document de travail · calculs basés sur les barèmes 2026 et les données saisies.";
+      t(
+        "pdf.footer.default_note",
+        undefined,
+        "Document de travail · calculs basés sur les barèmes 2026 et les données saisies.",
+      );
     const cabinetCenter = this.header.brokerageName?.trim() || this.header.brokerName?.trim() || "";
     const noteMaxW = pageWidth / 2 - margin - 20;
     const noteLines = doc.splitTextToSize(note, noteMaxW) as string[];
@@ -462,7 +492,12 @@ export class ReportPdf {
       doc.text(cabinetCenter, pageWidth / 2, pageHeight - 7, { align: "center" });
     }
     doc.setFont("helvetica", "bold");
-    doc.text(`Page ${current} / ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: "right" });
+    doc.text(
+      t("pdf.footer.page", { current, total: pageCount }, `Page ${current} / ${pageCount}`),
+      pageWidth - margin,
+      pageHeight - 7,
+      { align: "right" },
+    );
   }
 
   finalize() {
