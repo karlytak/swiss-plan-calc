@@ -4,6 +4,82 @@ import jsPDF from "jspdf";
 import autoTable, { type RowInput } from "jspdf-autotable";
 import { formatCHF } from "@/lib/format";
 
+// ---------------------------------------------------------------------------
+// Sanitisation Unicode -> WinAnsi (CP1252) pour la police Helvetica par défaut
+// de jsPDF. Tout caractère non supporté provoque un rendu erratique :
+// soit un glyphe absent (Ã pour σ), soit un cascade d'espaces parasites
+// dans la même cellule de tableau (« C H F  0 »). On remplace donc en amont
+// les caractères problématiques par leur équivalent ASCII / texte court.
+const PDF_CHAR_MAP: Record<string, string> = {
+  // séparateurs invisibles -> apostrophe suisse
+  "\u00A0": " ",
+  "\u202F": "'",
+  "\u2009": "'",
+  "\u2007": "'",
+  // grec (statistiques) -> texte
+  "σ": "sigma",
+  "Σ": "Sigma",
+  "α": "alpha",
+  "β": "beta",
+  "γ": "gamma",
+  "δ": "delta",
+  "π": "pi",
+  "λ": "lambda",
+  "μ": "µ", // µ existe en WinAnsi (0xB5)
+  "Δ": "Delta",
+  "Ω": "Ohm",
+  // mathématiques absents de WinAnsi
+  "→": "->",
+  "←": "<-",
+  "↔": "<->",
+  "⇒": "=>",
+  "≥": ">=",
+  "≤": "<=",
+  "≠": "!=",
+  "≈": "~",
+  "√": "racine",
+  "∞": "inf",
+  "✓": "OK",
+  "✗": "X",
+  "•": "·", // · existe en WinAnsi (0xB7)
+  "⁰": "0",
+  "¹": "1",
+  // ² ³ existent (0xB2 0xB3) -> on garde
+  "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+  "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4",
+  "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9",
+};
+
+/**
+ * Convertit un texte arbitraire en chaîne sûre pour jsPDF (Helvetica WinAnsi).
+ * - Remplace les caractères non WinAnsi par un équivalent ASCII / texte.
+ * - Tout codepoint > 0xFF restant est remplacé par "?" pour éviter les Ã.
+ */
+export function sanitizePdfText(input: unknown): string {
+  if (input === null || input === undefined) return "";
+  const raw = typeof input === "string" ? input : String(input);
+  let out = "";
+  for (const ch of raw) {
+    const mapped = PDF_CHAR_MAP[ch];
+    if (mapped !== undefined) {
+      out += mapped;
+      continue;
+    }
+    const cp = ch.codePointAt(0) ?? 0;
+    // ASCII + Latin-1 supplément couvrent l'essentiel de WinAnsi
+    if (cp <= 0xff) {
+      out += ch;
+    } else {
+      out += "?";
+    }
+  }
+  return out;
+}
+
+function sanitizeCell(v: unknown): string {
+  return sanitizePdfText(v);
+}
+
 export interface BrokerHeader {
   brokerName?: string;
   brokerEmail?: string;
@@ -52,6 +128,22 @@ export class ReportPdf {
 
   constructor(public header: PdfHeaderInfo) {
     this.doc = new jsPDF({ unit: "mm", format: "a4" });
+    // Monkey-patch doc.text pour sanitiser TOUT texte écrit dans le PDF
+    // (y compris via jspdf-autotable). Garantit l'absence de glyphes
+    // manquants (Ã pour σ) et d'artefacts d'espacement liés à l'encodage
+    // UTF-16 fallback de jsPDF lorsqu'un caractère hors WinAnsi est rencontré.
+    const origText = this.doc.text.bind(this.doc);
+    (this.doc as unknown as { text: (...a: unknown[]) => jsPDF }).text = (
+      ...args: unknown[]
+    ) => {
+      const t = args[0];
+      if (typeof t === "string") {
+        args[0] = sanitizePdfText(t);
+      } else if (Array.isArray(t)) {
+        args[0] = t.map((s) => (typeof s === "string" ? sanitizePdfText(s) : s));
+      }
+      return (origText as (...a: unknown[]) => jsPDF)(...args);
+    };
     this.pageWidth = this.doc.internal.pageSize.getWidth();
     this.pageHeight = this.doc.internal.pageSize.getHeight();
     this.contentWidth = this.pageWidth - this.margin * 2;
@@ -178,6 +270,7 @@ export class ReportPdf {
   }
 
   section(title: string) {
+    title = sanitizePdfText(title);
     this.ensureSpace(14);
     const { doc, margin, primary } = this;
     // Petit carré couleur primaire à gauche du titre
@@ -196,6 +289,7 @@ export class ReportPdf {
   }
 
   paragraph(text: string, opts?: { italic?: boolean; muted?: boolean }) {
+    text = sanitizePdfText(text);
     const { doc, margin, contentWidth } = this;
     doc.setFont("helvetica", opts?.italic ? "italic" : "normal");
     doc.setFontSize(10);
@@ -208,6 +302,7 @@ export class ReportPdf {
   }
 
   callout(text: string, tone: "info" | "success" | "warning" = "info") {
+    text = sanitizePdfText(text);
     const colors = {
       info: { bg: [239, 246, 255] as [number, number, number], border: this.primary },
       success: { bg: [236, 253, 245] as [number, number, number], border: [16, 185, 129] as [number, number, number] },
@@ -230,11 +325,12 @@ export class ReportPdf {
   }
 
   kvTable(rows: Array<[string, string]>) {
+    const safeRows = rows.map(([k, v]) => [sanitizeCell(k), sanitizeCell(v)] as [string, string]);
     autoTable(this.doc, {
       startY: this.cursorY,
       margin: { left: this.margin, right: this.margin },
       head: [],
-      body: rows as RowInput[],
+      body: safeRows as RowInput[],
       theme: "plain",
       styles: { fontSize: 10, cellPadding: { top: 1.5, bottom: 1.5, left: 0, right: 0 } },
       columnStyles: {
@@ -248,11 +344,13 @@ export class ReportPdf {
   }
 
   table(head: string[], body: Array<Array<string | number>>, opts?: { highlightLast?: boolean }) {
+    const safeHead = head.map(sanitizeCell);
+    const safeBody = body.map((row) => row.map(sanitizeCell));
     autoTable(this.doc, {
       startY: this.cursorY,
       margin: { left: this.margin, right: this.margin },
-      head: [head],
-      body: body as RowInput[],
+      head: [safeHead],
+      body: safeBody as RowInput[],
       theme: "striped",
       headStyles: { fillColor: this.primary, textColor: 255, fontStyle: "bold", fontSize: 10 },
       styles: { fontSize: 9.5, cellPadding: 2 },
