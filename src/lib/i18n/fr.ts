@@ -1610,5 +1610,4 @@ export const fr: Record<string, string> = {
 
   // === PDF · libellé bouton export ===
   "pdf.export": "Exporter en PDF",
-  "common.export_pdf_report": "Exporter en PDF",
 };
