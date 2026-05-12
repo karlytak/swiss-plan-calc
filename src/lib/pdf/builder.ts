@@ -186,9 +186,9 @@ export class ReportPdf {
     doc.setTextColor(255, 255, 255);
     doc.setFont("helvetica", "normal");
     doc.setFontSize(8);
-    doc.text("BARÈMES 2026", margin, bandH / 2 + 1.5);
+    doc.text(t("pdf.chrome.scales", undefined, "BARÈMES 2026"), margin, bandH / 2 + 1.5);
     doc.setFontSize(8.5);
-    const dateStr = new Date().toLocaleDateString("fr-CH", {
+    const dateStr = new Date().toLocaleDateString(getActiveLocale(), {
       day: "2-digit",
       month: "long",
       year: "numeric",
