@@ -845,3 +845,111 @@ export function exportVestedBenefitsPdf(args: {
 
   pdf.save(makeFilename("libre_passage", input.withdrawalCanton));
 }
+
+// ============================================================================
+// COMPARATEUR DIRIGEANT · SALAIRE / DIVIDENDES / RÉSERVES
+// ============================================================================
+
+export function exportDirectorCompensationPdf(args: {
+  header?: Partial<PdfHeaderInfo>;
+  inputs: DirectorInputs;
+  results: CompensationResult[];
+  recommended: CompensationResult;
+  current?: CompensationResult | null;
+  clientName?: string | null;
+  companyName?: string | null;
+}) {
+  const { inputs, results, recommended, current, clientName, companyName } = args;
+
+  const subtitle = t("pdf.director.subtitle", {
+    company: companyName ?? "—",
+    director: clientName ?? "—",
+    profit: formatCHF(inputs.totalProfit),
+  });
+
+  const pdf = new ReportPdf({
+    title: t("pdf.director.title", undefined, "Comparateur dirigeant · Salaire / Dividendes / Réserves"),
+    subtitle,
+    ...args.header,
+  } as PdfHeaderInfo);
+
+  // -- Synthèse / intro --
+  pdf.section(t("pdf.section.summary", undefined, "Synthèse"));
+  pdf.paragraph(t("pdf.director.intro"));
+
+  pdf.metricsGrid([
+    { label: t("pdf.director.kpi.profit"), value: inputs.totalProfit, tone: "primary" },
+    { label: t("pdf.director.col.net"), value: recommended.directorNet, tone: "success" },
+    { label: t("pdf.director.col.salary_cost"), value: recommended.company.totalSalaryCost },
+    { label: t("pdf.director.col.reserves"), value: recommended.retainedInCompany },
+  ]);
+
+  // -- Paramètres saisis --
+  pdf.section(t("pdf.director.section.params", undefined, "Paramètres saisis"));
+  pdf.kvTable([
+    [t("pdf.director.kpi.profit"), formatCHF(inputs.totalProfit)],
+    [t("pdf.director.kpi.canton_company"), `${inputs.companyCanton} · ${cantonName(inputs.companyCanton)}`],
+    [t("pdf.director.kpi.canton_director"), `${inputs.directorCanton} · ${cantonName(inputs.directorCanton)}`],
+    [t("pdf.director.kpi.civil_status"), t(`calc.status.${inputs.status}`, undefined, inputs.status)],
+    [t("pdf.director.kpi.age"), `${inputs.age}`],
+    [
+      t("pdf.director.kpi.lpp"),
+      inputs.lppPlan === "executive_1e"
+        ? t("calc.dir.lpp.executive", undefined, "Plan cadre / 1e")
+        : t("calc.dir.lpp.mandatory", undefined, "LPP obligatoire"),
+    ],
+    [t("pdf.director.kpi.qualified"), inputs.qualifiedHolding ? "✓" : "—"],
+    ...(inputs.reserveTarget && inputs.reserveTarget > 0
+      ? ([[t("pdf.director.kpi.reserve"), formatCHF(inputs.reserveTarget)]] as Array<[string, string]>)
+      : []),
+  ]);
+
+  // -- Comparatif des stratégies --
+  pdf.section(t("pdf.director.section.compare", undefined, "Comparatif des stratégies"));
+  const allRows = current ? [current, ...results] : results;
+  pdf.table(
+    [
+      t("pdf.director.col.strategy"),
+      t("pdf.director.col.salary_cost"),
+      t("pdf.director.col.dividends"),
+      t("pdf.director.col.corp_tax"),
+      t("pdf.director.col.income_tax"),
+      t("pdf.director.col.reserves"),
+      t("pdf.director.col.net"),
+    ],
+    allRows.map((r) => [
+      (r === recommended ? "★ " : "") + (r.strategy.label ?? ""),
+      formatCHF(r.company.totalSalaryCost),
+      formatCHF(r.company.dividendsPaid),
+      formatCHF(r.company.corporateTax),
+      formatCHF(r.director.totalIncomeTax),
+      formatCHF(r.retainedInCompany),
+      formatCHF(r.directorNet),
+    ]),
+  );
+
+  // -- Recommandation chiffrée --
+  pdf.section(t("pdf.director.section.reco", undefined, "Recommandation chiffrée"));
+  pdf.callout(
+    t("pdf.director.reco.headline", {
+      label: recommended.strategy.label ?? "—",
+      net: formatCHF(recommended.directorNet),
+      charges: formatCHF(recommended.totalTaxAndCharges),
+    }),
+    "success",
+  );
+  if (current) {
+    const gain = recommended.directorNet - current.directorNet;
+    pdf.metricsGrid([
+      { label: t("pdf.director.reco.gain_year"), value: gain, tone: gain >= 0 ? "success" : "warning" },
+      { label: t("pdf.director.reco.gain_10y"), value: gain * 10, tone: gain >= 0 ? "success" : "warning" },
+    ]);
+    pdf.paragraph(t("pdf.director.reco.vs_current"), { italic: true, muted: true });
+  }
+
+  // -- Avertissements légaux --
+  pdf.section(t("pdf.director.section.legal", undefined, "Avertissements légaux"));
+  pdf.callout(t("pdf.director.legal"), "warning");
+
+  pdf.save(makeFilename(t("pdf.director.fname", undefined, "comparateur_dirigeant"), inputs.companyCanton));
+}
