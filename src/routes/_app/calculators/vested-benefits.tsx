@@ -31,6 +31,7 @@ import {
 } from "@/lib/lpp/vested";
 import { formatCHF } from "@/lib/format";
 import { exportVestedBenefitsPdf } from "@/lib/pdf/reports";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
@@ -184,7 +185,27 @@ function VestedBenefitsCalc() {
       </div>
 
       <div className="space-y-4 md:col-span-3">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <SaveSimulationButton
+            kind="vested_benefits"
+            inputs={form}
+            summary={{
+              recommendedStrategy: recommended,
+              recommendedFinalBalance:
+                projections.find((p) => p.strategy.id === recommended)?.finalBalance ?? 0,
+              securityFinalBalance:
+                projections.find((p) => p.strategy.id === "security")?.finalBalance ?? 0,
+              balancedFinalBalance:
+                projections.find((p) => p.strategy.id === "balanced")?.finalBalance ?? 0,
+              dynamicFinalBalance:
+                projections.find((p) => p.strategy.id === "dynamic")?.finalBalance ?? 0,
+              gainVsSecurity:
+                (projections.find((p) => p.strategy.id === recommended)?.finalBalance ?? 0) -
+                (projections.find((p) => p.strategy.id === "security")?.finalBalance ?? 0),
+              yearsToRetirement: form.yearsToRetirement,
+            }}
+            defaultTitle={`Libre passage · ${form.initialBalance} CHF / ${form.yearsToRetirement} ans`}
+          />
           <ExportPdfButton
             onClick={() =>
               exportVestedBenefitsPdf({

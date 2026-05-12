@@ -485,6 +485,11 @@ export const de: Record<string, string> = {
   "history.kind.pillar3a": "Säule 3a",
   "history.kind.retirement": "Rente vs. Kapital",
   "history.kind.canton_compare": "Kantonsvergleich",
+  "history.kind.avs_ai": "AHV/IV-Rente (1. Säule)",
+  "history.kind.vested_benefits": "Freizügigkeit",
+  "history.kind.cross_border": "Grenzgänger",
+  "history.kind.tou": "Nachträgliche ordentliche Veranlagung (NOV)",
+  "history.kind.director_compensation": "Vergütung Geschäftsführer",
 
   // === LOT 1 — Calculateurs prévoyance (AVS/AHV · LPP/BVG · 3a · libre passage) ===
   "pension.canton": "Kanton",

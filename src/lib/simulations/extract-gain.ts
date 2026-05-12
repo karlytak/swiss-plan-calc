@@ -22,6 +22,12 @@ function s(v: unknown): string | undefined {
   return undefined;
 }
 
+function bool(v: unknown): boolean {
+  return v === true || v === "true" || v === 1;
+}
+
+const LIFE_EXPECTANCY_YEARS = 20;
+
 export function extractGain(entry: HistoryEntry): ExtractedGain {
   const summary = (entry.summary ?? {}) as Record<string, unknown>;
   const inputs = (entry.inputs ?? {}) as Record<string, unknown>;
@@ -83,6 +89,68 @@ export function extractGain(entry: HistoryEntry): ExtractedGain {
         amount,
         label: "Comparateur d'investissements",
         details: s(summary.winner) ? `Avantage : ${s(summary.winner)}` : undefined,
+      };
+    }
+    case "avs_ai": {
+      const missing = num(summary.missingYears);
+      const theoretical = num(summary.theoreticalAnnualPension);
+      const actual = num(summary.annualPension);
+      const gap = Math.max(0, theoretical - actual);
+      if (missing <= 0 || gap <= 0) return none();
+      return {
+        type: "one_time",
+        amount: Math.round(gap * LIFE_EXPECTANCY_YEARS),
+        label: `Cotisation AVS rétroactive (${missing} an${missing > 1 ? "s" : ""} comblée${missing > 1 ? "s" : ""})`,
+        details: `Rente supplémentaire estimée sur ${LIFE_EXPECTANCY_YEARS} ans de retraite`,
+      };
+    }
+    case "vested_benefits": {
+      const reco = num(summary.recommendedFinalBalance);
+      const sec = num(summary.securityFinalBalance);
+      const amount = Math.max(0, reco - sec);
+      if (amount <= 0) return none();
+      const strat = s(summary.recommendedStrategy) ?? "recommandée";
+      return {
+        type: "one_time",
+        amount: Math.round(amount),
+        label: `Optimisation libre passage (stratégie ${strat})`,
+        details: "Gain projeté à la retraite, hors fiscalité au retrait",
+      };
+    }
+    case "cross_border": {
+      const altDelta = num(summary.alternativeDelta);
+      if (altDelta <= 0) return none();
+      return {
+        type: "annual",
+        amount: Math.round(altDelta),
+        label: "Optimisation régime frontalier",
+        details: s(summary.regimeLabel) ?? "Économie annuelle si bascule de régime",
+      };
+    }
+    case "tou": {
+      const eligible = bool(summary.eligibleForTOU);
+      const share = num(summary.swissShare);
+      if (!eligible || share < 90) return none();
+      const amount = num(summary.touSaving);
+      if (amount <= 0) return none();
+      return {
+        type: "one_time",
+        amount: Math.round(amount),
+        label: "Bascule TOU (Taxation Ordinaire Ultérieure)",
+        details: "Économie annuelle si éligibilité quasi-résident confirmée",
+      };
+    }
+    case "director_compensation": {
+      const reco = num(summary.recommendedDirectorNet);
+      const cur = num(summary.currentDirectorNet);
+      const gain = num(summary.gainAnnual) || (cur > 0 ? reco - cur : 0);
+      if (gain <= 0) return none();
+      const strat = s(summary.recommendedLabel) ?? "optimale";
+      return {
+        type: "annual",
+        amount: Math.round(gain),
+        label: `Optimisation rémunération dirigeant (${strat})`,
+        details: "Gain annuel sur revenu net",
       };
     }
     default:
