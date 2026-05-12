@@ -282,6 +282,23 @@ function InvestmentCard({
             </Select>
           </div>
 
+          <div className="space-y-1.5">
+            <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              {t("calc.invcompare.field.interest_mode")}
+              <HelpDot tip={t("calc.invcompare.tip.interest_mode")} />
+            </Label>
+            <Select
+              value={value.interestMode ?? "compound"}
+              onValueChange={(v) => set("interestMode", v as "compound" | "simple")}
+            >
+              <SelectTrigger><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="compound">{t("calc.invcompare.mode.compound")}</SelectItem>
+                <SelectItem value="simple">{t("calc.invcompare.mode.simple")}</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
           <NumField
             label={t("calc.invcompare.field.duration")}
             value={value.durationYears}
