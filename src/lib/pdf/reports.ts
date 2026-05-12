@@ -2,13 +2,15 @@
 // Textes explicatifs longs, contexte fiscal suisse, recommandations.
 import { ReportPdf, makeFilename, type PdfHeaderInfo } from "./builder";
 import { formatCHF, formatPct } from "@/lib/format";
+import { t, tCanton } from "@/lib/i18n";
 import type { IncomeTaxBreakdown, IncomeTaxInput } from "@/lib/tax/income";
 import type { LPPProjectionResult, LPPBuybackPlanResult, AnnuityVsLumpSumResult } from "@/lib/lpp";
 import type { Pillar3aProjectionResult, StaggeredWithdrawalResult } from "@/lib/pillar3";
 import type { SourceTaxResult } from "@/lib/tax/source";
+import type { CompensationResult, DirectorInputs } from "@/lib/director-compensation/types";
 import { CANTONS } from "@/lib/swiss/cantons";
 
-const cantonName = (code: string) => CANTONS.find((c) => c.code === code)?.name ?? code;
+const cantonName = (code: string) => tCanton(code) || CANTONS.find((c) => c.code === code)?.name || code;
 const STATUS_LABEL: Record<string, string> = {
   single: "Célibataire",
   married: "Marié·e (imposition commune)",
