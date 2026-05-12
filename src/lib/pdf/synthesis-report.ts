@@ -327,7 +327,7 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
     case "canton_compare":
       pushIfChf(rows, "Revenu imposable", i.taxableIncome);
       pushIfChf(rows, "Fortune imposable", i.taxableWealth);
-      pushStr(rows, "Statut familial", i.status as string | undefined);
+      pushStr(rows, "Statut familial", localizeStatus(i.status));
       break;
     case "income_tax":
     case "source_tax":
