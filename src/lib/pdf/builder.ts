@@ -435,6 +435,14 @@ export class ReportPdf {
     return this;
   }
 
+  /** Force le passage à une nouvelle page en redessinant l'en-tête standard. */
+  newPage() {
+    this.doc.addPage();
+    this.drawHeader();
+    this.cursorY = this.headerH + 10;
+    return this;
+  }
+
   /** Bandeau "SITUATION ACTUELLE" — fond gris clair, filet vertical. */
   situationBanner(label?: string) {
     const text = label ?? t("pdf.banner.current", undefined, "SITUATION ACTUELLE");
