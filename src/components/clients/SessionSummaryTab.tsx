@@ -153,18 +153,25 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
         </CardContent>
       </Card>
 
-      {/* BLOC 3 — Bouton préparer dossier (placeholder) */}
+      {/* BLOC 3 — Bouton préparer dossier de synthèse PDF */}
       <div className="flex justify-end">
         <Button
           size="lg"
           className="gap-2 shine"
-          onClick={() => toast.info(t("client.session.coming_soon_toast"))}
+          onClick={() => setReportOpen(true)}
           disabled={entries.length === 0}
         >
           <FileText className="h-4 w-4" />
           {t("client.session.prepare_pdf_button", { name: clientName })}
         </Button>
       </div>
+
+      <SynthesisReportModal
+        open={reportOpen}
+        onOpenChange={setReportOpen}
+        clientId={clientId}
+        entries={entries}
+      />
     </div>
   );
 }
