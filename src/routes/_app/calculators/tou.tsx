@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Info, CheckCircle2, AlertCircle, Scale } from "lucide-react";
 import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/CalcUI";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { getSelectableCantons } from "@/lib/swiss/cantons";
 import { checkQuasiResident, compareTOUvsSource } from "@/lib/tax/tou";
 import type { IncomeTaxInput } from "@/lib/tax/income";
