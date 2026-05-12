@@ -354,7 +354,7 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
       break;
     case "cross_border":
       pushIfChf(rows, "Salaire annuel", i.annualSalary);
-      pushStr(rows, "Régime", i.regime as string | undefined);
+      pushStr(rows, "Régime", localizeRegime(i.regime));
       break;
     case "tou":
       pushIfChf(rows, "Salaire brut", i.grossIncome);
