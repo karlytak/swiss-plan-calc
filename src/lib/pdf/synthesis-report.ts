@@ -37,6 +37,29 @@ const str = (v: unknown): string | undefined => {
   return undefined;
 };
 
+const STATUS_FR: Record<string, string> = {
+  single: "Célibataire",
+  married: "Marié·e",
+  registered_partnership: "Partenariat enregistré",
+  single_with_children: "Famille monoparentale",
+  divorced: "Divorcé·e",
+  widowed: "Veuf / Veuve",
+  separated: "Séparé·e",
+};
+const REGIME_FR: Record<string, string> = {
+  fr_1983: "Frontalier français (accord 1983)",
+  ge: "Frontalier Genève",
+  tou: "TOU (taxation ordinaire ultérieure)",
+};
+const localizeStatus = (v: unknown) => {
+  const k = typeof v === "string" ? v : "";
+  return STATUS_FR[k] ?? (k || undefined);
+};
+const localizeRegime = (v: unknown) => {
+  const k = typeof v === "string" ? v : "";
+  return REGIME_FR[k] ?? (k || undefined);
+};
+
 // ============================================================================
 
 export interface SynthesisReportArgs {
@@ -62,10 +85,10 @@ export function exportSynthesisReportPdf(args: SynthesisReportArgs): void {
     ...args.header,
   } as PdfHeaderInfo);
 
-  // ---------- PAGE 1 — COVER ----------
+  // ---------- PAGE 1 · COVER ----------
   drawCoverPage(pdf, fullName, options.customNote, args.header);
 
-  // ---------- PAGE 2 — PROFIL CLIENT ----------
+  // ---------- PAGE 2 · PROFIL CLIENT ----------
   pdf.newPage();
   drawClientProfile(pdf, client, pension, assets, company);
 
@@ -164,7 +187,7 @@ function drawCoverPage(
   doc.setFont("helvetica", "italic");
   doc.setFontSize(9);
   doc.setTextColor(...muted);
-  doc.text("Document confidentiel — Usage interne", pageWidth / 2, pageHeight - 25, {
+  doc.text("Document confidentiel · Usage interne", pageWidth / 2, pageHeight - 25, {
     align: "center",
   });
 }
@@ -252,7 +275,7 @@ function drawSimulationPage(pdf: ReportPdf, entry: HistoryEntry, includeCharts: 
   pdf.section(kindLabel);
   pdf.paragraph(entry.title, { italic: true, muted: true });
 
-  // Section 1 — paramètres
+  // Section 1 · paramètres
   const params = formatInputs(entry);
   if (params.length) {
     pdf.spacer(2);
@@ -260,7 +283,7 @@ function drawSimulationPage(pdf: ReportPdf, entry: HistoryEntry, includeCharts: 
     pdf.kvTable(params);
   }
 
-  // Section 2 — résultats clés
+  // Section 2 · résultats clés
   const metrics = formatMetrics(entry);
   if (metrics.length) {
     pdf.spacer(2);
@@ -268,12 +291,12 @@ function drawSimulationPage(pdf: ReportPdf, entry: HistoryEntry, includeCharts: 
     pdf.metricsGrid(metrics);
   }
 
-  // Section 3 — graphique simplifié si pertinent
+  // Section 3 · graphique simplifié si pertinent
   if (includeCharts) {
     drawSimpleChart(pdf, entry);
   }
 
-  // Section 4 — commentaire
+  // Section 4 · commentaire
   const comment = buildComment(entry);
   if (comment) {
     pdf.spacer(2);
@@ -304,13 +327,13 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
     case "canton_compare":
       pushIfChf(rows, "Revenu imposable", i.taxableIncome);
       pushIfChf(rows, "Fortune imposable", i.taxableWealth);
-      pushStr(rows, "Statut familial", i.status as string | undefined);
+      pushStr(rows, "Statut familial", localizeStatus(i.status));
       break;
     case "income_tax":
     case "source_tax":
       pushStr(rows, "Canton", i.canton ? cantonName(String(i.canton)) : undefined);
       pushIfChf(rows, "Revenu brut", i.grossIncome ?? i.income);
-      pushStr(rows, "Statut familial", i.status as string | undefined);
+      pushStr(rows, "Statut familial", localizeStatus(i.status));
       break;
     case "retirement":
       pushIfChf(rows, "Capital LPP", i.capital);
@@ -331,7 +354,7 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
       break;
     case "cross_border":
       pushIfChf(rows, "Salaire annuel", i.annualSalary);
-      pushStr(rows, "Régime", i.regime as string | undefined);
+      pushStr(rows, "Régime", localizeRegime(i.regime));
       break;
     case "tou":
       pushIfChf(rows, "Salaire brut", i.grossIncome);
@@ -560,7 +583,7 @@ function drawComparisonPage(
   pension: ClientPension | null,
   _assets: ClientAssets | null,
 ) {
-  pdf.section("Synthèse globale — Situation avant et après optimisation");
+  pdf.section("Synthèse globale · Situation avant et après optimisation");
   pdf.paragraph(
     "Ce tableau agrège les résultats de l'ensemble des simulations sélectionnées et chiffre l'impact global des optimisations identifiées.",
     { muted: true, italic: true },
@@ -706,7 +729,7 @@ function drawConclusionPage(pdf: ReportPdf, entries: HistoryEntry[]) {
       if (g.type === "none") continue;
       const amount =
         g.type === "annual" ? `${formatCHF(g.amount)} / an` : formatCHF(g.amount);
-      pdf.paragraph(`${n}. ${g.label} — Gain estimé : ${amount}.${g.details ? ` ${g.details}.` : ""}`);
+      pdf.paragraph(`${n}. ${g.label} · Gain estimé : ${amount}.${g.details ? ` ${g.details}.` : ""}`);
       n++;
     }
   }
