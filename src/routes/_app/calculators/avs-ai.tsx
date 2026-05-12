@@ -27,6 +27,7 @@ import {
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useT } from "@/contexts/LanguageContext";
 
 const searchSchema = z.object({
