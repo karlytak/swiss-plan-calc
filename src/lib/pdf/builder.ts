@@ -265,7 +265,7 @@ export class ReportPdf {
     doc.setFont("helvetica", "normal");
     doc.setFontSize(7.5);
     doc.setTextColor(...this.muted);
-    doc.text("RAPPORT", rightX, zoneTop + 4, { align: "right" });
+    doc.text(t("pdf.chrome.report", undefined, "RAPPORT"), rightX, zoneTop + 4, { align: "right" });
     doc.setFont("helvetica", "bold");
     doc.setFontSize(13);
     doc.setTextColor(...this.primary);
