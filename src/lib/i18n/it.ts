@@ -1533,4 +1533,73 @@ export const it: Record<string, string> = {
   "calc.lpp.search_tip": "Averi mancanti? Ricerca gratuita presso la Centrale 2° pilastro:",
   "calc.lpp.search_tip_cta": "sfbvg.ch",
 
+  // === PDF · cromo (intestazione, banner, piè di pagina) ===
+  "pdf.chrome.scales": "TARIFFE 2026",
+  "pdf.chrome.report": "RAPPORTO",
+  "pdf.banner.current": "SITUAZIONE ATTUALE",
+  "pdf.banner.projection": "PROIEZIONE",
+  "pdf.footer.default_note":
+    "Documento di lavoro · calcoli basati sulle tariffe 2026 e sui dati inseriti.",
+  "pdf.footer.page": "Pagina {current} / {total}",
+
+  // === PDF · titoli dei rapporti ===
+  "pdf.income.title": "Rapporto imposta sul reddito e sulla sostanza",
+  "pdf.income.subtitle": "Cantone di {canton} · tariffe 2026",
+  "pdf.source.title": "Imposta alla fonte · simulazione",
+  "pdf.source.subtitle": "Cantone {canton} · tariffa {scale}",
+  "pdf.lpp.title": "Previdenza professionale (LPP) · proiezione completa",
+  "pdf.lpp.subtitle": "Capitale e riscatti · orizzonte {age} anni",
+  "pdf.pillar3a.title": "Pilastro 3a · strategia completa",
+  "pdf.pillar3a.subtitle": "Contributo, proiezione e prelievo scaglionato · {canton}",
+  "pdf.retirement.title": "Rendita o capitale? · Decisione pensionamento",
+  "pdf.retirement.subtitle": "Capitale LPP di {capital} · {canton}",
+  "pdf.canton.title": "Comparatore cantonale · Carico fiscale 2026",
+  "pdf.cross_border.title": "Frontaliere · Simulazione fiscale transfrontaliera",
+  "pdf.tou.title": "TOU · Tassazione ordinaria ulteriore",
+  "pdf.tou.subtitle": "Quasi-residente · {canton}",
+  "pdf.vested.title": "Libero passaggio · Strategie d'investimento",
+  "pdf.vested.subtitle": "Capitale {capital} · orizzonte {years} anni · {canton}",
+  "pdf.director.title": "Comparatore dirigente · Salario / Dividendi / Riserve",
+  "pdf.director.subtitle": "Società {company} · dirigente {director} · utile {profit}",
+
+  // === PDF · sezioni comuni ===
+  "pdf.section.summary": "Sintesi",
+  "pdf.section.assumptions": "Ipotesi adottate",
+  "pdf.section.recommendation": "Raccomandazione",
+  "pdf.section.method": "Metodologia & avvertenze",
+
+  // === PDF · comparatore dirigente ===
+  "pdf.director.section.params": "Parametri inseriti",
+  "pdf.director.section.compare": "Confronto delle strategie",
+  "pdf.director.section.reco": "Raccomandazione quantificata",
+  "pdf.director.section.legal": "Avvertenze legali",
+  "pdf.director.intro":
+    "Questo rapporto confronta diverse strategie di ripartizione dell'utile annuo di una società tra salario, dividendi e riserve, per identificare l'ottimale per il dirigente e l'azienda secondo le tariffe fiscali 2026.",
+  "pdf.director.kpi.profit": "Utile da ripartire",
+  "pdf.director.kpi.canton_company": "Cantone società",
+  "pdf.director.kpi.canton_director": "Cantone dirigente",
+  "pdf.director.kpi.civil_status": "Stato civile",
+  "pdf.director.kpi.age": "Età dirigente",
+  "pdf.director.kpi.lpp": "Piano LPP",
+  "pdf.director.kpi.qualified": "Partecipazione qualificata",
+  "pdf.director.kpi.reserve": "Riserva obiettivo / anno",
+  "pdf.director.col.strategy": "Strategia",
+  "pdf.director.col.salary": "Salario lordo",
+  "pdf.director.col.salary_cost": "Costo totale società",
+  "pdf.director.col.corp_tax": "Imposta società",
+  "pdf.director.col.dividends": "Dividendi",
+  "pdf.director.col.income_tax": "Imposta sul reddito",
+  "pdf.director.col.social": "Contributi sociali",
+  "pdf.director.col.reserves": "Riserve",
+  "pdf.director.col.net": "Netto dirigente",
+  "pdf.director.reco.headline":
+    "Strategia raccomandata: {label}. Netto dirigente {net}, oneri totali {charges}.",
+  "pdf.director.reco.gain_year": "Guadagno netto annuo dirigente",
+  "pdf.director.reco.gain_10y": "Guadagno cumulato su 10 anni",
+  "pdf.director.reco.vs_current": "Rispetto alla situazione attuale.",
+  "pdf.director.legal":
+    "Avvertenza: questo confronto si basa sulle tariffe 2026 e sui dati inseriti. Verificare la natura «usuale» del salario per il settore (teoria del dividendo dissimulato, art. 58 CO), le perdite fiscali riportate, la struttura di gruppo e i piani previdenziali specifici (1e, sovraobbligatorio). Una sotto-remunerazione salariale può essere riqualificata da AVS e fisco.",
+  "pdf.director.fname": "comparatore_dirigente",
+
+  "pdf.export": "Esporta in PDF",
 };

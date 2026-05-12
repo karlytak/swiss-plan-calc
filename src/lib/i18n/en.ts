@@ -1533,4 +1533,73 @@ export const en: Record<string, string> = {
   "calc.lpp.search_tip": "Missing assets? Free search at the 2nd pillar Central Office:",
   "calc.lpp.search_tip_cta": "sfbvg.ch",
 
+  // === PDF · chrome (header, banners, footer) ===
+  "pdf.chrome.scales": "2026 SCALES",
+  "pdf.chrome.report": "REPORT",
+  "pdf.banner.current": "CURRENT SITUATION",
+  "pdf.banner.projection": "PROJECTION",
+  "pdf.footer.default_note":
+    "Working document · calculations based on the 2026 tax scales and the data entered.",
+  "pdf.footer.page": "Page {current} / {total}",
+
+  // === PDF · report titles ===
+  "pdf.income.title": "Income & Wealth Tax Report",
+  "pdf.income.subtitle": "Canton of {canton} · 2026 scales",
+  "pdf.source.title": "Withholding Tax · Simulation",
+  "pdf.source.subtitle": "Canton {canton} · scale {scale}",
+  "pdf.lpp.title": "Occupational Pension (BVG) · Full Projection",
+  "pdf.lpp.subtitle": "Capital & buybacks · {age}-year horizon",
+  "pdf.pillar3a.title": "Pillar 3a · Full Strategy",
+  "pdf.pillar3a.subtitle": "Contribution, projection and staggered withdrawal · {canton}",
+  "pdf.retirement.title": "Annuity or Lump Sum? · Retirement Decision",
+  "pdf.retirement.subtitle": "BVG capital of {capital} · {canton}",
+  "pdf.canton.title": "Cantonal Comparator · 2026 Tax Burden",
+  "pdf.cross_border.title": "Cross-border Worker · Tax Simulation",
+  "pdf.tou.title": "Subsequent Ordinary Taxation (TOU)",
+  "pdf.tou.subtitle": "Quasi-resident · {canton}",
+  "pdf.vested.title": "Vested Benefits · Investment Strategies",
+  "pdf.vested.subtitle": "Capital {capital} · {years}-year horizon · {canton}",
+  "pdf.director.title": "Director Comparator · Salary / Dividends / Reserves",
+  "pdf.director.subtitle": "Company {company} · director {director} · profit {profit}",
+
+  // === PDF · common sections ===
+  "pdf.section.summary": "Summary",
+  "pdf.section.assumptions": "Assumptions",
+  "pdf.section.recommendation": "Recommendation",
+  "pdf.section.method": "Methodology & disclaimers",
+
+  // === PDF · director comparator ===
+  "pdf.director.section.params": "Input parameters",
+  "pdf.director.section.compare": "Strategy comparison",
+  "pdf.director.section.reco": "Quantified recommendation",
+  "pdf.director.section.legal": "Legal disclaimers",
+  "pdf.director.intro":
+    "This report compares several strategies for splitting a company's annual profit between salary, dividends and reserves, to identify the optimum for the director and the company under the 2026 tax scales.",
+  "pdf.director.kpi.profit": "Profit to allocate",
+  "pdf.director.kpi.canton_company": "Company canton",
+  "pdf.director.kpi.canton_director": "Director canton",
+  "pdf.director.kpi.civil_status": "Civil status",
+  "pdf.director.kpi.age": "Director age",
+  "pdf.director.kpi.lpp": "BVG plan",
+  "pdf.director.kpi.qualified": "Qualified holding",
+  "pdf.director.kpi.reserve": "Target reserve / year",
+  "pdf.director.col.strategy": "Strategy",
+  "pdf.director.col.salary": "Gross salary",
+  "pdf.director.col.salary_cost": "Total company cost",
+  "pdf.director.col.corp_tax": "Corporate tax",
+  "pdf.director.col.dividends": "Dividends",
+  "pdf.director.col.income_tax": "Income tax",
+  "pdf.director.col.social": "Social contributions",
+  "pdf.director.col.reserves": "Reserves",
+  "pdf.director.col.net": "Director net",
+  "pdf.director.reco.headline":
+    "Recommended strategy: {label}. Director net {net}, total charges {charges}.",
+  "pdf.director.reco.gain_year": "Annual net gain (director)",
+  "pdf.director.reco.gain_10y": "Cumulative gain over 10 years",
+  "pdf.director.reco.vs_current": "Compared with the current situation.",
+  "pdf.director.legal":
+    "Disclaimer: this comparison is based on the 2026 scales and the assumptions entered. Verify the industry-customary nature of the salary (hidden-dividend doctrine, Art. 58 CO), any tax-loss carryforwards, the group structure and any specific pension plans (1e, supplementary). An understated salary may be reclassified by AHV/AVS and the tax authority.",
+  "pdf.director.fname": "director_comparator",
+
+  "pdf.export": "Export as PDF",
 };
