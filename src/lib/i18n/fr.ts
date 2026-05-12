@@ -489,6 +489,11 @@ export const fr: Record<string, string> = {
   "history.kind.pillar3a": "Pilier 3a",
   "history.kind.retirement": "Rente vs capital",
   "history.kind.canton_compare": "Comparateur cantonal",
+  "history.kind.avs_ai": "Rente AVS/AI (1er pilier)",
+  "history.kind.vested_benefits": "Libre passage",
+  "history.kind.cross_border": "Frontaliers",
+  "history.kind.tou": "TOU / Quasi-résident",
+  "history.kind.director_compensation": "Rémunération dirigeant",
 
   // === LOT 1 — Calculateurs prévoyance (AVS/AHV · LPP/BVG · 3a · libre passage) ===
   "pension.canton": "Canton",
