@@ -245,7 +245,26 @@ function DirectorCompensationCalc() {
     <TooltipProvider delayDuration={150}>
       <div className="space-y-6">
         <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.dir.guide.title")} />
-        <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
+        <div className="flex justify-end gap-2">
+          <SaveSimulationButton
+            kind="director_compensation"
+            inputs={{ ...inputs, hasCurrent, current, custom }}
+            summary={{
+              recommendedLabel: recommendation.best.strategy.label,
+              recommendedDirectorNet: recommendation.best.directorNet,
+              recommendedTotalCharges: recommendation.best.totalTaxAndCharges,
+              currentDirectorNet: currentResult?.directorNet ?? 0,
+              gainAnnual: currentResult
+                ? Math.max(0, recommendation.best.directorNet - currentResult.directorNet)
+                : 0,
+              totalProfit: inputs.totalProfit,
+              companyCanton: inputs.companyCanton,
+              directorCanton: inputs.directorCanton,
+            }}
+            defaultTitle={`Dirigeant ${inputs.companyCanton} · profit ${inputs.totalProfit} CHF`}
+          />
+          <GuideToggleButton onClick={() => setGuideOpen(true)} />
+        </div>
         {(linkedClient || linkedCompany) && (
           <LinkBanner client={linkedClient} company={linkedCompany} />
         )}
