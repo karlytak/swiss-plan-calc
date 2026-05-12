@@ -158,7 +158,22 @@ function CrossBorderCalc() {
       </div>
 
       <div className="space-y-4 md:col-span-2">
-        <div className="flex justify-end">
+        <div className="flex justify-end gap-2">
+          <SaveSimulationButton
+            kind="cross_border"
+            inputs={form}
+            summary={{
+              regime: result.regime,
+              regimeLabel: result.regimeLabel,
+              totalTax: result.totalTax,
+              netAnnual: result.netAnnual,
+              totalRate: result.totalRate,
+              swissTax: result.swissTax,
+              foreignTax: result.foreignTax,
+              alternativeDelta: result.alternative?.delta ?? 0,
+            }}
+            defaultTitle={`Frontalier ${form.workCanton} · ${form.grossAnnualSalary} CHF`}
+          />
           <ExportPdfButton
             onClick={() => exportCrossBorderPdf({ input: form, result })}
           />
