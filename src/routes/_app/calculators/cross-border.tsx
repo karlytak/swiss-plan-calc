@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Globe, Info, ArrowRightLeft } from "lucide-react";
 import { CalcCard, MoneyTile, PctTile, Row } from "@/components/calculators/CalcUI";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { formatCHF } from "@/lib/format";
 import {
   computeCrossBorder,
