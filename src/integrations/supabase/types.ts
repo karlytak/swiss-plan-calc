@@ -762,6 +762,11 @@ export type Database = {
         | "retirement"
         | "canton_compare"
         | "investment_compare"
+        | "avs_ai"
+        | "vested_benefits"
+        | "cross_border"
+        | "tou"
+        | "director_compensation"
       tax_status:
         | "resident"
         | "source_taxed"
@@ -947,6 +952,11 @@ export const Constants = {
         "retirement",
         "canton_compare",
         "investment_compare",
+        "avs_ai",
+        "vested_benefits",
+        "cross_border",
+        "tou",
+        "director_compensation",
       ],
       tax_status: [
         "resident",
