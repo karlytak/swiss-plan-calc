@@ -688,13 +688,6 @@ function drawGainHighlight(pdf: ReportPdf, totals: Totals) {
   pdf.cursorY = y + h + 4;
 }
 
-// ProtectedensureSpace appelé en interne — exposer via cast
-declare module "./builder" {
-  // augmenter typing pour autoriser l'appel ensureSpace public côté utilitaires
-  interface ReportPdf {
-    ensureSpace(needed: number): void;
-  }
-}
 
 // ============================================================================
 // CONCLUSION
