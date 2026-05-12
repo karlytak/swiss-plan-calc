@@ -3,6 +3,8 @@
 import jsPDF from "jspdf";
 import autoTable, { type RowInput } from "jspdf-autotable";
 import { formatCHF } from "@/lib/format";
+import { t } from "@/lib/i18n";
+import { getActiveLocale } from "@/lib/i18n/format";
 
 // ---------------------------------------------------------------------------
 // Sanitisation Unicode -> WinAnsi (CP1252) pour la police Helvetica par défaut
@@ -16,6 +18,28 @@ const PDF_CHAR_MAP: Record<string, string> = {
   "\u202F": "'",
   "\u2009": "'",
   "\u2007": "'",
+  // tirets typographiques -> tiret ASCII
+  "\u2010": "-", // hyphen
+  "\u2011": "-", // non-breaking hyphen
+  "\u2012": "-", // figure dash
+  "\u2013": "-", // en-dash
+  "\u2014": "-", // em-dash
+  "\u2015": "-", // horizontal bar
+  "\u2212": "-", // minus sign
+  // guillemets typographiques -> ASCII
+  "\u201C": '"',
+  "\u201D": '"',
+  "\u201E": '"',
+  "\u201F": '"',
+  "\u2018": "'",
+  "\u2019": "'",
+  "\u201A": "'",
+  "\u201B": "'",
+  // ellipses
+  "\u2026": "...",
+  // marques diverses
+  "\u00AB": '"', // « guillemet français ouvrant -> "
+  "\u00BB": '"', // » guillemet français fermant -> "
   // grec (statistiques) -> texte
   "σ": "sigma",
   "Σ": "Sigma",
