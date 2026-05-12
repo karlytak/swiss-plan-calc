@@ -270,6 +270,7 @@ export class ReportPdf {
   }
 
   section(title: string) {
+    title = sanitizePdfText(title);
     this.ensureSpace(14);
     const { doc, margin, primary } = this;
     // Petit carré couleur primaire à gauche du titre
@@ -288,6 +289,7 @@ export class ReportPdf {
   }
 
   paragraph(text: string, opts?: { italic?: boolean; muted?: boolean }) {
+    text = sanitizePdfText(text);
     const { doc, margin, contentWidth } = this;
     doc.setFont("helvetica", opts?.italic ? "italic" : "normal");
     doc.setFontSize(10);
@@ -300,6 +302,7 @@ export class ReportPdf {
   }
 
   callout(text: string, tone: "info" | "success" | "warning" = "info") {
+    text = sanitizePdfText(text);
     const colors = {
       info: { bg: [239, 246, 255] as [number, number, number], border: this.primary },
       success: { bg: [236, 253, 245] as [number, number, number], border: [16, 185, 129] as [number, number, number] },
@@ -322,16 +325,41 @@ export class ReportPdf {
   }
 
   kvTable(rows: Array<[string, string]>) {
+    const safeRows = rows.map(([k, v]) => [sanitizeCell(k), sanitizeCell(v)] as [string, string]);
     autoTable(this.doc, {
       startY: this.cursorY,
       margin: { left: this.margin, right: this.margin },
       head: [],
-      body: rows as RowInput[],
+      body: safeRows as RowInput[],
       theme: "plain",
       styles: { fontSize: 10, cellPadding: { top: 1.5, bottom: 1.5, left: 0, right: 0 } },
       columnStyles: {
         0: { textColor: this.muted, cellWidth: this.contentWidth * 0.55 },
         1: { halign: "right", fontStyle: "bold", textColor: this.ink },
+      },
+      didDrawPage: () => this.drawFooter(),
+    });
+    this.cursorY = (this.doc as unknown as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 4;
+    return this;
+  }
+
+  table(head: string[], body: Array<Array<string | number>>, opts?: { highlightLast?: boolean }) {
+    const safeHead = head.map(sanitizeCell);
+    const safeBody = body.map((row) => row.map(sanitizeCell));
+    autoTable(this.doc, {
+      startY: this.cursorY,
+      margin: { left: this.margin, right: this.margin },
+      head: [safeHead],
+      body: safeBody as RowInput[],
+      theme: "striped",
+      headStyles: { fillColor: this.primary, textColor: 255, fontStyle: "bold", fontSize: 10 },
+      styles: { fontSize: 9.5, cellPadding: 2 },
+      alternateRowStyles: { fillColor: [250, 251, 252] },
+      didParseCell: (data) => {
+        if (opts?.highlightLast && data.section === "body" && data.row.index === body.length - 1) {
+          data.cell.styles.fontStyle = "bold";
+          data.cell.styles.fillColor = [219, 234, 254];
+        }
       },
       didDrawPage: () => this.drawFooter(),
     });
