@@ -483,6 +483,11 @@ export const en: Record<string, string> = {
   "history.kind.pillar3a": "Pillar 3a",
   "history.kind.retirement": "Pension vs lump-sum",
   "history.kind.canton_compare": "Cantonal comparator",
+  "history.kind.avs_ai": "OASI/DI pension (1st pillar)",
+  "history.kind.vested_benefits": "Vested benefits",
+  "history.kind.cross_border": "Cross-border workers",
+  "history.kind.tou": "Subsequent ordinary assessment (TOU)",
+  "history.kind.director_compensation": "Director compensation",
 
   // === LOT 1 — Calculateurs prévoyance (AVS/AHV · LPP/BVG · 3a · libre passage) ===
   "pension.canton": "Canton",
