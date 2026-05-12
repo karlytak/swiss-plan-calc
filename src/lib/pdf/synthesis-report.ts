@@ -37,6 +37,29 @@ const str = (v: unknown): string | undefined => {
   return undefined;
 };
 
+const STATUS_FR: Record<string, string> = {
+  single: "Célibataire",
+  married: "Marié·e",
+  registered_partnership: "Partenariat enregistré",
+  single_with_children: "Famille monoparentale",
+  divorced: "Divorcé·e",
+  widowed: "Veuf / Veuve",
+  separated: "Séparé·e",
+};
+const REGIME_FR: Record<string, string> = {
+  fr_1983: "Frontalier français (accord 1983)",
+  ge: "Frontalier Genève",
+  tou: "TOU (taxation ordinaire ultérieure)",
+};
+const localizeStatus = (v: unknown) => {
+  const k = typeof v === "string" ? v : "";
+  return STATUS_FR[k] ?? (k || undefined);
+};
+const localizeRegime = (v: unknown) => {
+  const k = typeof v === "string" ? v : "";
+  return REGIME_FR[k] ?? (k || undefined);
+};
+
 // ============================================================================
 
 export interface SynthesisReportArgs {
