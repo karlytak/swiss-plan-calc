@@ -4,6 +4,82 @@ import jsPDF from "jspdf";
 import autoTable, { type RowInput } from "jspdf-autotable";
 import { formatCHF } from "@/lib/format";
 
+// ---------------------------------------------------------------------------
+// Sanitisation Unicode -> WinAnsi (CP1252) pour la police Helvetica par défaut
+// de jsPDF. Tout caractère non supporté provoque un rendu erratique :
+// soit un glyphe absent (Ã pour σ), soit un cascade d'espaces parasites
+// dans la même cellule de tableau (« C H F  0 »). On remplace donc en amont
+// les caractères problématiques par leur équivalent ASCII / texte court.
+const PDF_CHAR_MAP: Record<string, string> = {
+  // séparateurs invisibles -> apostrophe suisse
+  "\u00A0": " ",
+  "\u202F": "'",
+  "\u2009": "'",
+  "\u2007": "'",
+  // grec (statistiques) -> texte
+  "σ": "sigma",
+  "Σ": "Sigma",
+  "α": "alpha",
+  "β": "beta",
+  "γ": "gamma",
+  "δ": "delta",
+  "π": "pi",
+  "λ": "lambda",
+  "μ": "µ", // µ existe en WinAnsi (0xB5)
+  "Δ": "Delta",
+  "Ω": "Ohm",
+  // mathématiques absents de WinAnsi
+  "→": "->",
+  "←": "<-",
+  "↔": "<->",
+  "⇒": "=>",
+  "≥": ">=",
+  "≤": "<=",
+  "≠": "!=",
+  "≈": "~",
+  "√": "racine",
+  "∞": "inf",
+  "✓": "OK",
+  "✗": "X",
+  "•": "·", // · existe en WinAnsi (0xB7)
+  "⁰": "0",
+  "¹": "1",
+  // ² ³ existent (0xB2 0xB3) -> on garde
+  "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+  "₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4",
+  "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9",
+};
+
+/**
+ * Convertit un texte arbitraire en chaîne sûre pour jsPDF (Helvetica WinAnsi).
+ * - Remplace les caractères non WinAnsi par un équivalent ASCII / texte.
+ * - Tout codepoint > 0xFF restant est remplacé par "?" pour éviter les Ã.
+ */
+export function sanitizePdfText(input: unknown): string {
+  if (input === null || input === undefined) return "";
+  const raw = typeof input === "string" ? input : String(input);
+  let out = "";
+  for (const ch of raw) {
+    const mapped = PDF_CHAR_MAP[ch];
+    if (mapped !== undefined) {
+      out += mapped;
+      continue;
+    }
+    const cp = ch.codePointAt(0) ?? 0;
+    // ASCII + Latin-1 supplément couvrent l'essentiel de WinAnsi
+    if (cp <= 0xff) {
+      out += ch;
+    } else {
+      out += "?";
+    }
+  }
+  return out;
+}
+
+function sanitizeCell(v: unknown): string {
+  return sanitizePdfText(v);
+}
+
 export interface BrokerHeader {
   brokerName?: string;
   brokerEmail?: string;
