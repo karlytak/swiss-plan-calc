@@ -340,10 +340,46 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
       pushIfPct(rows, "Taux de conversion", i.conversionRate);
       pushIf(rows, "Âge", i.age);
       break;
-    case "investment_compare":
-      pushIfChf(rows, "Capital initial", i.initialCapital);
-      pushIf(rows, "Horizon (années)", i.years);
+    case "investment_compare": {
+      const a = (i.a ?? {}) as Record<string, unknown>;
+      const b = (i.b ?? {}) as Record<string, unknown>;
+      const nameA = str(a.name) || "Investissement A";
+      const nameB = str(b.name) || "Investissement B";
+      const freqLabel = (f: unknown) =>
+        f === "monthly" ? "Mensuel" : f === "annual" ? "Annuel" : "Aucun";
+      const typeLabel = (t: unknown) => {
+        switch (t) {
+          case "life_insurance": return "Assurance-vie";
+          case "fund": return "Fonds de placement";
+          case "etf": return "ETF";
+          case "savings": return "Épargne / dépôt";
+          case "pillar_3a": return "3e pilier A";
+          case "pillar_3b": return "3e pilier B";
+          default: return "Autre";
+        }
+      };
+      const modeLabel = (m: unknown) => (m === "simple" ? "Intérêts simples" : "Intérêts composés");
+      pushStr(rows, "Hypothèse A", nameA);
+      pushStr(rows, "Hypothèse B", nameB);
+      pushStr(rows, `Type · ${nameA}`, typeLabel(a.type));
+      pushStr(rows, `Type · ${nameB}`, typeLabel(b.type));
+      pushIf(rows, "Horizon (années)", a.durationYears ?? b.durationYears);
+      pushIfChf(rows, `Capital initial · ${nameA}`, a.initialCapital);
+      pushIfChf(rows, `Capital initial · ${nameB}`, b.initialCapital);
+      pushStr(rows, `Fréquence versement · ${nameA}`, freqLabel(a.contributionFrequency));
+      pushStr(rows, `Fréquence versement · ${nameB}`, freqLabel(b.contributionFrequency));
+      pushIfChf(rows, `Versement périodique · ${nameA}`, a.periodicContribution);
+      pushIfChf(rows, `Versement périodique · ${nameB}`, b.periodicContribution);
+      pushIfPct(rows, `Rendement brut · ${nameA}`, a.grossReturnRate);
+      pushIfPct(rows, `Rendement brut · ${nameB}`, b.grossReturnRate);
+      pushIfPct(rows, `Frais annuels · ${nameA}`, a.annualFeeRate);
+      pushIfPct(rows, `Frais annuels · ${nameB}`, b.annualFeeRate);
+      pushIfPct(rows, `Imposition à la sortie · ${nameA}`, a.exitTaxRate);
+      pushIfPct(rows, `Imposition à la sortie · ${nameB}`, b.exitTaxRate);
+      pushStr(rows, `Mode de capitalisation · ${nameA}`, modeLabel(a.interestMode));
+      pushStr(rows, `Mode de capitalisation · ${nameB}`, modeLabel(b.interestMode));
       break;
+    }
     case "avs_ai":
       pushIf(rows, "Années cotisées", i.contributionYears);
       pushIfChf(rows, "Revenu annuel moyen", i.averageIncome);
@@ -437,10 +473,20 @@ function formatMetrics(
       if (num(s.currentDirectorNet)) out.push({ label: "Net dirigeant actuel", value: num(s.currentDirectorNet) });
       if (num(s.gainAnnual)) out.push({ label: "Gain annuel", value: num(s.gainAnnual), tone: "primary" });
       break;
-    case "investment_compare":
+    case "investment_compare": {
+      const i = (entry.inputs ?? {}) as Record<string, unknown>;
+      const a = (i.a ?? {}) as Record<string, unknown>;
+      const b = (i.b ?? {}) as Record<string, unknown>;
+      const nameA = str(a.name) || "A";
+      const nameB = str(b.name) || "B";
+      if (num(s.aFinalNet)) out.push({ label: `Capital net · ${nameA}`, value: num(s.aFinalNet) });
+      if (num(s.bFinalNet)) out.push({ label: `Capital net · ${nameB}`, value: num(s.bFinalNet) });
       if (num(s.netDifference)) out.push({ label: "Différence nette", value: num(s.netDifference), tone: "primary" });
-      if (str(s.winner)) out.push({ label: "Avantage", value: str(s.winner)! });
+      if (num(s.pctAdvantage)) out.push({ label: "Avantage relatif", value: formatPct(num(s.pctAdvantage)), tone: "success" });
+      const w = str(s.winner);
+      if (w && w !== "tie") out.push({ label: "Stratégie gagnante", value: w === "a" ? nameA : nameB, tone: "success" });
       break;
+    }
   }
   return out;
 }
@@ -471,6 +517,19 @@ function drawSimpleChart(pdf: ReportPdf, entry: HistoryEntry) {
           right: { label: "Optimisé", value: num(s.recommendedDirectorNet) },
         };
       break;
+    case "investment_compare": {
+      const i = (entry.inputs ?? {}) as Record<string, unknown>;
+      const a = (i.a ?? {}) as Record<string, unknown>;
+      const b = (i.b ?? {}) as Record<string, unknown>;
+      const aNet = num(s.aFinalNet);
+      const bNet = num(s.bFinalNet);
+      if (aNet && bNet)
+        pair = {
+          left: { label: str(a.name) || "A", value: aNet },
+          right: { label: str(b.name) || "B", value: bNet },
+        };
+      break;
+    }
     case "cross_border":
       if (num(s.currentTax) && num(s.alternativeTax))
         pair = {
@@ -562,10 +621,31 @@ function buildComment(entry: HistoryEntry): string | null {
       const diff = Math.max(0, r - sec);
       return `Le scénario recommandé projette un capital de ${formatCHF(r)} à la retraite, contre ${formatCHF(sec)} pour la stratégie de sécurité, soit un gain potentiel de ${formatCHF(diff)} (hors fiscalité au retrait).`;
     }
+    case "investment_compare": {
+      const i = (entry.inputs ?? {}) as Record<string, unknown>;
+      const a = (i.a ?? {}) as Record<string, unknown>;
+      const b = (i.b ?? {}) as Record<string, unknown>;
+      const nameA = str(a.name) || "Investissement A";
+      const nameB = str(b.name) || "Investissement B";
+      const years = num(a.durationYears) || num(b.durationYears);
+      const diff = num(s.netDifference);
+      const pct = num(s.pctAdvantage);
+      const w = str(s.winner);
+      const aNet = num(s.aFinalNet);
+      const bNet = num(s.bFinalNet);
+      if (!diff || !w || w === "tie") {
+        return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, les deux placements (${nameA} et ${nameB}) aboutissent à un capital net comparable. La décision se jouera donc sur la liquidité, la fiscalité personnelle et l'aversion au risque.${entry.note ? ` ${entry.note.trim()}` : ""}`;
+      }
+      const winnerName = w === "a" ? nameA : nameB;
+      const loserName = w === "a" ? nameB : nameA;
+      const winnerNet = w === "a" ? aNet : bNet;
+      const loserNet = w === "a" ? bNet : aNet;
+      const pctTxt = pct ? ` soit +${formatPct(pct)}` : "";
+      return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, ${winnerName} dégage un capital net de ${formatCHF(winnerNet)} contre ${formatCHF(loserNet)} pour ${loserName}, soit un avantage net de ${formatCHF(diff)}${pctTxt} en faveur de ${winnerName}. Cette comparaison intègre les frais de gestion annuels et l'imposition à la sortie ; elle est exprimée en valeurs nominales (hors inflation).${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
     case "cross_border":
     case "tou":
     case "avs_ai":
-    case "investment_compare":
     case "income_tax":
     case "source_tax":
       return entry.note?.trim() || null;
