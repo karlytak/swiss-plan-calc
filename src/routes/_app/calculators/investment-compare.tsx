@@ -1,5 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { z } from "zod";
+import { zodValidator, fallback } from "@tanstack/zod-adapter";
+import { usePrefillFromClient } from "@/hooks/usePrefillFromClient";
+import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import {
   LineChart,
   Line as RLine,
@@ -40,7 +44,12 @@ import {
   type InvestmentType,
 } from "@/lib/investment-compare";
 
+const searchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/calculators/investment-compare")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Comparateur d'investissements · SwissBroker Pro" }] }),
   component: InvestmentCompareCalc,
 });
@@ -73,9 +82,27 @@ const DEFAULT_B: InvestmentInput = {
 
 function InvestmentCompareCalc() {
   const t = useT();
+  const { clientId } = Route.useSearch();
+  const { client, prefill } = usePrefillFromClient(clientId, "investment-compare");
   const [a, setA] = useState<InvestmentInput>({ ...DEFAULT_A, name: t("calc.invcompare.default_a") });
   const [b, setB] = useState<InvestmentInput>({ ...DEFAULT_B, name: t("calc.invcompare.default_b") });
   const [guideOpen, setGuideOpen] = useState(false);
+
+  // Hydratation unique de l'hypothèse A à partir de la fiche client.
+  const hydratedRef = useRef(false);
+  useEffect(() => {
+    if (!prefill || hydratedRef.current) return;
+    setA((prev) => ({
+      ...prev,
+      ...(prefill.name ? { name: prefill.name } : {}),
+      ...(prefill.initialCapital !== undefined ? { initialCapital: prefill.initialCapital } : {}),
+      ...(prefill.durationYears !== undefined ? { durationYears: prefill.durationYears } : {}),
+    }));
+    setB((prev) =>
+      prefill.durationYears !== undefined ? { ...prev, durationYears: prefill.durationYears } : prev,
+    );
+    hydratedRef.current = true;
+  }, [prefill]);
 
   const comparison = useMemo(() => compareInvestments(a, b), [a, b]);
 
@@ -122,6 +149,7 @@ function InvestmentCompareCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <GuideMode
         open={guideOpen}
         onClose={() => setGuideOpen(false)}
