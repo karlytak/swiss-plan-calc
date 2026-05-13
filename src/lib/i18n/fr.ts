@@ -1071,7 +1071,7 @@ export const fr: Record<string, string> = {
   "calc.canton_compare.profile.title": "Profil à comparer",
   "calc.canton_compare.profile.desc.lump": "Impôt unique sur prestation en capital de {amount} (1/5 du barème fédéral + cantonal).",
   "calc.canton_compare.profile.desc.annual": "Charge fiscale annuelle simulée pour le profil renseigné.",
-  "calc.canton_compare.field.gross": "Salaire brut (CHF)",
+  "calc.canton_compare.field.gross": "Salaire brut total (incl. bonus et autres revenus, CHF)",
   "calc.canton_compare.tip.gross": "Salaire annuel brut soumis au barème cantonal et IFD.",
   "calc.canton_compare.field.civil_status": "Situation civile",
   "calc.canton_compare.tip.civil_status": "Marié = splitting partiel (barème plus favorable). Famille monoparentale = barème spécial.",
