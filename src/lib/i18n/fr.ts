@@ -1066,7 +1066,7 @@ export const fr: Record<string, string> = {
   "calc.canton_compare.mode.annual": "Charge fiscale annuelle",
   "calc.canton_compare.mode.annual.desc": "Situation actuelle : revenu et fortune renseignés.",
   "calc.canton_compare.mode.lump": "Impôt prestation LPP à la retraite",
-  "calc.canton_compare.mode.lump.has_capital": "Capital projeté à 65 ans : {amount}",
+  "calc.canton_compare.mode.lump.has_capital": "Capital projeté à 65 ans (incl. rachats LPP planifiés) : {amount}",
   "calc.canton_compare.mode.lump.no_capital": "Capital LPP projeté indisponible (renseigner LPP dans la fiche).",
   "calc.canton_compare.profile.title": "Profil à comparer",
   "calc.canton_compare.profile.desc.lump": "Impôt unique sur prestation en capital de {amount} (1/5 du barème fédéral + cantonal).",
