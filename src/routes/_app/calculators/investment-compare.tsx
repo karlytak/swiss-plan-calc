@@ -149,6 +149,7 @@ function InvestmentCompareCalc() {
 
   return (
     <div className="space-y-6">
+      {client && <ClientLinkBanner client={client} />}
       <GuideMode
         open={guideOpen}
         onClose={() => setGuideOpen(false)}
