@@ -12,6 +12,7 @@ import type { Client, ClientPension, ClientAssets } from "./types";
 import { ageFromDob, parseChildren } from "./types";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import type { TaxStatusContext, WorkStatusContext } from "@/lib/optimizer";
+import { getTotalGrossIncomeOrUndef } from "./income";
 
 export interface ClientBundle {
   client: Client;
