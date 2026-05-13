@@ -45,6 +45,7 @@ const CHIPS: CalcChip[] = [
   { to: "/calculators/retirement", label: "Rente vs capital", icon: Sun },
   { to: "/calculators/canton-compare", label: "Comparateur cantons", icon: Scale },
   { to: "/calculators/director-compensation", label: "Comparateur dirigeant", icon: TrendingUp },
+  { to: "/calculators/investment-compare", label: "Comparateur d'investissements", icon: LineChart },
   { to: "/calculators/tou", label: "TOU", icon: Calculator },
 ];
 
