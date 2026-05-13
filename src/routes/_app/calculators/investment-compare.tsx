@@ -44,7 +44,12 @@ import {
   type InvestmentType,
 } from "@/lib/investment-compare";
 
+const searchSchema = z.object({
+  clientId: fallback(z.string().uuid().optional(), undefined),
+});
+
 export const Route = createFileRoute("/_app/calculators/investment-compare")({
+  validateSearch: zodValidator(searchSchema),
   head: () => ({ meta: [{ title: "Comparateur d'investissements · SwissBroker Pro" }] }),
   component: InvestmentCompareCalc,
 });
