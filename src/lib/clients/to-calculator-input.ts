@@ -293,6 +293,23 @@ export function toAvsAiInput(b: ClientBundle) {
     spouseAverageAnnualIncome: numOrUndef(b.client.spouse_gross_annual_salary),
   };
 }
+
+/** Comparateur d'investissements · préremplit l'hypothèse A à partir de l'épargne disponible du client. */
+export function toInvestmentCompareInput(b: ClientBundle) {
+  const age = ageFromDob(b.client.date_of_birth);
+  const liquid =
+    Number(b.assets?.bank_accounts ?? 0) + Number(b.assets?.securities ?? 0);
+  const initialCapital = liquid > 0 ? Math.round(liquid) : undefined;
+  const durationYears = age !== null ? Math.max(1, 65 - age) : undefined;
+  const name = `${b.client.first_name ?? ""}`.trim()
+    ? `Situation actuelle · ${b.client.first_name}`
+    : "Situation actuelle";
+  return {
+    name,
+    initialCapital,
+    durationYears,
+  };
+}
 // ──────────────────────────────────────────────────────────────────────────
 
 /** Somme les soldes ("balance" / "amount" / "value") d'un tableau JSONB de comptes. */
