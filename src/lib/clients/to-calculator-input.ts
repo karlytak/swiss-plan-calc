@@ -12,6 +12,7 @@ import type { Client, ClientPension, ClientAssets } from "./types";
 import { ageFromDob, parseChildren } from "./types";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import type { TaxStatusContext, WorkStatusContext } from "@/lib/optimizer";
+import { getTotalGrossIncomeOrUndef } from "./income";
 
 export interface ClientBundle {
   client: Client;
@@ -148,7 +149,7 @@ export function toCrossBorderInput(b: ClientBundle) {
     b.client.civil_status === "registered_partnership";
   return {
     workCanton: b.client.canton ?? undefined,
-    grossAnnualSalary: numOrUndef(b.client.gross_annual_salary),
+    grossAnnualSalary: getTotalGrossIncomeOrUndef(b.client),
     status: (married ? "married" : "single") as "single" | "married",
     children: parseChildren(b.client.children).length,
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),
@@ -160,7 +161,7 @@ export function toTouInput(b: ClientBundle) {
   const base = toIncomeTaxInput(b);
   return {
     ...base,
-    worldwideIncome: numOrUndef(b.client.gross_annual_salary),
+    worldwideIncome: getTotalGrossIncomeOrUndef(b.client),
     isEUEFTAResident: b.client.tax_status === "tou",
   };
 }
@@ -174,7 +175,7 @@ export function toLppInput(b: ClientBundle) {
     confession: mapConfession(b.client),
     currentAge: ageFromDob(b.client.date_of_birth) ?? undefined,
     retirementAge: undefined,
-    grossSalary: numOrUndef(b.client.gross_annual_salary),
+    grossSalary: getTotalGrossIncomeOrUndef(b.client),
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),
     insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
     currentBalance: numOrUndef(b.pension?.lpp_current_balance),
@@ -204,7 +205,7 @@ export function toPillar3aInput(b: ClientBundle) {
   return {
     canton: b.client.canton ?? undefined,
     status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
-    grossSalary: numOrUndef(b.client.gross_annual_salary),
+    grossSalary: getTotalGrossIncomeOrUndef(b.client),
     contribution: numOrUndef(b.pension?.pillar_3a_annual_contribution),
     currentBalance: pillar3aSum > 0 ? pillar3aSum : undefined,
     yearsToRetirement: age !== null ? Math.max(1, 65 - age) : undefined,
@@ -216,15 +217,11 @@ export function toPillar3aInput(b: ClientBundle) {
 export function toCantonCompareInput(b: ClientBundle) {
   // Le formulaire n'a qu'un seul champ "Salaire brut" : on agrège
   // salaire + bonus + autres revenus pour refléter la base imposable totale.
-  const totalIncome =
-    Number(b.client.gross_annual_salary ?? 0) +
-    Number(b.client.bonus ?? 0) +
-    Number(b.client.other_income ?? 0);
   return {
     referenceCanton: b.client.canton ?? undefined,
     status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
     children: parseChildren(b.client.children).length,
-    grossSalary: totalIncome > 0 ? totalIncome : undefined,
+    grossSalary: getTotalGrossIncomeOrUndef(b.client),
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),
     netWealth: computeFortune(b.assets) || undefined,
   };
@@ -257,8 +254,11 @@ export function toAvsAiInput(b: ClientBundle) {
     b.client.civil_status === "married" ||
     b.client.civil_status === "registered_partnership";
   const gender = (b.client.gender as "male" | "female" | "other" | null) ?? undefined;
+  // AVS = revenu soumis à cotisations : salaire + bonus + autres revenus d'activité.
   const avgIncome =
-    Number(b.client.gross_annual_salary ?? 0) + Number(b.client.bonus ?? 0);
+    Number(b.client.gross_annual_salary ?? 0) +
+    Number(b.client.bonus ?? 0) +
+    Number(b.client.other_income ?? 0);
 
   // Référence : âge 65 par défaut, ajusté côté composant via getReferenceAge.
   const retirementYear =
