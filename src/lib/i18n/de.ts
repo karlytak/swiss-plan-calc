@@ -1067,7 +1067,7 @@ export const de: Record<string, string> = {
   "calc.canton_compare.profile.title": "Zu vergleichendes Profil",
   "calc.canton_compare.profile.desc.lump": "Einmalige Steuer auf Kapitalleistung von {amount} (1/5-Tarif Bund + Kanton).",
   "calc.canton_compare.profile.desc.annual": "Simulierte jährliche Steuerbelastung für das erfasste Profil.",
-  "calc.canton_compare.field.gross": "Bruttolohn (CHF)",
+  "calc.canton_compare.field.gross": "Bruttolohn gesamt (inkl. Bonus & weitere Einkünfte, CHF)",
   "calc.canton_compare.tip.gross": "Jährlicher Bruttolohn, dem Kantonstarif und der direkten Bundessteuer unterstellt.",
   "calc.canton_compare.field.civil_status": "Zivilstand",
   "calc.canton_compare.tip.civil_status": "Verheiratet = Teilsplitting (günstigerer Tarif). Alleinerziehend = Sondertarif.",
