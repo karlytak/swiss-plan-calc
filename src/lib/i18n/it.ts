@@ -1060,7 +1060,7 @@ export const it: Record<string, string> = {
   "calc.canton_compare.mode.annual": "Carico fiscale annuo",
   "calc.canton_compare.mode.annual.desc": "Situazione attuale: reddito e sostanza inseriti.",
   "calc.canton_compare.mode.lump": "Imposta su prestazione LPP al pensionamento",
-  "calc.canton_compare.mode.lump.has_capital": "Capitale proiettato a 65 anni: {amount}",
+  "calc.canton_compare.mode.lump.has_capital": "Capitale proiettato a 65 anni (incl. riscatti LPP pianificati): {amount}",
   "calc.canton_compare.mode.lump.no_capital": "Capitale LPP proiettato non disponibile (inserire LPP nella scheda).",
   "calc.canton_compare.profile.title": "Profilo da confrontare",
   "calc.canton_compare.profile.desc.lump": "Imposta unica su prestazione in capitale di {amount} (1/5 della tariffa federale + cantonale).",
