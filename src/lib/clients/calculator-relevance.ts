@@ -15,6 +15,7 @@ export type CalcRoute =
   | "/calculators/canton-compare"
   | "/calculators/avs-ai"
   | "/calculators/tou"
+  | "/calculators/investment-compare"
   | "/calculators/director-compensation";
 
 export interface Relevance {
@@ -73,6 +74,7 @@ export function getCalculatorRelevance(c: Client, route: CalcRoute): Relevance {
     case "/calculators/income-tax":
     case "/calculators/retirement":
     case "/calculators/canton-compare":
+    case "/calculators/investment-compare":
       return OK;
   }
 }
