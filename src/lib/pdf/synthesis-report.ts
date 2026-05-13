@@ -621,10 +621,31 @@ function buildComment(entry: HistoryEntry): string | null {
       const diff = Math.max(0, r - sec);
       return `Le scénario recommandé projette un capital de ${formatCHF(r)} à la retraite, contre ${formatCHF(sec)} pour la stratégie de sécurité, soit un gain potentiel de ${formatCHF(diff)} (hors fiscalité au retrait).`;
     }
+    case "investment_compare": {
+      const i = (entry.inputs ?? {}) as Record<string, unknown>;
+      const a = (i.a ?? {}) as Record<string, unknown>;
+      const b = (i.b ?? {}) as Record<string, unknown>;
+      const nameA = str(a.name) || "Investissement A";
+      const nameB = str(b.name) || "Investissement B";
+      const years = num(a.durationYears) || num(b.durationYears);
+      const diff = num(s.netDifference);
+      const pct = num(s.pctAdvantage);
+      const w = str(s.winner);
+      const aNet = num(s.aFinalNet);
+      const bNet = num(s.bFinalNet);
+      if (!diff || !w || w === "tie") {
+        return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, les deux placements (${nameA} et ${nameB}) aboutissent à un capital net comparable. La décision se jouera donc sur la liquidité, la fiscalité personnelle et l'aversion au risque.${entry.note ? ` ${entry.note.trim()}` : ""}`;
+      }
+      const winnerName = w === "a" ? nameA : nameB;
+      const loserName = w === "a" ? nameB : nameA;
+      const winnerNet = w === "a" ? aNet : bNet;
+      const loserNet = w === "a" ? bNet : aNet;
+      const pctTxt = pct ? ` soit +${formatPct(pct)}` : "";
+      return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, ${winnerName} dégage un capital net de ${formatCHF(winnerNet)} contre ${formatCHF(loserNet)} pour ${loserName}, soit un avantage net de ${formatCHF(diff)}${pctTxt} en faveur de ${winnerName}. Cette comparaison intègre les frais de gestion annuels et l'imposition à la sortie ; elle est exprimée en valeurs nominales (hors inflation).${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
     case "cross_border":
     case "tou":
     case "avs_ai":
-    case "investment_compare":
     case "income_tax":
     case "source_tax":
       return entry.note?.trim() || null;
