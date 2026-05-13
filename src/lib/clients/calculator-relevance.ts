@@ -74,6 +74,7 @@ export function getCalculatorRelevance(c: Client, route: CalcRoute): Relevance {
     case "/calculators/income-tax":
     case "/calculators/retirement":
     case "/calculators/canton-compare":
+    case "/calculators/investment-compare":
       return OK;
   }
 }
