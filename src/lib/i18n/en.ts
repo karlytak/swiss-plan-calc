@@ -1065,7 +1065,7 @@ export const en: Record<string, string> = {
   "calc.canton_compare.profile.title": "Profile to compare",
   "calc.canton_compare.profile.desc.lump": "One-off tax on capital benefit of {amount} (1/5 federal + cantonal scale).",
   "calc.canton_compare.profile.desc.annual": "Simulated annual tax burden for the entered profile.",
-  "calc.canton_compare.field.gross": "Gross salary (CHF)",
+  "calc.canton_compare.field.gross": "Total gross salary (incl. bonus & other income, CHF)",
   "calc.canton_compare.tip.gross": "Annual gross salary subject to cantonal scale and direct federal tax.",
   "calc.canton_compare.field.civil_status": "Civil status",
   "calc.canton_compare.tip.civil_status": "Married = partial splitting (more favourable scale). Single parent = special scale.",
