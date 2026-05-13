@@ -254,8 +254,11 @@ export function toAvsAiInput(b: ClientBundle) {
     b.client.civil_status === "married" ||
     b.client.civil_status === "registered_partnership";
   const gender = (b.client.gender as "male" | "female" | "other" | null) ?? undefined;
+  // AVS = revenu soumis à cotisations : salaire + bonus + autres revenus d'activité.
   const avgIncome =
-    Number(b.client.gross_annual_salary ?? 0) + Number(b.client.bonus ?? 0);
+    Number(b.client.gross_annual_salary ?? 0) +
+    Number(b.client.bonus ?? 0) +
+    Number(b.client.other_income ?? 0);
 
   // Référence : âge 65 par défaut, ajusté côté composant via getReferenceAge.
   const retirementYear =
