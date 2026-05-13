@@ -15,6 +15,7 @@ export type CalcRoute =
   | "/calculators/canton-compare"
   | "/calculators/avs-ai"
   | "/calculators/tou"
+  | "/calculators/investment-compare"
   | "/calculators/director-compensation";
 
 export interface Relevance {
