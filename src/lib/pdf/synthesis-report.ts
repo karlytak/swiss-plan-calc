@@ -88,28 +88,98 @@ export function exportSynthesisReportPdf(args: SynthesisReportArgs): void {
   // ---------- PAGE 1 · COVER ----------
   drawCoverPage(pdf, fullName, options.customNote, args.header);
 
-  // ---------- PAGE 2 · PROFIL CLIENT ----------
+  // ---------- PAGE 2 · TABLE DES MATIÈRES (placeholder, rempli en fin de génération) ----------
   pdf.newPage();
+  const tocPage = pdf.doc.getCurrentPageInfo().pageNumber;
+  const toc: Array<{ title: string; page: number }> = [];
+
+  // ---------- PROFIL CLIENT ----------
+  pdf.newPage();
+  toc.push({ title: "Profil client", page: pdf.doc.getCurrentPageInfo().pageNumber });
   drawClientProfile(pdf, client, pension, assets, company);
 
   // ---------- PAGES SIMULATIONS ----------
   for (const entry of entries) {
     pdf.newPage();
+    const kindLabel = KIND_LABELS[entry.kind as SimulationKind] || entry.kind;
+    const title = entry.title?.trim()
+      ? `${kindLabel} : ${entry.title.trim()}`
+      : kindLabel;
+    toc.push({ title, page: pdf.doc.getCurrentPageInfo().pageNumber });
     drawSimulationPage(pdf, entry, options.includeCharts);
   }
 
   // ---------- AVANT/APRÈS ----------
   pdf.newPage();
+  toc.push({ title: "Comparatif avant / après", page: pdf.doc.getCurrentPageInfo().pageNumber });
   drawComparisonPage(pdf, entries, pension, assets);
 
   // ---------- CONCLUSION ----------
   pdf.newPage();
+  toc.push({ title: "Conclusion & recommandations", page: pdf.doc.getCurrentPageInfo().pageNumber });
   drawConclusionPage(pdf, entries);
+
+  // ---------- Remplissage de la TOC sur la page placeholder ----------
+  pdf.doc.setPage(tocPage);
+  pdf.cursorY = 50;
+  drawTableOfContents(pdf, toc);
 
   const datePart = new Date().toISOString().slice(0, 10);
   const safeName = fullName.replace(/[^a-z0-9_-]/gi, "_") || "client";
   pdf.save(`Synthese_${safeName}_${datePart}.pdf`);
 }
+
+// ============================================================================
+// TABLE DES MATIÈRES
+// ============================================================================
+function drawTableOfContents(
+  pdf: ReportPdf,
+  items: Array<{ title: string; page: number }>,
+) {
+  const { doc, pageWidth, margin, primary, ink, muted } = pdf;
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(18);
+  doc.setTextColor(...primary);
+  doc.text("Sommaire", margin, pdf.cursorY);
+  pdf.cursorY += 4;
+  doc.setDrawColor(...primary);
+  doc.setLineWidth(0.5);
+  doc.line(margin, pdf.cursorY, margin + 30, pdf.cursorY);
+  pdf.cursorY += 10;
+
+  doc.setFontSize(11);
+  for (const item of items) {
+    const y = pdf.cursorY;
+    doc.setFont("helvetica", "normal");
+    doc.setTextColor(...ink);
+    const titleMaxW = pageWidth - margin * 2 - 20;
+    const titleLines = doc.splitTextToSize(item.title, titleMaxW) as string[];
+    doc.text(titleLines[0], margin, y);
+
+    // Pointillés entre titre et numéro de page
+    const titleW = doc.getTextWidth(titleLines[0]);
+    const pageStr = String(item.page);
+    const pageW = doc.getTextWidth(pageStr);
+    const dotsStart = margin + titleW + 2;
+    const dotsEnd = pageWidth - margin - pageW - 2;
+    if (dotsEnd > dotsStart) {
+      doc.setTextColor(...muted);
+      const dotChar = ".";
+      const dotW = doc.getTextWidth(dotChar);
+      const count = Math.max(0, Math.floor((dotsEnd - dotsStart) / dotW));
+      doc.text(dotChar.repeat(count), dotsStart, y);
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(...ink);
+    doc.text(pageStr, pageWidth - margin, y, { align: "right" });
+
+    pdf.cursorY += 8;
+  }
+}
+
+
 
 // ============================================================================
 // COVER
@@ -144,13 +214,15 @@ function drawCoverPage(
   const blockX = margin + 20;
   const blockW = pageWidth - margin * 2 - 40;
   const blockY = pdf.cursorY;
+  const todayIso = new Date().toISOString();
   const lines: Array<[string, string]> = [
-    ["Date du dossier", dateFR(new Date().toISOString())],
-    ["Préparé par", header?.brokerName || "—"],
-    ["Cabinet", header?.brokerageName || "—"],
+    ["Date du dossier", dateFR(todayIso)],
+    ["Données arrêtées au", dateFR(todayIso)],
+    ["Préparé par", header?.brokerName || "Non renseigné"],
+    ["Cabinet", header?.brokerageName || "Non renseigné"],
     [
       "Coordonnées",
-      [header?.brokerPhone, header?.brokerEmail].filter(Boolean).join(" · ") || "—",
+      [header?.brokerPhone, header?.brokerEmail].filter(Boolean).join(" · ") || "Non renseignées",
     ],
   ];
   const blockH = lines.length * 9 + 12;
