@@ -11,6 +11,7 @@ import {
   Vault,
   HeartHandshake,
   TrendingUp,
+  LineChart,
   Info,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
