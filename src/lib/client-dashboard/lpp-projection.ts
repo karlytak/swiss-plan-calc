@@ -15,11 +15,7 @@
 import type { ClientBundle } from "@/lib/clients/to-calculator-input";
 import { sumAccountBalances } from "@/lib/clients/to-calculator-input";
 import { ageFromDob } from "@/lib/clients/types";
-import {
-  projectLPP,
-  LPP_CONVERSION_RATE_2026,
-  type LPPProjectionResult,
-} from "@/lib/lpp";
+import { projectLPP, type LPPProjectionResult } from "@/lib/lpp";
 import { projectPillar3a, type Pillar3aProjectionResult } from "@/lib/pillar3";
 import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
 
