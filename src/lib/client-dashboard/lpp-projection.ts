@@ -15,21 +15,19 @@
 import type { ClientBundle } from "@/lib/clients/to-calculator-input";
 import { sumAccountBalances } from "@/lib/clients/to-calculator-input";
 import { ageFromDob } from "@/lib/clients/types";
-import {
-  projectLPP,
-  LPP_CONVERSION_RATE_2026,
-  type LPPProjectionResult,
-} from "@/lib/lpp";
+import { projectLPP, type LPPProjectionResult } from "@/lib/lpp";
 import { projectPillar3a, type Pillar3aProjectionResult } from "@/lib/pillar3";
 import { getWorkStatusRules } from "@/lib/clients/work-status-rules";
 
 export const RETIREMENT_AGE_DEFAULT = 65;
 
-/** Hypothèses de projection LPP "fiche client". Identiques partout. */
+/** Hypothèses de projection LPP "fiche client". Identiques partout.
+ *  Alignées sur les défauts du formulaire LPP pour cohérence au franc près. */
 export const DASHBOARD_LPP_DEFAULTS = {
-  expectedReturnRate: 1.25, // % — référence officielle 2026 (courtier)
-  feeRate: 0, // %
+  expectedReturnRate: 1.25, // % — taux minimum LPP 2026
+  feeRate: 0.6, // % — frais TER+admin moyens caisses LPP suisses
   salaryGrowthRate: 1, // %
+  conversionRate: 6.0, // % — taux minimum légal LPP 2026 (prudent)
 } as const;
 
 /** Hypothèses de projection 3a "fiche client". */
@@ -44,7 +42,10 @@ export interface ClientLppProjection {
   annualPension: number;
   monthlyPension: number;
   /** Hypothèses utilisées (pour affichage transparent dans l'UI). */
-  assumptions: typeof DASHBOARD_LPP_DEFAULTS & {
+  assumptions: {
+    expectedReturnRate: number;
+    feeRate: number;
+    salaryGrowthRate: number;
     conversionRate: number;
     retirementAge: number;
   };
@@ -62,7 +63,7 @@ export function projectClientLPP(b: ClientBundle): ClientLppProjection | null {
   const insuredSalary = Number(b.pension?.lpp_insured_salary ?? 0);
   const buybackCapacity = Number(b.pension?.lpp_max_buyback ?? 0);
   const conversionRate = Number(
-    b.pension?.lpp_conversion_rate ?? LPP_CONVERSION_RATE_2026,
+    b.pension?.lpp_conversion_rate ?? DASHBOARD_LPP_DEFAULTS.conversionRate,
   );
 
   if (!rules.hasLPP && currentCapital <= 0) return null;
