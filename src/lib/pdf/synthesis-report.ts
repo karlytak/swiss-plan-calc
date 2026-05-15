@@ -747,6 +747,24 @@ function buildComment(entry: HistoryEntry): string | null {
       const pctTxt = pct ? ` soit +${formatPct(pct)}` : "";
       return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, ${winnerName} dégage un capital net de ${formatCHF(winnerNet)} contre ${formatCHF(loserNet)} pour ${loserName}, soit un avantage net de ${formatCHF(diff)}${pctTxt} en faveur de ${winnerName}. Cette comparaison intègre les frais de gestion annuels et l'imposition à la sortie ; elle est exprimée en valeurs nominales (hors inflation).${entry.note ? ` ${entry.note.trim()}` : ""}`;
     }
+    case "health_insurance_france": {
+      const reco = str(s.recommended);
+      const cot = num(s.recommendedAnnualCHF);
+      const sav = num(s.savingsVsWorstCHF);
+      if (!reco || !cot) return entry.note?.trim() || null;
+      const recoLabel = reco === "CMU" ? "CMU" : reco === "CNTFS" ? "CNTFS" : "assurance privée suisse";
+      const savTxt = sav > 0 ? ` Économie annuelle vs option la plus chère : ${formatCHF(sav)}.` : "";
+      return `Pour ce profil de frontalier, le régime ${recoLabel} ressort comme le plus avantageux avec une cotisation annuelle estimée à ${formatCHF(cot)}.${savTxt} Calculs basés sur les barèmes 2026 connus, à valider avec le conseiller fiscal.${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
+    case "overtime": {
+      const net = num(s.netOvertimeCHF);
+      const sav = num(s.taxSavings);
+      const total = num(s.totalTaxOnOvertime);
+      const brut = num(s.overtimeCHF);
+      if (!brut) return entry.note?.trim() || null;
+      const savTxt = sav > 0 ? ` L'exonération France sur les heures sup génère une économie fiscale de ${formatCHF(sav)}.` : "";
+      return `Sur ${formatCHF(brut)} d'heures supplémentaires brutes, l'imposition combinée Suisse/France atteint ${formatCHF(total)}, pour un net en poche de ${formatCHF(net)}.${savTxt}${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
     case "cross_border":
     case "tou":
     case "avs_ai":
