@@ -1081,7 +1081,7 @@ export const fr: Record<string, string> = {
   "calc.canton_compare.field.wealth": "Fortune nette (CHF)",
   "calc.canton_compare.tip.wealth": "Fortune imposable cantonale. Avoirs LPP / 3a exonérés tant que non retirés.",
   "calc.canton_compare.field.reference": "Canton de référence",
-  "calc.canton_compare.scope_notice.html": "Comparaison sur les <strong>6 cantons romands</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zoug</strong> à titre de référence fiscale. 19 autres cantons disponibles prochainement (ZH, BS, BE, SZ, …).",
+  "calc.canton_compare.scope_notice.html": "Comparaison sur les <strong>6 cantons romands</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zoug et Schwyz</strong> à titre de référence fiscale. 18 autres cantons disponibles prochainement (ZH, BS, BE, …).",
   "calc.canton_compare.ranking.title": "Classement par charge fiscale totale",
   "calc.canton_compare.zg.short": "Référence fiscalité optimisée",
   "calc.canton_compare.zg.long": "Référence fiscalité optimisée (hors scope domicile v1, {count} cantons romands au-dessus)",
