@@ -11,18 +11,15 @@ export type OvertimeTaxStatus =
 export interface OvertimeInput {
   taxStatus: OvertimeTaxStatus;
   workCanton: string;
-  /** Salaire de base annuel (CHF), hors heures sup. */
   baseAnnualSalaryCHF: number;
-  /** Montant brut annuel des heures supplémentaires (CHF). */
   overtimeAmountCHF: number;
   civilStatus: "single" | "married";
   childrenCount: number;
   spouseEmployed: boolean;
   spouseAnnualSalaryCHF?: number;
-  /** Taux EUR / CHF utilisé pour la conversion (1 CHF = X EUR). */
   chfToEurRate: number;
-  /** Taux marginal IR France estimé (en %), pour le régime 1983. */
   estimatedFrenchMarginalRate: number;
+  [key: string]: unknown;
 }
 
 export interface OvertimeResult {

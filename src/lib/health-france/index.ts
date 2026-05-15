@@ -8,17 +8,14 @@
 
 export interface HealthFranceInput {
   swissGrossSalaryCHF: number;
-  /** Salaire annuel du conjoint en France (EUR). 0 si non applicable. */
   spouseFrenchSalaryEUR: number;
-  /** Conjoint a sa propre couverture santé en France. */
   spouseHasOwnCoverage: boolean;
   civilStatus: "single" | "married";
   childrenCount: number;
-  /** Taux de change CHF -> EUR (1 CHF = X EUR). */
   chfToEurRate: number;
-  /** Comparaison optionnelle avec assurance privée suisse (CHF/an). */
   privateInsuranceCHF?: number;
   taxYear: number;
+  [key: string]: unknown;
 }
 
 export interface HealthFranceResult {
