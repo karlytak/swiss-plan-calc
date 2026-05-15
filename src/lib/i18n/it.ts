@@ -1075,7 +1075,7 @@ export const it: Record<string, string> = {
   "calc.canton_compare.field.wealth": "Sostanza netta (CHF)",
   "calc.canton_compare.tip.wealth": "Sostanza imponibile cantonale. Averi LPP / 3a esenti finché non prelevati.",
   "calc.canton_compare.field.reference": "Cantone di riferimento",
-  "calc.canton_compare.scope_notice.html": "Confronto sui <strong>6 cantoni romandi</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zugo</strong> come riferimento fiscale. Altri 19 cantoni disponibili a breve (ZH, BS, BE, SZ, …).",
+  "calc.canton_compare.scope_notice.html": "Confronto sui <strong>6 cantoni romandi</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zugo e Svitto</strong> come riferimento fiscale. Altri 18 cantoni disponibili a breve (ZH, BS, BE, …).",
   "calc.canton_compare.ranking.title": "Classifica per carico fiscale totale",
   "calc.canton_compare.zg.short": "Riferimento fiscalità ottimizzata",
   "calc.canton_compare.zg.long": "Riferimento fiscalità ottimizzata (fuori scopo domicilio v1, {count} cantoni romandi sopra)",
