@@ -25,12 +25,14 @@ import {
   type IncomeTaxInput,
 } from "@/lib/tax/income";
 import {
-  projectLPP,
   annuityVsLumpSum,
   capitalWithdrawalTax,
-  LPP_CONVERSION_RATE_2026,
 } from "@/lib/lpp";
-import { projectPillar3a } from "@/lib/pillar3";
+
+import {
+  projectClientLPP,
+  projectClient3a,
+} from "./lpp-projection";
 import { computeSourceTax } from "@/lib/tax/source";
 import { CANTON_SCALES } from "@/lib/tax/cantons";
 import {
@@ -207,61 +209,21 @@ function buildTax(b: ClientBundle, taxInput: IncomeTaxInput | null): DashboardTa
   }
 }
 
-function buildLPP(b: ClientBundle, age: number | null): DashboardLPP | null {
-  const rules = getWorkStatusRules(b.client.work_status);
-  const currentCapital = Number(b.pension?.lpp_current_balance ?? 0);
-  const insuredSalary = Number(b.pension?.lpp_insured_salary ?? 0);
-  const buybackCapacity = Number(b.pension?.lpp_max_buyback ?? 0);
-
-  // Sans LPP affilié → on retourne au moins l'avoir actuel s'il existe (libre passage),
-  // sinon null.
-  if (!rules.hasLPP && currentCapital <= 0) return null;
-  if (age === null) {
-    return {
-      currentCapital,
-      projectedCapitalAt65: currentCapital,
-      buybackCapacity,
-      annualPension: 0,
-      monthlyPension: 0,
-    };
-  }
-  if (age >= RETIREMENT_AGE_DEFAULT) {
-    const annualPension = currentCapital * (LPP_CONVERSION_RATE_2026 / 100);
-    return {
-      currentCapital,
-      projectedCapitalAt65: currentCapital,
-      buybackCapacity,
-      annualPension: Math.round(annualPension),
-      monthlyPension: Math.round(annualPension / 12),
-    };
-  }
-
-  try {
-    const proj = projectLPP({
-      currentAge: age,
-      retirementAge: RETIREMENT_AGE_DEFAULT,
-      currentBalance: currentCapital,
-      insuredSalary:
-        insuredSalary > 0
-          ? insuredSalary
-          : Math.max(0, Number(b.client.gross_annual_salary ?? 0)),
-      conversionRate: Number(b.pension?.lpp_conversion_rate ?? LPP_CONVERSION_RATE_2026),
-    });
-    return {
-      currentCapital,
-      projectedCapitalAt65: proj.projectedBalance,
-      buybackCapacity,
-      annualPension: proj.annualPension,
-      monthlyPension: proj.monthlyPension,
-    };
-  } catch {
-    return null;
-  }
+function buildLPP(b: ClientBundle, _age: number | null): DashboardLPP | null {
+  const proj = projectClientLPP(b);
+  if (!proj) return null;
+  return {
+    currentCapital: proj.currentCapital,
+    projectedCapitalAt65: proj.projectedCapitalAt65,
+    buybackCapacity: proj.buybackCapacity,
+    annualPension: proj.annualPension,
+    monthlyPension: proj.monthlyPension,
+  };
 }
 
 function buildPillar3a(
   b: ClientBundle,
-  age: number | null,
+  _age: number | null,
   taxInput: IncomeTaxInput | null,
 ): DashboardPillar3a | null {
   const rules = getWorkStatusRules(b.client.work_status);
@@ -273,22 +235,9 @@ function buildPillar3a(
 
   const current = Number(b.pension?.pillar_3a_annual_contribution ?? 0);
   const unused = Math.max(0, cap - current);
-  const yearsToRetire =
-    age !== null ? Math.max(0, RETIREMENT_AGE_DEFAULT - age) : 0;
-
-  let projected = 0;
-  if (yearsToRetire > 0 && current > 0) {
-    try {
-      const proj = projectPillar3a({
-        currentBalance: 0,
-        yearlyContribution: current,
-        years: yearsToRetire,
-      });
-      projected = proj.finalBalance;
-    } catch {
-      projected = current * yearsToRetire;
-    }
-  }
+  // Délègue à la projection centrale (inclut le solde 3a existant).
+  const central = projectClient3a(b);
+  const projected = central?.projectedCapitalAt65 ?? 0;
 
   let savings = 0;
   if (current > 0 && taxInput) {

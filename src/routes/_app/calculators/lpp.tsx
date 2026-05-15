@@ -49,6 +49,7 @@ import { FiscalSnapshotBanner } from "@/components/calculators/FiscalSnapshotBan
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { useT } from "@/contexts/LanguageContext";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -63,7 +64,9 @@ export const Route = createFileRoute("/_app/calculators/lpp")({
 function LppCalc() {
   const t = useT();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "lpp");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "lpp");
+  const dashboard = useClientDashboard(bundle);
+  const ficheLppCapital = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
   const [form, setForm] = useState({
     currentAge: 40,
     retirementAge: 65,
@@ -194,6 +197,20 @@ function LppCalc() {
 
       {client && <ClientLinkBanner client={client} />}
       <FiscalSnapshotBanner clientId={clientId} />
+      {clientId && ficheLppCapital > 0 &&
+        Math.abs(projection.projectedBalance - ficheLppCapital) > 1 && (
+          <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-50 p-3 text-sm dark:bg-amber-950/30">
+            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
+            <div className="text-foreground">
+              Cette simulation diverge de la fiche client :{" "}
+              <span className="font-semibold tabular-nums">{fmtCHF(projection.projectedBalance)}</span>{" "}
+              ici, vs{" "}
+              <span className="font-semibold tabular-nums">{fmtCHF(ficheLppCapital)}</span>{" "}
+              d'après la fiche (rendement 1,5%, sans rachat). C'est normal en
+              mode what-if : la fiche ne stocke pas les rachats planifiés.
+            </div>
+          </div>
+        )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="md:col-span-3">
           <CalcCard title={t("calc.lpp.projection_card")} description={t("calc.lpp.projection_desc")}>

@@ -116,76 +116,43 @@ function CantonCompareCalc() {
 
   const [mode, setMode] = useState<CompareMode>("annual");
 
-  // Source unique de vérité : dernière simulation LPP / 3a sauvegardée pour ce client.
-  const { data: latestLpp } = useQuery({
-    enabled: !!clientId,
-    queryKey: ["latest-sim", clientId, "lpp"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("simulation_history")
-        .select("summary, created_at")
-        .eq("client_id", clientId!)
-        .eq("kind", "lpp")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-  const { data: latest3a } = useQuery({
-    enabled: !!clientId,
-    queryKey: ["latest-sim", clientId, "pillar3a"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("simulation_history")
-        .select("summary, created_at")
-        .eq("client_id", clientId!)
-        .eq("kind", "pillar3a")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const lppFromSim = Number(
-    (latestLpp?.summary as Record<string, unknown> | undefined)?.projectedBalance ?? 0,
-  );
-  const p3aFromSim = Number(
-    (latest3a?.summary as Record<string, unknown> | undefined)?.finalBalance ?? 0,
-  );
-  const lppFallback = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
+  // ─────────────────────────────────────────────────────────────────────
+  // Source UNIQUE de vérité : projections "fiche client" issues du
+  // dashboard central (cf. src/lib/client-dashboard/lpp-projection.ts).
+  // On NE LIT PLUS simulation_history ici : une simulation sauvegardée est
+  // un what-if figé, pas la vérité de la fiche. Si le courtier veut
+  // intégrer un rachat/rendement custom, il édite la fiche → projection
+  // re-évaluée pour TOUS les calculateurs.
+  // ─────────────────────────────────────────────────────────────────────
+  const lppFromFiche = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
+  const p3aFromFiche = dashboard?.pillar3a?.projectedCapitalAt65 ?? 0;
 
   const [lppCapitalOverride, setLppCapitalOverride] = useState<number | null>(null);
   const [p3aCapitalOverride, setP3aCapitalOverride] = useState<number | null>(null);
 
-  // Hydratation 1 fois quand les données arrivent
+  // Hydratation depuis la fiche dès que les projections sont disponibles.
   useEffect(() => {
-    if (lppCapitalOverride === null && (lppFromSim > 0 || lppFallback > 0)) {
-      setLppCapitalOverride(lppFromSim > 0 ? lppFromSim : lppFallback);
+    if (lppCapitalOverride === null && lppFromFiche > 0) {
+      setLppCapitalOverride(lppFromFiche);
     }
-  }, [lppFromSim, lppFallback, lppCapitalOverride]);
+  }, [lppFromFiche, lppCapitalOverride]);
   useEffect(() => {
-    if (p3aCapitalOverride === null && p3aFromSim > 0) {
-      setP3aCapitalOverride(p3aFromSim);
+    if (p3aCapitalOverride === null && p3aFromFiche > 0) {
+      setP3aCapitalOverride(p3aFromFiche);
     }
-  }, [p3aFromSim, p3aCapitalOverride]);
+  }, [p3aFromFiche, p3aCapitalOverride]);
 
-  const lppCapital = lppCapitalOverride ?? (lppFromSim > 0 ? lppFromSim : lppFallback);
-  const p3aCapital = p3aCapitalOverride ?? p3aFromSim;
+  const lppCapital = lppCapitalOverride ?? lppFromFiche;
+  const p3aCapital = p3aCapitalOverride ?? p3aFromFiche;
   const projectedLPPCapital = Math.max(0, lppCapital + p3aCapital);
 
-  const lppSource: "sim" | "fallback" | "none" =
-    lppFromSim > 0 ? "sim" : lppFallback > 0 ? "fallback" : "none";
-  const p3aSource: "sim" | "none" = p3aFromSim > 0 ? "sim" : "none";
-  const lppSimDate = latestLpp?.created_at
-    ? new Date(latestLpp.created_at).toLocaleDateString("fr-CH")
-    : null;
-  const p3aSimDate = latest3a?.created_at
-    ? new Date(latest3a.created_at).toLocaleDateString("fr-CH")
-    : null;
+  const lppDivergesFromFiche =
+    lppFromFiche > 0 && lppCapitalOverride !== null && lppCapitalOverride !== lppFromFiche;
+  const p3aDivergesFromFiche =
+    p3aFromFiche > 0 && p3aCapitalOverride !== null && p3aCapitalOverride !== p3aFromFiche;
+
+  const resetLppFromFiche = () => setLppCapitalOverride(lppFromFiche);
+  const resetP3aFromFiche = () => setP3aCapitalOverride(p3aFromFiche);
 
   const lumpSumStatus: "single" | "married" | "single_with_children" =
     form.status === "married"
@@ -333,11 +300,23 @@ function CantonCompareCalc() {
                 suffix="CHF"
               />
               <p className="text-[11px] text-muted-foreground">
-                {lppSource === "sim" && lppSimDate
-                  ? `Depuis simulation LPP du ${lppSimDate}. Modifiable.`
-                  : lppSource === "fallback"
-                    ? "Estimation par défaut (aucune simulation LPP enregistrée). Modifiable."
-                    : "Aucune projection disponible. Saisissez la valeur manuellement."}
+                {lppFromFiche > 0
+                  ? `D'après la fiche client (rendement ${dashboard?.lpp ? "1,5" : "—"}%, conversion ${
+                      dashboard?.lpp ? "6,8" : "—"
+                    }%). Modifiable pour what-if.`
+                  : "Aucune projection disponible : complétez l'avoir LPP dans la fiche client."}
+                {lppDivergesFromFiche && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={resetLppFromFiche}
+                      className="underline hover:text-foreground"
+                    >
+                      Réinitialiser depuis la fiche ({formatCHF(lppFromFiche)})
+                    </button>
+                  </>
+                )}
               </p>
             </div>
             <div className="space-y-1.5">
@@ -350,9 +329,21 @@ function CantonCompareCalc() {
                 suffix="CHF"
               />
               <p className="text-[11px] text-muted-foreground">
-                {p3aSource === "sim" && p3aSimDate
-                  ? `Depuis simulation 3a du ${p3aSimDate}. Modifiable.`
-                  : "Aucune simulation 3a enregistrée. Saisissez la valeur si pertinent."}
+                {p3aFromFiche > 0
+                  ? "D'après la fiche client (versement annuel + solde existant, rendement 2%). Modifiable."
+                  : "Aucun 3a renseigné en fiche. Saisissez la valeur si pertinent."}
+                {p3aDivergesFromFiche && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={resetP3aFromFiche}
+                      className="underline hover:text-foreground"
+                    >
+                      Réinitialiser depuis la fiche ({formatCHF(p3aFromFiche)})
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           </div>

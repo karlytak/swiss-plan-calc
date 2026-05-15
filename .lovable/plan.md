@@ -1,113 +1,89 @@
-# Plan détaillé des améliorations restantes
+# Cohérence inter-calculateurs — diagnostic et plan
 
-Bloc 1 (revenu unifié) déjà livré et testé. Voici ce qui reste, avec le risque évalué pour chaque item.
+## Avertissement honnête
 
-## Bloc 2 — Suivi client
-
-### 2.1 Historique versionné des simulations  — RISQUE: moyen
-**Problème** : aujourd'hui, chaque sauvegarde écrase la précédente pour un même calculateur sur un même client. Pas de comparaison "avant/après".
-
-**Changements** :
-- Migration DB : ajouter colonnes `version` (int, défaut 1) et `label` (text, optionnel) à `simulation_history`. Aucun DROP, aucune perte de données.
-- `SaveSimulationButton` : au save, calculer `version = max(version) + 1` pour ce (client_id, kind), et proposer un libellé optionnel ("avant rachat", "scénario A").
-- Liste des simulations sur la fiche client : grouper par kind, afficher les versions, bouton "comparer 2 versions" (modal côte-à-côte).
-
-**Ce qui ne change PAS** : structure existante, flux save actuel reste fonctionnel.
-
-### 2.2 Badge "données client modifiées"  — RISQUE: faible
-**Problème** : le conseiller ne sait pas qu'une simu sauvegardée est obsolète parce que la fiche a changé depuis.
-
-**Changements** :
-- Sur `ClientCalculatorBar` : si `client.updated_at > simulation.created_at` pour ce calculateur, afficher pastille orange "à rafraîchir".
-- 100% UI, aucune migration.
-
-### 2.3 PDF synthèse — page de garde + sommaire  — RISQUE: faible
-**Changements dans `src/lib/pdf/synthesis-report.ts`** :
-- Page 1 : page de garde avec logo conseiller (déjà dans `profiles.logo_url`), nom client, date, mention "valable au …".
-- Page 2 : sommaire avec numéros de page (calculés au 2e passage).
-- Footer : "Conseiller · {nom} · {date}".
-
-**Ce qui ne change PAS** : sections existantes, calculs, charts.
-
-### 2.4 Export Excel des simulations  — RISQUE: faible
-**Nouveau fichier** : `src/lib/xlsx/export-simulation.ts` qui prend une simulation et génère un .xlsx (1 onglet par section : hypothèses, calculs, résultats).
-- Bouton "Export XLSX" à côté de "Export PDF" dans la liste des simulations.
-- Dépendance déjà présente : `xlsx` (à confirmer, sinon `bun add xlsx`).
+Je ne peux pas livrer en un seul passage : (a) audit des 12 calculateurs, (b) refactor central, (c) refonte de canton-compare, (d) tests preview avec captures sur chaque paire. Je propose un découpage en 2 livraisons. Cette plan couvre **la livraison 1** (le bug bloquant + la fondation centrale). La livraison 2 audite et migre les autres calculateurs.
 
 ---
 
-## Bloc 3 — Sécurité
+## Diagnostic — pourquoi 221'416 ≠ 554'925
 
-### 3.1 Audit RLS systématique  — RISQUE: nul (audit seul)
-**Action** : lancer le scanner Lovable + revue manuelle des 11 tables (`clients`, `client_assets`, `client_pension`, `client_notes`, `companies`, `profiles`, `scenarios`, `simulations`, `simulation_history`, `simulation_shares`, `tax_year_data`).
+Trois sources de vérité **différentes** coexistent aujourd'hui pour « capital LPP projeté à la retraite » :
 
-D'après ce que je vois déjà :
-- ✅ Toutes les tables broker ont `auth.uid() = broker_id` correctement.
-- ⚠️ `tax_year_data` est lisible par tout authenticated → OK car données publiques.
-- ⚠️ `simulation_shares.access_shared_simulation` est SECURITY DEFINER (bien) avec password hash → OK.
+1. **Page LPP** (`src/routes/_app/calculators/lpp.tsx`, l.132-142) : recalcule en live via `projectLPP(form)` à partir du **formulaire local** — donc avec rendement / frais / rachats / extraCredit que le courtier vient de saisir.
+2. **Dashboard client** (`src/lib/client-dashboard/index.ts`, `buildLPP` l.210-260) : appelle `projectLPP` avec **seulement 5 champs** (age, balance, salaire assuré, conversionRate). Tout le reste tombe sur les **défauts** de `projectLPP` (rendement 1.5%, croissance salaire 1%, frais 0, pas de rachat, pas d'extraCredit).
+3. **Canton-compare** (`src/routes/_app/calculators/canton-compare.tsx`, l.159-178) : lit en priorité la **dernière simulation sauvegardée** dans `simulation_history` (`projectedBalance` de l'`inputs`/`summary`), avec fallback sur le dashboard. Une simulation sauvegardée est un **snapshot figé** qui contient les rachats / rendement / extraCredit du moment où le courtier a cliqué « Sauvegarder ».
 
-**Livrable** : rapport écrit, pas de migration sauf finding réel.
+Sur le client TEST :
+- 554'925 vient d'une **simulation LPP sauvegardée** (probablement avec rachats planifiés et/ou rendement plus élevé) lue par canton-compare.
+- 221'416 est le **recalcul live** sur la page LPP avec les valeurs courantes du formulaire (probablement rachats remis à 0, ou rendement par défaut).
 
-### 3.2 Rôles dans table dédiée  — RISQUE: à clarifier
-**Question pour toi** : as-tu besoin d'un rôle "admin" (vue cross-broker, modération) ou tout reste single-tenant par broker ? Si single-tenant suffit, **on saute ce point** — le modèle actuel est sain.
-
-### 3.3 Validation Zod sur server functions  — RISQUE: faible
-**Action** : audit des `createServerFn` du projet, vérifier que chacune a un `.inputValidator(zod...)` avec bornes (montants > 0, années 1900-2100, canton dans liste blanche, longueurs de strings).
-
-Liste des server functions à auditer (je l'établis avant de toucher) — j'ajoute les schémas manquants un par un, sans changer la logique.
-
-### 3.4 Logs PII  — RISQUE: faible
-**Action** : `rg "console.log|console.error"` sur `src/**` côté serveur, masquer ou retirer ce qui sort nom/email/AVS/revenu en clair.
-
-### 3.5 Rate-limit PDF  — ABANDONNÉ
-La doc plateforme indique de ne pas implémenter de rate-limiting backend ad-hoc. Je le retire.
+Les deux chiffres sont « corrects » dans leur monde, mais il n'y a **pas de source unique**.
 
 ---
 
-## Bloc 4 — UX, tests, perf
+## Principe de la correction (validé par votre cahier des charges)
 
-### 4.1 Validation visuelle formulaires  — RISQUE: faible
-- Sur les formulaires de la fiche client + calculateurs : helper `<FieldError>` cohérent, bornes (revenu ≥ 0, âge 0-120, année 1900-2100), message en rouge sous le champ.
-- 100% UI, aucune logique métier touchée.
+La **fiche client** (+ `client_pension`/`client_assets`) est la source unique de vérité pour les **inputs**. Les **projections** dérivent d'une fonction centrale `computeClientDashboard(bundle)` (déjà existante : `src/lib/client-dashboard/index.ts`) qui doit être :
+- la **seule** voie pour obtenir capital LPP projeté, capital 3a projeté, taux marginal, revenu déterminant.
+- appelée par tous les calculateurs **comme valeur d'affichage de référence** (« d'après la fiche »).
 
-### 4.2 Tooltips fiscaux  — RISQUE: nul
-- `<Info>` icon avec tooltip shadcn sur les champs : rachat LPP max, plafond 3a, déduction coordination, etc. Textes en 4 langues.
-
-### 4.3 Tests par canton  — RISQUE: nul
-- Snapshots de référence pour 3 profils types × 5 cantons (GE, VD, ZH, BE, TI).
-- Fichier `src/lib/tax/__tests__/canton-snapshots.test.ts`.
-
-### 4.4 Lazy-load + mémoïsation  — RISQUE: faible
-- `React.lazy` sur les routes calculateurs lourdes (`canton-compare`, `investment-compare`).
-- `useMemo` autour des recalculs cantonaux dans `canton-compare.tsx` (qui recalcule à chaque keystroke aujourd'hui).
+Les simulations sauvegardées (`simulation_history`) deviennent des **what-if** consultables, **jamais** la source qui alimente un autre calculateur en silence.
 
 ---
 
-## Ordre d'exécution recommandé
+## Livraison 1 (ce tour)
 
-Pour minimiser le risque de casse et te permettre de tester entre chaque :
+### A. Aligner la projection centrale sur la projection « page LPP »
 
-1. **2.2** (badge "à rafraîchir") — 100% UI, 10 min
-2. **2.3** (page de garde + sommaire PDF) — visuel, isolé
-3. **3.1** (audit RLS) — read-only
-4. **3.4** (logs PII) — suppression simple
-5. **4.1 + 4.2** (validation + tooltips) — UI
-6. **2.1** (versions de simulation) — touche la DB, à faire seul
-7. **2.4** (export XLSX) — nouvelle feature isolée
-8. **3.3** (validation Zod serveur) — par fonction, un par un
-9. **4.3** (tests canton) — additif
-10. **4.4** (perf) — en dernier, après stabilisation
+`buildLPP` du dashboard ignore aujourd'hui plusieurs paramètres présents en fiche client :
+- `lpp_max_buyback` (capacité de rachat) — non injecté dans la projection
+- pas de champ « rendement attendu » / « frais » / « croissance salaire » en fiche → on garde les défauts mais on les rend **explicites et identiques partout** via une constante exportée `DASHBOARD_LPP_PROJECTION_DEFAULTS`.
 
-## Ce que je NE fais PAS sans ton feu vert explicite
+Action :
+- Extraire dans `src/lib/client-dashboard/lpp-projection.ts` une fonction unique `projectClientLPP(bundle, opts?)` qui retourne `{ projectedBalance, annualPension, monthlyPension, currentCapital, buybackCapacity, assumptions }`. Elle expose les **hypothèses utilisées** (rendement, frais, etc.) pour affichage.
+- `buildLPP` du dashboard appelle cette fonction.
+- Idem `project3a` → `projectClient3a(bundle)`.
 
-- Refonte du moteur de calcul fiscal cantonal (bloc 1b/1c du plan initial) → trop risqué sans suite de tests, je préfère faire 4.3 d'abord.
-- Migration de schéma destructive.
-- Changement des barèmes 2024 → 2025.
+### B. Canton-compare lit la projection centrale, pas l'historique
 
-## Questions à clarifier avant de démarrer
+Dans `canton-compare.tsx` :
+- **Supprimer** la lecture de `simulation_history` comme source primaire.
+- La valeur initiale du capital LPP / 3a vient **uniquement** de `projectClientLPP(bundle)` / `projectClient3a(bundle)`.
+- Garder le champ éditable (override what-if) mais afficher clairement « Source : fiche client » avec les hypothèses (rendement %, conversion %).
+- Bouton « Réinitialiser depuis la fiche » qui re-hydrate.
 
-1. Tu veux des rôles admin cross-broker (point 3.2) ou non ?
-2. Pour 2.1 (versions), tu veux limiter à N versions par calculateur (ex: 10) ou illimité ?
-3. Pour 2.3 (page de garde PDF), je prends les couleurs `pdf_primary_color` et `pdf_accent_color` déjà dans `profiles` — OK ?
+### C. Page LPP affiche un avertissement de divergence
 
-Dis-moi par où on commence et je traite **un seul item à la fois**.
+Sur `lpp.tsx`, si le `form` actuel produit un capital différent de celui de la projection centrale (parce que le courtier a saisi un rendement, des rachats, etc. différents), afficher un encart discret : « Cette simulation diverge de la fiche : X CHF vs Y CHF (fiche). [Mettre à jour la fiche] ». Pas de blocage — c'est l'usage normal du what-if.
+
+### D. Tests
+
+- Tests unitaires pour `projectClientLPP` : déterministe, mêmes inputs → mêmes outputs.
+- Vérification manuelle preview : ouvrir LPP puis canton-compare sur le client TEST — chiffre identique au franc près tant qu'on ne touche pas au formulaire LPP.
+
+---
+
+## Livraison 2 (tour suivant — à votre demande)
+
+Audit en tableau des 12 calculateurs : pour chacun, lister
+1. inputs lus de la fiche (via `to-calculator-input.ts`)
+2. projections / valeurs calculées localement qui devraient venir du dashboard central
+3. duplications à éliminer
+
+Puis migration calculateur par calculateur vers `useClientDashboard()` pour toute valeur partagée (taux marginal, revenu déterminant, projection 3a, etc.).
+
+---
+
+## Détails techniques
+
+Fichiers touchés en livraison 1 :
+- **nouveau** `src/lib/client-dashboard/lpp-projection.ts` — `projectClientLPP`, `projectClient3a`, defaults exportés
+- **modifié** `src/lib/client-dashboard/index.ts` — `buildLPP` / `build3a` délèguent
+- **modifié** `src/routes/_app/calculators/canton-compare.tsx` — supprime la lecture `simulation_history`, lit le dashboard
+- **modifié** `src/routes/_app/calculators/lpp.tsx` — ajoute l'encart de divergence
+- **nouveaux tests** `src/lib/client-dashboard/lpp-projection.test.ts`
+
+Risque : la livraison 1 va **faire baisser** le chiffre affiché dans canton-compare (de 554'925 vers ~221'416 sur TEST), parce que la projection centrale ignore aujourd'hui les rachats que la simulation LPP sauvegardée contenait. C'est le **comportement correct** : si le courtier veut intégrer des rachats planifiés, il doit les saisir en fiche (champ `lpp_max_buyback` existe déjà mais n'est pas projeté — la livraison 1 corrige ça). Je vous le signale parce que ça va modifier des chiffres qui s'affichaient avant.
+
+Validez ce plan (ou indiquez ajustements) et je passe à l'implémentation.
