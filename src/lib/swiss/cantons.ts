@@ -118,6 +118,7 @@ export const SELECTABLE_CANTON_CODES = [
 export const COMPARABLE_CANTON_CODES = [
   ...SELECTABLE_CANTON_CODES,
   "ZG",
+  "SZ",
 ] as const;
 
 /** Code canton sélectionnable (domicile/travail). */
