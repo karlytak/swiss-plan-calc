@@ -13,6 +13,8 @@ import {
   Building2,
   LineChart,
   ArrowRight,
+  ShieldPlus,
+  Clock,
 } from "lucide-react";
 import { CalcCard } from "@/components/calculators/CalcUI";
 import { useT } from "@/contexts/LanguageContext";
@@ -28,6 +30,8 @@ const ITEMS = [
   { to: "/calculators/pillar3a" as const, icon: PiggyBank, key: "pillar3a" },
   { to: "/calculators/vested-benefits" as const, icon: ShieldCheck, key: "vested" },
   { to: "/calculators/cross-border" as const, icon: Globe, key: "cross_border" },
+  { to: "/calculators/health-insurance-france" as const, icon: ShieldPlus, key: "health_france" },
+  { to: "/calculators/overtime" as const, icon: Clock, key: "overtime" },
   { to: "/calculators/income-tax" as const, icon: Coins, key: "income_tax" },
   { to: "/calculators/source-tax" as const, icon: Wallet, key: "source_tax" },
   { to: "/calculators/tou" as const, icon: Scale, key: "tou" },

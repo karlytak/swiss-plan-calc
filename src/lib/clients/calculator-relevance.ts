@@ -16,7 +16,9 @@ export type CalcRoute =
   | "/calculators/avs-ai"
   | "/calculators/tou"
   | "/calculators/investment-compare"
-  | "/calculators/director-compensation";
+  | "/calculators/director-compensation"
+  | "/calculators/health-insurance-france"
+  | "/calculators/overtime";
 
 export interface Relevance {
   relevant: boolean;
@@ -76,5 +78,23 @@ export function getCalculatorRelevance(c: Client, route: CalcRoute): Relevance {
     case "/calculators/canton-compare":
     case "/calculators/investment-compare":
       return OK;
+
+    case "/calculators/health-insurance-france":
+      if (
+        ts === "cross_border_fr_1983" ||
+        (ts === "cross_border_ge" && c.country_of_residence === "FR")
+      )
+        return OK;
+      return { relevant: false, reason: "Spécifique aux frontaliers résidents en France." };
+
+    case "/calculators/overtime":
+      if (
+        ts === "cross_border_fr_1983" ||
+        ts === "cross_border_ge" ||
+        ts === "source_taxed" ||
+        ts === "tou"
+      )
+        return OK;
+      return { relevant: false, reason: "Pertinent pour frontaliers et imposés à la source." };
   }
 }
