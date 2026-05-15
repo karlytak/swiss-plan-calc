@@ -46,7 +46,10 @@ export interface ClientLppProjection {
   annualPension: number;
   monthlyPension: number;
   /** Hypothèses utilisées (pour affichage transparent dans l'UI). */
-  assumptions: typeof DASHBOARD_LPP_DEFAULTS & {
+  assumptions: {
+    expectedReturnRate: number;
+    feeRate: number;
+    salaryGrowthRate: number;
     conversionRate: number;
     retirementAge: number;
   };
@@ -64,7 +67,7 @@ export function projectClientLPP(b: ClientBundle): ClientLppProjection | null {
   const insuredSalary = Number(b.pension?.lpp_insured_salary ?? 0);
   const buybackCapacity = Number(b.pension?.lpp_max_buyback ?? 0);
   const conversionRate = Number(
-    b.pension?.lpp_conversion_rate ?? LPP_CONVERSION_RATE_2026,
+    b.pension?.lpp_conversion_rate ?? DASHBOARD_LPP_DEFAULTS.conversionRate,
   );
 
   if (!rules.hasLPP && currentCapital <= 0) return null;
