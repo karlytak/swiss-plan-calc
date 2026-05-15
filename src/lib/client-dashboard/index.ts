@@ -223,7 +223,7 @@ function buildLPP(b: ClientBundle, _age: number | null): DashboardLPP | null {
 
 function buildPillar3a(
   b: ClientBundle,
-  age: number | null,
+  _age: number | null,
   taxInput: IncomeTaxInput | null,
 ): DashboardPillar3a | null {
   const rules = getWorkStatusRules(b.client.work_status);
