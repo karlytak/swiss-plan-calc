@@ -953,3 +953,126 @@ export function exportDirectorCompensationPdf(args: {
 
   pdf.save(makeFilename(t("pdf.director.fname", undefined, "comparateur_dirigeant"), inputs.companyCanton));
 }
+
+// ============================================================================
+// SANTÉ FRONTALIERS (CMU / CNTFS)
+// ============================================================================
+
+export function exportHealthFrancePdf(args: {
+  header?: Partial<PdfHeaderInfo>;
+  input: import("@/lib/health-france").HealthFranceInput;
+  result: import("@/lib/health-france").HealthFranceResult;
+}) {
+  const { input, result } = args;
+  const recoLabel =
+    result.recommended === "CMU"
+      ? "CMU (France)"
+      : result.recommended === "CNTFS"
+        ? "CNTFS (France)"
+        : "Assurance privée suisse";
+  const pdf = new ReportPdf({
+    title: "Assurance santé frontaliers",
+    subtitle: `Régime recommandé : ${recoLabel}`,
+    ...args.header,
+  } as PdfHeaderInfo);
+
+  pdf.situationBanner("COMPARATIF CMU / CNTFS / PRIVÉ · 2026");
+  pdf.section("Synthèse");
+  pdf.metricsGrid([
+    { label: "Cotisation annuelle (recommandé)", value: result.recommendedAnnualCHF, tone: "success" },
+    { label: "Économie vs option la plus chère", value: result.savingsVsWorstCHF, tone: "primary" },
+    { label: "RFR estimé (EUR)", value: result.rfrEUR },
+    { label: "Seuil exonération CMU (EUR)", value: result.cmuThresholdEUR },
+  ]);
+
+  pdf.section("Profil");
+  pdf.kvTable([
+    ["Salaire suisse brut", formatCHF(input.swissGrossSalaryCHF)],
+    ["Situation civile", input.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire"],
+    ["Enfants à charge", String(input.childrenCount ?? 0)],
+    ["Salaire conjoint (EUR)", String(input.spouseFrenchSalaryEUR ?? 0)],
+    ["Conjoint avec couverture propre", input.spouseHasOwnCoverage ? "Oui" : "Non"],
+    ["Taux CHF→EUR", String(input.chfToEurRate)],
+    ["Année fiscale", String(input.taxYear)],
+  ]);
+
+  pdf.section("Comparatif des régimes");
+  const rows: Array<[string, string, string, string]> = [
+    ["CMU", formatCHF(result.cmuAnnualCHF), `${result.cmuAnnualEUR} EUR`, result.recommended === "CMU" ? "★" : ""],
+    ["CNTFS (approx.)", formatCHF(result.cntfsAnnualCHF), `${result.cntfsAnnualEUR} EUR`, result.recommended === "CNTFS" ? "★" : ""],
+  ];
+  if (result.privateAnnualCHF !== null) {
+    rows.push(["Assurance privée CH", formatCHF(result.privateAnnualCHF), "—", result.recommended === "PRIVATE" ? "★" : ""]);
+  }
+  pdf.table(["Régime", "CHF/an", "EUR/an", ""], rows);
+
+  pdf.section("Notes");
+  for (const n of result.notes) pdf.paragraph(n);
+
+  pdf.section("Avertissements");
+  pdf.callout(
+    "Calculs indicatifs basés sur les barèmes 2026 connus. CMU et CNTFS évoluent annuellement. À valider avec un conseiller fiscal pour les cas particuliers (changement de statut, mi-année, etc.).",
+    "warning",
+  );
+
+  pdf.save(makeFilename("sante_frontalier", input.civilStatus));
+}
+
+// ============================================================================
+// HEURES SUPPLÉMENTAIRES FRONTALIERS
+// ============================================================================
+
+export function exportOvertimePdf(args: {
+  header?: Partial<PdfHeaderInfo>;
+  input: import("@/lib/overtime-fr").OvertimeInput;
+  result: import("@/lib/overtime-fr").OvertimeResult;
+}) {
+  const { input, result } = args;
+  const pdf = new ReportPdf({
+    title: "Heures supplémentaires · frontaliers",
+    subtitle: `${cantonName(input.workCanton)} · ${input.taxStatus}`,
+    ...args.header,
+  } as PdfHeaderInfo);
+
+  pdf.situationBanner("FISCALITÉ HEURES SUP · 2026");
+  pdf.section("Synthèse");
+  pdf.metricsGrid([
+    { label: "Net perçu sur heures sup", value: result.netOvertimeCHF, tone: "success" },
+    { label: "Économie fiscale (exonération)", value: result.taxSavings, tone: "primary" },
+    { label: "Impôt total", value: result.totalTaxOnOvertime, tone: "warning" },
+    { label: "Heures sup brutes", value: result.overtimeCHF },
+  ]);
+
+  pdf.section("Paramètres");
+  pdf.kvTable([
+    ["Statut fiscal", input.taxStatus],
+    ["Canton de travail", `${input.workCanton} · ${cantonName(input.workCanton)}`],
+    ["Salaire de base", formatCHF(input.baseAnnualSalaryCHF)],
+    ["Heures sup brutes", formatCHF(input.overtimeAmountCHF)],
+    ["Situation civile", input.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire"],
+    ["Enfants", String(input.childrenCount ?? 0)],
+    ["Conjoint salarié", input.spouseEmployed ? `Oui (${formatCHF(input.spouseAnnualSalaryCHF ?? 0)})` : "Non"],
+    ["Taux CHF→EUR", String(input.chfToEurRate)],
+    ["Taux marginal IR FR estimé", `${input.estimatedFrenchMarginalRate}%`],
+  ]);
+
+  pdf.section("Détail fiscal");
+  pdf.kvTable([
+    ["Impôt Suisse", `${formatCHF(result.swissTaxOnOvertime)} (${result.swissRate}%)`],
+    ["Impôt France", result.hasFrenchExemption ? `${formatCHF(result.frenchTaxOnOvertime)} (${result.frenchRate}% sur la part > plafond)` : "Non applicable"],
+    ["Plafond exonération France", `${result.exemptionCapEUR.toLocaleString("fr-FR")} EUR`],
+    ["Montant exonéré", `${formatCHF(result.exemptedAmountCHF)} (${result.exemptedAmountEUR.toLocaleString("fr-FR")} EUR)`],
+    ["Charge effective", input.overtimeAmountCHF > 0 ? formatPct((result.totalTaxOnOvertime / input.overtimeAmountCHF) * 100) : "—"],
+  ]);
+
+  pdf.section("Notes");
+  for (const n of result.notes) pdf.paragraph(n);
+
+  pdf.section("Avertissements");
+  pdf.callout(
+    "Plafond d'exonération heures supplémentaires France à vérifier chaque année. Les taux marginaux sont des estimations. À valider avec un conseiller fiscal.",
+    "warning",
+  );
+
+  pdf.save(makeFilename("heures_sup_frontalier", input.workCanton));
+}
