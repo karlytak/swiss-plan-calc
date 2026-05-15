@@ -181,7 +181,7 @@ function CantonCompareCalc() {
             name: c.name,
             total: r.totalTax,
             effective: r.effectiveRate,
-            isReference: c.code === ZG_CODE,
+            isReference: REFERENCE_CODES.has(c.code),
           });
         } else {
           const tt = capitalWithdrawalTax({
@@ -198,16 +198,16 @@ function CantonCompareCalc() {
             name: c.name,
             total: tt.total,
             effective,
-            isReference: c.code === ZG_CODE,
+            isReference: REFERENCE_CODES.has(c.code),
           });
         }
       } catch (e) {
         console.warn(`[canton-compare] Calcul ignoré pour ${c.code}`, e);
       }
     }
-    const romands = rows.filter((r) => r.code !== ZG_CODE).sort((a, b) => a.total - b.total);
-    const zg = rows.filter((r) => r.code === ZG_CODE);
-    return [...romands, ...zg];
+    const romands = rows.filter((r) => !REFERENCE_CODES.has(r.code)).sort((a, b) => a.total - b.total);
+    const refs = rows.filter((r) => REFERENCE_CODES.has(r.code)).sort((a, b) => a.total - b.total);
+    return [...romands, ...refs];
   }, [form, comparable, mode, projectedLPPCapital, lumpSumStatus]);
 
   const referenceTax = data.find((d) => d.code === form.referenceCanton)?.total ?? 0;
