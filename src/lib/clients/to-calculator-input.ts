@@ -338,3 +338,41 @@ export function stripUndefined<T extends Record<string, unknown>>(o: T): Partial
   }
   return out;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// SANTÉ FRONTALIERS (CMU / CNTFS)
+// ──────────────────────────────────────────────────────────────────────────
+export function toHealthInsuranceFranceInput(b: ClientBundle) {
+  const main = numOrUndef(b.client.gross_annual_salary);
+  const spouse = numOrUndef(b.client.spouse_gross_annual_salary);
+  const childrenCount = parseChildren(b.client.children).length;
+  const isCouple =
+    b.client.civil_status === "married" ||
+    b.client.civil_status === "registered_partnership";
+  return {
+    swissGrossSalaryCHF: main,
+    spouseFrenchSalaryEUR: spouse !== undefined ? Math.round(spouse) : undefined,
+    civilStatus: isCouple ? ("married" as const) : ("single" as const),
+    childrenCount,
+  };
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// HEURES SUPPLÉMENTAIRES FRONTALIERS
+// ──────────────────────────────────────────────────────────────────────────
+export function toOvertimeInput(b: ClientBundle) {
+  const main = numOrUndef(b.client.gross_annual_salary);
+  const spouse = numOrUndef(b.client.spouse_gross_annual_salary);
+  const childrenCount = parseChildren(b.client.children).length;
+  const isCouple =
+    b.client.civil_status === "married" ||
+    b.client.civil_status === "registered_partnership";
+  return {
+    workCanton: b.client.canton ?? undefined,
+    baseAnnualSalaryCHF: main,
+    civilStatus: isCouple ? ("married" as const) : ("single" as const),
+    childrenCount,
+    spouseEmployed: spouse !== undefined && spouse > 0 ? true : undefined,
+    spouseAnnualSalaryCHF: spouse,
+  };
+}
