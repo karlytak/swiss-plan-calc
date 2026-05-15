@@ -62,7 +62,7 @@ function makeBundle(overrides: {
 describe("projectClientLPP — déterminisme et cohérence", () => {
   it("retourne null si pas affilié et pas d'avoir", () => {
     const b = makeBundle({
-      client: { work_status: "no_activity" },
+      client: { work_status: "retired" },
       pension: { lpp_current_balance: 0 },
     });
     expect(projectClientLPP(b)).toBeNull();
