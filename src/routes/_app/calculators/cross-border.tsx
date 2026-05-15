@@ -36,11 +36,11 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_app/calculators/cross-border")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({ meta: [{ title: "Frontaliers · SwissBroker Pro" }] }),
+  head: () => ({ meta: [{ title: "Frontaliers FR · SwissBroker Pro" }] }),
   component: CrossBorderCalc,
 });
 
-const ELIGIBLE_CANTONS = [...FR_ACCORD_CANTONS, "GE", "TI"] as const;
+const ELIGIBLE_CANTONS = [...FR_ACCORD_CANTONS, "GE"] as const;
 
 function CrossBorderCalc() {
   const t = useT();
