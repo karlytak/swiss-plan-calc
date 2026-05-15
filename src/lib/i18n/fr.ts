@@ -1159,7 +1159,7 @@ export const fr: Record<string, string> = {
   "landing.cta.desc": "Inscription en 30 secondes. Aucune carte bancaire. Tout est gratuit pendant la phase de lancement.",
   "landing.cta.button": "Créer mon compte courtier",
   "landing.footer.brand": "SwissBroker Pro · Conçu en Suisse",
-  "landing.footer.scope": "Suisse romande · Frontaliers FR / IT / DE / AT",
+  "landing.footer.scope": "Suisse romande · Frontaliers FR",
 
   // === Auth (signup / signin) ===
   "auth.head.title": "Connexion · SwissBroker Pro",
