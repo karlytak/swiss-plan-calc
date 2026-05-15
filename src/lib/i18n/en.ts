@@ -158,9 +158,9 @@ export const en: Record<string, string> = {
   "calc.vested.title": "Vested benefits",
   "calc.vested.desc":
     "Security / balanced / dynamic strategies, projection net of fees and taxes.",
-  "calc.cross_border.title": "FR / IT cross-border workers",
+  "calc.cross_border.title": "FR cross-border workers",
   "calc.cross_border.desc":
-    "4.5% scheme (8 cantons), Geneva specifics, Italy-Switzerland Ticino agreement 2023.",
+    "Franco-Swiss 4.5% scheme (Romandy except Geneva) and Geneva-specific regime (withholding + refund).",
   "calc.income_tax.title": "Income & wealth tax",
   "calc.income_tax.desc":
     "DFT + cantonal/communal tax, all cantons, standard Swiss deductions, marginal & effective rate.",
