@@ -971,7 +971,7 @@ export function exportHealthFrancePdf(args: {
         ? "CNTFS (France)"
         : "Assurance privée suisse";
   const pdf = new ReportPdf({
-    title: "Assurance santé frontaliers",
+    title: "CNTFS / LAMal",
     subtitle: `Régime recommandé : ${recoLabel}`,
     ...args.header,
   } as PdfHeaderInfo);
