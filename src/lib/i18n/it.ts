@@ -158,7 +158,7 @@ export const it: Record<string, string> = {
   "calc.vested.title": "Libero passaggio",
   "calc.vested.desc":
     "Strategie sicurezza / equilibrata / dinamica, proiezione netta da spese e imposte.",
-  "calc.cross_border.title": "Frontalieri FR / IT",
+  "calc.cross_border.title": "Frontalieri FR",
   "calc.cross_border.desc":
     "Regime 4,5 % (8 cantoni), specificità di Ginevra, accordo italo-svizzero Ticino 2023.",
   "calc.income_tax.title": "Imposta su reddito e sostanza",
