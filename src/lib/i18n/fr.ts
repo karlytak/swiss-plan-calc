@@ -13,7 +13,7 @@ export const fr: Record<string, string> = {
 
   // === Comparateur cantonal ===
   "comparator.scope.notice":
-    "📍 Comparaison sur les 6 cantons romands + Zoug (référence). 19 autres cantons disponibles prochainement.",
+    "📍 Comparaison sur les 6 cantons romands + Zoug et Schwyz (référence). 18 autres cantons disponibles prochainement.",
   "comparator.zg.badge": "Référence fiscalité optimisée",
   "comparator.zg.tooltip":
     "Comparaison hors Suisse romande · non disponible comme canton de domicile en v1.",
