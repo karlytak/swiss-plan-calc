@@ -1077,7 +1077,7 @@ export const de: Record<string, string> = {
   "calc.canton_compare.field.wealth": "Reinvermögen (CHF)",
   "calc.canton_compare.tip.wealth": "Kantonal steuerbares Vermögen. BVG-/3a-Guthaben steuerfrei, solange nicht bezogen.",
   "calc.canton_compare.field.reference": "Referenzkanton",
-  "calc.canton_compare.scope_notice.html": "Vergleich der <strong>6 Westschweizer Kantone</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zug</strong> als steuerliche Referenz. 19 weitere Kantone in Kürze verfügbar (ZH, BS, BE, SZ, …).",
+  "calc.canton_compare.scope_notice.html": "Vergleich der <strong>6 Westschweizer Kantone</strong> (GE, VD, VS, FR, NE, JU) + <strong>Zug und Schwyz</strong> als steuerliche Referenz. 18 weitere Kantone in Kürze verfügbar (ZH, BS, BE, …).",
   "calc.canton_compare.ranking.title": "Rangliste nach Gesamtsteuerbelastung",
   "calc.canton_compare.zg.short": "Referenz optimierte Steuern",
   "calc.canton_compare.zg.long": "Referenz optimierte Steuern (ausserhalb Wohnsitz v1, {count} Westschweizer Kantone darüber)",
