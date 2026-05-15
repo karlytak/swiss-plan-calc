@@ -475,6 +475,22 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
       pushStr(rows, "Canton société", i.companyCanton ? cantonName(String(i.companyCanton)) : undefined);
       pushStr(rows, "Canton dirigeant", i.directorCanton ? cantonName(String(i.directorCanton)) : undefined);
       break;
+    case "health_insurance_france":
+      pushIfChf(rows, "Salaire suisse brut", i.swissGrossSalaryCHF);
+      pushStr(rows, "Situation civile", i.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire");
+      pushIf(rows, "Enfants à charge", i.childrenCount);
+      if (num(i.spouseFrenchSalaryEUR)) rows.push(["Salaire conjoint (EUR)", String(num(i.spouseFrenchSalaryEUR))]);
+      if (num(i.chfToEurRate)) rows.push(["Taux CHF→EUR", String(i.chfToEurRate)]);
+      break;
+    case "overtime":
+      pushStr(rows, "Statut fiscal", str(i.taxStatus));
+      pushStr(rows, "Canton de travail", i.workCanton ? cantonName(String(i.workCanton)) : undefined);
+      pushIfChf(rows, "Salaire de base", i.baseAnnualSalaryCHF);
+      pushIfChf(rows, "Heures sup brutes", i.overtimeAmountCHF);
+      pushStr(rows, "Situation civile", i.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire");
+      pushIf(rows, "Enfants à charge", i.childrenCount);
+      pushIfPct(rows, "Taux marginal IR FR estimé", i.estimatedFrenchMarginalRate);
+      break;
   }
   return rows;
 }
@@ -557,6 +573,22 @@ function formatMetrics(
       if (num(s.pctAdvantage)) out.push({ label: "Avantage relatif", value: formatPct(num(s.pctAdvantage)), tone: "success" });
       const w = str(s.winner);
       if (w && w !== "tie") out.push({ label: "Stratégie gagnante", value: w === "a" ? nameA : nameB, tone: "success" });
+      break;
+    }
+    case "health_insurance_france": {
+      const reco = str(s.recommended);
+      if (reco) out.push({ label: "Régime recommandé", value: reco === "CMU" ? "CMU" : reco === "CNTFS" ? "CNTFS" : "Assurance privée CH", tone: "primary" });
+      if (num(s.recommendedAnnualCHF)) out.push({ label: "Cotisation annuelle (recommandé)", value: num(s.recommendedAnnualCHF), tone: "success" });
+      if (num(s.savingsVsWorstCHF)) out.push({ label: "Économie vs option la plus chère", value: num(s.savingsVsWorstCHF), tone: "success" });
+      if (num(s.cmuAnnualCHF)) out.push({ label: "CMU", value: num(s.cmuAnnualCHF) });
+      if (num(s.cntfsAnnualCHF)) out.push({ label: "CNTFS", value: num(s.cntfsAnnualCHF) });
+      break;
+    }
+    case "overtime": {
+      if (num(s.netOvertimeCHF)) out.push({ label: "Net perçu sur heures sup", value: num(s.netOvertimeCHF), tone: "success" });
+      if (num(s.taxSavings)) out.push({ label: "Économie fiscale (exonération FR)", value: num(s.taxSavings), tone: "success" });
+      if (num(s.totalTaxOnOvertime)) out.push({ label: "Impôt total heures sup", value: num(s.totalTaxOnOvertime), tone: "warning" });
+      if (num(s.overtimeCHF)) out.push({ label: "Heures sup brutes", value: num(s.overtimeCHF) });
       break;
     }
   }
@@ -714,6 +746,24 @@ function buildComment(entry: HistoryEntry): string | null {
       const loserNet = w === "a" ? bNet : aNet;
       const pctTxt = pct ? ` soit +${formatPct(pct)}` : "";
       return `Sur ${years || "l'horizon retenu"} an${(years || 0) > 1 ? "s" : ""}, ${winnerName} dégage un capital net de ${formatCHF(winnerNet)} contre ${formatCHF(loserNet)} pour ${loserName}, soit un avantage net de ${formatCHF(diff)}${pctTxt} en faveur de ${winnerName}. Cette comparaison intègre les frais de gestion annuels et l'imposition à la sortie ; elle est exprimée en valeurs nominales (hors inflation).${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
+    case "health_insurance_france": {
+      const reco = str(s.recommended);
+      const cot = num(s.recommendedAnnualCHF);
+      const sav = num(s.savingsVsWorstCHF);
+      if (!reco || !cot) return entry.note?.trim() || null;
+      const recoLabel = reco === "CMU" ? "CMU" : reco === "CNTFS" ? "CNTFS" : "assurance privée suisse";
+      const savTxt = sav > 0 ? ` Économie annuelle vs option la plus chère : ${formatCHF(sav)}.` : "";
+      return `Pour ce profil de frontalier, le régime ${recoLabel} ressort comme le plus avantageux avec une cotisation annuelle estimée à ${formatCHF(cot)}.${savTxt} Calculs basés sur les barèmes 2026 connus, à valider avec le conseiller fiscal.${entry.note ? ` ${entry.note.trim()}` : ""}`;
+    }
+    case "overtime": {
+      const net = num(s.netOvertimeCHF);
+      const sav = num(s.taxSavings);
+      const total = num(s.totalTaxOnOvertime);
+      const brut = num(s.overtimeCHF);
+      if (!brut) return entry.note?.trim() || null;
+      const savTxt = sav > 0 ? ` L'exonération France sur les heures sup génère une économie fiscale de ${formatCHF(sav)}.` : "";
+      return `Sur ${formatCHF(brut)} d'heures supplémentaires brutes, l'imposition combinée Suisse/France atteint ${formatCHF(total)}, pour un net en poche de ${formatCHF(net)}.${savTxt}${entry.note ? ` ${entry.note.trim()}` : ""}`;
     }
     case "cross_border":
     case "tou":
