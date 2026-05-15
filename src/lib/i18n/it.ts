@@ -160,7 +160,7 @@ export const it: Record<string, string> = {
     "Strategie sicurezza / equilibrata / dinamica, proiezione netta da spese e imposte.",
   "calc.cross_border.title": "Frontalieri FR",
   "calc.cross_border.desc":
-    "Regime 4,5 % (8 cantoni), specificità di Ginevra, accordo italo-svizzero Ticino 2023.",
+    "Regime franco-svizzero 4,5 % (Romandia salvo Ginevra) e regime specifico Ginevra (imposta alla fonte + retrocessione).",
   "calc.income_tax.title": "Imposta su reddito e sostanza",
   "calc.income_tax.desc":
     "IFD + ICC tutti i cantoni, deduzioni standard svizzere, aliquota marginale ed effettiva.",
