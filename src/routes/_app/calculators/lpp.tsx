@@ -206,7 +206,7 @@ function LppCalc() {
               <span className="font-semibold tabular-nums">{fmtCHF(projection.projectedBalance)}</span>{" "}
               ici, vs{" "}
               <span className="font-semibold tabular-nums">{fmtCHF(ficheLppCapital)}</span>{" "}
-              d'après la fiche (rendement 1,5%, sans rachat). C'est normal en
+              d'après la fiche (rendement 1,25%, sans rachat). C'est normal en
               mode what-if : la fiche ne stocke pas les rachats planifiés.
             </div>
           </div>
