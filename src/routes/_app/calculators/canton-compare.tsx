@@ -46,6 +46,8 @@ import type {
 } from "@/lib/clients/types";
 
 const ZG_CODE = "ZG";
+const SZ_CODE = "SZ";
+const REFERENCE_CODES: ReadonlySet<string> = new Set([ZG_CODE, SZ_CODE]);
 
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
