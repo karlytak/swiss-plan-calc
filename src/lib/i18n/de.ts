@@ -159,9 +159,9 @@ export const de: Record<string, string> = {
   "calc.vested.title": "Freizügigkeit",
   "calc.vested.desc":
     "Strategien Sicherheit / Ausgewogen / Dynamisch, Nettoprojektion nach Gebühren und Steuern.",
-  "calc.cross_border.title": "Grenzgänger FR / IT",
+  "calc.cross_border.title": "Grenzgänger FR",
   "calc.cross_border.desc":
-    "4.5%-Regime (8 Kantone), Sonderfall Genf, Italo-Schweizer Abkommen Tessin 2023.",
+    "Französisch-schweizerisches 4.5%-Regime (Romandie ausser Genf) und Genfer Spezialregime (Quellensteuer + Rückerstattung).",
   "calc.income_tax.title": "Einkommens- & Vermögenssteuer",
   "calc.income_tax.desc":
     "DBSt + StG alle Kantone, Schweizer Standardabzüge, Grenz- & Effektivsatz.",
