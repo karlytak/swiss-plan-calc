@@ -17,6 +17,8 @@ import {
   toRetirementInput,
   toAvsAiInput,
   toInvestmentCompareInput,
+  toHealthInsuranceFranceInput,
+  toOvertimeInput,
   stripUndefined,
   type ClientBundle,
 } from "@/lib/clients/to-calculator-input";
@@ -33,7 +35,9 @@ export type CalculatorKind =
   | "canton-compare"
   | "retirement"
   | "avs-ai"
-  | "investment-compare";
+  | "investment-compare"
+  | "health-insurance-france"
+  | "overtime";
 
 const MAPPERS = {
   "income-tax": toIncomeTaxInput,
@@ -47,6 +51,8 @@ const MAPPERS = {
   retirement: toRetirementInput,
   "avs-ai": toAvsAiInput,
   "investment-compare": toInvestmentCompareInput,
+  "health-insurance-france": toHealthInsuranceFranceInput,
+  overtime: toOvertimeInput,
 } as const;
 
 export interface PrefillResult<K extends CalculatorKind> {
