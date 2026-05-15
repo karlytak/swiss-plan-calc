@@ -14,6 +14,8 @@ import {
   TrendingUp,
   LineChart,
   Info,
+  ShieldPlus,
+  Clock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Client } from "@/lib/clients/types";
@@ -44,6 +46,8 @@ const CHIPS: CalcChip[] = [
   { to: "/calculators/pillar3a", kind: "pillar3a", label: "3e pilier A & B", icon: PiggyBank },
   { to: "/calculators/vested-benefits", kind: "vested_benefits", label: "Libre passage", icon: Vault },
   { to: "/calculators/cross-border", kind: "cross_border", label: "Frontalier", icon: Globe2 },
+  { to: "/calculators/health-insurance-france", kind: "health_insurance_france", label: "Santé frontaliers (CMU/CNTFS)", icon: ShieldPlus },
+  { to: "/calculators/overtime", kind: "overtime", label: "Heures sup. frontaliers", icon: Clock },
   { to: "/calculators/income-tax", kind: "income_tax", label: "Impôt revenu", icon: Receipt },
   { to: "/calculators/source-tax", kind: "source_tax", label: "Impôt à la source", icon: Coins },
   { to: "/calculators/retirement", kind: "retirement", label: "Rente vs capital", icon: Sun },

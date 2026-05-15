@@ -79,14 +79,14 @@ export function SaveSimulationButton({
       const payload = {
         broker_id: user.id,
         client_id: clientId === "none" ? null : clientId,
-        kind,
+        kind: kind as never,
         title: title.trim() || (defaultTitle ?? t("save_sim.default_title")),
         note: note.trim() || null,
         inputs: inputs as never,
         summary: summary as never,
         tags,
       };
-      const { error } = await supabase.from("simulation_history").insert(payload);
+      const { error } = await supabase.from("simulation_history").insert(payload as never);
       if (error) throw error;
     },
     onSuccess: () => {
