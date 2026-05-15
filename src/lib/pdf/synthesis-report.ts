@@ -575,6 +575,22 @@ function formatMetrics(
       if (w && w !== "tie") out.push({ label: "Stratégie gagnante", value: w === "a" ? nameA : nameB, tone: "success" });
       break;
     }
+    case "health_insurance_france": {
+      const reco = str(s.recommended);
+      if (reco) out.push({ label: "Régime recommandé", value: reco === "CMU" ? "CMU" : reco === "CNTFS" ? "CNTFS" : "Assurance privée CH", tone: "primary" });
+      if (num(s.recommendedAnnualCHF)) out.push({ label: "Cotisation annuelle (recommandé)", value: num(s.recommendedAnnualCHF), tone: "success" });
+      if (num(s.savingsVsWorstCHF)) out.push({ label: "Économie vs option la plus chère", value: num(s.savingsVsWorstCHF), tone: "success" });
+      if (num(s.cmuAnnualCHF)) out.push({ label: "CMU", value: num(s.cmuAnnualCHF) });
+      if (num(s.cntfsAnnualCHF)) out.push({ label: "CNTFS", value: num(s.cntfsAnnualCHF) });
+      break;
+    }
+    case "overtime": {
+      if (num(s.netOvertimeCHF)) out.push({ label: "Net perçu sur heures sup", value: num(s.netOvertimeCHF), tone: "success" });
+      if (num(s.taxSavings)) out.push({ label: "Économie fiscale (exonération FR)", value: num(s.taxSavings), tone: "success" });
+      if (num(s.totalTaxOnOvertime)) out.push({ label: "Impôt total heures sup", value: num(s.totalTaxOnOvertime), tone: "warning" });
+      if (num(s.overtimeCHF)) out.push({ label: "Heures sup brutes", value: num(s.overtimeCHF) });
+      break;
+    }
   }
   return out;
 }
