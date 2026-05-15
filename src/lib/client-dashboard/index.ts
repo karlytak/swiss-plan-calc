@@ -235,9 +235,6 @@ function buildPillar3a(
 
   const current = Number(b.pension?.pillar_3a_annual_contribution ?? 0);
   const unused = Math.max(0, cap - current);
-  const yearsToRetire =
-    age !== null ? Math.max(0, RETIREMENT_AGE_DEFAULT - age) : 0;
-
   // Délègue à la projection centrale (inclut le solde 3a existant).
   const central = projectClient3a(b);
   const projected = central?.projectedCapitalAt65 ?? 0;
