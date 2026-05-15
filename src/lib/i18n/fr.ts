@@ -157,9 +157,9 @@ export const fr: Record<string, string> = {
   "calc.vested.title": "Libre passage",
   "calc.vested.desc":
     "Stratégies sécurité / équilibre / dynamique, projection nette frais et impôts.",
-  "calc.cross_border.title": "Frontaliers FR / IT",
+  "calc.cross_border.title": "Frontaliers FR",
   "calc.cross_border.desc":
-    "Régime 4.5 % (8 cantons), Genève spécifique, accord italo-suisse Tessin 2023.",
+    "Régime franco-suisse 4.5 % (cantons romands sauf GE) et régime spécifique Genève (IS + rétrocession).",
   "calc.income_tax.title": "Impôt revenu & fortune",
   "calc.income_tax.desc":
     "IFD + ICC tous cantons, déductions standard suisses, taux marginal & effectif.",
