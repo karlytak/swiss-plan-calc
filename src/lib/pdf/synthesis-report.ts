@@ -475,6 +475,22 @@ function formatInputs(entry: HistoryEntry): Array<[string, string]> {
       pushStr(rows, "Canton société", i.companyCanton ? cantonName(String(i.companyCanton)) : undefined);
       pushStr(rows, "Canton dirigeant", i.directorCanton ? cantonName(String(i.directorCanton)) : undefined);
       break;
+    case "health_insurance_france":
+      pushIfChf(rows, "Salaire suisse brut", i.swissGrossSalaryCHF);
+      pushStr(rows, "Situation civile", i.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire");
+      pushIf(rows, "Enfants à charge", i.childrenCount);
+      if (num(i.spouseFrenchSalaryEUR)) rows.push(["Salaire conjoint (EUR)", String(num(i.spouseFrenchSalaryEUR))]);
+      if (num(i.chfToEurRate)) rows.push(["Taux CHF→EUR", String(i.chfToEurRate)]);
+      break;
+    case "overtime":
+      pushStr(rows, "Statut fiscal", str(i.taxStatus));
+      pushStr(rows, "Canton de travail", i.workCanton ? cantonName(String(i.workCanton)) : undefined);
+      pushIfChf(rows, "Salaire de base", i.baseAnnualSalaryCHF);
+      pushIfChf(rows, "Heures sup brutes", i.overtimeAmountCHF);
+      pushStr(rows, "Situation civile", i.civilStatus === "married" ? "Marié·e / pacsé·e" : "Célibataire");
+      pushIf(rows, "Enfants à charge", i.childrenCount);
+      pushIfPct(rows, "Taux marginal IR FR estimé", i.estimatedFrenchMarginalRate);
+      break;
   }
   return rows;
 }
