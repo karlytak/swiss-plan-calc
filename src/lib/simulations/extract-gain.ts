@@ -153,6 +153,27 @@ export function extractGain(entry: HistoryEntry): ExtractedGain {
         details: "Gain annuel sur revenu net",
       };
     }
+    case "health_insurance_france": {
+      const amount = num(summary.savingsVsWorstCHF);
+      if (amount <= 0) return none();
+      const reco = s(summary.recommended);
+      return {
+        type: "annual",
+        amount: Math.round(amount),
+        label: `Assurance santé frontalier (${reco ?? "régime optimisé"})`,
+        details: "Économie annuelle vs option la plus chère",
+      };
+    }
+    case "overtime": {
+      const amount = num(summary.taxSavings);
+      if (amount <= 0) return none();
+      return {
+        type: "annual",
+        amount: Math.round(amount),
+        label: "Heures sup · exonération France",
+        details: "Économie fiscale annuelle (régime frontalier 1983)",
+      };
+    }
     default:
       return none();
   }
