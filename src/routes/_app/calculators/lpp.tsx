@@ -63,7 +63,9 @@ export const Route = createFileRoute("/_app/calculators/lpp")({
 function LppCalc() {
   const t = useT();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "lpp");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "lpp");
+  const dashboard = useClientDashboard(bundle);
+  const ficheLppCapital = dashboard?.lpp?.projectedCapitalAt65 ?? 0;
   const [form, setForm] = useState({
     currentAge: 40,
     retirementAge: 65,
