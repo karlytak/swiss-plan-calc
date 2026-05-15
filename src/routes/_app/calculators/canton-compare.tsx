@@ -300,11 +300,23 @@ function CantonCompareCalc() {
                 suffix="CHF"
               />
               <p className="text-[11px] text-muted-foreground">
-                {lppSource === "sim" && lppSimDate
-                  ? `Depuis simulation LPP du ${lppSimDate}. Modifiable.`
-                  : lppSource === "fallback"
-                    ? "Estimation par défaut (aucune simulation LPP enregistrée). Modifiable."
-                    : "Aucune projection disponible. Saisissez la valeur manuellement."}
+                {lppFromFiche > 0
+                  ? `D'après la fiche client (rendement ${dashboard?.lpp ? "1,5" : "—"}%, conversion ${
+                      dashboard?.lpp ? "6,8" : "—"
+                    }%). Modifiable pour what-if.`
+                  : "Aucune projection disponible : complétez l'avoir LPP dans la fiche client."}
+                {lppDivergesFromFiche && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={resetLppFromFiche}
+                      className="underline hover:text-foreground"
+                    >
+                      Réinitialiser depuis la fiche ({formatCHF(lppFromFiche)})
+                    </button>
+                  </>
+                )}
               </p>
             </div>
             <div className="space-y-1.5">
@@ -317,9 +329,21 @@ function CantonCompareCalc() {
                 suffix="CHF"
               />
               <p className="text-[11px] text-muted-foreground">
-                {p3aSource === "sim" && p3aSimDate
-                  ? `Depuis simulation 3a du ${p3aSimDate}. Modifiable.`
-                  : "Aucune simulation 3a enregistrée. Saisissez la valeur si pertinent."}
+                {p3aFromFiche > 0
+                  ? "D'après la fiche client (versement annuel + solde existant, rendement 2%). Modifiable."
+                  : "Aucun 3a renseigné en fiche. Saisissez la valeur si pertinent."}
+                {p3aDivergesFromFiche && (
+                  <>
+                    {" "}
+                    <button
+                      type="button"
+                      onClick={resetP3aFromFiche}
+                      className="underline hover:text-foreground"
+                    >
+                      Réinitialiser depuis la fiche ({formatCHF(p3aFromFiche)})
+                    </button>
+                  </>
+                )}
               </p>
             </div>
           </div>
