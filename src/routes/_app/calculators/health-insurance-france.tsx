@@ -199,40 +199,91 @@ function HealthInsuranceFranceCalc() {
               tone="success"
               big
             />
-            <MoneyTile
-              label="Économie vs option la plus chère"
-              value={result.savingsVsWorstCHF}
-              tone="primary"
-            />
+            {result.savingsVsPrivateCHF !== null ? (
+              <MoneyTile
+                label={
+                  result.savingsVsPrivateCHF >= 0
+                    ? "Économie annuelle vs LAMal"
+                    : "Surcoût annuel vs LAMal"
+                }
+                value={Math.abs(result.savingsVsPrivateCHF)}
+                tone={result.savingsVsPrivateCHF >= 0 ? "primary" : "warning"}
+              />
+            ) : (
+              <MoneyTile
+                label="Économie vs option la plus chère"
+                value={result.savingsVsWorstCHF}
+                tone="primary"
+              />
+            )}
           </Row>
-          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <MoneyTile
               label="CMU"
               value={result.cmuAnnualCHF}
               hint={`${result.cmuAnnualEUR.toLocaleString("fr-FR")} EUR`}
+              tone={result.recommended === "CMU" ? "success" : "default"}
             />
             <MoneyTile
-              label="CNTFS (approx.)"
+              label="CNTFS"
               value={result.cntfsAnnualCHF}
               hint={`${result.cntfsAnnualEUR.toLocaleString("fr-FR")} EUR`}
+              tone={result.recommended === "CNTFS" ? "success" : "default"}
             />
             {result.privateAnnualCHF !== null && (
               <MoneyTile
-                label="Assurance privée CH"
+                label="LAMal (privée CH)"
                 value={result.privateAnnualCHF}
+                tone={result.recommended === "PRIVATE" ? "success" : "default"}
               />
             )}
           </div>
           <div className="mt-3 flex items-start gap-2 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
             <Shield className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
             <span>
-              RFR estimé : {result.rfrEUR.toLocaleString("fr-FR")} EUR · Seuil CMU :{" "}
-              {result.cmuThresholdEUR.toLocaleString("fr-FR")} EUR.
+              RFR estimé : {result.rfrEUR.toLocaleString("fr-FR")} EUR · Abattement CMU :{" "}
+              {result.cmuThresholdEUR.toLocaleString("fr-FR")} EUR ({result.partsFiscales} part
+              {result.partsFiscales > 1 ? "s" : ""} fiscale{result.partsFiscales > 1 ? "s" : ""}).
             </span>
           </div>
         </CalcCard>
+
+        <CalcCard title="Détail du calcul">
+          <BreakdownSection title="CMU — Cotisation Subsidiaire Maladie" lines={result.cmuBreakdown} />
+          <BreakdownSection title="CNTFS — adhésion volontaire frontalier" lines={result.cntfsBreakdown} />
+          {result.privateBreakdown.length > 0 && (
+            <BreakdownSection title="LAMal — assurance privée suisse" lines={result.privateBreakdown} />
+          )}
+        </CalcCard>
       </div>
     </div>
+  );
+}
+
+function BreakdownSection({
+  title,
+  lines,
+}: {
+  title: string;
+  lines: { label: string; value: string }[];
+}) {
+  return (
+    <Collapsible defaultOpen={false} className="border-b border-border/60 py-2 last:border-b-0">
+      <CollapsibleTrigger className="flex w-full items-center justify-between gap-2 text-left text-sm font-medium hover:text-primary [&[data-state=open]>svg]:rotate-180">
+        <span>{title}</span>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform" />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+        <ul className="mt-2 space-y-1.5 text-xs">
+          {lines.map((l, i) => (
+            <li key={i} className="flex justify-between gap-3 border-b border-dashed border-border/40 pb-1 last:border-b-0">
+              <span className="text-muted-foreground">{l.label}</span>
+              <span className="font-medium tabular-nums">{l.value}</span>
+            </li>
+          ))}
+        </ul>
+      </CollapsibleContent>
+    </Collapsible>
   );
 }
 
