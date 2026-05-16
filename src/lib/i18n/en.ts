@@ -161,6 +161,12 @@ export const en: Record<string, string> = {
   "calc.cross_border.title": "FR cross-border workers",
   "calc.cross_border.desc":
     "Franco-Swiss 4.5% scheme (Romandy except Geneva) and Geneva-specific regime (withholding + refund).",
+  "calc.health_france.title": "CNTFS / LAMal calculator",
+  "calc.health_france.desc":
+    "Compares CMU, CNTFS and LAMal for French cross-border workers by income, family and coverage.",
+  "calc.overtime.title": "Overtime calculator",
+  "calc.overtime.desc":
+    "Estimates the tax impact of overtime for French cross-border workers.",
   "calc.income_tax.title": "Income & wealth tax",
   "calc.income_tax.desc":
     "DFT + cantonal/communal tax, all cantons, standard Swiss deductions, marginal & effective rate.",
