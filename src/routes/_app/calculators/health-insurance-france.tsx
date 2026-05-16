@@ -49,10 +49,10 @@ function HealthInsuranceFranceCalc() {
     civilStatus: "single",
     childrenCount: 0,
     chfToEurRate: 1.05,
-    privateInsuranceCHF: undefined,
+    privateInsuranceCHF: 3_600,
     taxYear: new Date().getFullYear(),
   });
-  const [showPrivate, setShowPrivate] = useState(false);
+  const [showPrivate, setShowPrivate] = useState(true);
   useHydrateFormFromPrefill(prefill, setForm);
   const set = <K extends keyof HealthFranceInput>(k: K, v: HealthFranceInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
