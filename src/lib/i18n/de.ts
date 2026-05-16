@@ -162,6 +162,12 @@ export const de: Record<string, string> = {
   "calc.cross_border.title": "Grenzgänger FR",
   "calc.cross_border.desc":
     "Französisch-schweizerisches 4.5%-Regime (Romandie ausser Genf) und Genfer Spezialregime (Quellensteuer + Rückerstattung).",
+  "calc.health_france.title": "CNTFS / LAMal-Rechner",
+  "calc.health_france.desc":
+    "Vergleicht CMU, CNTFS und LAMal für französische Grenzgänger nach Einkommen, Familie und Deckung.",
+  "calc.overtime.title": "Überstunden-Rechner",
+  "calc.overtime.desc":
+    "Schätzt die steuerliche Wirkung von Überstunden für französische Grenzgänger.",
   "calc.income_tax.title": "Einkommens- & Vermögenssteuer",
   "calc.income_tax.desc":
     "DBSt + StG alle Kantone, Schweizer Standardabzüge, Grenz- & Effektivsatz.",

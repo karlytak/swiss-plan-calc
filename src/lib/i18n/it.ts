@@ -161,6 +161,12 @@ export const it: Record<string, string> = {
   "calc.cross_border.title": "Frontalieri FR",
   "calc.cross_border.desc":
     "Regime franco-svizzero 4,5 % (Romandia salvo Ginevra) e regime specifico Ginevra (imposta alla fonte + retrocessione).",
+  "calc.health_france.title": "Calcolatore CNTFS / LAMal",
+  "calc.health_france.desc":
+    "Confronta CMU, CNTFS e LAMal per frontalieri francesi secondo reddito, famiglia e copertura.",
+  "calc.overtime.title": "Calcolatore ore supplementari",
+  "calc.overtime.desc":
+    "Stima l'impatto fiscale delle ore supplementari per frontalieri francesi.",
   "calc.income_tax.title": "Imposta su reddito e sostanza",
   "calc.income_tax.desc":
     "IFD + ICC tutti i cantoni, deduzioni standard svizzere, aliquota marginale ed effettiva.",
