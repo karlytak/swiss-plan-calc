@@ -1003,7 +1003,7 @@ export function exportHealthFrancePdf(args: {
 
   pdf.section("Avertissements");
   pdf.callout(
-    "Calculs indicatifs basés sur les barèmes 2026 connus (PASS 2026 = 47'100 EUR, taux CMU 8%). La cotisation CMU est gérée et collectée par le CNTFS via l'URSSAF. Le droit d'option CMU vs LAMal doit être exercé dans les 3 mois suivant le début de l'activité frontalière.",
+    `Calculs indicatifs. CMU : abattement officiel ${input.taxYear} = ${result.abatementEUR.toLocaleString("fr-FR")} EUR, taux 8% sur les revenus N-2. La cotisation CMU est gérée et collectée par le CNTFS via l'URSSAF. LAMal : tarifs forfaitaires indicatifs, à ajuster selon caisse, franchise et canton de domicile. Le droit d'option CMU vs LAMal doit être exercé dans les 3 mois suivant le début de l'activité frontalière et est irrévocable.`,
     "warning",
   );
 
