@@ -498,7 +498,10 @@ function LppCalc() {
         </div>
       </div>
 
-      <CertificatePensionsCard form={form} set={set} />
+      <CertificatePensionsCard
+        form={form}
+        onChange={(patch) => setForm((f) => ({ ...f, ...patch }))}
+      />
 
       <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
