@@ -703,3 +703,217 @@ function InsuredSalaryPanel({
     </TooltipProvider>
   );
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// Rentes LPP du certificat (invalidité / orphelin / veuf-veuve)
+// Plafond enfants pris en compte = 3 (réglementaire LPP).
+// ─────────────────────────────────────────────────────────────────────────
+const MAX_ORPHAN_CHILDREN = 3;
+
+type CertForm = {
+  children: number;
+  disabilityAmount: number;
+  disabilityPeriod: "year" | "month";
+  orphanAmount: number;
+  orphanPeriod: "year" | "month";
+  widowAmount: number;
+  widowPeriod: "year" | "month";
+};
+
+function CertificatePensionsCard({
+  form,
+  set,
+}: {
+  form: CertForm;
+  set: <K extends keyof CertForm>(k: K, v: CertForm[K]) => void;
+}) {
+  const t = useT();
+
+  const toAnnual = (a: number, p: "year" | "month") => (p === "month" ? a * 12 : a);
+  const toMonthly = (a: number, p: "year" | "month") =>
+    p === "month" ? a : Math.round(a / 12);
+
+  const disabilityAnnual = toAnnual(form.disabilityAmount, form.disabilityPeriod);
+  const disabilityMonthly = toMonthly(form.disabilityAmount, form.disabilityPeriod);
+
+  const orphanCount = Math.min(MAX_ORPHAN_CHILDREN, Math.max(0, form.children));
+  const orphanCapped = form.children > MAX_ORPHAN_CHILDREN;
+  const orphanPerAnnual = toAnnual(form.orphanAmount, form.orphanPeriod);
+  const orphanPerMonthly = toMonthly(form.orphanAmount, form.orphanPeriod);
+  const orphanTotalAnnual = orphanPerAnnual * orphanCount;
+  const orphanTotalMonthly = orphanPerMonthly * orphanCount;
+
+  const widowAnnual = toAnnual(form.widowAmount, form.widowPeriod);
+  const widowMonthly = toMonthly(form.widowAmount, form.widowPeriod);
+
+  return (
+    <CalcCard
+      title={t("calc.lpp.cert.card_title")}
+      description={t("calc.lpp.cert.card_desc")}
+    >
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <CertBlock
+          title={t("calc.lpp.cert.disability_title")}
+          amount={form.disabilityAmount}
+          period={form.disabilityPeriod}
+          onAmount={(v) => set("disabilityAmount", v)}
+          onPeriod={(p) => set("disabilityPeriod", p)}
+          monthly={disabilityMonthly}
+          annual={disabilityAnnual}
+        />
+        <CertBlock
+          title={t("calc.lpp.cert.orphan_title")}
+          amountLabel={t("calc.lpp.cert.orphan_amount_label")}
+          amount={form.orphanAmount}
+          period={form.orphanPeriod}
+          onAmount={(v) => set("orphanAmount", v)}
+          onPeriod={(p) => set("orphanPeriod", p)}
+          monthly={orphanPerMonthly}
+          annual={orphanPerAnnual}
+          extra={
+            <div className="mt-2 space-y-1 rounded-md border border-border/60 bg-muted/30 p-2 text-[11px]">
+              <div>
+                {t("calc.lpp.cert.orphan_children_used", { n: orphanCount })}
+                {orphanCapped && (
+                  <span className="ml-1 text-warning">
+                    {" "}
+                    {t("calc.lpp.cert.orphan_cap_note")}
+                  </span>
+                )}
+              </div>
+              <div className="flex justify-between font-medium tabular-nums">
+                <span>{t("calc.lpp.cert.orphan_total_month")}</span>
+                <span>{formatCHF(orphanTotalMonthly)}</span>
+              </div>
+              <div className="flex justify-between font-medium tabular-nums">
+                <span>{t("calc.lpp.cert.orphan_total_year")}</span>
+                <span>{formatCHF(orphanTotalAnnual)}</span>
+              </div>
+            </div>
+          }
+        />
+        <CertBlock
+          title={t("calc.lpp.cert.widow_title")}
+          amount={form.widowAmount}
+          period={form.widowPeriod}
+          onAmount={(v) => set("widowAmount", v)}
+          onPeriod={(p) => set("widowPeriod", p)}
+          monthly={widowMonthly}
+          annual={widowAnnual}
+        />
+      </div>
+
+      <div className="mt-5 rounded-lg border border-primary/30 bg-primary/5 p-4">
+        <div className="text-xs font-semibold uppercase tracking-wider text-primary">
+          {t("calc.lpp.cert.summary_title")}
+        </div>
+        <div className="mt-2 space-y-1.5 text-sm">
+          <SummaryRow
+            label={t("calc.lpp.cert.summary_disability")}
+            monthly={disabilityMonthly}
+            annual={disabilityAnnual}
+          />
+          <SummaryRow
+            label={t("calc.lpp.cert.summary_orphan", { n: orphanCount })}
+            monthly={orphanTotalMonthly}
+            annual={orphanTotalAnnual}
+          />
+          <SummaryRow
+            label={t("calc.lpp.cert.summary_widow")}
+            monthly={widowMonthly}
+            annual={widowAnnual}
+          />
+        </div>
+        <p className="mt-3 text-[11px] text-muted-foreground">
+          {t("calc.lpp.cert.summary_note")}
+        </p>
+      </div>
+    </CalcCard>
+  );
+}
+
+function CertBlock({
+  title,
+  amountLabel,
+  amount,
+  period,
+  onAmount,
+  onPeriod,
+  monthly,
+  annual,
+  extra,
+}: {
+  title: string;
+  amountLabel?: string;
+  amount: number;
+  period: "year" | "month";
+  onAmount: (v: number) => void;
+  onPeriod: (p: "year" | "month") => void;
+  monthly: number;
+  annual: number;
+  extra?: React.ReactNode;
+}) {
+  const t = useT();
+  return (
+    <div className="rounded-xl border border-border bg-card p-4 space-y-3">
+      <div className="text-sm font-semibold text-foreground">{title}</div>
+      <NumField
+        label={amountLabel ?? t("calc.lpp.cert.amount_label")}
+        value={amount}
+        onChange={onAmount}
+        suffix="CHF"
+      />
+      <div className="space-y-1.5">
+        <Label className="text-xs font-medium text-muted-foreground">
+          {t("calc.lpp.cert.period_label")}
+        </Label>
+        <Select value={period} onValueChange={(v) => onPeriod(v as "year" | "month")}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="month">{t("calc.lpp.cert.period_month")}</SelectItem>
+            <SelectItem value="year">{t("calc.lpp.cert.period_year")}</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+      <div className="space-y-1 rounded-md bg-muted/40 p-2 text-xs">
+        <div className="flex justify-between tabular-nums">
+          <span className="text-muted-foreground">{t("calc.lpp.cert.computed_month")}</span>
+          <span className="font-semibold">{formatCHF(monthly)}</span>
+        </div>
+        <div className="flex justify-between tabular-nums">
+          <span className="text-muted-foreground">{t("calc.lpp.cert.computed_year")}</span>
+          <span className="font-semibold">{formatCHF(annual)}</span>
+        </div>
+      </div>
+      {extra}
+    </div>
+  );
+}
+
+function SummaryRow({
+  label,
+  monthly,
+  annual,
+}: {
+  label: string;
+  monthly: number;
+  annual: number;
+}) {
+  const t = useT();
+  return (
+    <div className="flex flex-wrap items-baseline justify-between gap-2 border-b border-border/40 pb-1.5 last:border-0 last:pb-0">
+      <span className="text-foreground">{label}</span>
+      <span className="tabular-nums text-foreground/90">
+        <span className="font-semibold">{formatCHF(monthly)}</span>
+        <span className="text-muted-foreground">
+          {" "}
+          {t("calc.lpp.cert.per_month_short")} ·{" "}
+        </span>
+        <span className="font-semibold">{formatCHF(annual)}</span>
+        <span className="text-muted-foreground"> {t("calc.lpp.cert.per_year_short")}</span>
+      </span>
+    </div>
+  );
+}
