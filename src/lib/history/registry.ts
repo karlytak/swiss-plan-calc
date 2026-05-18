@@ -113,11 +113,12 @@ export function extractKpis(kind: SimulationKind, summary: SummaryShape): Histor
       ];
     case "overtime":
       return [
-        { label: "Net heures sup", value: num(summary.netOvertimeCHF), unit: "CHF" },
-        { label: "Impôt total heures sup", value: num(summary.totalTaxOnOvertime), unit: "CHF" },
-        { label: "Économie fiscale", value: num(summary.taxSavings), unit: "CHF" },
-        { label: "Heures sup brutes", value: num(summary.overtimeCHF), unit: "CHF" },
+        { label: "Économie fiscale", value: num(summary.taxSavingsCHF ?? summary.taxSavings), unit: "CHF" },
+        { label: "Salaire exonéré", value: num(summary.exemptSalaryRetainedEUR), unit: "EUR" },
+        { label: "Heures exonérées", value: num(summary.exemptHoursRetained), unit: "h" },
+        { label: "Heures annuelles", value: num(summary.annualHours), unit: "h" },
       ];
+
   }
 }
 
