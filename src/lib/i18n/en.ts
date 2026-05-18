@@ -1612,4 +1612,23 @@ export const en: Record<string, string> = {
   "pdf.director.fname": "director_comparator",
 
   "pdf.export": "Export as PDF",
+
+  "calc.section.prevoyance": "Pension planning",
+  "calc.section.prevoyance.desc":
+    "Retirement, disability and survivors' benefits",
+  "calc.section.fiscalite": "Taxation",
+  "calc.section.fiscalite.desc":
+    "Income/wealth tax, withholding, TOU, cross-border",
+  "calc.section.strategie": "Strategy & decision support",
+  "calc.section.strategie.desc":
+    "Director compensation and comparison tools",
+  "calc.group.lpp.title": "2nd pillar (LPP)",
+  "calc.group.lpp.desc":
+    "Capital projection, buy-ins, vested benefits, certificate annuities",
+  "calc.group.fiscalite.title": "Swiss taxation",
+  "calc.group.fiscalite.desc":
+    "Income & wealth tax, withholding tax, TOU, French cross-border",
+  "calc.group.decision.title": "Decision support",
+  "calc.group.decision.desc":
+    "Canton comparator, annuity vs lump sum, investment comparator",
 };
