@@ -576,11 +576,11 @@ function formatMetrics(
     }
     case "health_insurance_france": {
       const reco = str(s.recommended);
-      const recoLabel = reco === "LAMAL" ? "LAMal (Suisse)" : reco ? "CMU/CNTFS (France)" : "—";
+      const recoLabel = reco === "LAMAL" ? "LAMal (Suisse)" : reco === "CMU" ? "CMU (France)" : "—";
       if (reco) out.push({ label: "Option recommandée", value: recoLabel, tone: "primary" });
       if (num(s.recommendedAnnualCHF)) out.push({ label: "Cotisation annuelle (recommandé)", value: num(s.recommendedAnnualCHF), tone: "success" });
       if (num(s.savingsCHF)) out.push({ label: "Économie vs autre option", value: num(s.savingsCHF), tone: "success" });
-      if (num(s.cmuAnnualCHF)) out.push({ label: "CMU/CNTFS", value: num(s.cmuAnnualCHF) });
+      if (num(s.cmuAnnualCHF)) out.push({ label: "CMU", value: num(s.cmuAnnualCHF) });
       if (num(s.lamalAnnualCHF)) out.push({ label: "LAMal", value: num(s.lamalAnnualCHF) });
       break;
     }
