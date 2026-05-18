@@ -498,6 +498,8 @@ function LppCalc() {
         </div>
       </div>
 
+      <CertificatePensionsCard form={form} set={set} />
+
       <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
           kind="lpp"
