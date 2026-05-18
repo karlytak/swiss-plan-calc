@@ -29,6 +29,7 @@ import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calcu
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useT } from "@/contexts/LanguageContext";
+import { parseChildren, ageFromDob } from "@/lib/clients/types";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -53,7 +54,7 @@ function AvsAiCalc() {
   const t = useT();
   const currentYear = new Date().getFullYear();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "avs-ai");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "avs-ai");
 
   // Persistance localStorage en mode standalone (sans clientId) · l'utilisateur
   // ne perd plus ses saisies quand il quitte/revient au calculateur.
@@ -136,6 +137,53 @@ function AvsAiCalc() {
   );
 
   const ageAtRetirement = form.retirementYear - form.birthYear;
+
+  // ── AI (Assurance Invalidité) ──────────────────────────────────────────
+  // Bonifications calculées sur l'âge ACTUEL des enfants (situation réelle au
+  // moment de l'évaluation d'invalidité), pas projection future à 16 ans.
+  const childrenElapsedYears = useMemo(() => {
+    const kids = parseChildren(bundle?.client.children);
+    if (kids.length === 0) return null;
+    let total = 0;
+    for (const k of kids) {
+      const a = ageFromDob(k.date_of_birth);
+      if (a === null) continue;
+      total += Math.max(0, Math.min(16, a));
+    }
+    return total;
+  }, [bundle]);
+
+  // Overrides éditables (utile en mode standalone). Si client lié → préremplit.
+  const [aiEduYears, setAiEduYears] = useState<number>(0);
+  const [aiAssistYears, setAiAssistYears] = useState<number>(0);
+  useEffect(() => {
+    if (childrenElapsedYears !== null) setAiEduYears(childrenElapsedYears);
+  }, [childrenElapsedYears]);
+  useEffect(() => {
+    setAiAssistYears(form.assistanceYears);
+  }, [form.assistanceYears]);
+
+  const aiProjection = useMemo(
+    () =>
+      projectAvsPension({
+        status: "single",
+        primary: {
+          birthYear: form.birthYear,
+          gender: form.gender,
+          contributionStartYear: form.contributionStartYear,
+          // Pour l'AI, la rente est figée sur la situation présente : on tronque
+          // la carrière à l'année courante.
+          retirementYear: currentYear,
+          averageAnnualIncome: form.averageAnnualIncome,
+          departureYear: null,
+          educationalYears: aiEduYears,
+          educationalShare: form.educationalShare,
+          assistanceYears: aiAssistYears,
+          assistanceShare: form.assistanceShare,
+        },
+      }),
+    [form, aiEduYears, aiAssistYears, currentYear],
+  );
 
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
@@ -389,6 +437,69 @@ function AvsAiCalc() {
               <MoneyTile label={t("calc.avs.theoretical_full")} value={projection.primary.theoreticalAnnualPension} />
               <StatTile label={t("calc.avs.scale")} value={`${(projection.primary.reductionRatio * 100).toFixed(1)} %`} hint={t("calc.avs.scale_hint")} />
             </Row>
+          </CalcCard>
+
+          <CalcCard
+            title={t("calc.ai.card_title")}
+            description={t("calc.ai.card_desc")}
+          >
+            <Row>
+              <MoneyTile
+                label={t("calc.ai.pension_month")}
+                value={aiProjection.primary.monthlyPension}
+                tone="primary"
+                big
+              />
+              <MoneyTile
+                label={t("calc.ai.pension_year")}
+                value={aiProjection.primary.annualPension}
+                tone="success"
+              />
+            </Row>
+            <Row>
+              <StatTile
+                label={t("calc.ai.scale")}
+                value={`${aiProjection.primary.effectiveYears} / ${AVS_2026.fullContributionYears}`}
+                hint={t("calc.ai.scale_hint")}
+              />
+              <MoneyTile
+                label={t("calc.ai.theoretical_full")}
+                value={aiProjection.primary.theoreticalAnnualPension}
+              />
+            </Row>
+            <div className="mt-3 space-y-2 rounded-md bg-muted/40 p-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("calc.ai.bonifs_title")}
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <NumField
+                  label={t("calc.ai.field.edu_years")}
+                  value={aiEduYears}
+                  onChange={setAiEduYears}
+                  wikiTip={t("calc.ai.tip.edu_years")}
+                />
+                <NumField
+                  label={t("calc.ai.field.assist_years")}
+                  value={aiAssistYears}
+                  onChange={setAiAssistYears}
+                  wikiTip={t("calc.ai.tip.assist_years")}
+                />
+              </div>
+              {childrenElapsedYears !== null && (
+                <p className="text-[11px] text-muted-foreground">
+                  {t("calc.ai.children_note", { years: childrenElapsedYears })}
+                </p>
+              )}
+              <p className="text-[11px] text-foreground/80">
+                {t("calc.ai.bonifs_amount", {
+                  bonus: aiProjection.primary.bonificationsBonus,
+                  income: aiProjection.primary.determiningIncome,
+                })}
+              </p>
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {t("calc.ai.disclaimer")}
+            </p>
           </CalcCard>
 
           {form.isCouple && projection.spouse && (
