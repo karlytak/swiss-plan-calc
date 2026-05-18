@@ -54,7 +54,7 @@ function AvsAiCalc() {
   const t = useT();
   const currentYear = new Date().getFullYear();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "avs-ai");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "avs-ai");
 
   // Persistance localStorage en mode standalone (sans clientId) · l'utilisateur
   // ne perd plus ses saisies quand il quitte/revient au calculateur.
