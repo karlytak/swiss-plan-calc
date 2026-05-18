@@ -156,17 +156,12 @@ function AvsAiCalc() {
   // Overrides éditables (utile en mode standalone). Si client lié → préremplit.
   const [aiEduYears, setAiEduYears] = useState<number>(0);
   const [aiAssistYears, setAiAssistYears] = useState<number>(0);
-  const aiHydratedRef = (function () {
-    // hydrate one-shot quand children disponibles
-    useEffect(() => {
-      if (childrenElapsedYears !== null) setAiEduYears(childrenElapsedYears);
-      // assistance : on prend ce que l'utilisateur a saisi côté AVS comme défaut
-      setAiAssistYears(form.assistanceYears);
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [childrenElapsedYears]);
-    return null;
-  })();
-  void aiHydratedRef;
+  useEffect(() => {
+    if (childrenElapsedYears !== null) setAiEduYears(childrenElapsedYears);
+  }, [childrenElapsedYears]);
+  useEffect(() => {
+    setAiAssistYears(form.assistanceYears);
+  }, [form.assistanceYears]);
 
   const aiProjection = useMemo(
     () =>
