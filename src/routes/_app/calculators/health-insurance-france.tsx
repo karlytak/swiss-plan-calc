@@ -195,9 +195,9 @@ function HealthInsuranceFranceCalc() {
           <div className="mt-3 flex items-start gap-2 rounded-md border bg-muted/30 p-3 text-xs text-muted-foreground">
             <Shield className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
             <span>
-              RFR estimé : {result.rfrEUR.toLocaleString("fr-FR")} EUR · PASS 2026 :{" "}
-              {result.passEUR.toLocaleString("fr-FR")} EUR · Abattement (25%) :{" "}
-              {result.abatementEUR.toLocaleString("fr-FR")} EUR.
+              RFR estimé (revenus N-2) : {result.rfrEUR.toLocaleString("fr-FR")} EUR · Abattement{" "}
+              {form.taxYear} : {result.abatementEUR.toLocaleString("fr-FR")} EUR · Assiette :{" "}
+              {result.cmuBaseEUR.toLocaleString("fr-FR")} EUR × 8%.
             </span>
           </div>
           <div className="mt-3 rounded-md border bg-muted/20 p-3 text-xs text-muted-foreground">
