@@ -1620,4 +1620,24 @@ export const fr: Record<string, string> = {
 
   // === PDF · libellé bouton export ===
   "pdf.export": "Exporter en PDF",
+
+  // === Index calculateurs — sections & groupes ===
+  "calc.section.prevoyance": "Prévoyance",
+  "calc.section.prevoyance.desc":
+    "Calcul des prestations de retraite, invalidité et survivants",
+  "calc.section.fiscalite": "Fiscalité",
+  "calc.section.fiscalite.desc":
+    "Impôts revenu/fortune, source, TOU, frontaliers",
+  "calc.section.strategie": "Stratégie & aide à la décision",
+  "calc.section.strategie.desc":
+    "Optimisations dirigeants et outils de comparaison",
+  "calc.group.lpp.title": "Prévoyance 2e pilier (LPP)",
+  "calc.group.lpp.desc":
+    "Projection capital, rachats, libre passage, rentes certificat",
+  "calc.group.fiscalite.title": "Fiscalité Suisse",
+  "calc.group.fiscalite.desc":
+    "Impôt revenu & fortune, impôt à la source, TOU, frontaliers FR",
+  "calc.group.decision.title": "Aide à la décision",
+  "calc.group.decision.desc":
+    "Comparateur cantonal, rente vs capital, comparateur d'investissements",
 };
