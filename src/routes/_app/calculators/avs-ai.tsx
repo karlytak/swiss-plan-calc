@@ -439,6 +439,69 @@ function AvsAiCalc() {
             </Row>
           </CalcCard>
 
+          <CalcCard
+            title={t("calc.ai.card_title")}
+            description={t("calc.ai.card_desc")}
+          >
+            <Row>
+              <MoneyTile
+                label={t("calc.ai.pension_month")}
+                value={aiProjection.primary.monthlyPension}
+                tone="primary"
+                big
+              />
+              <MoneyTile
+                label={t("calc.ai.pension_year")}
+                value={aiProjection.primary.annualPension}
+                tone="success"
+              />
+            </Row>
+            <Row>
+              <StatTile
+                label={t("calc.ai.scale")}
+                value={`${aiProjection.primary.effectiveYears} / ${AVS_2026.fullContributionYears}`}
+                hint={t("calc.ai.scale_hint")}
+              />
+              <MoneyTile
+                label={t("calc.ai.theoretical_full")}
+                value={aiProjection.primary.theoreticalAnnualPension}
+              />
+            </Row>
+            <div className="mt-3 space-y-2 rounded-md bg-muted/40 p-3">
+              <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                {t("calc.ai.bonifs_title")}
+              </div>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <NumField
+                  label={t("calc.ai.field.edu_years")}
+                  value={aiEduYears}
+                  onChange={setAiEduYears}
+                  wikiTip={t("calc.ai.tip.edu_years")}
+                />
+                <NumField
+                  label={t("calc.ai.field.assist_years")}
+                  value={aiAssistYears}
+                  onChange={setAiAssistYears}
+                  wikiTip={t("calc.ai.tip.assist_years")}
+                />
+              </div>
+              {childrenElapsedYears !== null && (
+                <p className="text-[11px] text-muted-foreground">
+                  {t("calc.ai.children_note", { years: childrenElapsedYears })}
+                </p>
+              )}
+              <p className="text-[11px] text-foreground/80">
+                {t("calc.ai.bonifs_amount", {
+                  bonus: aiProjection.primary.bonificationsBonus,
+                  income: aiProjection.primary.determiningIncome,
+                })}
+              </p>
+            </div>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              {t("calc.ai.disclaimer")}
+            </p>
+          </CalcCard>
+
           {form.isCouple && projection.spouse && (
             <CalcCard title={t("calc.avs.detail_spouse_card")}>
               <Row>
