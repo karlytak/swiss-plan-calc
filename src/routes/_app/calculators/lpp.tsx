@@ -725,11 +725,13 @@ type CertForm = {
 
 function CertificatePensionsCard({
   form,
-  set,
+  onChange,
 }: {
   form: CertForm;
-  set: <K extends keyof CertForm>(k: K, v: CertForm[K]) => void;
+  onChange: (patch: Partial<CertForm>) => void;
 }) {
+  const set = <K extends keyof CertForm>(k: K, v: CertForm[K]) =>
+    onChange({ [k]: v } as Partial<CertForm>);
   const t = useT();
 
   const toAnnual = (a: number, p: "year" | "month") => (p === "month" ? a * 12 : a);
