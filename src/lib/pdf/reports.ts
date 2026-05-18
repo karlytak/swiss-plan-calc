@@ -977,7 +977,7 @@ export function exportHealthFrancePdf(args: {
     { label: "Cotisation annuelle (recommandé)", value: result.recommendedAnnualCHF, tone: "success" },
     { label: "Économie annuelle vs autre option", value: result.savingsCHF, tone: "primary" },
     { label: "RFR estimé (EUR)", value: result.rfrEUR },
-    { label: "Abattement (25% PASS, EUR)", value: result.abatementEUR },
+    { label: `Abattement ${input.taxYear} (EUR)`, value: result.abatementEUR },
   ]);
 
   pdf.section("Profil");
