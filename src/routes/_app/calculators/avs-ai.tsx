@@ -138,6 +138,58 @@ function AvsAiCalc() {
 
   const ageAtRetirement = form.retirementYear - form.birthYear;
 
+  // ── AI (Assurance Invalidité) ──────────────────────────────────────────
+  // Bonifications calculées sur l'âge ACTUEL des enfants (situation réelle au
+  // moment de l'évaluation d'invalidité), pas projection future à 16 ans.
+  const childrenElapsedYears = useMemo(() => {
+    const kids = parseChildren(bundle?.client.children);
+    if (kids.length === 0) return null;
+    let total = 0;
+    for (const k of kids) {
+      const a = ageFromDob(k.date_of_birth);
+      if (a === null) continue;
+      total += Math.max(0, Math.min(16, a));
+    }
+    return total;
+  }, [bundle]);
+
+  // Overrides éditables (utile en mode standalone). Si client lié → préremplit.
+  const [aiEduYears, setAiEduYears] = useState<number>(0);
+  const [aiAssistYears, setAiAssistYears] = useState<number>(0);
+  const aiHydratedRef = (function () {
+    // hydrate one-shot quand children disponibles
+    useEffect(() => {
+      if (childrenElapsedYears !== null) setAiEduYears(childrenElapsedYears);
+      // assistance : on prend ce que l'utilisateur a saisi côté AVS comme défaut
+      setAiAssistYears(form.assistanceYears);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [childrenElapsedYears]);
+    return null;
+  })();
+  void aiHydratedRef;
+
+  const aiProjection = useMemo(
+    () =>
+      projectAvsPension({
+        status: "single",
+        primary: {
+          birthYear: form.birthYear,
+          gender: form.gender,
+          contributionStartYear: form.contributionStartYear,
+          // Pour l'AI, la rente est figée sur la situation présente : on tronque
+          // la carrière à l'année courante.
+          retirementYear: currentYear,
+          averageAnnualIncome: form.averageAnnualIncome,
+          departureYear: null,
+          educationalYears: aiEduYears,
+          educationalShare: form.educationalShare,
+          assistanceYears: aiAssistYears,
+          assistanceShare: form.assistanceShare,
+        },
+      }),
+    [form, aiEduYears, aiAssistYears, currentYear],
+  );
+
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: t("calc.avs.step.welcome.t"), body: t("calc.avs.step.welcome.b") },
