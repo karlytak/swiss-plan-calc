@@ -200,8 +200,14 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
     });
 
     const gross = computeGrossForRegime(g, det.regime);
-    const totalTax = crossBorder.totalTax; // impôt uniquement
+    const totalTax = crossBorder.totalTax;
     const social = health.recommendedAnnualCHF;
+    const cbNotes = [...crossBorder.notes];
+    if (det.regime === "cross_border_ge") {
+      cbNotes.push(
+        "Part étrangère : estimation du résidu d'impôt français après crédit (à valider avec la déclaration FR effective).",
+      );
+    }
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
@@ -215,7 +221,7 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       foreignShareCHF: crossBorder.foreignTax,
       effectiveRate: rate(totalTax, gross),
       marginalRate: crossBorder.marginalRate,
-      notes: [...notes, ...crossBorder.notes],
+      notes: [...notes, ...cbNotes],
     };
   }
 
