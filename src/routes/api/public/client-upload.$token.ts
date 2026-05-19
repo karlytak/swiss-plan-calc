@@ -129,12 +129,12 @@ export const Route = createFileRoute("/api/public/client-upload/$token")({
 
         const { data: docId, error: regErr } = await supabaseAdmin.rpc("register_client_upload", {
           _token: token,
-          _category: category as "attestation_lpp",
+          _category: category as Parameters<typeof supabaseAdmin.rpc>[1] extends infer _ ? never : never,
           _original_filename: safeName,
           _storage_path: storagePath,
           _mime_type: file.type,
           _size_bytes: file.size,
-        });
+        } as never);
         if (regErr) {
           // Rollback storage file
           await supabaseAdmin.storage.from("client-documents").remove([storagePath]);
