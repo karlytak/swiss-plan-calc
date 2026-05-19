@@ -40,7 +40,7 @@ const searchSchema = z.object({
 
 export const Route = createFileRoute("/_app/calculators/tax-global")({
   validateSearch: zodValidator(searchSchema),
-  head: () => ({ meta: [{ title: "Calculateur Fiscal Global · SwissBroker Pro" }] }),
+  head: () => ({ meta: [{ title: "Calculateur Fiscal Global, SwissBroker Pro" }] }),
   component: TaxGlobalCalc,
 });
 
