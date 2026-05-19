@@ -24,15 +24,30 @@ const PRIORITY_LABEL: Record<Optimization["priority"], string> = {
   low: "À considérer",
 };
 
+export type Pillar3bContext = {
+  canton?: string | null;
+  civilStatus?: string | null;
+  taxStatus?:
+    | "resident"
+    | "source_taxed"
+    | "cross_border_fr_1983"
+    | "cross_border_ge"
+    | "tou"
+    | null;
+};
+
 export function OptimizationsPanel({
   optimizations,
   title = "Suggestions d'optimisation",
   emptyHint,
+  canton,
+  civilStatus,
+  taxStatus,
 }: {
   optimizations: Optimization[];
   title?: string;
   emptyHint?: string;
-}) {
+} & Pillar3bContext) {
   const totalSavings = optimizations.reduce((s, o) => s + o.estimatedSavings, 0);
 
   if (optimizations.length === 0) {
@@ -46,7 +61,7 @@ export function OptimizationsPanel({
               "Renseignez davantage d'informations (LPP, 3a, fortune, canton) pour obtenir des recommandations chiffrées."}
           </p>
         </div>
-        <Pillar3bInfoTile />
+        <Pillar3bInfoTile canton={canton} civilStatus={civilStatus} taxStatus={taxStatus} />
       </div>
     );
   }
