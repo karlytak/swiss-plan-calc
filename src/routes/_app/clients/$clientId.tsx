@@ -357,7 +357,12 @@ function ClientDetailPage() {
           <TabsTrigger value="patrimoine">Patrimoine</TabsTrigger>
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1">
+            <FolderOpen className="h-3.5 w-3.5" />
+            Documents
+          </TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="session" className="mt-4">
           <SessionSummaryTab
