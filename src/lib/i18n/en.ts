@@ -1746,6 +1746,10 @@ export const en: Record<string, string> = {
   "calc.global.tile.swiss_part": "Swiss part",
   "calc.global.tile.foreign_part": "Foreign part",
   "calc.global.tile.health": "Recommended health",
+  "calc.global.badge.frontalier": "Cross-border worker",
+  "calc.global.note.cohabiting": "Cohabitation: in Switzerland, each partner is taxed separately (single-person scale). No income aggregation.",
+  "calc.global.tile.social": "Health charges (LAMal/CMU)",
+  "calc.global.tile.gross": "Gross income",
   "calc.global.scenarios.title": "Scenario comparator",
   "calc.global.scenarios.desc":
     "Every available optimisation, recomputed live on the same client file.",
