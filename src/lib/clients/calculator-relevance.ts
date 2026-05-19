@@ -8,6 +8,7 @@ export type CalcRoute =
   | "/calculators/income-tax"
   | "/calculators/source-tax"
   | "/calculators/cross-border"
+  | "/calculators/tax-global"
   | "/calculators/pillar3a"
   | "/calculators/lpp"
   | "/calculators/vested-benefits"
@@ -74,6 +75,7 @@ export function getCalculatorRelevance(c: Client, route: CalcRoute): Relevance {
 
     case "/calculators/avs-ai":
     case "/calculators/income-tax":
+    case "/calculators/tax-global":
     case "/calculators/retirement":
     case "/calculators/canton-compare":
     case "/calculators/investment-compare":
