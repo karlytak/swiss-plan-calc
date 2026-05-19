@@ -17,7 +17,9 @@ import {
   Users as UsersIcon,
   Wallet,
   Landmark,
+  FolderOpen,
 } from "lucide-react";
+import { DocumentsTab } from "@/components/clients/DocumentsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
@@ -355,7 +357,12 @@ function ClientDetailPage() {
           <TabsTrigger value="patrimoine">Patrimoine</TabsTrigger>
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1">
+            <FolderOpen className="h-3.5 w-3.5" />
+            Documents
+          </TabsTrigger>
         </TabsList>
+
 
         <TabsContent value="session" className="mt-4">
           <SessionSummaryTab
@@ -610,6 +617,15 @@ function ClientDetailPage() {
             )}
           </Card>
         </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <DocumentsTab
+            clientId={clientId}
+            clientFirstName={client.first_name}
+          />
+        </TabsContent>
+
+
 
       </Tabs>
 

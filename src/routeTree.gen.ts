@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
+import { Route as ClientUploadTokenRouteImport } from './routes/client-upload.$token'
 import { Route as AppWikiRouteImport } from './routes/_app/wiki'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -41,6 +42,7 @@ import { Route as AppCalculatorsDirectorCompensationRouteImport } from './routes
 import { Route as AppCalculatorsCrossBorderRouteImport } from './routes/_app/calculators/cross-border'
 import { Route as AppCalculatorsCantonCompareRouteImport } from './routes/_app/calculators/canton-compare'
 import { Route as AppCalculatorsAvsAiRouteImport } from './routes/_app/calculators/avs-ai'
+import { Route as ApiPublicClientUploadTokenRouteImport } from './routes/api/public/client-upload.$token'
 import { Route as AppCompaniesCompanyIdEditRouteImport } from './routes/_app/companies/$companyId_.edit'
 import { Route as AppClientsClientIdScenariosRouteImport } from './routes/_app/clients/$clientId_.scenarios'
 import { Route as AppClientsClientIdEditRouteImport } from './routes/_app/clients/$clientId_.edit'
@@ -62,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
 const SharedTokenRoute = SharedTokenRouteImport.update({
   id: '/shared/$token',
   path: '/shared/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientUploadTokenRoute = ClientUploadTokenRouteImport.update({
+  id: '/client-upload/$token',
+  path: '/client-upload/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppWikiRoute = AppWikiRouteImport.update({
@@ -211,6 +218,12 @@ const AppCalculatorsAvsAiRoute = AppCalculatorsAvsAiRouteImport.update({
   path: '/avs-ai',
   getParentRoute: () => AppCalculatorsRoute,
 } as any)
+const ApiPublicClientUploadTokenRoute =
+  ApiPublicClientUploadTokenRouteImport.update({
+    id: '/api/public/client-upload/$token',
+    path: '/api/public/client-upload/$token',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const AppCompaniesCompanyIdEditRoute =
   AppCompaniesCompanyIdEditRouteImport.update({
     id: '/$companyId_/edit',
@@ -238,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -264,6 +278,7 @@ export interface FileRoutesByFullPath {
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
   '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
   '/companies/$companyId/edit': typeof AppCompaniesCompanyIdEditRoute
+  '/api/public/client-upload/$token': typeof ApiPublicClientUploadTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -272,6 +287,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -298,6 +314,7 @@ export interface FileRoutesByTo {
   '/clients/$clientId/edit': typeof AppClientsClientIdEditRoute
   '/clients/$clientId/scenarios': typeof AppClientsClientIdScenariosRoute
   '/companies/$companyId/edit': typeof AppCompaniesCompanyIdEditRoute
+  '/api/public/client-upload/$token': typeof ApiPublicClientUploadTokenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -310,6 +327,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -336,6 +354,7 @@ export interface FileRoutesById {
   '/_app/clients/$clientId_/edit': typeof AppClientsClientIdEditRoute
   '/_app/clients/$clientId_/scenarios': typeof AppClientsClientIdScenariosRoute
   '/_app/companies/$companyId_/edit': typeof AppCompaniesCompanyIdEditRoute
+  '/api/public/client-upload/$token': typeof ApiPublicClientUploadTokenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -348,6 +367,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -374,6 +394,7 @@ export interface FileRouteTypes {
     | '/clients/$clientId/edit'
     | '/clients/$clientId/scenarios'
     | '/companies/$companyId/edit'
+    | '/api/public/client-upload/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -382,6 +403,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -408,6 +430,7 @@ export interface FileRouteTypes {
     | '/clients/$clientId/edit'
     | '/clients/$clientId/scenarios'
     | '/companies/$companyId/edit'
+    | '/api/public/client-upload/$token'
   id:
     | '__root__'
     | '/'
@@ -419,6 +442,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/history'
     | '/_app/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/_app/calculators/avs-ai'
     | '/_app/calculators/canton-compare'
@@ -445,13 +469,16 @@ export interface FileRouteTypes {
     | '/_app/clients/$clientId_/edit'
     | '/_app/clients/$clientId_/scenarios'
     | '/_app/companies/$companyId_/edit'
+    | '/api/public/client-upload/$token'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ClientUploadTokenRoute: typeof ClientUploadTokenRoute
   SharedTokenRoute: typeof SharedTokenRoute
+  ApiPublicClientUploadTokenRoute: typeof ApiPublicClientUploadTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -482,6 +509,13 @@ declare module '@tanstack/react-router' {
       path: '/shared/$token'
       fullPath: '/shared/$token'
       preLoaderRoute: typeof SharedTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client-upload/$token': {
+      id: '/client-upload/$token'
+      path: '/client-upload/$token'
+      fullPath: '/client-upload/$token'
+      preLoaderRoute: typeof ClientUploadTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/wiki': {
@@ -680,6 +714,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCalculatorsAvsAiRouteImport
       parentRoute: typeof AppCalculatorsRoute
     }
+    '/api/public/client-upload/$token': {
+      id: '/api/public/client-upload/$token'
+      path: '/api/public/client-upload/$token'
+      fullPath: '/api/public/client-upload/$token'
+      preLoaderRoute: typeof ApiPublicClientUploadTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app/companies/$companyId_/edit': {
       id: '/_app/companies/$companyId_/edit'
       path: '/$companyId/edit'
@@ -800,7 +841,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  ClientUploadTokenRoute: ClientUploadTokenRoute,
   SharedTokenRoute: SharedTokenRoute,
+  ApiPublicClientUploadTokenRoute: ApiPublicClientUploadTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
