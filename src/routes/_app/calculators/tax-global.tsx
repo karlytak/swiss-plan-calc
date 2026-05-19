@@ -50,7 +50,10 @@ function TaxGlobalCalc() {
   const { client, prefill } = usePrefillFromClient(clientId, "tax-global");
 
   const [form, setForm] = useState<TaxGlobalInput>(() => createDefaultInput());
-  useHydrateFormFromPrefill(prefill as Partial<TaxGlobalInput> | null, setForm);
+  useHydrateFormFromPrefill(
+    prefill as Partial<Record<string, unknown>> | null,
+    setForm as unknown as (updater: (prev: Record<string, unknown>) => Record<string, unknown>) => void,
+  );
 
   const set = <K extends keyof TaxGlobalInput>(k: K, v: TaxGlobalInput[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
