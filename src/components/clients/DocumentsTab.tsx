@@ -86,10 +86,6 @@ function randomToken(): string {
   return Array.from(arr, (b) => b.toString(36).padStart(2, "0")).join("").slice(0, 32);
 }
 
-function fileIcon(mime: string) {
-  if (mime.startsWith("image/")) return <ImageIcon className="h-4 w-4 text-muted-foreground" />;
-  return <FileText className="h-4 w-4 text-muted-foreground" />;
-}
 
 export function DocumentsTab({
   clientId,
@@ -106,6 +102,9 @@ export function DocumentsTab({
   const [uploadCategory, setUploadCategory] = useState<DocumentCategory>("attestation_lpp");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState<string>("");
+  const [previewMime, setPreviewMime] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "name_asc" | "name_desc">("date_desc");
+  const [viewMode, setViewMode] = useState<"grouped" | "flat">("grouped");
 
   const docsQuery = useQuery({
     queryKey: ["client-documents", clientId],
@@ -237,6 +236,7 @@ export function DocumentsTab({
     }
     setPreviewUrl(data.signedUrl);
     setPreviewName(doc.original_filename);
+    setPreviewMime(doc.mime_type);
   };
 
   const downloadDoc = async (doc: DocRow) => {
@@ -254,13 +254,99 @@ export function DocumentsTab({
     ? `${window.location.origin}/client-upload/${activeLink.token}`
     : null;
 
+  const sortDocs = (arr: DocRow[]) => {
+    const copy = [...arr];
+    copy.sort((a, b) => {
+      switch (sortBy) {
+        case "date_asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "name_asc":
+          return a.original_filename.localeCompare(b.original_filename);
+        case "name_desc":
+          return b.original_filename.localeCompare(a.original_filename);
+        case "date_desc":
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+    return copy;
+  };
+
+  const allDocsSorted = sortDocs(docsQuery.data || []);
   const docsByCategory: Record<string, DocRow[]> = {};
-  for (const d of docsQuery.data || []) {
+  for (const d of allDocsSorted) {
     (docsByCategory[d.category] ||= []).push(d);
   }
 
   const totalDocs = docsQuery.data?.length || 0;
   const totalCats = Object.keys(docsByCategory).length;
+
+  const renderDocItem = (doc: DocRow, showCategory = false) => {
+    const isImage = doc.mime_type.startsWith("image/");
+    const isPdf = doc.mime_type === "application/pdf";
+    return (
+      <li
+        key={doc.id}
+        className="group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-accent/30"
+      >
+        <button
+          type="button"
+          onClick={() => openPreview(doc)}
+          className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted"
+          title="Aperçu"
+        >
+          {isImage ? (
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+          ) : isPdf ? (
+            <FileText className="h-5 w-5 text-destructive" />
+          ) : (
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          )}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium" title={doc.original_filename}>
+            {doc.original_filename}
+          </div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {showCategory && (
+              <Badge variant="outline" className="h-4 text-[10px]">
+                {CATEGORY_LABELS[doc.category] || doc.category}
+              </Badge>
+            )}
+            <span>{formatBytes(doc.size_bytes)}</span>
+            <span aria-hidden>·</span>
+            <span>{new Date(doc.created_at).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" })}</span>
+            <Badge
+              variant={doc.uploaded_by === "client_link" ? "default" : "secondary"}
+              className="h-4 text-[10px]"
+            >
+              {doc.uploaded_by === "client_link" ? "Client" : "Courtier"}
+            </Badge>
+          </div>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => openPreview(doc)} title="Aperçu">
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => downloadDoc(doc)} title="Télécharger">
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          title="Supprimer"
+          onClick={() => {
+            if (confirm(`Supprimer "${doc.original_filename}" ?`)) {
+              deleteDoc.mutate(doc);
+            }
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </li>
+    );
+  };
+
 
   return (
     <div className="space-y-6">
@@ -393,11 +479,35 @@ export function DocumentsTab({
 
       {/* Liste */}
       <Card className="p-6">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">Documents au dossier</h3>
-          <Badge variant="secondary">
-            {totalDocs} document(s) · {totalCats} catégorie(s)
-          </Badge>
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <h3 className="text-lg font-semibold">Documents au dossier</h3>
+            <Badge variant="secondary">
+              {totalDocs} document(s) · {totalCats} catégorie(s)
+            </Badge>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Select value={viewMode} onValueChange={(v) => setViewMode(v as typeof viewMode)}>
+              <SelectTrigger className="h-9 w-44">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="grouped">Grouper par catégorie</SelectItem>
+                <SelectItem value="flat">Liste complète</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={sortBy} onValueChange={(v) => setSortBy(v as typeof sortBy)}>
+              <SelectTrigger className="h-9 w-52">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="date_desc">Date (plus récent)</SelectItem>
+                <SelectItem value="date_asc">Date (plus ancien)</SelectItem>
+                <SelectItem value="name_asc">Nom (A → Z)</SelectItem>
+                <SelectItem value="name_desc">Nom (Z → A)</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         {docsQuery.isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -408,7 +518,7 @@ export function DocumentsTab({
           </div>
         )}
 
-        {totalDocs > 0 && (
+        {totalDocs > 0 && viewMode === "grouped" && (
           <Accordion type="multiple" defaultValue={Object.keys(docsByCategory)} className="w-full">
             {DOCUMENT_CATEGORIES.map((cat) => {
               const docs = docsByCategory[cat.value];
@@ -424,56 +534,18 @@ export function DocumentsTab({
                     </span>
                   </AccordionTrigger>
                   <AccordionContent>
-                    <ul className="space-y-2">
-                      {docs.map((doc) => (
-                        <li
-                          key={doc.id}
-                          className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-background p-3"
-                        >
-                          {fileIcon(doc.mime_type)}
-                          <div className="min-w-0 flex-1">
-                            <div className="truncate text-sm font-medium">
-                              {doc.original_filename}
-                            </div>
-                            <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
-                              <span>{formatBytes(doc.size_bytes)}</span>
-                              <span>·</span>
-                              <span>{new Date(doc.created_at).toLocaleString("fr-CH")}</span>
-                              <Badge
-                                variant={doc.uploaded_by === "client_link" ? "default" : "secondary"}
-                                className="ml-1 h-4 text-[10px]"
-                              >
-                                {doc.uploaded_by === "client_link" ? "Client" : "Courtier"}
-                              </Badge>
-                            </div>
-                          </div>
-                          <Button size="sm" variant="ghost" onClick={() => openPreview(doc)}>
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost" onClick={() => downloadDoc(doc)}>
-                            <Download className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="ghost"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() => {
-                              if (confirm(`Supprimer "${doc.original_filename}" ?`)) {
-                                deleteDoc.mutate(doc);
-                              }
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </li>
-                      ))}
-                    </ul>
+                    <ul className="space-y-2">{docs.map((doc) => renderDocItem(doc))}</ul>
                   </AccordionContent>
                 </AccordionItem>
               );
             })}
           </Accordion>
         )}
+
+        {totalDocs > 0 && viewMode === "flat" && (
+          <ul className="space-y-2">{allDocsSorted.map((doc) => renderDocItem(doc, true))}</ul>
+        )}
+
       </Card>
 
       {/* Dialog: générer un lien */}
@@ -534,15 +606,47 @@ export function DocumentsTab({
 
       {/* Preview modal */}
       <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle className="truncate">{previewName}</DialogTitle>
+            <DialogTitle className="truncate pr-8">{previewName}</DialogTitle>
+            <DialogDescription className="text-xs">
+              Aperçu sécurisé · lien valable 10 minutes
+            </DialogDescription>
           </DialogHeader>
           {previewUrl && (
-            <iframe src={previewUrl} className="h-[70vh] w-full rounded-md border" title={previewName} />
+            <div className="flex max-h-[75vh] items-center justify-center overflow-auto rounded-md border bg-muted/30">
+              {previewMime.startsWith("image/") ? (
+                <img
+                  src={previewUrl}
+                  alt={previewName}
+                  className="max-h-[75vh] w-auto object-contain"
+                />
+              ) : previewMime === "application/pdf" ? (
+                <iframe
+                  src={previewUrl}
+                  className="h-[75vh] w-full"
+                  title={previewName}
+                />
+              ) : (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  Aperçu indisponible pour ce type de fichier.
+                </div>
+              )}
+            </div>
           )}
+          <DialogFooter>
+            {previewUrl && (
+              <Button asChild variant="outline">
+                <a href={previewUrl} target="_blank" rel="noreferrer">
+                  <Download className="mr-2 h-4 w-4" /> Ouvrir dans un nouvel onglet
+                </a>
+              </Button>
+            )}
+            <Button onClick={() => setPreviewUrl(null)}>Fermer</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
