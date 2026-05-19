@@ -24,6 +24,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Pillar3bInfoTile } from "@/components/optimizer/OptimizationsPanel";
+import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 
 import { CANTONS } from "@/lib/swiss/cantons";
 import { formatCHF } from "@/lib/format";
@@ -624,6 +625,37 @@ function TaxGlobalCalc() {
           })}
         </div>
       </CalcCard>
+
+      <div className="flex flex-wrap justify-end gap-2">
+        <SaveSimulationButton
+          kind="tax_global"
+          inputs={form as unknown as Record<string, unknown>}
+          summary={(() => {
+            const best = scenarios
+              .filter((s) => s.id !== "baseline")
+              .reduce<{ savings: number; label: string } | null>((acc, s) => {
+                const savings = -s.deltaVsBaseline;
+                if (savings <= 0) return acc;
+                if (!acc || savings > acc.savings) return { savings, label: s.label };
+                return acc;
+              }, null);
+            return {
+              regime: result.regime,
+              regimeLabel: result.regimeLabel,
+              totalTaxCHF: result.totalTaxCHF,
+              netAnnualCHF: result.netAnnualCHF,
+              effectiveRate: result.effectiveRate,
+              marginalRate: result.marginalRate,
+              swissShareCHF: result.swissShareCHF,
+              foreignShareCHF: result.foreignShareCHF,
+              socialChargesCHF: result.socialChargesCHF,
+              bestScenarioSavings: best?.savings ?? 0,
+              bestScenarioLabel: best?.label ?? null,
+            };
+          })()}
+          defaultTitle={`Fiscal global ${form.canton} · ${result.regimeLabel}`}
+        />
+      </div>
     </div>
   );
 }

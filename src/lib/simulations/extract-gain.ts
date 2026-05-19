@@ -175,6 +175,17 @@ export function extractGain(entry: HistoryEntry): ExtractedGain {
         details: "Économie fiscale annuelle (régime frontalier 1983)",
       };
     }
+    case "tax_global": {
+      const amount = num(summary.bestScenarioSavings);
+      if (amount <= 0) return none();
+      const label = s(summary.bestScenarioLabel) ?? "Optimisation fiscale globale";
+      return {
+        type: "annual",
+        amount: Math.round(amount),
+        label,
+        details: "Économie fiscale annuelle (meilleur scénario simulé)",
+      };
+    }
     default:
       return none();
   }
