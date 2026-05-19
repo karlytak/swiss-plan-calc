@@ -106,6 +106,9 @@ export function DocumentsTab({
   const [uploadCategory, setUploadCategory] = useState<DocumentCategory>("attestation_lpp");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewName, setPreviewName] = useState<string>("");
+  const [previewMime, setPreviewMime] = useState<string>("");
+  const [sortBy, setSortBy] = useState<"date_desc" | "date_asc" | "name_asc" | "name_desc">("date_desc");
+  const [viewMode, setViewMode] = useState<"grouped" | "flat">("grouped");
 
   const docsQuery = useQuery({
     queryKey: ["client-documents", clientId],
