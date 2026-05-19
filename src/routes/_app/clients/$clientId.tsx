@@ -618,6 +618,15 @@ function ClientDetailPage() {
           </Card>
         </TabsContent>
 
+        <TabsContent value="documents" className="mt-4">
+          <DocumentsTab
+            clientId={clientId}
+            clientFirstName={client.first_name}
+          />
+        </TabsContent>
+
+
+
       </Tabs>
 
       <ArchiveConfirmDialog
