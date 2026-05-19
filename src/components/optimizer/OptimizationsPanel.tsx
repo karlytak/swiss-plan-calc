@@ -172,3 +172,30 @@ function labelize(key: string): string {
     .replace(/^./, (s) => s.toUpperCase())
     .trim();
 }
+
+function Pillar3bInfoTile() {
+  return (
+    <div
+      className="rounded-xl border border-dashed border-border bg-muted/30 p-4"
+      role="note"
+      aria-label="Information 3e pilier B"
+    >
+      <div className="flex items-start gap-3">
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+          <Info className="h-4 w-4" />
+        </div>
+        <div className="flex-1 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-2">
+            <h4 className="text-sm font-semibold">3e pilier B (assurance-vie / épargne libre)</h4>
+            <Badge variant="outline" className="text-[10px] uppercase tracking-wider">
+              Pas de scénario chiffré
+            </Badge>
+          </div>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            Le 3e pilier B n'est <strong>pas déductible au niveau fédéral (IFD)</strong>. Au niveau cantonal, les primes entrent dans un <strong>forfait global "primes d'assurance + intérêts d'épargne"</strong> plafonné (ex. GE : ~2 200 CHF seul / ~4 300 CHF couple), souvent déjà saturé par la LAMal et les intérêts bancaires. L'effet fiscal réel est donc <strong>quasi nul</strong> dans la plupart des situations, et <strong>inexistant pour un frontalier accord 1983</strong> (imposition en France). Le 3b reste pertinent pour la <strong>prévoyance, la protection des proches et la transmission</strong>, mais pas comme levier d'optimisation fiscale directe.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
