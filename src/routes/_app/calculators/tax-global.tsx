@@ -173,9 +173,7 @@ function TaxGlobalCalc() {
                     <Field label={t("calc.global.field.civil_status")}>
                       <Select
                         value={form.civilStatus}
-                    <Field label={t("calc.global.field.civil_status")}>
-                      <Select
-                        value={form.civilStatus}
+
                         onValueChange={(v) =>
                           set("civilStatus", v as TaxGlobalInput["civilStatus"])
                         }
