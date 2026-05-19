@@ -189,7 +189,7 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
     const altTotal = altSwiss + altFR;
     return {
       regime: "fr_geneva",
-      regimeLabel: "Genève · IS genevoise + rétrocession à la France",
+      regimeLabel: "Genève, IS genevoise + rétrocession à la France",
       swissTax: Math.round(swissTax),
       swissRate: Math.round((swissTax / input.grossAnnualSalary) * 1000) / 10,
       foreignTax: Math.round(frTaxChf),
