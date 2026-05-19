@@ -522,12 +522,12 @@ function CantonCompareCalc() {
           <span className="mt-0.5 text-base leading-none" aria-hidden>🇫🇷</span>
           <div className="space-y-1 text-foreground/90">
             <p>
-              <strong>Régime frontalier — accord franco-suisse 1983.</strong>{" "}
+              <strong>Régime frontalier (accord franco-suisse 1983).</strong>{" "}
               L'impôt est dû <strong>en France uniquement</strong> pour{" "}
               {accord1983Rows.map((r) => r.code).join(", ")}. Le canton suisse
               de travail ne change pas le montant
               {accord1983Identical && accord1983Sample
-                ? ` — d'où ${formatCHF(accord1983Sample.total)} (${accord1983Sample.effective}%) identique sur ces ${accord1983Rows.length} cantons.`
+                ? `, d'où ${formatCHF(accord1983Sample.total)} (${accord1983Sample.effective}%) identique sur ces ${accord1983Rows.length} cantons.`
                 : "."}
               {hasGeFrontalier && (
                 <> Seul <strong>Genève</strong> prélève à la source en Suisse (IS + 4,5% rétrocédés à la France).</>
