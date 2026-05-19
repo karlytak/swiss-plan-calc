@@ -28,11 +28,13 @@ export type Pillar3bContext = {
   canton?: string | null;
   civilStatus?: string | null;
   taxStatus?:
+    | "resident_ordinary"
     | "resident"
     | "source_taxed"
     | "cross_border_fr_1983"
     | "cross_border_ge"
     | "tou"
+    | "unknown"
     | null;
 };
 
@@ -175,7 +177,9 @@ export function OptimizationsPanel({
 
       <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
         <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
-        Suggestions calculées sur la base des barèmes fiscaux 2026 et du statut fiscal du client. Pour les cas complexes (frontaliers TOU, structures holding, revenus internationaux), valider la cohérence des hypothèses avant remise au client.
+        Suggestions calculées sur la base des barèmes fiscaux 2026 et du statut fiscal du client.
+        Pour les cas complexes (frontaliers TOU, structures holding, revenus internationaux),
+        valider la cohérence des hypothèses avant remise au client.
       </p>
     </div>
   );
@@ -206,7 +210,7 @@ function isCouple(civilStatus?: string | null): boolean {
   return civilStatus === "married" || civilStatus === "registered_partnership";
 }
 
-function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
+export function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
   const c = (canton ?? "").toUpperCase();
   const isGE = c === "GE";
   const isFR = c === "FR";
@@ -226,9 +230,7 @@ function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
       "En tant que frontalier sous l'accord 1983, votre revenu est imposé en France. Les déductions cantonales suisses (y compris 3b à GE/FR) n'ont aucun effet fiscal.";
   } else if (isGE) {
     const max = couple ? GE_LIMITS_2025.couple : GE_LIMITS_2025.single;
-    const maxSelf = couple
-      ? GE_LIMITS_2025.coupleSelfEmployed
-      : GE_LIMITS_2025.singleSelfEmployed;
+    const maxSelf = couple ? GE_LIMITS_2025.coupleSelfEmployed : GE_LIMITS_2025.singleSelfEmployed;
     statusBadge = { label: "Éligible — Genève", tone: "success" };
     statusLine = `Votre canton (GE) autorise une déduction 3b jusqu'à ${formatCHF(max)}/an${couple ? " (couple)" : " (célibataire)"}, ou ${formatCHF(maxSelf)} si indépendant. Supplément de ${formatCHF(GE_LIMITS_2025.perChild)} par enfant à charge.`;
   } else if (isFR) {
@@ -265,10 +267,11 @@ function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
         <div className="flex-1 space-y-3">
           <div className="space-y-1">
             <div className="flex flex-wrap items-center gap-2">
-              <h4 className="text-sm font-semibold">
-                3e pilier B (assurance-vie / épargne libre)
-              </h4>
-              <Badge variant="outline" className={cn("text-[10px] uppercase tracking-wider", badgeClass)}>
+              <h4 className="text-sm font-semibold">3e pilier B (assurance-vie / épargne libre)</h4>
+              <Badge
+                variant="outline"
+                className={cn("text-[10px] uppercase tracking-wider", badgeClass)}
+              >
                 {statusBadge.label}
               </Badge>
             </div>
@@ -278,10 +281,11 @@ function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
           </div>
 
           <p className="text-xs leading-relaxed text-foreground/80">
-            Le 3e pilier B n'est jamais déductible de l'impôt fédéral direct (IFD). Au niveau cantonal,
-            la plupart des cantons ne prévoient aucune déduction spécifique pour le 3b — les primes
-            entrent au mieux dans le forfait général "assurances et intérêts d'épargne", souvent déjà
-            saturé par la LAMal. Seuls Genève et Fribourg accordent une déduction dédiée, plafonnée.
+            Le 3e pilier B n'est jamais déductible de l'impôt fédéral direct (IFD). Au niveau
+            cantonal, la plupart des cantons ne prévoient aucune déduction spécifique pour le 3b —
+            les primes entrent au mieux dans le forfait général "assurances et intérêts d'épargne",
+            souvent déjà saturé par la LAMal. Seuls Genève et Fribourg accordent une déduction
+            dédiée, plafonnée.
           </p>
 
           {statusLine && (
@@ -305,9 +309,18 @@ function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
                 Genève — plafonds 2025
               </div>
               <div className="mt-1 space-y-0.5 text-[11px] text-foreground/80">
-                <div>Célibataire : {formatCHF(GE_LIMITS_2025.single)} ({formatCHF(GE_LIMITS_2025.singleSelfEmployed)} si indépendant)</div>
-                <div>Couple : {formatCHF(GE_LIMITS_2025.couple)} ({formatCHF(GE_LIMITS_2025.coupleSelfEmployed)} si indépendants)</div>
-                <div>Par enfant : {formatCHF(GE_LIMITS_2025.perChild)} ({formatCHF(GE_LIMITS_2025.perChildSelfEmployed)} si indépendants)</div>
+                <div>
+                  Célibataire : {formatCHF(GE_LIMITS_2025.single)} (
+                  {formatCHF(GE_LIMITS_2025.singleSelfEmployed)} si indépendant)
+                </div>
+                <div>
+                  Couple : {formatCHF(GE_LIMITS_2025.couple)} (
+                  {formatCHF(GE_LIMITS_2025.coupleSelfEmployed)} si indépendants)
+                </div>
+                <div>
+                  Par enfant : {formatCHF(GE_LIMITS_2025.perChild)} (
+                  {formatCHF(GE_LIMITS_2025.perChildSelfEmployed)} si indépendants)
+                </div>
               </div>
             </div>
             <div className="rounded-lg border border-border bg-card p-2.5">
@@ -322,8 +335,8 @@ function Pillar3bInfoTile({ canton, civilStatus, taxStatus }: Pillar3bContext) {
           </div>
 
           <p className="text-[11px] italic text-muted-foreground">
-            Le 3b reste pertinent pour la prévoyance, la protection des proches et la transmission, mais
-            ce n'est pas un levier d'optimisation fiscale dans la majorité des cas.
+            Le 3b reste pertinent pour la prévoyance, la protection des proches et la transmission,
+            mais ce n'est pas un levier d'optimisation fiscale dans la majorité des cas.
           </p>
         </div>
       </div>
