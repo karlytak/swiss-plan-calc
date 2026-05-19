@@ -590,8 +590,14 @@ function CantonCompareCalc() {
                 {data.map((d) => {
                   const isCheapest = cheapestRomand?.code === d.code;
                   const isRef = REFERENCE_CODES.has(d.code);
-                  const fill = isCheapest || isRef ? "var(--success)" : "var(--primary)";
-                  return <Cell key={d.code} fill={fill} fillOpacity={isRef ? 0.65 : 1} />;
+                  // ZG / SZ : couleur dédiée (accent) à pleine opacité, sinon
+                  // ils ressortaient quasi blancs à 0.65 d'opacité.
+                  const fill = isRef
+                    ? "var(--accent)"
+                    : isCheapest
+                      ? "var(--success)"
+                      : "var(--primary)";
+                  return <Cell key={d.code} fill={fill} fillOpacity={1} />;
                 })}
               </Bar>
             </BarChart>
