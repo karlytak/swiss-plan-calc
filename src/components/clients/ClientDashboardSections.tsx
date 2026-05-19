@@ -36,7 +36,7 @@ export function DashboardOverview({ dashboard, clientId }: Props) {
       <DashboardCard
         title="Charge fiscale annuelle"
         icon={Calculator}
-        detailLink={{ to: "/calculators/income-tax", search: linkSearch(clientId) }}
+        detailLink={{ to: "/calculators/tax-global", search: linkSearch(clientId) }}
       >
         {dashboard.tax ? (
           <>
@@ -180,7 +180,7 @@ export function DashboardFiscal({ dashboard, clientId }: Props) {
       <DashboardCard
         title="Charge fiscale détaillée"
         icon={Calculator}
-        detailLink={{ to: "/calculators/income-tax", search: linkSearch(clientId) }}
+        detailLink={{ to: "/calculators/tax-global", search: linkSearch(clientId) }}
       >
         {dashboard.tax ? (
           <>
