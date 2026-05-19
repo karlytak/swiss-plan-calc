@@ -13,6 +13,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
+import { Route as ClientUploadTokenRouteImport } from './routes/client-upload.$token'
 import { Route as AppWikiRouteImport } from './routes/_app/wiki'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
@@ -63,6 +64,11 @@ const IndexRoute = IndexRouteImport.update({
 const SharedTokenRoute = SharedTokenRouteImport.update({
   id: '/shared/$token',
   path: '/shared/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientUploadTokenRoute = ClientUploadTokenRouteImport.update({
+  id: '/client-upload/$token',
+  path: '/client-upload/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppWikiRoute = AppWikiRouteImport.update({
@@ -245,6 +251,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -280,6 +287,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AppDashboardRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -319,6 +327,7 @@ export interface FileRoutesById {
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/wiki': typeof AppWikiRoute
+  '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
   '/_app/calculators/canton-compare': typeof AppCalculatorsCantonCompareRoute
@@ -358,6 +367,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -393,6 +403,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/history'
     | '/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
     | '/calculators/canton-compare'
@@ -431,6 +442,7 @@ export interface FileRouteTypes {
     | '/_app/dashboard'
     | '/_app/history'
     | '/_app/wiki'
+    | '/client-upload/$token'
     | '/shared/$token'
     | '/_app/calculators/avs-ai'
     | '/_app/calculators/canton-compare'
@@ -464,6 +476,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
   AuthRoute: typeof AuthRoute
+  ClientUploadTokenRoute: typeof ClientUploadTokenRoute
   SharedTokenRoute: typeof SharedTokenRoute
   ApiPublicClientUploadTokenRoute: typeof ApiPublicClientUploadTokenRoute
 }
@@ -496,6 +509,13 @@ declare module '@tanstack/react-router' {
       path: '/shared/$token'
       fullPath: '/shared/$token'
       preLoaderRoute: typeof SharedTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client-upload/$token': {
+      id: '/client-upload/$token'
+      path: '/client-upload/$token'
+      fullPath: '/client-upload/$token'
+      preLoaderRoute: typeof ClientUploadTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app/wiki': {
@@ -821,6 +841,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
   AuthRoute: AuthRoute,
+  ClientUploadTokenRoute: ClientUploadTokenRoute,
   SharedTokenRoute: SharedTokenRoute,
   ApiPublicClientUploadTokenRoute: ApiPublicClientUploadTokenRoute,
 }
