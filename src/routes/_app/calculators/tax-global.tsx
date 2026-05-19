@@ -173,14 +173,22 @@ function TaxGlobalCalc() {
                     <Field label={t("calc.global.field.civil_status")}>
                       <Select
                         value={form.civilStatus}
+                    <Field label={t("calc.global.field.civil_status")}>
+                      <Select
+                        value={form.civilStatus}
                         onValueChange={(v) =>
-                          set("civilStatus", v as "single" | "married")
+                          set("civilStatus", v as TaxGlobalInput["civilStatus"])
                         }
                       >
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="single">Célibataire</SelectItem>
-                          <SelectItem value="married">Marié / partenariat</SelectItem>
+                          <SelectItem value="single">{t("enum.civil_status.single")}</SelectItem>
+                          <SelectItem value="married">{t("enum.civil_status.married")}</SelectItem>
+                          <SelectItem value="registered_partnership">{t("enum.civil_status.registered_partnership")}</SelectItem>
+                          <SelectItem value="cohabiting">{t("enum.civil_status.cohabiting")}</SelectItem>
+                          <SelectItem value="divorced">{t("enum.civil_status.divorced")}</SelectItem>
+                          <SelectItem value="separated">{t("enum.civil_status.separated")}</SelectItem>
+                          <SelectItem value="widowed">{t("enum.civil_status.widowed")}</SelectItem>
                         </SelectContent>
                       </Select>
                     </Field>
@@ -210,7 +218,7 @@ function TaxGlobalCalc() {
                       value={form.age ?? 40}
                       onChange={(v) => set("age", v)}
                     />
-                    {form.civilStatus === "married" && (
+                    {isCouple && (
                       <Field label={t("calc.global.field.spouse_employed")}>
                         <div className="flex h-10 items-center">
                           <Switch
@@ -221,8 +229,14 @@ function TaxGlobalCalc() {
                       </Field>
                     )}
                   </div>
+                  {isCohabiting && (
+                    <p className="mt-3 rounded-md border border-amber-500/30 bg-amber-500/5 p-2 text-xs text-amber-700 dark:text-amber-300">
+                      {t("calc.global.note.cohabiting")}
+                    </p>
+                  )}
                 </AccordionContent>
               </AccordionItem>
+
 
               <AccordionItem value="income">
                 <AccordionTrigger>{t("calc.global.section.income")}</AccordionTrigger>
