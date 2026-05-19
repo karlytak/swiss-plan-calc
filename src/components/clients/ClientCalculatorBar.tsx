@@ -2,12 +2,9 @@ import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import {
   Calculator,
-  Coins,
   Landmark,
   PiggyBank,
   Scale,
-  Globe2,
-  Receipt,
   Sun,
   Vault,
   HeartHandshake,
@@ -16,6 +13,7 @@ import {
   Info,
   ShieldPlus,
   Clock,
+  Receipt,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Client } from "@/lib/clients/types";
