@@ -135,10 +135,18 @@ export function StatTile({
     tone === "primary"
       ? "border-primary/30 bg-primary/5"
       : tone === "success"
-        ? "border-success/30 bg-success/5"
+        ? "border-success/60 bg-success/15 ring-1 ring-success/30 shadow-[0_0_0_1px_color-mix(in_oklab,var(--success)_25%,transparent)]"
         : tone === "warning"
           ? "border-warning/30 bg-warning/5"
           : "border-border bg-muted/40";
+  const valueToneCls =
+    tone === "success"
+      ? "text-success"
+      : tone === "warning"
+        ? "text-warning"
+        : tone === "primary"
+          ? "text-primary"
+          : "";
   return (
     <div
       key={value}
@@ -155,6 +163,7 @@ export function StatTile({
         className={cn(
           "mt-1 break-words font-semibold leading-tight tabular-nums transition-transform duration-300 group-hover:translate-y-[-1px]",
           big ? "text-2xl" : "text-lg sm:text-xl",
+          valueToneCls,
         )}
         title={value}
       >
