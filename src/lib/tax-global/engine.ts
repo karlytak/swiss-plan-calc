@@ -79,7 +79,7 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
     const gross = computeGrossForRegime(g, det.regime);
     if (g.foreignIncome > 0) {
       notes.push(
-        "Revenu étranger : exonéré en CH (convention) mais retenu pour le taux effectif — à reporter en déclaration.",
+        "Revenu étranger : exonéré en CH (convention) mais retenu pour le taux effectif, à reporter en déclaration.",
       );
     }
     return {
