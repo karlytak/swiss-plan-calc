@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
+import { Pillar3bInfoTile } from "@/components/optimizer/OptimizationsPanel";
 
 import { CANTONS } from "@/lib/swiss/cantons";
 import { formatCHF } from "@/lib/format";
@@ -307,48 +308,55 @@ function TaxGlobalCalc() {
               <AccordionItem value="deductions">
                 <AccordionTrigger>{t("calc.global.section.deductions")}</AccordionTrigger>
                 <AccordionContent>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <NumField
-                      label={t("calc.global.field.pillar_3a")}
-                      value={form.pillar3aContributions}
-                      onChange={(v) => set("pillar3aContributions", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.lpp_buyback")}
-                      value={form.lppBuyback}
-                      onChange={(v) => set("lppBuyback", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.mortgage")}
-                      value={form.mortgageInterest}
-                      onChange={(v) => set("mortgageInterest", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.maintenance")}
-                      value={form.realEstateMaintenance}
-                      onChange={(v) => set("realEstateMaintenance", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.health_premiums")}
-                      value={form.healthInsurancePremiums}
-                      onChange={(v) => set("healthInsurancePremiums", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.child_care")}
-                      value={form.childCareCosts}
-                      onChange={(v) => set("childCareCosts", v)}
-                      suffix="CHF"
-                    />
-                    <NumField
-                      label={t("calc.global.field.donations")}
-                      value={form.donations}
-                      onChange={(v) => set("donations", v)}
-                      suffix="CHF"
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <NumField
+                        label={t("calc.global.field.pillar_3a")}
+                        value={form.pillar3aContributions}
+                        onChange={(v) => set("pillar3aContributions", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.lpp_buyback")}
+                        value={form.lppBuyback}
+                        onChange={(v) => set("lppBuyback", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.mortgage")}
+                        value={form.mortgageInterest}
+                        onChange={(v) => set("mortgageInterest", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.maintenance")}
+                        value={form.realEstateMaintenance}
+                        onChange={(v) => set("realEstateMaintenance", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.health_premiums")}
+                        value={form.healthInsurancePremiums}
+                        onChange={(v) => set("healthInsurancePremiums", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.child_care")}
+                        value={form.childCareCosts}
+                        onChange={(v) => set("childCareCosts", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
+                        label={t("calc.global.field.donations")}
+                        value={form.donations}
+                        onChange={(v) => set("donations", v)}
+                        suffix="CHF"
+                      />
+                    </div>
+                    <Pillar3bInfoTile
+                      canton={form.canton}
+                      civilStatus={form.civilStatus}
+                      taxStatus={result.regime}
                     />
                   </div>
                 </AccordionContent>
