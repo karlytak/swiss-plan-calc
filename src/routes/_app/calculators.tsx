@@ -5,7 +5,7 @@ import { z } from "zod";
 import {
   Calculator,
   Coins,
-  Wallet,
+  
   PiggyBank,
   Landmark,
   Map,
@@ -37,8 +37,7 @@ const TABS = [
   { to: "/calculators/avs-ai", labelKey: "calc.tab.avs", icon: HeartHandshake, exact: false as boolean },
   { to: "/calculators/lpp", labelKey: "calc.tab.lpp", icon: Landmark, exact: false as boolean },
   { to: "/calculators/pillar3a", labelKey: "calc.tab.pillar3a", icon: PiggyBank, exact: false as boolean },
-  { to: "/calculators/income-tax", labelKey: "calc.tab.income_tax", icon: Coins, exact: false as boolean },
-  { to: "/calculators/source-tax", labelKey: "calc.tab.source_tax", icon: Wallet, exact: false as boolean },
+  { to: "/calculators/tax-global", labelKey: "calc.global.title", icon: Coins, exact: false as boolean },
   { to: "/calculators/canton-compare", labelKey: "calc.tab.canton_compare", icon: Map, exact: false as boolean },
   { to: "/calculators/retirement", labelKey: "calc.tab.retirement", icon: TrendingUp, exact: false as boolean },
 ] as const;
