@@ -129,7 +129,7 @@ export const Route = createFileRoute("/api/public/client-upload/$token")({
 
         const { data: docId, error: regErr } = await supabaseAdmin.rpc("register_client_upload", {
           _token: token,
-          _category: category,
+          _category: category as "attestation_lpp",
           _original_filename: safeName,
           _storage_path: storagePath,
           _mime_type: file.type,
