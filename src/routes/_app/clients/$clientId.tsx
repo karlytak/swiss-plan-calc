@@ -17,7 +17,9 @@ import {
   Users as UsersIcon,
   Wallet,
   Landmark,
+  FolderOpen,
 } from "lucide-react";
+import { DocumentsTab } from "@/components/clients/DocumentsTab";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
