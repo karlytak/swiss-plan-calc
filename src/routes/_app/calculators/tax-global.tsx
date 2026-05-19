@@ -438,7 +438,29 @@ function TaxGlobalCalc() {
                 value={result.marginalRate}
               />
             </div>
+            {isFrontalier && (
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <MoneyTile
+                  label={t("calc.global.tile.swiss_part")}
+                  value={result.swissShareCHF}
+                />
+                <MoneyTile
+                  label={t("calc.global.tile.foreign_part")}
+                  value={result.foreignShareCHF}
+                />
+                <MoneyTile
+                  label={t("calc.global.tile.social")}
+                  value={result.socialChargesCHF}
+                  tone="warning"
+                />
+                <MoneyTile
+                  label={t("calc.global.tile.gross")}
+                  value={result.grossIncomeCHF}
+                />
+              </div>
+            )}
           </CalcCard>
+
 
           {/* Breakdown — ordinaire */}
           {result.income && (
