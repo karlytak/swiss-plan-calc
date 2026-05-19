@@ -83,6 +83,87 @@ export type Database = {
           },
         ]
       }
+      client_document_links: {
+        Row: {
+          broker_id: string
+          client_id: string
+          created_at: string
+          expires_at: string
+          id: string
+          last_used_at: string | null
+          max_uploads: number
+          revoked: boolean
+          token: string
+          upload_count: number
+        }
+        Insert: {
+          broker_id: string
+          client_id: string
+          created_at?: string
+          expires_at: string
+          id?: string
+          last_used_at?: string | null
+          max_uploads?: number
+          revoked?: boolean
+          token: string
+          upload_count?: number
+        }
+        Update: {
+          broker_id?: string
+          client_id?: string
+          created_at?: string
+          expires_at?: string
+          id?: string
+          last_used_at?: string | null
+          max_uploads?: number
+          revoked?: boolean
+          token?: string
+          upload_count?: number
+        }
+        Relationships: []
+      }
+      client_documents: {
+        Row: {
+          broker_id: string
+          category: Database["public"]["Enums"]["client_document_category"]
+          client_id: string
+          created_at: string
+          id: string
+          mime_type: string
+          original_filename: string
+          size_bytes: number
+          storage_path: string
+          upload_link_id: string | null
+          uploaded_by: Database["public"]["Enums"]["client_document_source"]
+        }
+        Insert: {
+          broker_id: string
+          category: Database["public"]["Enums"]["client_document_category"]
+          client_id: string
+          created_at?: string
+          id?: string
+          mime_type: string
+          original_filename: string
+          size_bytes: number
+          storage_path: string
+          upload_link_id?: string | null
+          uploaded_by?: Database["public"]["Enums"]["client_document_source"]
+        }
+        Update: {
+          broker_id?: string
+          category?: Database["public"]["Enums"]["client_document_category"]
+          client_id?: string
+          created_at?: string
+          id?: string
+          mime_type?: string
+          original_filename?: string
+          size_bytes?: number
+          storage_path?: string
+          upload_link_id?: string | null
+          uploaded_by?: Database["public"]["Enums"]["client_document_source"]
+        }
+        Relationships: []
+      }
       client_notes: {
         Row: {
           body: string
@@ -710,8 +791,29 @@ export type Database = {
           title: string
         }[]
       }
+      get_upload_link_info: {
+        Args: { _token: string }
+        Returns: {
+          broker_display: string
+          client_first_name: string
+          expires_at: string
+          link_id: string
+          uploads_remaining: number
+        }[]
+      }
       hash_share_password: {
         Args: { _password: string; _share_id: string }
+        Returns: string
+      }
+      register_client_upload: {
+        Args: {
+          _category: Database["public"]["Enums"]["client_document_category"]
+          _mime_type: string
+          _original_filename: string
+          _size_bytes: number
+          _storage_path: string
+          _token: string
+        }
         Returns: string
       }
     }
@@ -725,6 +827,17 @@ export type Database = {
         | "divorced"
         | "widowed"
         | "separated"
+      client_document_category:
+        | "attestation_lpp"
+        | "fiche_salaire"
+        | "declaration_fiscale"
+        | "piece_identite"
+        | "police_3e_pilier"
+        | "police_lca"
+        | "certificat_avs"
+        | "documents_bancaires"
+        | "autres"
+      client_document_source: "broker" | "client_link"
       company_legal_form:
         | "sarl"
         | "sa"
@@ -921,6 +1034,18 @@ export const Constants = {
         "widowed",
         "separated",
       ],
+      client_document_category: [
+        "attestation_lpp",
+        "fiche_salaire",
+        "declaration_fiscale",
+        "piece_identite",
+        "police_3e_pilier",
+        "police_lca",
+        "certificat_avs",
+        "documents_bancaires",
+        "autres",
+      ],
+      client_document_source: ["broker", "client_link"],
       company_legal_form: ["sarl", "sa", "cooperative", "association", "other"],
       confession: [
         "none",
