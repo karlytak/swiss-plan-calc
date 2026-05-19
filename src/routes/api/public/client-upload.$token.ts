@@ -5,7 +5,15 @@ import {
   MAX_FILE_SIZE_BYTES,
   sanitizeFilename,
   DOCUMENT_CATEGORIES,
+import type { Database } from "@/integrations/supabase/types";
+import {
+  ALLOWED_MIME_TYPES,
+  MAX_FILE_SIZE_BYTES,
+  sanitizeFilename,
+  DOCUMENT_CATEGORIES,
 } from "@/lib/documents/categories";
+
+type CategoryEnum = Database["public"]["Enums"]["client_document_category"];
 
 const ALLOWED_CATEGORIES = new Set(DOCUMENT_CATEGORIES.map((c) => c.value));
 const ALLOWED_MIMES = new Set<string>(ALLOWED_MIME_TYPES);
