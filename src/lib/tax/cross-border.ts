@@ -217,7 +217,7 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
   // ===== Hors scope v1 =====
   return {
     regime: "fr_accord_45",
-    regimeLabel: `Canton ${input.workCanton} · hors scope v1`,
+    regimeLabel: `Canton ${input.workCanton} (hors scope v1)`,
     swissTax: 0,
     swissRate: 0,
     foreignTax: 0,
