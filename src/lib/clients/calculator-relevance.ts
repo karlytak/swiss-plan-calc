@@ -8,6 +8,7 @@ export type CalcRoute =
   | "/calculators/income-tax"
   | "/calculators/source-tax"
   | "/calculators/cross-border"
+  | "/calculators/tax-global"
   | "/calculators/pillar3a"
   | "/calculators/lpp"
   | "/calculators/vested-benefits"
