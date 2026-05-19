@@ -258,13 +258,99 @@ export function DocumentsTab({
     ? `${window.location.origin}/client-upload/${activeLink.token}`
     : null;
 
+  const sortDocs = (arr: DocRow[]) => {
+    const copy = [...arr];
+    copy.sort((a, b) => {
+      switch (sortBy) {
+        case "date_asc":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case "name_asc":
+          return a.original_filename.localeCompare(b.original_filename);
+        case "name_desc":
+          return b.original_filename.localeCompare(a.original_filename);
+        case "date_desc":
+        default:
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+      }
+    });
+    return copy;
+  };
+
+  const allDocsSorted = sortDocs(docsQuery.data || []);
   const docsByCategory: Record<string, DocRow[]> = {};
-  for (const d of docsQuery.data || []) {
+  for (const d of allDocsSorted) {
     (docsByCategory[d.category] ||= []).push(d);
   }
 
   const totalDocs = docsQuery.data?.length || 0;
   const totalCats = Object.keys(docsByCategory).length;
+
+  const renderDocItem = (doc: DocRow, showCategory = false) => {
+    const isImage = doc.mime_type.startsWith("image/");
+    const isPdf = doc.mime_type === "application/pdf";
+    return (
+      <li
+        key={doc.id}
+        className="group flex flex-wrap items-center gap-3 rounded-lg border border-border bg-card p-3 transition-colors hover:border-primary/40 hover:bg-accent/30"
+      >
+        <button
+          type="button"
+          onClick={() => openPreview(doc)}
+          className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-muted"
+          title="Aperçu"
+        >
+          {isImage ? (
+            <ImageIcon className="h-5 w-5 text-muted-foreground" />
+          ) : isPdf ? (
+            <FileText className="h-5 w-5 text-destructive" />
+          ) : (
+            <FileText className="h-5 w-5 text-muted-foreground" />
+          )}
+        </button>
+        <div className="min-w-0 flex-1">
+          <div className="truncate text-sm font-medium" title={doc.original_filename}>
+            {doc.original_filename}
+          </div>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
+            {showCategory && (
+              <Badge variant="outline" className="h-4 text-[10px]">
+                {CATEGORY_LABELS[doc.category] || doc.category}
+              </Badge>
+            )}
+            <span>{formatBytes(doc.size_bytes)}</span>
+            <span aria-hidden>·</span>
+            <span>{new Date(doc.created_at).toLocaleString("fr-CH", { dateStyle: "medium", timeStyle: "short" })}</span>
+            <Badge
+              variant={doc.uploaded_by === "client_link" ? "default" : "secondary"}
+              className="h-4 text-[10px]"
+            >
+              {doc.uploaded_by === "client_link" ? "Client" : "Courtier"}
+            </Badge>
+          </div>
+        </div>
+        <Button size="sm" variant="ghost" onClick={() => openPreview(doc)} title="Aperçu">
+          <Eye className="h-4 w-4" />
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => downloadDoc(doc)} title="Télécharger">
+          <Download className="h-4 w-4" />
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          title="Supprimer"
+          onClick={() => {
+            if (confirm(`Supprimer "${doc.original_filename}" ?`)) {
+              deleteDoc.mutate(doc);
+            }
+          }}
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </li>
+    );
+  };
+
 
   return (
     <div className="space-y-6">
