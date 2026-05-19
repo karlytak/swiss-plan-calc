@@ -617,7 +617,7 @@ function CantonCompareCalc() {
         <div className="mt-3 flex flex-wrap items-center gap-4 text-xs text-muted-foreground">
           <Legend color="var(--success)" label={t("calc.canton_compare.legend.cheapest")} />
           <Legend color="var(--primary)" label={t("calc.canton_compare.legend.romand")} />
-          <Legend color="var(--success)" label={t("calc.canton_compare.legend.zg")} opacity={0.65} />
+          <Legend color="var(--accent)" label={t("calc.canton_compare.legend.zg")} />
         </div>
       </CalcCard>
 
