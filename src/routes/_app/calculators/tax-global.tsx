@@ -66,6 +66,10 @@ function TaxGlobalCalc() {
   const showFrontalierBlock =
     result.regime === "cross_border_ge" || result.regime === "cross_border_fr_1983";
   const showTouBlock = result.regime === "source_taxed" || result.regime === "tou";
+  const isFrontalier = showFrontalierBlock;
+  const isCouple = form.civilStatus === "married" || form.civilStatus === "registered_partnership";
+  const isCohabiting = form.civilStatus === "cohabiting";
+
 
   return (
     <div className="space-y-6">
