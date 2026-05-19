@@ -5,7 +5,7 @@ import { z } from "zod";
 import {
   Calculator,
   Coins,
-  Wallet,
+  
   PiggyBank,
   Landmark,
   Map,
