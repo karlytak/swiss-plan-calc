@@ -1,10 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
-import {
-  ALLOWED_MIME_TYPES,
-  MAX_FILE_SIZE_BYTES,
-  sanitizeFilename,
-  DOCUMENT_CATEGORIES,
 import type { Database } from "@/integrations/supabase/types";
 import {
   ALLOWED_MIME_TYPES,
