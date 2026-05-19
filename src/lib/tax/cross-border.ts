@@ -149,6 +149,7 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
   const spouseEur = (input.spouseGrossSalary ?? 0) * eur;
   // Abattement forfaitaire 10% (frais professionnels FR)
   const taxableFR = (grossEur + spouseEur) * 0.9;
+  const marginal = frenchMarginalRate(taxableFR, input.status, children);
 
   // ===== Régime 1 : Accord 4.5% (cantons romands sauf GE) =====
   if (isFrAccordCanton(input.workCanton)) {
@@ -166,6 +167,7 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
       totalTax: Math.round(total),
       totalRate: Math.round((total / input.grossAnnualSalary) * 1000) / 10,
       netAnnual: Math.round(input.grossAnnualSalary - total),
+      marginalRate: marginal,
       notes: [
         "Retenue suisse : 4.5 % du brut, intégralement rétrocédée à la France.",
         "Imposition principale en France au barème progressif après abattement 10 %.",
@@ -177,9 +179,9 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
   // ===== Régime 2 : Genève (résident FR travaille à GE) =====
   if (input.workCanton === "GE") {
     const swissTax = genevaSourceTax(input.grossAnnualSalary, input.status, children);
-    // Imposition principale en Suisse, France garde un crédit d'impôt
-    const frTaxResidual = frenchIncomeTax(taxableFR, input.status, children) * 0.05; // marginal ~5%
-    const frTaxChf = frTaxResidual / eur;
+    // Imposition principale en Suisse, France garde un crédit d'impôt (taux effectif).
+    // Approximation : impôt FR ramené à 0 sauf si revenus FR séparés (hors scope ici).
+    const frTaxChf = 0;
     const total = swissTax + frTaxChf;
     // Comparatif : si GE était sous accord 4.5 %
     const altSwiss = input.grossAnnualSalary * 0.045;
@@ -191,14 +193,15 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
       swissTax: Math.round(swissTax),
       swissRate: Math.round((swissTax / input.grossAnnualSalary) * 1000) / 10,
       foreignTax: Math.round(frTaxChf),
-      foreignRate: Math.round((frTaxChf / input.grossAnnualSalary) * 1000) / 10,
+      foreignRate: 0,
       totalTax: Math.round(total),
       totalRate: Math.round((total / input.grossAnnualSalary) * 1000) / 10,
       netAnnual: Math.round(input.grossAnnualSalary - total),
+      marginalRate: marginal,
       notes: [
         "Genève applique sa propre imposition à la source (pas l'accord 4.5 %).",
         "GE rétrocède 3.5 % du brut au département français de résidence.",
-        "Imposition principale en CH ; la France n'impose que le revenu mondial via taux effectif.",
+        "Imposition principale en CH ; la France n'impose que via taux effectif (crédit d'impôt = impôt FR).",
         "Vérifier l'éligibilité TOU si déductions élevées (intérêts d'emprunt résidence principale, 3a).",
       ],
       alternative: {
@@ -222,9 +225,11 @@ export function computeCrossBorder(input: CrossBorderInput): CrossBorderResult {
     totalTax: 0,
     totalRate: 0,
     netAnnual: input.grossAnnualSalary,
+    marginalRate: 0,
     notes: [
       `Le canton ${input.workCanton} n'est pas couvert en v1 (Suisse romande uniquement).`,
       "Cantons disponibles v1 : GE, VD, VS, FR, NE, JU.",
     ],
   };
 }
+
