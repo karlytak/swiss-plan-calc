@@ -171,7 +171,7 @@ export function OptimizationsPanel({
         ))}
       </div>
 
-      <Pillar3bInfoTile />
+      <Pillar3bInfoTile canton={canton} civilStatus={civilStatus} taxStatus={taxStatus} />
 
       <p className="flex items-start gap-2 text-[11px] text-muted-foreground">
         <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
