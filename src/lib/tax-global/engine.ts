@@ -85,9 +85,15 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
   if (det.regime === "resident_ordinary") {
     const income = computeIncomeTax(toIncomeTaxInput(g));
     const gross = computeGrossForRegime(g, det.regime);
+    const lamal = estimateLamalCH(g);
     if (g.foreignIncome > 0) {
       notes.push(
         "Revenu étranger : exonéré en CH (convention) mais retenu pour le taux effectif, à reporter en déclaration.",
+      );
+    }
+    if (g.imputedRent > 0) {
+      notes.push(
+        "Valeur locative incluse dans le revenu imposable (impôt) mais exclue du net cash affiché.",
       );
     }
     return {
@@ -95,12 +101,12 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       regimeLabel: det.regimeLabel,
       income,
       totalTaxCHF: income.totalTax,
-      socialChargesCHF: 0,
+      socialChargesCHF: lamal,
       grossIncomeCHF: gross,
-      netAnnualCHF: Math.max(0, gross - income.totalTax),
+      netAnnualCHF: Math.max(0, gross - income.totalTax - lamal),
       swissShareCHF: income.totalTax,
       foreignShareCHF: 0,
-      effectiveRate: income.effectiveRate,
+      effectiveRate: rate(income.totalTax, gross),
       marginalRate: income.marginalRate,
       notes,
     };
