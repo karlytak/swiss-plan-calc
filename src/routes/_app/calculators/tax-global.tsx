@@ -118,7 +118,7 @@ function TaxGlobalCalc() {
                         <SelectContent>
                           {selectableCantons.map((c) => (
                             <SelectItem key={c.code} value={c.code}>
-                              {c.code} · {c.name}
+                              {c.code} {c.name}
                             </SelectItem>
                           ))}
                         </SelectContent>
