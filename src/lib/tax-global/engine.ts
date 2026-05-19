@@ -9,7 +9,7 @@ import { computeHealthFrance } from "@/lib/health-france";
 import { detectRegime, toTaxStatus, toFrenchStatus, isCoupleStatus } from "./profile";
 import type { TaxGlobalInput, TaxGlobalResult, Regime } from "./types";
 
-/** Revenu brut de référence selon le régime — utilisé pour effective rate & net. */
+/** Revenu brut cash de référence (valeur locative exclue, c'est un revenu fictif). */
 function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
   const couple = isCoupleStatus(g.civilStatus);
   switch (regime) {
@@ -19,8 +19,7 @@ function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
         g.bonus +
         (couple ? g.spouseGrossSalary : 0) +
         g.otherIncome +
-        g.rentalIncome +
-        g.imputedRent
+        g.rentalIncome
       );
     case "source_taxed":
     case "tou":
@@ -35,6 +34,15 @@ function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
     default:
       return g.grossSalary + g.bonus;
   }
+}
+
+/** Estimation rapide LAMal CH (résident) à partir des primes saisies. */
+function estimateLamalCH(g: TaxGlobalInput): number {
+  const couple = isCoupleStatus(g.civilStatus);
+  const adults = couple ? 2 : 1;
+  const adultAnnual = (g.lamalAdultMonthlyCHF || 0) * 12 * adults;
+  const childAnnual = (g.lamalChildMonthlyCHF || 0) * 12 * g.children;
+  return Math.round(adultAnnual + childAnnual);
 }
 
 export function toIncomeTaxInput(g: TaxGlobalInput): IncomeTaxInput {
