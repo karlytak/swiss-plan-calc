@@ -257,6 +257,22 @@ function CantonCompareCalc() {
   }, [data]);
   const heterogeneousRegimes = mode === "annual" && distinctRegimes.length > 1;
 
+  // Groupe "accord 1983" : cantons frontaliers FR où l'impôt est dû en France
+  // et donc identique d'un canton à l'autre.
+  const accord1983Rows = useMemo(
+    () => data.filter((d) => d.regime === "cross_border_fr_1983"),
+    [data],
+  );
+  const accord1983Sample = accord1983Rows[0];
+  const accord1983Identical =
+    accord1983Rows.length >= 2 &&
+    accord1983Rows.every((r) => r.total === accord1983Sample!.total);
+  const hasGeFrontalier = data.some((d) => d.regime === "cross_border_ge");
+  const showAccord1983Banner = mode === "annual" && accord1983Rows.length >= 2;
+  const showGeFrontalierBanner =
+    mode === "annual" && hasGeFrontalier && accord1983Rows.length >= 1;
+
+
   const referenceTax = data.find((d) => d.code === referenceCanton)?.total ?? 0;
   const cheapestRomand = useMemo(
     () =>
