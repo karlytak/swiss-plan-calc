@@ -1748,6 +1748,10 @@ export const de: Record<string, string> = {
   "calc.global.tile.swiss_part": "Schweizer Anteil",
   "calc.global.tile.foreign_part": "Ausländischer Anteil",
   "calc.global.tile.health": "Empfohlene Krankenkasse",
+  "calc.global.badge.frontalier": "Grenzgänger",
+  "calc.global.note.cohabiting": "Konkubinat: In der Schweiz wird jeder Partner separat besteuert (Tarif für Alleinstehende). Keine Einkommenszusammenrechnung.",
+  "calc.global.tile.social": "Gesundheitsabgaben (KVG/CMU)",
+  "calc.global.tile.gross": "Bruttoeinkommen",
   "calc.global.scenarios.title": "Szenarienvergleich",
   "calc.global.scenarios.desc":
     "Alle möglichen Optimierungen, in Echtzeit auf derselben Kundendatei neu berechnet.",
