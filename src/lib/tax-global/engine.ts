@@ -9,7 +9,7 @@ import { computeHealthFrance } from "@/lib/health-france";
 import { detectRegime, toTaxStatus, toFrenchStatus, isCoupleStatus } from "./profile";
 import type { TaxGlobalInput, TaxGlobalResult, Regime } from "./types";
 
-/** Revenu brut de référence selon le régime — utilisé pour effective rate & net. */
+/** Revenu brut cash de référence (valeur locative exclue, c'est un revenu fictif). */
 function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
   const couple = isCoupleStatus(g.civilStatus);
   switch (regime) {
@@ -19,8 +19,7 @@ function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
         g.bonus +
         (couple ? g.spouseGrossSalary : 0) +
         g.otherIncome +
-        g.rentalIncome +
-        g.imputedRent
+        g.rentalIncome
       );
     case "source_taxed":
     case "tou":
@@ -35,6 +34,15 @@ function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
     default:
       return g.grossSalary + g.bonus;
   }
+}
+
+/** Estimation rapide LAMal CH (résident) à partir des primes saisies. */
+function estimateLamalCH(g: TaxGlobalInput): number {
+  const couple = isCoupleStatus(g.civilStatus);
+  const adults = couple ? 2 : 1;
+  const adultAnnual = (g.lamalAdultMonthlyCHF || 0) * 12 * adults;
+  const childAnnual = (g.lamalChildMonthlyCHF || 0) * 12 * g.children;
+  return Math.round(adultAnnual + childAnnual);
 }
 
 export function toIncomeTaxInput(g: TaxGlobalInput): IncomeTaxInput {
@@ -77,9 +85,15 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
   if (det.regime === "resident_ordinary") {
     const income = computeIncomeTax(toIncomeTaxInput(g));
     const gross = computeGrossForRegime(g, det.regime);
+    const lamal = estimateLamalCH(g);
     if (g.foreignIncome > 0) {
       notes.push(
         "Revenu étranger : exonéré en CH (convention) mais retenu pour le taux effectif, à reporter en déclaration.",
+      );
+    }
+    if (g.imputedRent > 0) {
+      notes.push(
+        "Valeur locative incluse dans le revenu imposable (impôt) mais exclue du net cash affiché.",
       );
     }
     return {
@@ -87,12 +101,12 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       regimeLabel: det.regimeLabel,
       income,
       totalTaxCHF: income.totalTax,
-      socialChargesCHF: 0,
+      socialChargesCHF: lamal,
       grossIncomeCHF: gross,
-      netAnnualCHF: Math.max(0, gross - income.totalTax),
+      netAnnualCHF: Math.max(0, gross - income.totalTax - lamal),
       swissShareCHF: income.totalTax,
       foreignShareCHF: 0,
-      effectiveRate: income.effectiveRate,
+      effectiveRate: rate(income.totalTax, gross),
       marginalRate: income.marginalRate,
       notes,
     };
@@ -139,6 +153,9 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       touEligibility.eligibleForTOU && touComparison.ordinaryTax < source.annualTax;
     const total = useTOU ? touComparison.ordinaryTax : source.annualTax;
     const gross = computeGrossForRegime(g, det.regime);
+    const lamal = estimateLamalCH(g);
+    // Marginal : si TOU bénéfique → marginal ordinaire ; sinon taux IS moyen (proxy).
+    const marginal = useTOU ? touComparison.marginalRate : source.rate;
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
@@ -146,13 +163,13 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       touEligibility,
       touComparison,
       totalTaxCHF: total,
-      socialChargesCHF: 0,
+      socialChargesCHF: lamal,
       grossIncomeCHF: gross,
-      netAnnualCHF: Math.max(0, gross - total),
+      netAnnualCHF: Math.max(0, gross - total - lamal),
       swissShareCHF: total,
       foreignShareCHF: 0,
       effectiveRate: rate(total, gross),
-      marginalRate: touComparison.marginalRate,
+      marginalRate: marginal,
       notes,
     };
   }
@@ -183,8 +200,14 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
     });
 
     const gross = computeGrossForRegime(g, det.regime);
-    const totalTax = crossBorder.totalTax; // impôt uniquement
+    const totalTax = crossBorder.totalTax;
     const social = health.recommendedAnnualCHF;
+    const cbNotes = [...crossBorder.notes];
+    if (det.regime === "cross_border_ge") {
+      cbNotes.push(
+        "Part étrangère : estimation du résidu d'impôt français après crédit (à valider avec la déclaration FR effective).",
+      );
+    }
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
@@ -198,7 +221,7 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       foreignShareCHF: crossBorder.foreignTax,
       effectiveRate: rate(totalTax, gross),
       marginalRate: crossBorder.marginalRate,
-      notes: [...notes, ...crossBorder.notes],
+      notes: [...notes, ...cbNotes],
     };
   }
 
