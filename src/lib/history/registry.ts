@@ -118,8 +118,15 @@ export function extractKpis(kind: SimulationKind, summary: SummaryShape): Histor
         { label: "Heures exonérées", value: num(summary.exemptHoursRetained) },
         { label: "Heures annuelles", value: num(summary.annualHours) },
       ];
-
-
+    case "tax_global":
+      return [
+        { label: "Impôt total", value: num(summary.totalTaxCHF), unit: "CHF" },
+        { label: "Net annuel", value: num(summary.netAnnualCHF), unit: "CHF" },
+        { label: "Taux effectif", value: Number(num(summary.effectiveRate).toFixed(2)), unit: "%" },
+        { label: "Taux marginal", value: Number(num(summary.marginalRate).toFixed(2)), unit: "%" },
+        { label: "Régime", value: String(summary.regimeLabel ?? summary.regime ?? "—") },
+        { label: "Économie optimisations", value: num(summary.bestScenarioSavings), unit: "CHF" },
+      ];
   }
 }
 
@@ -280,7 +287,8 @@ export async function regeneratePdf(
     case "tou":
     case "director_compensation":
     case "health_insurance_france":
-    case "overtime": {
+    case "overtime":
+    case "tax_global": {
       // Pas de regénération PDF pour ces calculateurs (lien profond + bouton Exporter dans la fiche).
       return;
     }
