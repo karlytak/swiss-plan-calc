@@ -610,15 +610,47 @@ export function DocumentsTab({
 
       {/* Preview modal */}
       <Dialog open={!!previewUrl} onOpenChange={(o) => !o && setPreviewUrl(null)}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="max-w-5xl">
           <DialogHeader>
-            <DialogTitle className="truncate">{previewName}</DialogTitle>
+            <DialogTitle className="truncate pr-8">{previewName}</DialogTitle>
+            <DialogDescription className="text-xs">
+              Aperçu sécurisé · lien valable 10 minutes
+            </DialogDescription>
           </DialogHeader>
           {previewUrl && (
-            <iframe src={previewUrl} className="h-[70vh] w-full rounded-md border" title={previewName} />
+            <div className="flex max-h-[75vh] items-center justify-center overflow-auto rounded-md border bg-muted/30">
+              {previewMime.startsWith("image/") ? (
+                <img
+                  src={previewUrl}
+                  alt={previewName}
+                  className="max-h-[75vh] w-auto object-contain"
+                />
+              ) : previewMime === "application/pdf" ? (
+                <iframe
+                  src={previewUrl}
+                  className="h-[75vh] w-full"
+                  title={previewName}
+                />
+              ) : (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  Aperçu indisponible pour ce type de fichier.
+                </div>
+              )}
+            </div>
           )}
+          <DialogFooter>
+            {previewUrl && (
+              <Button asChild variant="outline">
+                <a href={previewUrl} target="_blank" rel="noreferrer">
+                  <Download className="mr-2 h-4 w-4" /> Ouvrir dans un nouvel onglet
+                </a>
+              </Button>
+            )}
+            <Button onClick={() => setPreviewUrl(null)}>Fermer</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
+
     </div>
   );
 }
