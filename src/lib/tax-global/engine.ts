@@ -153,6 +153,9 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       touEligibility.eligibleForTOU && touComparison.ordinaryTax < source.annualTax;
     const total = useTOU ? touComparison.ordinaryTax : source.annualTax;
     const gross = computeGrossForRegime(g, det.regime);
+    const lamal = estimateLamalCH(g);
+    // Marginal : si TOU bénéfique → marginal ordinaire ; sinon taux IS moyen (proxy).
+    const marginal = useTOU ? touComparison.marginalRate : source.rate;
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
@@ -160,13 +163,13 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       touEligibility,
       touComparison,
       totalTaxCHF: total,
-      socialChargesCHF: 0,
+      socialChargesCHF: lamal,
       grossIncomeCHF: gross,
-      netAnnualCHF: Math.max(0, gross - total),
+      netAnnualCHF: Math.max(0, gross - total - lamal),
       swissShareCHF: total,
       foreignShareCHF: 0,
       effectiveRate: rate(total, gross),
-      marginalRate: touComparison.marginalRate,
+      marginalRate: marginal,
       notes,
     };
   }
