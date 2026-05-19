@@ -579,8 +579,10 @@ function TaxGlobalCalc() {
                   isBaseline
                     ? "border-primary/50 bg-primary/5"
                     : isGain
-                      ? "border-success/40 bg-success/5"
-                      : "border-border bg-muted/30"
+                      ? "border-success/60 bg-success/15 ring-1 ring-success/30"
+                      : isCost
+                        ? "border-destructive/60 bg-destructive/10 ring-1 ring-destructive/30"
+                        : "border-border bg-muted/30"
                 }`}
               >
                 <div className="flex items-start justify-between gap-2">
@@ -588,33 +590,43 @@ function TaxGlobalCalc() {
                     <div className="text-sm font-semibold">{s.label}</div>
                     <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
                   </div>
-                  {isBaseline && (
+                  {isBaseline ? (
                     <Badge variant="outline" className="shrink-0">
                       Base
                     </Badge>
-                  )}
+                  ) : isGain ? (
+                    <Badge className="shrink-0 border-transparent bg-success text-white shadow-sm">
+                      Économie
+                    </Badge>
+                  ) : isCost ? (
+                    <Badge className="shrink-0 border-transparent bg-destructive text-white shadow-sm">
+                      Surcoût
+                    </Badge>
+                  ) : null}
                 </div>
                 <div className="mt-3 text-lg font-bold tabular-nums">
                   {formatCHF(s.result.totalTaxCHF)}
                 </div>
                 {!isBaseline && (
                   <div
-                    className={`mt-1 inline-flex items-center gap-1 text-xs font-semibold ${
+                    className={`mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-bold tabular-nums ${
                       isGain
-                        ? "text-success"
+                        ? "bg-success/25 text-success"
                         : isCost
-                          ? "text-destructive"
-                          : "text-muted-foreground"
+                          ? "bg-destructive/20 text-destructive"
+                          : "bg-muted text-muted-foreground"
                     }`}
                   >
                     {isGain ? (
-                      <TrendingDown className="h-3.5 w-3.5" />
+                      <TrendingDown className="h-4 w-4" />
                     ) : (
-                      <TrendingUp className="h-3.5 w-3.5" />
+                      <TrendingUp className="h-4 w-4" />
                     )}
-                    {isGain
-                      ? `${t("calc.global.scenarios.saves")} ${formatCHF(Math.abs(s.deltaVsBaseline))}`
-                      : `${t("calc.global.scenarios.costs")} ${formatCHF(Math.abs(s.deltaVsBaseline))}`}
+                    {isGain ? "−" : "+"}
+                    {formatCHF(Math.abs(s.deltaVsBaseline))}
+                    <span className="text-[10px] font-medium opacity-80">
+                      {isGain ? t("calc.global.scenarios.saves") : t("calc.global.scenarios.costs")}
+                    </span>
                   </div>
                 )}
                 <div className="mt-2 text-xs text-muted-foreground">
