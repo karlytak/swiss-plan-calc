@@ -43,6 +43,8 @@ export interface CrossBorderResult {
   totalTax: number;
   totalRate: number;
   netAnnual: number;
+  /** Taux marginal côté pays de résidence (% — dernière tranche FR atteinte) */
+  marginalRate: number;
   notes: string[];
   // Comparatif si plusieurs régimes possibles
   alternative?: {
