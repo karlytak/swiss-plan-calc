@@ -99,6 +99,25 @@ function frenchIncomeTax(taxableEur: number, status: "single" | "married", child
   return Math.max(0, tax * parts);
 }
 
+/** Taux marginal FR (% — taux de la tranche atteinte par revenu/part). */
+function frenchMarginalRate(taxableEur: number, status: "single" | "married", children: number): number {
+  let parts = status === "married" ? 2 : 1;
+  parts += children >= 3 ? 1 + (children - 1) : children * 0.5;
+  const perPart = taxableEur / parts;
+  const brackets = [
+    { upTo: 11_497, rate: 0 },
+    { upTo: 29_315, rate: 11 },
+    { upTo: 83_823, rate: 30 },
+    { upTo: 180_294, rate: 41 },
+    { upTo: Infinity, rate: 45 },
+  ];
+  for (const b of brackets) {
+    if (perPart <= b.upTo) return b.rate;
+  }
+  return 45;
+}
+
+
 /** Approximation impôt à la source GE pour résidents français */
 function genevaSourceTax(grossAnnual: number, status: "single" | "married", children: number): number {
   // GE est l'un des cantons à fiscalité élevée à la source.
