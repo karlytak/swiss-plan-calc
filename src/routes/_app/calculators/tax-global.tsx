@@ -389,14 +389,20 @@ function TaxGlobalCalc() {
                       <NumField
                         label={t("calc.global.field.eur_chf")}
                         value={form.eurChfRate}
-                        onChange={(v) => set("eurChfRate", v)}
+                        onChange={(v) => {
+                          const eurChf = v || 0.95;
+                          setForm((f) => ({
+                            ...f,
+                            eurChfRate: eurChf,
+                            // Maintien automatique de la cohérence :
+                            // 1 EUR = X CHF  ⇒  1 CHF = 1/X EUR
+                            chfToEurRate: eurChf > 0
+                              ? Math.round((1 / eurChf) * 10000) / 10000
+                              : f.chfToEurRate,
+                          }));
+                        }}
                         step={0.01}
-                      />
-                      <NumField
-                        label={t("calc.global.field.chf_eur")}
-                        value={form.chfToEurRate}
-                        onChange={(v) => set("chfToEurRate", v)}
-                        step={0.01}
+                        tip="1 EUR = X CHF. La valeur 1 CHF = X EUR est dérivée automatiquement."
                       />
                       <NumField
                         label={t("calc.global.field.tax_year")}
