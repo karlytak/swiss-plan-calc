@@ -31,6 +31,7 @@ import {
   WORK_STATUS_LABELS,
   LPP_PLAN_LABELS,
   SOURCE_TAX_SCALES,
+  SELECTABLE_SOURCE_TAX_SCALES,
   SOURCE_TAX_SCALE_LABELS,
   GENDER_LABELS,
   type CivilStatus,
@@ -707,11 +708,20 @@ function StepFiscal({ form, update, errors }: StepProps) {
               <SelectValue placeholder={t("wizard.field.source_scale.placeholder")} />
             </SelectTrigger>
             <SelectContent>
-              {SOURCE_TAX_SCALES.map((s) => (
+              {SELECTABLE_SOURCE_TAX_SCALES.map((s) => (
                 <SelectItem key={s} value={s}>
                   {SOURCE_TAX_SCALE_LABELS[s]}
                 </SelectItem>
               ))}
+              {form.source_tax_scale &&
+                !SELECTABLE_SOURCE_TAX_SCALES.includes(
+                  form.source_tax_scale as (typeof SELECTABLE_SOURCE_TAX_SCALES)[number],
+                ) &&
+                SOURCE_TAX_SCALES.includes(form.source_tax_scale as SourceTaxScale) && (
+                  <SelectItem value={form.source_tax_scale}>
+                    {SOURCE_TAX_SCALE_LABELS[form.source_tax_scale as SourceTaxScale]} — legacy
+                  </SelectItem>
+                )}
             </SelectContent>
           </Select>
         </Field>
