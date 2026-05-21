@@ -854,109 +854,21 @@ function TaxGlobalCalc() {
       {/* TRANSPARENCE — comment ce résultat est calculé */}
       <TaxGlobalExplanation form={form} result={result} client={client} />
 
-      {/* SCENARIOS */}
-      <CalcCard
-        title={t("calc.global.scenarios.title")}
-        description={t("calc.global.scenarios.desc")}
-      >
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {scenarios.map((s) => {
-            const isBaseline = s.id === "baseline";
-            const isGain = !isBaseline && s.deltaVsBaseline < 0;
-            const isCost = !isBaseline && s.deltaVsBaseline > 0;
-            return (
-              <div
-                key={s.id}
-                className={`rounded-xl border p-4 transition-shadow hover-lift ${
-                  isBaseline
-                    ? "border-primary/50 bg-primary/5"
-                    : isGain
-                      ? "border-success/60 bg-success/15 ring-1 ring-success/30"
-                      : isCost
-                        ? "border-destructive/60 bg-destructive/10 ring-1 ring-destructive/30"
-                        : "border-border bg-muted/30"
-                }`}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div>
-                    <div className="text-sm font-semibold">{s.label}</div>
-                    <p className="mt-0.5 text-xs text-muted-foreground">{s.description}</p>
-                  </div>
-                  {isBaseline ? (
-                    <Badge variant="outline" className="shrink-0">
-                      Base
-                    </Badge>
-                  ) : isGain ? (
-                    <Badge className="shrink-0 border-transparent bg-success text-white shadow-sm">
-                      Économie
-                    </Badge>
-                  ) : isCost ? (
-                    <Badge className="shrink-0 border-transparent bg-destructive text-white shadow-sm">
-                      Surcoût
-                    </Badge>
-                  ) : null}
-                </div>
-                <div className="mt-3 text-lg font-bold tabular-nums">
-                  {formatCHF(s.result.totalTaxCHF)}
-                </div>
-                {!isBaseline && (
-                  <div
-                    className={`mt-2 inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-sm font-bold tabular-nums ${
-                      isGain
-                        ? "bg-success/25 text-success"
-                        : isCost
-                          ? "bg-destructive/20 text-destructive"
-                          : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    {isGain ? (
-                      <TrendingDown className="h-4 w-4" />
-                    ) : (
-                      <TrendingUp className="h-4 w-4" />
-                    )}
-                    {isGain ? "−" : "+"}
-                    {formatCHF(Math.abs(s.deltaVsBaseline))}
-                    <span className="text-[10px] font-medium opacity-80">
-                      {isGain ? t("calc.global.scenarios.saves") : t("calc.global.scenarios.costs")}
-                    </span>
-                  </div>
-                )}
-                <div className="mt-2 text-xs text-muted-foreground">
-                  Net : {formatCHF(s.result.netAnnualCHF)}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </CalcCard>
-
       <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
           kind="tax_global"
           inputs={form as unknown as Record<string, unknown>}
-          summary={(() => {
-            const best = scenarios
-              .filter((s) => s.id !== "baseline")
-              .reduce<{ savings: number; label: string } | null>((acc, s) => {
-                const savings = -s.deltaVsBaseline;
-                if (savings <= 0) return acc;
-                if (!acc || savings > acc.savings) return { savings, label: s.label };
-                return acc;
-              }, null);
-            return {
-              regime: result.regime,
-              regimeLabel: result.regimeLabel,
-              totalTaxCHF: result.totalTaxCHF,
-              netAnnualCHF: result.netAnnualCHF,
-              effectiveRate: result.effectiveRate,
-              marginalRate: result.marginalRate,
-              swissShareCHF: result.swissShareCHF,
-              foreignShareCHF: result.foreignShareCHF,
-              socialChargesCHF: result.socialChargesCHF,
-              bestScenarioSavings: best?.savings ?? 0,
-              bestScenarioLabel: best?.label ?? null,
-            };
-          })()}
+          summary={{
+            regime: result.regime,
+            regimeLabel: result.regimeLabel,
+            totalTaxCHF: result.totalTaxCHF,
+            netAnnualCHF: result.netAnnualCHF,
+            effectiveRate: result.effectiveRate,
+            marginalRate: result.marginalRate,
+            swissShareCHF: result.swissShareCHF,
+            foreignShareCHF: result.foreignShareCHF,
+            socialChargesCHF: result.socialChargesCHF,
+          }}
           defaultTitle={`Fiscal global ${form.canton} · ${result.regimeLabel}`}
         />
       </div>
