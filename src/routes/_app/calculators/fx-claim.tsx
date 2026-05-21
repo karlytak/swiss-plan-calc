@@ -111,22 +111,29 @@ function FxClaimCalc() {
     setLoading(true);
     try {
       const fetched = await fetchRates({ data: { dates, currency } });
-      const map = new Map(fetched.map((r) => [r.date, r.rate]));
+      const map = new Map(fetched.map((r) => [r.date, r]));
       const missing: string[] = [];
+      const shifted: string[] = [];
       setRows((rs) =>
         rs.map((r) => {
-          const rate = map.get(r.date);
-          if (rate === null || rate === undefined) {
+          const entry = map.get(r.date);
+          if (!entry || entry.rate === null || entry.rate === undefined) {
             missing.push(r.date);
             return r;
           }
-          return { ...r, marketRate: rate };
+          if (entry.effectiveDate && entry.effectiveDate !== r.date) {
+            shifted.push(`${r.date} → ${entry.effectiveDate}`);
+          }
+          return { ...r, marketRate: entry.rate };
         }),
       );
       if (missing.length) {
         toast.warning(`Taux non récupérés pour ${missing.length} date(s) — saisie manuelle.`);
       } else {
         toast.success(`Taux ${currency}/CHF récupérés via ECB.`);
+      }
+      if (shifted.length) {
+        toast.info(`${shifted.length} date(s) repliée(s) sur le jour ouvrable précédent (week-end/férié).`);
       }
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Erreur récupération taux");
@@ -186,7 +193,16 @@ function FxClaimCalc() {
             </div>
             <div className="space-y-1.5 sm:col-span-2">
               <Label className="text-xs">
-                Taux AFC retenu — défaut {(AFC_ANNUAL_RATES[taxYear]?.[currency] ?? 0).toFixed(4)} CHF/{currency}
+                Taux AFC retenu{" "}
+                {AFC_ANNUAL_RATES[taxYear]?.[currency] != null ? (
+                  <span className="text-success">
+                    — officiel {taxYear} : {(AFC_ANNUAL_RATES[taxYear]![currency] ?? 0).toFixed(4)} CHF/{currency}
+                  </span>
+                ) : (
+                  <span className="text-warning">
+                    — taux AFC non publié pour {currency} en {taxYear}, saisir manuellement
+                  </span>
+                )}
               </Label>
               <Input
                 placeholder="Laisser vide pour utiliser le taux officiel AFC"
