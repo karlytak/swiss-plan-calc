@@ -159,7 +159,8 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       touEligibility.eligibleForTOU && touComparison.ordinaryTax < source.annualTax;
     const total = useTOU ? touComparison.ordinaryTax : source.annualTax;
     const gross = computeGrossForRegime(g, det.regime);
-    const lamal = estimateLamalCH(g);
+    // Idem résident : pas d'estimation LAMal automatique pour source/TOU (résident CH).
+    const lamal = 0;
     // Marginal : si TOU bénéfique → marginal ordinaire ; sinon taux IS moyen (proxy).
     const marginal = useTOU ? touComparison.marginalRate : source.rate;
     return {
