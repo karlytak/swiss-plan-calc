@@ -1399,7 +1399,7 @@ export const fr: Record<string, string> = {
   "wizard.field.npa": "Code postal (NPA)",
   "wizard.field.tax_status": "Statut fiscal",
   "wizard.field.source_scale": "Barème impôt à la source",
-  "wizard.field.source_scale.hint": "Sélectionner selon situation familiale",
+  "wizard.field.source_scale.hint": "Sélectionner selon situation familiale. Frontaliers France/Italie : choisir A/B/C/H et renseigner le statut fiscal ci-dessus.",
   "wizard.field.source_scale.placeholder": "Sélectionner",
   "wizard.field.confession": "Confession",
   "wizard.field.parish": "Paroisse (si pertinent)",
