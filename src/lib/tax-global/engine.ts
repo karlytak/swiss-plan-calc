@@ -88,10 +88,13 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
   if (det.regime === "resident_ordinary") {
     const income = computeIncomeTax(toIncomeTaxInput(g));
     const gross = computeGrossForRegime(g, det.regime);
-    const lamal = estimateLamalCH(g);
+    // Pas d'estimation LAMal automatique pour résident : les primes sont déjà
+    // déductibles via `healthInsurancePremiums` (forfait cantonal). Afficher une
+    // estimation séparée serait trompeur — laissé à 0, le net cash reste cohérent.
+    const lamal = 0;
     if (g.foreignIncome > 0) {
       notes.push(
-        "Revenu étranger : exonéré en CH (convention) mais retenu pour le taux effectif, à reporter en déclaration.",
+        "Revenu étranger : NON pris en compte dans ce calcul. À reporter manuellement en déclaration suisse pour la progressivité (méthode d'exemption avec réserve de progressivité).",
       );
     }
     if (g.imputedRent > 0) {
