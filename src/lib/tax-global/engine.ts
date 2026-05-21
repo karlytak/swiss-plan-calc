@@ -191,15 +191,43 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       eligible: touEligibility.eligibleForTOU,
     });
 
-    // KPI : prend le minimum (source ou TOU si éligible et avantageuse)
-    const useTOU =
-      touEligibility.eligibleForTOU && touComparison.ordinaryTax < source.annualTax;
-    const total = useTOU ? touComparison.ordinaryTax : source.annualTax;
+    // Total des déductions saisies par l'utilisateur (utilisé pour décider
+    // si on doit basculer l'affichage sur le scénario ordinaire).
+    const deductionsTotal =
+      (g.pillar3aContributions || 0) +
+      (g.lppBuyback || 0) +
+      (g.mortgageInterest || 0) +
+      (g.realEstateMaintenance || 0) +
+      (g.healthInsurancePremiums || 0) +
+      (g.childCareCosts || 0) +
+      (g.donations || 0) +
+      (g.pillar3bContributions || 0);
+
+    // Règle d'affichage : on prend le MIN entre source et ordinaire avec
+    // déductions, peu importe l'éligibilité TOU. Le courtier veut voir
+    // l'effet d'une déduction simulée même hors quasi-résident — la note
+    // précise la démarche requise (TOU si éligible, rectification IS sinon).
+    const useOrdinary = touComparison.ordinaryTax < source.annualTax;
+    const total = useOrdinary ? touComparison.ordinaryTax : source.annualTax;
+    if (useOrdinary && deductionsTotal > 0) {
+      if (touEligibility.eligibleForTOU) {
+        notes.push(
+          `Affichage basé sur la TOU (taxation ordinaire avec déductions) car plus avantageuse. Démarche : déposer la demande TOU avant le 31 mars ${g.taxYear + 1}.`,
+        );
+      } else {
+        notes.push(
+          `Quasi-résident NON éligible (${touEligibility.swissShare}% du revenu mondial en CH, seuil 90%). Déductions appliquées ici uniquement via démarche de rectification IS auprès du canton — sans cette demande, la retenue source brute (${source.annualTax.toLocaleString("fr-CH")} CHF) s'applique.`,
+        );
+      }
+    } else if (deductionsTotal > 0 && !useOrdinary) {
+      notes.push(
+        `Déductions saisies (${Math.round(deductionsTotal).toLocaleString("fr-CH")} CHF) insuffisantes pour battre la retenue source — IS conservée.`,
+      );
+    }
     const gross = computeGrossForRegime(g, det.regime);
     // Idem résident : pas d'estimation LAMal automatique pour source/TOU (résident CH).
     const lamal = 0;
-    // Marginal : si TOU bénéfique → marginal ordinaire ; sinon taux IS moyen (proxy).
-    const marginal = useTOU ? touComparison.marginalRate : source.rate;
+    const marginal = useOrdinary ? touComparison.marginalRate : source.rate;
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
@@ -222,15 +250,18 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
           "Impôt à la source mensuel × 12 (hors gratifications irrégulières)",
           touEligibility.eligibleForTOU
             ? `Quasi-résident : ${baseTrace.detection.swissShareOfWorldwide}% du revenu mondial en CH → TOU possible`
-            : `Quasi-résident non éligible (seuil 90% du revenu mondial en CH)`,
-          useTOU
-            ? "TOU avantageuse : impôt ordinaire avec déductions retenu comme KPI"
-            : "Source moins coûteuse que TOU : impôt à la source conservé",
+            : `Quasi-résident non éligible (seuil 90% du revenu mondial en CH) — déductions appliquées sur rectification IS uniquement`,
+          useOrdinary
+            ? "Affichage : impôt ordinaire avec déductions (plus avantageux)"
+            : "Affichage : impôt à la source (moins coûteux que l'ordinaire ici)",
+          deductionsTotal > 0
+            ? `Déductions saisies prises en compte : ${Math.round(deductionsTotal).toLocaleString("fr-CH")} CHF`
+            : "Aucune déduction saisie",
         ],
         limits: [
           "Taux IS = taux moyen (le marginal réel dépend du barème détaillé)",
           "Bonus / 13e salaire annualisés via la part fixe — vérifier le mode de prélèvement employeur",
-          "Pas de prise en compte des allocations familiales déductibles cantonales spécifiques",
+          "Pour appliquer les déductions, démarche administrative requise (TOU ou rectification IS)",
         ],
       },
     };
