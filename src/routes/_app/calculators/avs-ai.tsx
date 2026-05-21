@@ -30,6 +30,8 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useT } from "@/contexts/LanguageContext";
 import { parseChildren, ageFromDob } from "@/lib/clients/types";
+import { buildSurvivorBenefits } from "@/lib/avs/survivors";
+import { formatCHF } from "@/lib/format";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -502,6 +504,13 @@ function AvsAiCalc() {
             </p>
           </CalcCard>
 
+          <SurvivorCard
+            theoreticalAnnual={projection.primary.theoreticalAnnualPension}
+            hasSurvivingSpouse={form.isCouple}
+            childrenCount={parseChildren(bundle?.client?.children).length}
+          />
+
+
           {form.isCouple && projection.spouse && (
             <CalcCard title={t("calc.avs.detail_spouse_card")}>
               <Row>
@@ -567,3 +576,77 @@ function NumField({
     </div>
   );
 }
+
+function SurvivorCard({
+  theoreticalAnnual,
+  hasSurvivingSpouse,
+  childrenCount,
+}: {
+  theoreticalAnnual: number;
+  hasSurvivingSpouse: boolean;
+  childrenCount: number;
+}) {
+  const survivors = useMemo(
+    () =>
+      buildSurvivorBenefits({
+        deceasedTheoreticalAnnual: theoreticalAnnual,
+        hasSurvivingSpouse,
+        childrenCount,
+      }),
+    [theoreticalAnnual, hasSurvivingSpouse, childrenCount],
+  );
+
+  if (!hasSurvivingSpouse && childrenCount === 0) {
+    return (
+      <CalcCard
+        title="Décès — Rentes de survivants"
+        description="Indiquez un conjoint ou des enfants pour estimer les rentes de survivants."
+      >
+        <p className="text-xs text-muted-foreground">
+          Rente théorique vieillesse du défunt : {formatCHF(theoreticalAnnual)} / an.
+        </p>
+      </CalcCard>
+    );
+  }
+
+  return (
+    <CalcCard
+      title="Décès — Rentes de survivants AVS"
+      description="Veuf/veuve 80% · Orphelin 40% (60% si double). Plafond familial 150%."
+    >
+      <Row>
+        <MoneyTile
+          label="Total mensuel"
+          value={survivors.totalMonthly}
+          tone="primary"
+          big
+        />
+        <MoneyTile label="Total annuel" value={survivors.totalAnnual} tone="success" />
+      </Row>
+      <div className="mt-3 space-y-1.5 rounded-md border border-border/60 p-2 text-xs">
+        {survivors.widow && (
+          <div className="flex justify-between">
+            <span className="text-foreground/80">{survivors.widow.label}</span>
+            <span className="tabular-nums text-muted-foreground">
+              {formatCHF(survivors.widow.annual)} ({formatCHF(survivors.widow.monthly)} / mois)
+            </span>
+          </div>
+        )}
+        {survivors.orphans.map((o, i) => (
+          <div key={i} className="flex justify-between">
+            <span className="text-foreground/80">{o.label}</span>
+            <span className="tabular-nums text-muted-foreground">
+              {formatCHF(o.annual)} ({formatCHF(o.monthly)} / mois)
+            </span>
+          </div>
+        ))}
+      </div>
+      {survivors.cappedFamily && (
+        <p className="mt-2 rounded-md bg-warning/10 p-2 text-[11px] text-warning-foreground">
+          Plafond familial 150 % appliqué (réduction proportionnelle).
+        </p>
+      )}
+    </CalcCard>
+  );
+}
+

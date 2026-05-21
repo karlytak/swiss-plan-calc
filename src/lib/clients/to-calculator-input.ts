@@ -168,6 +168,28 @@ export function toTouInput(b: ClientBundle) {
 
 /** LPP & rachats */
 export function toLppInput(b: ClientBundle) {
+  // Rachats planifiés sauvegardés en fiche → pré-remplit actualBuyback + buybackYears
+  const plannedRaw = (b.pension as { lpp_planned_buybacks?: unknown } | null | undefined)
+    ?.lpp_planned_buybacks;
+  const planned = Array.isArray(plannedRaw)
+    ? (plannedRaw as Array<{ year?: number; amount?: number }>)
+    : [];
+  const plannedTotal = planned.reduce((s, p) => s + Number(p?.amount ?? 0), 0);
+  const plannedYears = planned.length > 0
+    ? Math.max(1, new Set(planned.map((p) => p?.year)).size)
+    : undefined;
+
+  // Hypothèses sauvegardées (rendement, frais, croissance, taux conv)
+  const a = ((b.pension as { lpp_assumptions?: unknown } | null | undefined)
+    ?.lpp_assumptions ?? null) as
+    | {
+        expectedReturnRate?: number;
+        feeRate?: number;
+        salaryGrowthRate?: number;
+        conversionRate?: number;
+      }
+    | null;
+
   return {
     canton: b.client.canton ?? undefined,
     status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
@@ -180,7 +202,12 @@ export function toLppInput(b: ClientBundle) {
     insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
     currentBalance: numOrUndef(b.pension?.lpp_current_balance),
     buybackCapacity: numOrUndef(b.pension?.lpp_max_buyback),
-    conversionRate: numOrUndef(b.pension?.lpp_conversion_rate),
+    conversionRate: a?.conversionRate ?? numOrUndef(b.pension?.lpp_conversion_rate),
+    expectedReturnRate: a?.expectedReturnRate,
+    feeRate: a?.feeRate,
+    salaryGrowthRate: a?.salaryGrowthRate,
+    actualBuyback: plannedTotal > 0 ? plannedTotal : undefined,
+    buybackYears: plannedYears,
     pillar3aContributions: numOrUndef(b.pension?.pillar_3a_annual_contribution),
     mortgageInterest: numOrUndef(b.assets?.mortgage_interest),
     realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
