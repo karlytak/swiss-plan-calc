@@ -31,6 +31,16 @@ export interface CrossBorderInput {
   spouseGrossSalary?: number;
   /** Taux de change EUR/CHF (défaut 0.95) */
   eurChfRate?: number;
+  /**
+   * Déductions FR-éligibles (en CHF, converties en EUR par le moteur).
+   * Côté France, sont déductibles de l'assiette : intérêts d'emprunt résidence
+   * principale (crédit d'impôt en pratique mais traités ici comme abattement),
+   * frais de garde, dons à organismes d'intérêt général.
+   * Le 3e pilier A / rachat LPP suisses ne sont PAS déductibles côté FR.
+   */
+  mortgageInterestCHF?: number;
+  childCareCostsCHF?: number;
+  donationsCHF?: number;
 }
 
 export interface CrossBorderResult {
