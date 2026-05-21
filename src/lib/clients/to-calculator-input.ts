@@ -436,6 +436,7 @@ export function toTaxGlobalInput(b: ClientBundle) {
     "single",
     "married",
     "registered_partnership",
+    "cohabiting",
     "divorced",
     "separated",
     "widowed",
@@ -458,9 +459,11 @@ export function toTaxGlobalInput(b: ClientBundle) {
   const imputedRent = owns && rentalValue > 0 ? rentalValue : 0;
   const rentalIncome = owns && rentalValue > 0 ? 0 : rentalValue;
 
-  // Rachat LPP : somme des rachats effectués cette année (déductible une fois).
+  // Rachat LPP année courante : rachats déjà effectués + rachats planifiés (déductibles).
   const currentYear = new Date().getFullYear();
-  const lppBuyback = sumLppBuybacksForYear(b.pension, currentYear);
+  const lppBuyback =
+    sumLppBuybacksForYear(b.pension, currentYear) +
+    sumLppPlannedForYear(b.pension, currentYear);
 
   return {
     canton: b.client.canton ?? undefined,
@@ -495,6 +498,21 @@ function sumLppBuybacksForYear(
   if (!pension?.lpp_buybacks_done) return 0;
   const arr = Array.isArray(pension.lpp_buybacks_done)
     ? (pension.lpp_buybacks_done as Array<{ year?: number; amount?: number }>)
+    : [];
+  return arr
+    .filter((b) => Number(b?.year) === year)
+    .reduce((s, b) => s + Number(b?.amount ?? 0), 0);
+}
+
+function sumLppPlannedForYear(
+  pension: ClientPension | null,
+  year: number,
+): number {
+  const raw = (pension as unknown as { lpp_planned_buybacks?: unknown } | null)
+    ?.lpp_planned_buybacks;
+  if (!raw) return 0;
+  const arr = Array.isArray(raw)
+    ? (raw as Array<{ year?: number; amount?: number }>)
     : [];
   return arr
     .filter((b) => Number(b?.year) === year)

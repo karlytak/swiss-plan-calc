@@ -13,6 +13,7 @@ export type Regime =
   | "source_taxed" // permis B/L, résident CH
   | "cross_border_ge" // frontalier travaillant à GE
   | "cross_border_fr_1983" // frontalier accord 1983
+  | "cross_border_other" // frontalier hors GE/accord 1983
   | "tou" // quasi-résident éligible TOU
   | "unknown";
 
@@ -95,4 +96,23 @@ export interface TaxGlobalResult {
   effectiveRate: number;
   marginalRate: number;
   notes: string[];
+  /** Trace pédagogique (origine régime, valeurs intermédiaires, hypothèses). */
+  trace?: TaxGlobalTrace;
+}
+
+/** Trace pédagogique pour le panneau "comment ce résultat est calculé". */
+export interface TaxGlobalTrace {
+  /** Pourquoi ce régime a été détecté. */
+  regimeReason: string;
+  /** Inputs clés utilisés pour la détection. */
+  detection: {
+    canton: string;
+    permit: string;
+    countryOfResidence: string;
+    swissShareOfWorldwide?: number; // en %, pour TOU
+  };
+  /** Hypothèses appliquées par le moteur. */
+  assumptions: string[];
+  /** Limites connues du calcul pour ce régime. */
+  limits: string[];
 }

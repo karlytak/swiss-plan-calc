@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Pillar3bInfoTile } from "@/components/optimizer/OptimizationsPanel";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
+import { TaxGlobalExplanation } from "@/components/calculators/TaxGlobalExplanation";
 
 import { CANTONS } from "@/lib/swiss/cantons";
 import { formatCHF } from "@/lib/format";
@@ -68,7 +69,9 @@ function TaxGlobalCalc() {
   const selectableCantons = CANTONS.filter((c) => c.selectable);
   const showFortune = result.regime === "resident_ordinary";
   const showFrontalierBlock =
-    result.regime === "cross_border_ge" || result.regime === "cross_border_fr_1983";
+    result.regime === "cross_border_ge" ||
+    result.regime === "cross_border_fr_1983" ||
+    result.regime === "cross_border_other";
   const showTouBlock = result.regime === "source_taxed" || result.regime === "tou";
   const isFrontalier = showFrontalierBlock;
   const isCouple = form.civilStatus === "married" || form.civilStatus === "registered_partnership";
@@ -389,14 +392,20 @@ function TaxGlobalCalc() {
                       <NumField
                         label={t("calc.global.field.eur_chf")}
                         value={form.eurChfRate}
-                        onChange={(v) => set("eurChfRate", v)}
+                        onChange={(v) => {
+                          const eurChf = v || 0.95;
+                          setForm((f) => ({
+                            ...f,
+                            eurChfRate: eurChf,
+                            // Maintien automatique de la cohérence :
+                            // 1 EUR = X CHF  ⇒  1 CHF = 1/X EUR
+                            chfToEurRate: eurChf > 0
+                              ? Math.round((1 / eurChf) * 10000) / 10000
+                              : f.chfToEurRate,
+                          }));
+                        }}
                         step={0.01}
-                      />
-                      <NumField
-                        label={t("calc.global.field.chf_eur")}
-                        value={form.chfToEurRate}
-                        onChange={(v) => set("chfToEurRate", v)}
-                        step={0.01}
+                        tip="1 EUR = X CHF. La valeur 1 CHF = X EUR est dérivée automatiquement."
                       />
                       <NumField
                         label={t("calc.global.field.tax_year")}
@@ -567,6 +576,9 @@ function TaxGlobalCalc() {
           )}
         </div>
       </div>
+
+      {/* TRANSPARENCE — comment ce résultat est calculé */}
+      <TaxGlobalExplanation form={form} result={result} client={client} />
 
       {/* SCENARIOS */}
       <CalcCard
