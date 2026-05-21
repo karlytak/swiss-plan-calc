@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
-import { Sparkles, Info, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
+import { Sparkles, Info, ArrowRight } from "lucide-react";
 
 import { CalcCard, MoneyTile, PctTile, Row, InfoLabel, HelpDot } from "@/components/calculators/CalcUI";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
