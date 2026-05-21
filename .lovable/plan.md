@@ -1,68 +1,72 @@
+## Objectif
 
-## Réponses aux 2 questions
+Dans `/calculators/tax-global`, section **Revenus**, corriger 3 problèmes :
 
-### 1. D'où viennent les 20'000 CHF de rachat LPP dans le comparateur de scénarios ?
+1. Le **total des revenus bruts** n'est pas visible — l'utilisateur ne voit pas que tout s'additionne réellement (le moteur le fait, mais l'UI ne l'affiche pas).
+2. Aucune **bulle d'info (i)** sur les champs ambigus : valeur locative, revenus étrangers, revenus locatifs, autres revenus.
+3. Les **revenus étrangers** sont saisis en CHF sans possibilité de saisir une autre devise avec conversion automatique.
 
-**Ce ne sont PAS les données de la fiche client.** C'est une **simulation hardcodée** dans `src/lib/tax-global/scenarios.ts` ligne 59 :
+## Changements UI (frontend uniquement)
 
-```ts
-const buybackTrial = 20_000;          // valeur fixe pour TOUS les clients
-if (!isFrAccord1983 && input.lppBuyback < buybackTrial) {
-  const r = computeTaxGlobal({ ...input, lppBuyback: buybackTrial });
-  out.push({ label: `+Rachat LPP 20'000 CHF`, ... });
-}
+### 1. Total cumulé affiché en direct
+Ajouter en bas de l'accordéon **Revenus** un encart récapitulatif :
 ```
-
-Le moteur prend le baseline (qui lui contient bien le rachat de la fiche client via `to-calculator-input.ts`) et ajoute **arbitrairement 20'000 CHF** pour montrer un scénario "et si je rachetais 20k ?". C'est un cas-école, pas une recommandation calibrée sur le client.
-
-**Le vrai souci** : la capacité de rachat LPP du client (`lpp_max_buyback`) est déjà connue (champ `lppBuybackCapacity` dans le profil), mais le scénario l'ignore et propose toujours 20k.
-
-**Correctif proposé** :
-- Remplacer la constante par `Math.min(20_000, lppBuybackCapacity ?? 20_000)` quand la capacité existe, sinon proposer 3 paliers (5k / 20k / capacité max).
-- Renommer le label en `+Rachat LPP <X> CHF (capacité dispo : Y)` pour rendre l'origine du chiffre transparente.
-- Ajouter une tooltip sur le scénario : *"Simulation théorique. Capacité de rachat reprise de la fiche client (lpp_max_buyback). Modifiable dans Optimisations & déductions."*
-
-### 2. Le calculateur "Réclamation taux de change" trouve-t-il le bon taux par année antérieure ?
-
-**Oui, en partie — voici exactement comment :**
-
-**Taux AFC (officiel suisse, annuel)** — `src/lib/fx/sources.ts` :
-```ts
-AFC_ANNUAL_RATES = {
-  2020: { EUR: 1.0705, USD: 0.9395, GBP: 1.2050 },
-  2021: { EUR: 1.0811, USD: 0.9145, GBP: 1.2576 },
-  2022: { EUR: 1.0047, USD: 0.9558, GBP: 1.1812 },
-  2023: { EUR: 0.9716, USD: 0.8984, GBP: 1.1175 },
-  2024: { EUR: 0.9518, USD: 0.8800, GBP: 1.1230 },
-  2025: { EUR: 0.9376, USD: 0.8500, GBP: 1.1100 },
-}
+Revenu brut total      :  XXX'XXX CHF
+  Salaire principal    :  …
+  + Bonus / 13e        :  …
+  + Salaire conjoint   :  …  (si couple)
+  + Autres revenus     :  …
+  + Revenus locatifs   :  …
+  + Valeur locative    :  …  (incluse dans l'imposable, pas dans le cash)
+  + Revenus étrangers  :  XX'XXX EUR → YY'YYY CHF (taux X.XXXX)
 ```
-→ Dès que tu changes l'année dans le menu, le taux AFC correspondant s'affiche automatiquement (EUR/USD/GBP). Couverture : **2020 → 2025 uniquement**.
+Pour confirmer visuellement que **tout s'additionne**.
 
-**Taux marché (BNS/ECB, journalier)** — bouton **"Taux BNS/ECB"** :
-- Appelle `fetchMarketRates` (server function) qui interroge `api.frankfurter.app` (proxy ECB gratuit)
-- Récupère le taux à la **date exacte** de chaque versement listé
-- Remplit automatiquement la colonne "Taux BNS/ECB" de chaque ligne
-- Affiche un toast si certaines dates n'ont pas pu être récupérées (week-end, jour férié → fallback manuel)
+### 2. Bulles d'information (icône `Info` + `Tooltip`)
+Sur chaque champ revenu, petit `i` avec explication suisse officielle :
 
-**Limites actuelles** :
-1. AFC ne couvre pas les années < 2020 ni 2026+ (à compléter quand publié).
-2. CAD, JPY, AUD ne sont pas dans la table — uniquement EUR/USD/GBP.
-3. Pas de fallback automatique BNS si Frankfurter échoue.
+- **Salaire brut** : « Salaire annuel brut figurant sur le certificat de salaire (case 1 / 8), avant déductions sociales (AVS, AI, AC, LPP). »
+- **Bonus / 13e** : « Gratifications, 13e salaire, part variable. Imposés comme le salaire ordinaire. »
+- **Autres revenus** : « Revenus accessoires : jetons de présence, indemnités, activités indépendantes secondaires, rentes imposables. »
+- **Revenus locatifs** : « Loyers nets perçus d'immeubles loués (après charges déductibles), avant entretien et intérêts hypothécaires qui s'inscrivent en déductions. »
+- **Valeur locative** : « Revenu fictif imposé pour les propriétaires occupants de leur résidence principale ou secondaire en Suisse (art. 21 LIFD). Représente le loyer que vous paieriez si vous louiez votre bien. Incluse dans le revenu imposable, mais pas dans votre cash réel. »
+- **Revenus étrangers** : « Revenus de source étrangère (salaire, dividendes, loyers d'immeubles hors CH). En Suisse, ils sont exonérés mais retenus pour la **progressivité du taux** (méthode d'exemption avec réserve de progressivité, art. 7 LIFD). À convertir en CHF au taux AFC de l'année. »
 
-**Améliorations proposées** :
-- Ajouter années **2017-2019** (rétroactif jusqu'à 5 ans = délai de prescription FR/CH).
-- Ajouter **CAD, JPY** au minimum (frontaliers, expatriés).
-- En cas d'échec Frankfurter, basculer sur **data.snb.ch** (BNS officielle) comme source secondaire.
-- Si la date tombe un week-end, prendre automatiquement le vendredi précédent (déjà standard fiscal).
+### 3. Conversion devise pour revenus étrangers
+Remplacer le champ unique `foreignIncome (CHF)` par un mini-bloc :
+- **Devise** : `Select` (CHF / EUR / USD / GBP / CAD / JPY — listes déjà dans `src/lib/fx/sources.ts`)
+- **Montant** : `NumField` dans la devise choisie
+- **Source du taux** : `Tabs` `AFC officiel ({année}) ↔ Marché du jour`
+  - AFC : lit `AFC_ANNUAL_RATES[g.taxYear][devise]`
+  - Marché : appel à `fetchMarketRates` (server fn existant, gère weekend/fallback)
+- **Affichage** : `→ XXX'XXX CHF (taux X.XXXX, source AFC 2025)` sous le champ
+- Stockage interne : conversion → push de la valeur CHF dans `form.foreignIncome` (le moteur reste inchangé)
 
-## Récap fichiers à modifier
+État local additionnel dans `tax-global.tsx` :
+```ts
+const [fxCurrency, setFxCurrency] = useState<"CHF"|"EUR"|"USD"|"GBP"|"CAD"|"JPY">("CHF");
+const [fxAmount, setFxAmount]     = useState(0);
+const [fxSource, setFxSource]     = useState<"afc"|"market">("afc");
+const [fxRate, setFxRate]         = useState<number|null>(null);
+```
+Effect : recalculer `foreignIncome` en CHF quand devise / montant / source / année change.
 
-| Fichier | Changement |
+## Détails techniques
+
+| Fichier | Modification |
 |---|---|
-| `src/lib/tax-global/scenarios.ts` | Scénario rachat LPP basé sur `lppBuybackCapacity`, label transparent |
-| `src/lib/fx/sources.ts` | Ajouter années 2017-2019, devises CAD/JPY |
-| `src/lib/fx/fetch.functions.ts` | Fallback BNS + repli vendredi précédent si week-end |
-| `src/routes/_app/calculators/fx-claim.tsx` | Badge "Taux AFC officiel <année>" + warning si année hors table |
+| `src/routes/_app/calculators/tax-global.tsx` | Ajouter `IncomeTotalsCard` sous le grid, ajouter `<Info/>` + `<Tooltip>` sur chaque `NumField` revenu, remplacer le champ `foreignIncome` par un bloc devise+montant+source+taux |
+| `src/components/calculators/IncomeTotalsCard.tsx` *(nouveau, optionnel inline)* | Petit composant qui liste chaque ligne + total, formaté `fr-CH` |
+| `src/lib/i18n/{fr,en,de,it}.ts` | Clés `calc.global.tip.gross_salary` / `.bonus` / `.other_income` / `.rental_income` / `.imputed_rent` / `.foreign_income` + `calc.global.field.foreign_currency`, `.foreign_amount`, `.fx_source_afc`, `.fx_source_market`, `.income_total` |
 
-Confirme et j'applique.
+Réutilisations existantes :
+- `Tooltip`, `TooltipTrigger`, `TooltipContent`, `TooltipProvider` → `@/components/ui/tooltip`
+- `Info` icon → `lucide-react`
+- `AFC_ANNUAL_RATES`, `SUPPORTED_CURRENCIES` → `src/lib/fx/sources.ts`
+- `fetchMarketRates` → `src/lib/fx/fetch.functions.ts`
+- `formatCHF` → `src/lib/format.ts`
+
+## Hors scope
+- Aucune modification du moteur (`engine.ts`, `income.ts`, `scenarios.ts`) — la logique d'addition existe déjà côté calcul, on rend juste l'addition visible et on convertit l'entrée.
+- Pas de changement DB / types Supabase.
+- Les autres sections (déductions, comparateur, synthèse) ne sont pas touchées.
