@@ -36,6 +36,11 @@ import { computeTaxGlobal } from "@/lib/tax-global/engine";
 import { buildScenarios } from "@/lib/tax-global/scenarios";
 import { createDefaultInput } from "@/lib/tax-global/profile";
 import type { TaxGlobalInput } from "@/lib/tax-global/types";
+import { SUPPORTED_CURRENCIES, getAfcRate, type Currency } from "@/lib/fx/sources";
+import { fetchMarketRates } from "@/lib/fx/fetch.functions";
+import { useEffect } from "react";
+
+type FxCurrency = "CHF" | Currency;
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
