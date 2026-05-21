@@ -51,6 +51,7 @@ const MODULES: ModuleDef[] = [
     links: [
       { to: "/calculators/tax-global", labelKey: "calc.global.title" },
       { to: "/calculators/overtime", labelKey: "calc.overtime.title" },
+      { to: "/calculators/fx-claim", labelKey: "calc.fx_claim.title" },
     ],
   },
   {
