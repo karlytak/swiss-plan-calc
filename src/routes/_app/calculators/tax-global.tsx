@@ -4,7 +4,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { Sparkles, Info, TrendingDown, TrendingUp, ArrowRight } from "lucide-react";
 
-import { CalcCard, MoneyTile, PctTile, Row, InfoLabel } from "@/components/calculators/CalcUI";
+import { CalcCard, MoneyTile, PctTile, Row, InfoLabel, HelpDot } from "@/components/calculators/CalcUI";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
