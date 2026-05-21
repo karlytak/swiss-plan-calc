@@ -93,6 +93,16 @@ export const LPP_PLAN_LABELS = makeI18nLabels<LppPlan>("lpp_plan", {
 export const SOURCE_TAX_SCALES = ["A", "B", "C", "H", "L", "M", "N", "P", "Q", "R", "S", "T"] as const;
 export type SourceTaxScale = (typeof SOURCE_TAX_SCALES)[number];
 
+/**
+ * Barèmes sélectionnables en V1 (scope Suisse romande : GE/VD/VS/FR/NE/JU).
+ * Les frontaliers FR/IT utilisent A/B/C/H + le statut fiscal (tax_status).
+ * Les barèmes L/M/N/P/Q (frontaliers DE) et R/S/T (artistes/sportifs/conférenciers)
+ * sont conservés dans SOURCE_TAX_SCALES pour rétrocompat affichage mais ne sont pas
+ * proposés à la saisie.
+ */
+export const SELECTABLE_SOURCE_TAX_SCALES = ["A", "B", "C", "H"] as const;
+export type SelectableSourceTaxScale = (typeof SELECTABLE_SOURCE_TAX_SCALES)[number];
+
 export const SOURCE_TAX_SCALE_LABELS: Record<SourceTaxScale, string> = {
   A: "A · Célibataire sans enfant",
   B: "B · Marié, un seul revenu",
