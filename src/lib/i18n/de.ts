@@ -136,6 +136,7 @@ export const de: Record<string, string> = {
   "nav.calculators": "Rechner",
   "nav.wiki": "Wiki & Schulung",
   "nav.history": "Verlauf",
+  "nav.feedback": "Feedback",
   "nav.account": "Mein Profil",
   "nav.signout": "Abmelden",
 
