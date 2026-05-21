@@ -61,7 +61,9 @@ export function toIncomeTaxInput(g: TaxGlobalInput): IncomeTaxInput {
     lppBuyback: g.lppBuyback,
     mortgageInterest: g.mortgageInterest,
     realEstateMaintenance: g.realEstateMaintenance,
-    healthInsurancePremiums: g.healthInsurancePremiums || undefined,
+    // 3e pilier B : agrégé aux primes d'assurance déductibles (plafond canton/IFD)
+    healthInsurancePremiums:
+      (g.healthInsurancePremiums || 0) + (g.pillar3bContributions || 0) || undefined,
     childCareCosts: g.childCareCosts,
     donations: g.donations,
     netWealth: g.netWealth,
