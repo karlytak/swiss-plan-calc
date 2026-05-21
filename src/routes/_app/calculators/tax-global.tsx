@@ -577,6 +577,9 @@ function TaxGlobalCalc() {
         </div>
       </div>
 
+      {/* TRANSPARENCE — comment ce résultat est calculé */}
+      <TaxGlobalExplanation form={form} result={result} client={client} />
+
       {/* SCENARIOS */}
       <CalcCard
         title={t("calc.global.scenarios.title")}
