@@ -25,6 +25,7 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Pillar3bInfoTile } from "@/components/optimizer/OptimizationsPanel";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
+import { TaxGlobalExplanation } from "@/components/calculators/TaxGlobalExplanation";
 
 import { CANTONS } from "@/lib/swiss/cantons";
 import { formatCHF } from "@/lib/format";
