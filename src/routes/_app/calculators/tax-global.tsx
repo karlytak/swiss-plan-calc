@@ -33,7 +33,7 @@ import { useT } from "@/contexts/LanguageContext";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 
 import { computeTaxGlobal } from "@/lib/tax-global/engine";
-import { buildScenarios } from "@/lib/tax-global/scenarios";
+
 import { createDefaultInput } from "@/lib/tax-global/profile";
 import type { TaxGlobalInput } from "@/lib/tax-global/types";
 import { SUPPORTED_CURRENCIES, getAfcRate, type Currency } from "@/lib/fx/sources";
