@@ -447,6 +447,7 @@ function ClientDetailPage() {
           {dashboard?.hasEnoughData && (
             <DashboardPension dashboard={dashboard} clientId={clientId} />
           )}
+          {bundle && <ConsolidatedBenefitsCard bundle={bundle} />}
           <div className="grid gap-4 lg:grid-cols-2">
             <Card title="2e pilier (LPP)">
               <Row label="Plan" value={pension ? LPP_PLAN_LABELS[pension.lpp_plan] : "—"} />
