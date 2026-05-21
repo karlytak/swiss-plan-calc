@@ -135,6 +135,7 @@ export const it: Record<string, string> = {
   "nav.calculators": "Calcolatori",
   "nav.wiki": "Wiki & Formazione",
   "nav.history": "Cronologia",
+  "nav.feedback": "Feedback",
   "nav.account": "Il mio profilo",
   "nav.signout": "Disconnetti",
 

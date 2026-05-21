@@ -16,6 +16,7 @@ import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 import { Route as ClientUploadTokenRouteImport } from './routes/client-upload.$token'
 import { Route as AppWikiRouteImport } from './routes/_app/wiki'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
+import { Route as AppFeedbackRouteImport } from './routes/_app/feedback'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCompaniesRouteImport } from './routes/_app/companies'
 import { Route as AppCalculatorsRouteImport } from './routes/_app/calculators'
@@ -80,6 +81,11 @@ const AppWikiRoute = AppWikiRouteImport.update({
 const AppHistoryRoute = AppHistoryRouteImport.update({
   id: '/history',
   path: '/history',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppFeedbackRoute = AppFeedbackRouteImport.update({
+  id: '/feedback',
+  path: '/feedback',
   getParentRoute: () => AppRoute,
 } as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
@@ -255,6 +261,7 @@ export interface FileRoutesByFullPath {
   '/calculators': typeof AppCalculatorsRouteWithChildren
   '/companies': typeof AppCompaniesRouteWithChildren
   '/dashboard': typeof AppDashboardRoute
+  '/feedback': typeof AppFeedbackRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
@@ -292,6 +299,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/account': typeof AppAccountRoute
   '/dashboard': typeof AppDashboardRoute
+  '/feedback': typeof AppFeedbackRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
@@ -333,6 +341,7 @@ export interface FileRoutesById {
   '/_app/calculators': typeof AppCalculatorsRouteWithChildren
   '/_app/companies': typeof AppCompaniesRouteWithChildren
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/feedback': typeof AppFeedbackRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/wiki': typeof AppWikiRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
@@ -374,6 +383,7 @@ export interface FileRouteTypes {
     | '/calculators'
     | '/companies'
     | '/dashboard'
+    | '/feedback'
     | '/history'
     | '/wiki'
     | '/client-upload/$token'
@@ -411,6 +421,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/account'
     | '/dashboard'
+    | '/feedback'
     | '/history'
     | '/wiki'
     | '/client-upload/$token'
@@ -451,6 +462,7 @@ export interface FileRouteTypes {
     | '/_app/calculators'
     | '/_app/companies'
     | '/_app/dashboard'
+    | '/_app/feedback'
     | '/_app/history'
     | '/_app/wiki'
     | '/client-upload/$token'
@@ -542,6 +554,13 @@ declare module '@tanstack/react-router' {
       path: '/history'
       fullPath: '/history'
       preLoaderRoute: typeof AppHistoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/feedback': {
+      id: '/_app/feedback'
+      path: '/feedback'
+      fullPath: '/feedback'
+      preLoaderRoute: typeof AppFeedbackRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/dashboard': {
@@ -833,6 +852,7 @@ interface AppRouteChildren {
   AppCalculatorsRoute: typeof AppCalculatorsRouteWithChildren
   AppCompaniesRoute: typeof AppCompaniesRouteWithChildren
   AppDashboardRoute: typeof AppDashboardRoute
+  AppFeedbackRoute: typeof AppFeedbackRoute
   AppHistoryRoute: typeof AppHistoryRoute
   AppWikiRoute: typeof AppWikiRoute
   AppClientsClientIdRoute: typeof AppClientsClientIdRoute
@@ -847,6 +867,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCalculatorsRoute: AppCalculatorsRouteWithChildren,
   AppCompaniesRoute: AppCompaniesRouteWithChildren,
   AppDashboardRoute: AppDashboardRoute,
+  AppFeedbackRoute: AppFeedbackRoute,
   AppHistoryRoute: AppHistoryRoute,
   AppWikiRoute: AppWikiRoute,
   AppClientsClientIdRoute: AppClientsClientIdRoute,

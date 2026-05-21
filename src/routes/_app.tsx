@@ -11,12 +11,14 @@ import {
   Menu,
   Bookmark,
   BookOpen,
+  MessageSquare,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/components/ui/sheet";
 import { useAuth } from "@/contexts/AuthContext";
 import { useT } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app")({
@@ -50,6 +52,7 @@ function AppShell() {
           <Outlet />
         </main>
       </div>
+      <FeedbackWidget />
     </div>
   );
 }
@@ -61,6 +64,7 @@ const NAV = [
   { to: "/calculators", labelKey: "nav.calculators", icon: Calculator },
   { to: "/wiki", labelKey: "nav.wiki", icon: BookOpen },
   { to: "/history", labelKey: "nav.history", icon: Bookmark },
+  { to: "/feedback", labelKey: "nav.feedback", icon: MessageSquare },
   { to: "/account", labelKey: "nav.account", icon: UserCircle },
 ] as const;
 
