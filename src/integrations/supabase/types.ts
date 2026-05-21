@@ -209,6 +209,7 @@ export type Database = {
           client_id: string
           created_at: string
           id: string
+          lpp_assumptions: Json | null
           lpp_buybacks_done: Json
           lpp_conversion_rate: number | null
           lpp_coordination_deduction: number
@@ -217,6 +218,7 @@ export type Database = {
           lpp_insured_salary: number
           lpp_max_buyback: number
           lpp_plan: Database["public"]["Enums"]["lpp_plan_type"]
+          lpp_planned_buybacks: Json
           pillar_3a_accounts: Json
           pillar_3a_annual_contribution: number
           pillar_3b_accounts: Json
@@ -230,6 +232,7 @@ export type Database = {
           client_id: string
           created_at?: string
           id?: string
+          lpp_assumptions?: Json | null
           lpp_buybacks_done?: Json
           lpp_conversion_rate?: number | null
           lpp_coordination_deduction?: number
@@ -238,6 +241,7 @@ export type Database = {
           lpp_insured_salary?: number
           lpp_max_buyback?: number
           lpp_plan?: Database["public"]["Enums"]["lpp_plan_type"]
+          lpp_planned_buybacks?: Json
           pillar_3a_accounts?: Json
           pillar_3a_annual_contribution?: number
           pillar_3b_accounts?: Json
@@ -251,6 +255,7 @@ export type Database = {
           client_id?: string
           created_at?: string
           id?: string
+          lpp_assumptions?: Json | null
           lpp_buybacks_done?: Json
           lpp_conversion_rate?: number | null
           lpp_coordination_deduction?: number
@@ -259,6 +264,7 @@ export type Database = {
           lpp_insured_salary?: number
           lpp_max_buyback?: number
           lpp_plan?: Database["public"]["Enums"]["lpp_plan_type"]
+          lpp_planned_buybacks?: Json
           pillar_3a_accounts?: Json
           pillar_3a_annual_contribution?: number
           pillar_3b_accounts?: Json
