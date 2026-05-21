@@ -360,6 +360,12 @@ function TaxGlobalCalc() {
                         suffix="CHF"
                       />
                       <NumField
+                        label="Cotisations 3e pilier B (assurance-vie / épargne libre)"
+                        value={form.pillar3bContributions}
+                        onChange={(v) => set("pillar3bContributions", v)}
+                        suffix="CHF"
+                      />
+                      <NumField
                         label={t("calc.global.field.donations")}
                         value={form.donations}
                         onChange={(v) => set("donations", v)}

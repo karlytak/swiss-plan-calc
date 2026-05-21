@@ -206,16 +206,43 @@ function LppCalc() {
       <FiscalSnapshotBanner clientId={clientId} />
       {clientId && ficheLppCapital > 0 &&
         Math.abs(projection.projectedBalance - ficheLppCapital) > 1 && (
-          <div className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-50 p-3 text-sm dark:bg-amber-950/30">
-            <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0 text-amber-600" />
-            <div className="text-foreground">
-              Cette simulation diverge de la fiche client :{" "}
-              <span className="font-semibold tabular-nums">{fmtCHF(projection.projectedBalance)}</span>{" "}
-              ici, vs{" "}
-              <span className="font-semibold tabular-nums">{fmtCHF(ficheLppCapital)}</span>{" "}
-              d'après la fiche (rendement 1,25%, sans rachat). C'est normal en
-              mode what-if : la fiche ne stocke pas les rachats planifiés.
+          <div className="flex items-start gap-3 rounded-lg border border-primary/30 bg-primary/5 p-3 text-sm">
+            <Info className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" />
+            <div className="flex-1 text-foreground">
+              <p className="font-medium">Simulation non sauvegardée</p>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Valeur ici : <span className="font-semibold tabular-nums text-foreground">{fmtCHF(projection.projectedBalance)}</span> · Fiche client : <span className="font-semibold tabular-nums text-foreground">{fmtCHF(ficheLppCapital)}</span>. Cliquez « Appliquer à la fiche » pour synchroniser.
+              </p>
             </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={async () => {
+                if (!clientId) return;
+                const planned = form.actualBuyback > 0 ? [{
+                  year: new Date().getFullYear(),
+                  amount: form.actualBuyback,
+                  label: `Rachat planifié ${form.buybackYears} an(s)`,
+                }] : [];
+                const assumptions = {
+                  expectedReturnRate: form.expectedReturnRate,
+                  feeRate: form.feeRate,
+                  salaryGrowthRate: form.salaryGrowthRate,
+                  conversionRate: form.conversionRate,
+                };
+                const { supabase } = await import("@/integrations/supabase/client");
+                await supabase
+                  .from("client_pension")
+                  .update({
+                    lpp_planned_buybacks: planned,
+                    lpp_assumptions: assumptions,
+                  } as never)
+                  .eq("client_id", clientId);
+                window.location.reload();
+              }}
+            >
+              Appliquer à la fiche
+            </Button>
           </div>
         )}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
