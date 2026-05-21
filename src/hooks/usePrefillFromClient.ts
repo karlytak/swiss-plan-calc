@@ -108,19 +108,53 @@ export function usePrefillFromClient<K extends CalculatorKind>(
 }
 
 /**
+ * Champs « identité fiscale » qui doivent toujours rester en phase avec la
+ * fiche client. Si le courtier modifie l'état civil / canton / enfants /
+ * confession dans la fiche, ces valeurs sont resynchronisées sur le
+ * calculateur (même après l'hydratation initiale). Les autres champs
+ * (salaire, hypothèses, what-if) ne sont JAMAIS écrasés après hydratation.
+ */
+const IDENTITY_FIELDS = ["status", "canton", "children", "confession"] as const;
+
+/**
  * Helper : hydrate UNE SEULE FOIS un useState form avec les valeurs prefill,
  * en ignorant les undefined (pour préserver les défauts du calculateur).
- * Les modifications "what-if" du courtier ne sont JAMAIS écrasées.
+ * Les modifications "what-if" du courtier ne sont JAMAIS écrasées —
+ * EXCEPTION : les champs identité fiscale (état civil, canton, enfants,
+ * confession) sont resynchronisés en continu depuis la fiche client.
  */
 export function useHydrateFormFromPrefill<T extends Record<string, unknown>>(
   prefill: Partial<T> | null,
   setForm: (updater: (prev: T) => T) => void,
 ) {
   const hydratedRef = useRef(false);
+  // Mémoïse les dernières valeurs identité connues pour détecter les changements.
+  const lastIdentityRef = useRef<Record<string, unknown>>({});
   useEffect(() => {
-    if (prefill && !hydratedRef.current) {
+    if (!prefill) return;
+    if (!hydratedRef.current) {
+      // 1re hydratation : on copie tout (sauf undefined).
       setForm((prev) => ({ ...prev, ...stripUndefined(prefill as Record<string, unknown>) }) as T);
       hydratedRef.current = true;
+      for (const k of IDENTITY_FIELDS) {
+        lastIdentityRef.current[k] = (prefill as Record<string, unknown>)[k];
+      }
+      return;
+    }
+    // Hydratations suivantes : on resynchronise uniquement l'identité fiscale
+    // si elle a changé côté fiche client.
+    const patch: Record<string, unknown> = {};
+    for (const k of IDENTITY_FIELDS) {
+      const next = (prefill as Record<string, unknown>)[k];
+      if (next === undefined) continue;
+      if (next !== lastIdentityRef.current[k]) {
+        patch[k] = next;
+        lastIdentityRef.current[k] = next;
+      }
+    }
+    if (Object.keys(patch).length > 0) {
+      setForm((prev) => ({ ...prev, ...patch }) as T);
     }
   }, [prefill, setForm]);
 }
+
