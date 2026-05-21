@@ -37,7 +37,10 @@ function computeGrossForRegime(g: TaxGlobalInput, regime: Regime): number {
   }
 }
 
-/** Estimation rapide LAMal CH (résident) à partir des primes saisies. */
+/** Estimation rapide LAMal CH (résident) à partir des primes saisies.
+ *  Utilisée uniquement pour le bloc santé frontalier ; pour le résident, on
+ *  laisse 0 car les primes sont déjà déduites via `healthInsurancePremiums`.
+ */
 function estimateLamalCH(g: TaxGlobalInput): number {
   const couple = isCoupleStatus(g.civilStatus);
   const adults = couple ? 2 : 1;
