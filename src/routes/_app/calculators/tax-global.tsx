@@ -497,12 +497,14 @@ function TaxGlobalCalc() {
                 value={result.totalTaxCHF}
                 tone="warning"
                 big
+                tip="Somme de l'impôt fédéral direct (IFD), cantonal, communal, ecclésiastique et — pour résident — impôt sur la fortune. N'inclut PAS les charges sociales (LAMal/CMU). Voir le panneau « Comment ce résultat est calculé » pour la chaîne complète."
               />
               <MoneyTile
                 label={t("calc.global.tile.net")}
                 value={result.netAnnualCHF}
                 tone="success"
                 big
+                tip="Revenu brut − impôt total − charges sociales (LAMal/CMU pour frontalier). La valeur locative est exclue (revenu fictif, pas du cash)."
               />
             </Row>
             <div className="mt-3 grid grid-cols-2 gap-3">
@@ -510,8 +512,13 @@ function TaxGlobalCalc() {
                 label={t("calc.global.tile.effective_rate")}
                 value={result.effectiveRate}
                 tone="primary"
+                tip="Impôt total ÷ revenu brut. Taux moyen réellement payé sur l'ensemble du revenu."
               />
-              <PctTile label={t("calc.global.tile.marginal_rate")} value={result.marginalRate} />
+              <PctTile
+                label={t("calc.global.tile.marginal_rate")}
+                value={result.marginalRate}
+                tip="Taux d'imposition du prochain franc gagné. Sert à chiffrer l'économie d'une déduction : économie ≈ déduction × taux marginal."
+              />
             </div>
             <div className="mt-3 grid grid-cols-2 gap-3">
               {isFrontalier && (
@@ -519,10 +526,12 @@ function TaxGlobalCalc() {
                   <MoneyTile
                     label={t("calc.global.tile.swiss_part")}
                     value={result.swissShareCHF}
+                    tip="Impôt prélevé en Suisse (retenue à la source, ou taxation ordinaire CH si TOU/rectification IS activée)."
                   />
                   <MoneyTile
                     label={t("calc.global.tile.foreign_part")}
                     value={result.foreignShareCHF}
+                    tip="Estimation du résidu d'impôt côté pays de résidence APRÈS application du crédit d'impôt (méthode du taux effectif). Hors GE et accord 1983, varie selon le pays."
                   />
                 </>
               )}
@@ -531,9 +540,14 @@ function TaxGlobalCalc() {
                   label={t("calc.global.tile.social")}
                   value={result.socialChargesCHF}
                   tone="warning"
+                  tip="Charges santé annuelles : CMU (8% du revenu fiscal de référence FR) ou LAMal (primes mensuelles × 12 × nb assurés). L'option recommandée minimise ce coût."
                 />
               )}
-              <MoneyTile label={t("calc.global.tile.gross")} value={result.grossIncomeCHF} />
+              <MoneyTile
+                label={t("calc.global.tile.gross")}
+                value={result.grossIncomeCHF}
+                tip="Revenu brut de référence utilisé pour les taux. Salaire + bonus + (conjoint si couple) + autres revenus + loyer perçu. Valeur locative et revenus étrangers exclus."
+              />
             </div>
           </CalcCard>
 
@@ -541,13 +555,26 @@ function TaxGlobalCalc() {
           {result.income && (
             <CalcCard>
               <div className="grid grid-cols-2 gap-3">
-                <MoneyTile label={t("calc.global.tile.federal")} value={result.income.ifd} />
+                <MoneyTile
+                  label={t("calc.global.tile.federal")}
+                  value={result.income.ifd}
+                  tip="Impôt fédéral direct (LIFD art. 36). Barème progressif fédéral appliqué au revenu imposable IFD, après déduction enfants (6 700 CHF / enfant) et rabais 259 CHF / enfant."
+                />
                 <MoneyTile
                   label={t("calc.global.tile.cantonal")}
                   value={result.income.cantonal + result.income.communal}
+                  tip={`Impôt cantonal + communal. Barème du canton ${form.canton} × coefficient cantonal × multiplicateur communal (chef-lieu par défaut tant que la commune réelle n'est pas résolue).`}
                 />
-                <MoneyTile label={t("calc.global.tile.wealth")} value={result.income.wealthTax} />
-                <MoneyTile label="Église" value={result.income.church} />
+                <MoneyTile
+                  label={t("calc.global.tile.wealth")}
+                  value={result.income.wealthTax}
+                  tip="Impôt sur la fortune nette (immobilier + titres + bancaire + véhicules − dettes). Seuils d'exonération et barèmes cantonaux. Uniquement résident ordinaire."
+                />
+                <MoneyTile
+                  label="Église"
+                  value={result.income.church}
+                  tip="Impôt ecclésiastique cantonal — appliqué uniquement si la confession est catholique ou protestante. Taux variable par canton (généralement 5–15 % de l'impôt cantonal)."
+                />
               </div>
             </CalcCard>
           )}
@@ -556,8 +583,16 @@ function TaxGlobalCalc() {
           {showTouBlock && result.source && (
             <CalcCard>
               <Row>
-                <MoneyTile label={t("calc.global.tile.source")} value={result.source.annualTax} />
-                <PctTile label="Taux IS" value={result.source.rate} />
+                <MoneyTile
+                  label={t("calc.global.tile.source")}
+                  value={result.source.annualTax}
+                  tip="Retenue à la source annuelle = (salaire mensuel × taux IS du barème) × 12. Barème déterminé par statut civil, conjoint actif et confession."
+                />
+                <PctTile
+                  label="Taux IS"
+                  value={result.source.rate}
+                  tip="Taux moyen du barème IS appliqué — le marginal réel dépend du barème détaillé du canton de travail."
+                />
               </Row>
               {result.touEligibility && (
                 <div className="mt-3 rounded-md border p-3 text-sm">
@@ -572,6 +607,7 @@ function TaxGlobalCalc() {
                     <span className="text-muted-foreground">
                       {t("calc.global.tile.swiss_part")} : {result.touEligibility.swissShare}%
                     </span>
+                    <HelpDot tip="Quasi-résident = ≥ 90 % du revenu mondial gagné en CH. Seuil requis pour demander la TOU (Taxation Ordinaire Ultérieure), qui permet d'appliquer toutes les déductions effectives (3a, rachat LPP, intérêts hypothécaires, etc.) en remplacement de la retenue source." />
                   </div>
                   {result.touComparison && (
                     <p className="mt-2 text-xs text-muted-foreground">
@@ -591,19 +627,30 @@ function TaxGlobalCalc() {
                   label={t("calc.global.tile.swiss_part")}
                   value={result.crossBorder.swissTax}
                   hint={`${result.crossBorder.swissRate}%`}
+                  tip={
+                    result.regime === "cross_border_fr_1983"
+                      ? "Retenue suisse forfaitaire de 4.5 % du brut (accord 1983), intégralement rétrocédée à la France."
+                      : "Impôt à la source genevois (barème A/B + réduction enfants) — OU impôt ordinaire CH avec déductions si TOU GE activée et plus avantageux."
+                  }
                 />
                 <MoneyTile
                   label={t("calc.global.tile.foreign_part")}
                   value={result.crossBorder.foreignTax}
                   hint={`${result.crossBorder.foreignRate}%`}
+                  tip={
+                    result.regime === "cross_border_fr_1983"
+                      ? "Impôt FR au barème progressif sur (brut × 0.9 − déductions FR-éligibles), avec quotient familial. Crédit d'impôt évite la double imposition."
+                      : "GE : impôt FR ramené à 0 (taux effectif côté FR, imposition principale en CH). Hors GE / accord 1983 : varie selon le pays."
+                  }
                 />
               </div>
               {result.health && (
                 <div className="mt-3 rounded-md border p-3 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold">
+                    <span className="flex items-center gap-1.5 font-semibold">
                       {t("calc.global.tile.health")} :{" "}
                       <span className="text-primary">{result.health.recommended}</span>
+                      <HelpDot tip="Comparaison automatique CMU (8 % du revenu fiscal FR) vs LAMal (primes mensuelles × 12 × assurés). L'option affichée est celle qui minimise le coût annuel." />
                     </span>
                     <span className="tabular-nums">
                       {formatCHF(result.health.recommendedAnnualCHF)}/an
@@ -616,6 +663,7 @@ function TaxGlobalCalc() {
               )}
             </CalcCard>
           )}
+
         </div>
       </div>
 
