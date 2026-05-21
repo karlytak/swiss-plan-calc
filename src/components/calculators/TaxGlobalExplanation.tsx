@@ -181,7 +181,7 @@ export function TaxGlobalExplanation({ form, result, client }: Props) {
             <Section icon={<ListChecks className="h-4 w-4" />} title="3. Chaîne de calcul (impôt à la source)">
               <div className="rounded-md border bg-muted/30 p-3 font-mono text-xs">
                 <CalcLine label={`Salaire mensuel brut`} value={Math.round((form.grossSalary + form.bonus) / 12)} />
-                <CalcLine label={`Barème IS appliqué`} value={NaN} text={result.source.scale ?? "—"} />
+                <CalcLine label={`Barème IS appliqué`} value={NaN} text={result.source.scaleUsed ?? "—"} />
                 <CalcLine label={`Taux IS (moyen)`} value={NaN} text={`${result.source.rate}%`} />
                 <div className="my-2 border-t" />
                 <CalcLine label="Impôt à la source annuel" value={result.source.annualTax} bold tone="warning" />
