@@ -68,7 +68,9 @@ function TaxGlobalCalc() {
   const selectableCantons = CANTONS.filter((c) => c.selectable);
   const showFortune = result.regime === "resident_ordinary";
   const showFrontalierBlock =
-    result.regime === "cross_border_ge" || result.regime === "cross_border_fr_1983";
+    result.regime === "cross_border_ge" ||
+    result.regime === "cross_border_fr_1983" ||
+    result.regime === "cross_border_other";
   const showTouBlock = result.regime === "source_taxed" || result.regime === "tou";
   const isFrontalier = showFrontalierBlock;
   const isCouple = form.civilStatus === "married" || form.civilStatus === "registered_partnership";
