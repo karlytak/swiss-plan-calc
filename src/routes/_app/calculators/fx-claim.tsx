@@ -65,16 +65,12 @@ function FxClaimCalc() {
   const [currency, setCurrency] = useState<Currency>("EUR");
   const [marginalRate, setMarginalRate] = useState<number>(28);
   const [afcOverride, setAfcOverride] = useState<string>("");
-  const [rows, setRows] = useState<FxTransaction[]>(() => {
-    const today = `${taxYear}-06-15`;
-    return [
-      { ...newRow(`${taxYear}-03-15`), amount: 8000, label: "Salaire mars" },
-      { ...newRow(`${taxYear}-06-15`), amount: 8000, label: "Salaire juin" },
-      { ...newRow(`${taxYear}-09-15`), amount: 8000, label: "Salaire septembre" },
-      { ...newRow(`${taxYear}-12-15`), amount: 8000, label: "Salaire décembre" },
-    ];
-    void today;
-  });
+  const [rows, setRows] = useState<FxTransaction[]>(() => [
+    { ...newRow(`${2024}-03-15`), amount: 8000, label: "Salaire mars" },
+    { ...newRow(`${2024}-06-15`), amount: 8000, label: "Salaire juin" },
+    { ...newRow(`${2024}-09-15`), amount: 8000, label: "Salaire septembre" },
+    { ...newRow(`${2024}-12-15`), amount: 8000, label: "Salaire décembre" },
+  ]);
   const [loading, setLoading] = useState(false);
 
   const afcRate = useMemo(() => {
