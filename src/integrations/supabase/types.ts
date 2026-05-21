@@ -776,6 +776,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_feedback: {
+        Row: {
+          broker_id: string
+          category: Database["public"]["Enums"]["feedback_category"]
+          context: Json
+          created_at: string
+          id: string
+          message: string
+          page_path: string | null
+          rating: number | null
+          status: Database["public"]["Enums"]["feedback_status"]
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          broker_id: string
+          category?: Database["public"]["Enums"]["feedback_category"]
+          context?: Json
+          created_at?: string
+          id?: string
+          message: string
+          page_path?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["feedback_status"]
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          broker_id?: string
+          category?: Database["public"]["Enums"]["feedback_category"]
+          context?: Json
+          created_at?: string
+          id?: string
+          message?: string
+          page_path?: string | null
+          rating?: number | null
+          status?: Database["public"]["Enums"]["feedback_status"]
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -857,6 +899,13 @@ export type Database = {
         | "christian_catholic"
         | "jewish"
         | "other"
+      feedback_category: "bug" | "suggestion" | "calculation" | "ux" | "other"
+      feedback_status:
+        | "new"
+        | "in_review"
+        | "planned"
+        | "resolved"
+        | "dismissed"
       gender: "male" | "female" | "other"
       lpp_plan_type: "mandatory" | "extra_mandatory" | "executive" | "mixed"
       permit_type: "none" | "B" | "C" | "L" | "Ci" | "F" | "G" | "swiss"
@@ -1061,6 +1110,8 @@ export const Constants = {
         "jewish",
         "other",
       ],
+      feedback_category: ["bug", "suggestion", "calculation", "ux", "other"],
+      feedback_status: ["new", "in_review", "planned", "resolved", "dismissed"],
       gender: ["male", "female", "other"],
       lpp_plan_type: ["mandatory", "extra_mandatory", "executive", "mixed"],
       permit_type: ["none", "B", "C", "L", "Ci", "F", "G", "swiss"],
