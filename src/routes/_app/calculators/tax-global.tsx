@@ -69,7 +69,7 @@ function TaxGlobalCalc() {
     setForm((f) => ({ ...f, [k]: v }));
 
   const result = useMemo(() => computeTaxGlobal(form), [form]);
-  const scenarios = useMemo(() => buildScenarios(form), [form]);
+  
 
   // ── Conversion devise pour revenus étrangers ──
   const [fxCurrency, setFxCurrency] = useState<FxCurrency>("CHF");
