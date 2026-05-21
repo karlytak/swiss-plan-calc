@@ -166,6 +166,7 @@ export const fr: Record<string, string> = {
   "calc.overtime.title": "Calculateur heures supp",
   "calc.overtime.desc":
     "Estime l'impact fiscal des heures supplémentaires pour les frontaliers français.",
+  "calc.fx_claim.title": "Réclamation taux de change",
   "calc.income_tax.title": "Impôt revenu & fortune",
   "calc.income_tax.desc":
     "IFD + ICC tous cantons, déductions standard suisses, taux marginal & effectif.",
