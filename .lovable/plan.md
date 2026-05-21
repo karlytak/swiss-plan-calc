@@ -1,83 +1,68 @@
 
-## Diagnostic — pourquoi les déductions ne changent rien
+## Réponses aux 2 questions
 
-J'ai relu `engine.ts`, `scenarios.ts` et `cross-border.ts`. Le bug est confirmé et il vient bien du moteur, pas de l'UI.
+### 1. D'où viennent les 20'000 CHF de rachat LPP dans le comparateur de scénarios ?
 
-**Ce qui se passe aujourd'hui selon le régime détecté :**
+**Ce ne sont PAS les données de la fiche client.** C'est une **simulation hardcodée** dans `src/lib/tax-global/scenarios.ts` ligne 59 :
 
-| Régime | LPP / 3a / hypo / santé / dons pris en compte ? |
+```ts
+const buybackTrial = 20_000;          // valeur fixe pour TOUS les clients
+if (!isFrAccord1983 && input.lppBuyback < buybackTrial) {
+  const r = computeTaxGlobal({ ...input, lppBuyback: buybackTrial });
+  out.push({ label: `+Rachat LPP 20'000 CHF`, ... });
+}
+```
+
+Le moteur prend le baseline (qui lui contient bien le rachat de la fiche client via `to-calculator-input.ts`) et ajoute **arbitrairement 20'000 CHF** pour montrer un scénario "et si je rachetais 20k ?". C'est un cas-école, pas une recommandation calibrée sur le client.
+
+**Le vrai souci** : la capacité de rachat LPP du client (`lpp_max_buyback`) est déjà connue (champ `lppBuybackCapacity` dans le profil), mais le scénario l'ignore et propose toujours 20k.
+
+**Correctif proposé** :
+- Remplacer la constante par `Math.min(20_000, lppBuybackCapacity ?? 20_000)` quand la capacité existe, sinon proposer 3 paliers (5k / 20k / capacité max).
+- Renommer le label en `+Rachat LPP <X> CHF (capacité dispo : Y)` pour rendre l'origine du chiffre transparente.
+- Ajouter une tooltip sur le scénario : *"Simulation théorique. Capacité de rachat reprise de la fiche client (lpp_max_buyback). Modifiable dans Optimisations & déductions."*
+
+### 2. Le calculateur "Réclamation taux de change" trouve-t-il le bon taux par année antérieure ?
+
+**Oui, en partie — voici exactement comment :**
+
+**Taux AFC (officiel suisse, annuel)** — `src/lib/fx/sources.ts` :
+```ts
+AFC_ANNUAL_RATES = {
+  2020: { EUR: 1.0705, USD: 0.9395, GBP: 1.2050 },
+  2021: { EUR: 1.0811, USD: 0.9145, GBP: 1.2576 },
+  2022: { EUR: 1.0047, USD: 0.9558, GBP: 1.1812 },
+  2023: { EUR: 0.9716, USD: 0.8984, GBP: 1.1175 },
+  2024: { EUR: 0.9518, USD: 0.8800, GBP: 1.1230 },
+  2025: { EUR: 0.9376, USD: 0.8500, GBP: 1.1100 },
+}
+```
+→ Dès que tu changes l'année dans le menu, le taux AFC correspondant s'affiche automatiquement (EUR/USD/GBP). Couverture : **2020 → 2025 uniquement**.
+
+**Taux marché (BNS/ECB, journalier)** — bouton **"Taux BNS/ECB"** :
+- Appelle `fetchMarketRates` (server function) qui interroge `api.frankfurter.app` (proxy ECB gratuit)
+- Récupère le taux à la **date exacte** de chaque versement listé
+- Remplit automatiquement la colonne "Taux BNS/ECB" de chaque ligne
+- Affiche un toast si certaines dates n'ont pas pu être récupérées (week-end, jour férié → fallback manuel)
+
+**Limites actuelles** :
+1. AFC ne couvre pas les années < 2020 ni 2026+ (à compléter quand publié).
+2. CAD, JPY, AUD ne sont pas dans la table — uniquement EUR/USD/GBP.
+3. Pas de fallback automatique BNS si Frankfurter échoue.
+
+**Améliorations proposées** :
+- Ajouter années **2017-2019** (rétroactif jusqu'à 5 ans = délai de prescription FR/CH).
+- Ajouter **CAD, JPY** au minimum (frontaliers, expatriés).
+- En cas d'échec Frankfurter, basculer sur **data.snb.ch** (BNS officielle) comme source secondaire.
+- Si la date tombe un week-end, prendre automatiquement le vendredi précédent (déjà standard fiscal).
+
+## Récap fichiers à modifier
+
+| Fichier | Changement |
 |---|---|
-| **Résident ordinaire** (permis C ou Suisse, résidence CH) | ✅ OUI — passe par `computeIncomeTax(toIncomeTaxInput(g))` |
-| **Source / quasi-résident** (permis B/L, résidence CH) | ⚠️ NON par défaut. Les déductions ne sont prises en compte QUE si la TOU est éligible (≥90 % CH) ET avantageuse. Sinon l'impôt = retenue source brute, et le KPI ne bouge pas d'un franc. |
-| **Frontalier GE** | ❌ NON. `computeCrossBorder` ne reçoit que salaire + statut + enfants + conjoint. Tout le reste est ignoré silencieusement. |
-| **Frontalier accord 1983 (VD/VS/FR/NE/JU)** | ❌ NON. Idem : 4.5 % retenu sur le brut, le reste est imposé en France sur `(brut × 0.9)` sans aucune déduction CH. |
-| **Frontalier autre** | ❌ NON. Idem. |
+| `src/lib/tax-global/scenarios.ts` | Scénario rachat LPP basé sur `lppBuybackCapacity`, label transparent |
+| `src/lib/fx/sources.ts` | Ajouter années 2017-2019, devises CAD/JPY |
+| `src/lib/fx/fetch.functions.ts` | Fallback BNS + repli vendredi précédent si week-end |
+| `src/routes/_app/calculators/fx-claim.tsx` | Badge "Taux AFC officiel <année>" + warning si année hors table |
 
-C'est pour ça que peu importe ce que tu tapes dans « Rachat LPP » ou « Intérêts hypothécaires », tu vois le même chiffre dans la synthèse et le même delta nul dans les scénarios. Le client courant (`09278d25...`) est très probablement frontalier ou imposé à la source.
-
----
-
-## Ce que je vais corriger
-
-### 1. Brancher les déductions sur tous les régimes (correction moteur)
-
-**Régime source / quasi-résident** (`engine.ts`)
-- Calculer **systématiquement** la variante ordinaire avec déductions via `toIncomeTaxInput(g)` (déjà disponible via `touComparison.ordinaryTax`).
-- Si l'utilisateur saisit ≥ 1 CHF de déduction → bascule automatique de l'affichage sur le scénario ordinaire et badge « Calcul basé sur rectification IS / TOU — la déduction ne s'applique qu'avec cette démarche ».
-- Si éligible TOU : badge vert. Sinon : badge orange « nécessite rectification IS » (sans bloquer l'affichage — c'est ce que veut un courtier qui simule l'effet d'un rachat).
-- Le KPI bouge donc dès la première saisie.
-
-**Frontalier GE** (`engine.ts` + `cross-border.ts`)
-- Étendre `CrossBorderInput` avec les déductions CH (`pillar3aContributions`, `lppBuyback`, `mortgageInterest`, `realEstateMaintenance`, `healthInsurancePremiums`, `childCareCosts`, `donations`).
-- Recalculer `genevaSourceTax` sur l'assiette nette CH (mêmes règles que TOU GE) quand au moins une déduction est saisie.
-- Note explicite : « Effet appliqué uniquement si TOU GE demandée (quasi-résident ≥ 90 % revenu CH). »
-
-**Frontalier accord 1983 (4.5 %)**
-- La retenue 4.5 % CH reste insensible (c'est légal : brut × 4.5 %).
-- En revanche : déduire les déductions FR-éligibles de l'assiette `taxableFR` AVANT le barème français (hypothèses : intérêts d'emprunt résidence principale FR, frais de garde FR, dons FR). Le 3a et le rachat LPP CH ne sont **pas** déductibles côté FR → on les laisse de côté avec note explicite ligne par ligne.
-- Champs concernés affichent automatiquement « ⚠️ non déductible (accord 1983 : imposition exclusive France) » dans la bulle.
-
-### 2. Bulles d'information sur chaque montant
-
-Au niveau **inputs** (chaque champ déduction/revenu), ajout d'un tooltip `<InfoLabel tip={...}>` qui dit :
-- À quoi sert le champ (« Cotisation versée sur un compte 3e pilier A en 2026 »).
-- Plafond / règle (« max 7 258 CHF affilié LPP, 36 288 CHF non-affilié »).
-- **Effet réel sur le calcul actuel** selon le régime détecté : « ✅ déductible intégralement », « ⚠️ déductible uniquement via TOU/rectification IS », « ❌ non déductible (accord 1983) ».
-
-Au niveau **résultats** (carte Synthèse + carte Breakdown + Source/TOU + Frontalier), conversion de chaque `MoneyTile` / `PctTile` en version avec icône `Info` et tooltip explicatif :
-- **Impôt total** : « = IFD + cantonal + communal + église + impôt fortune. Détail dans le panneau "Comment ce résultat est calculé". »
-- **Net annuel** : « = Brut − impôt − charges sociales (LAMal/CMU si frontalier). Valeur locative exclue. »
-- **Taux effectif** : « impôt total / revenu brut. »
-- **Taux marginal** : « taux appliqué au prochain franc gagné — sert à chiffrer une optimisation. »
-- **Part suisse / étrangère** : « répartition de l'impôt entre CH (retenue source) et pays de résidence (barème + crédit d'impôt). »
-- **Charges sociales** : « cotisation CMU ou LAMal (frontalier uniquement). »
-- **IFD / Cantonal / Fortune / Église** : formule courte + référence légale.
-- **Impôt source / Taux IS** : « basé sur le barème {scale} appliqué au salaire mensuel × 12. Hors gratifications irrégulières. »
-- **Éligibilité TOU** : « ≥ 90 % du revenu mondial gagné en Suisse → permet la taxation ordinaire ultérieure avec déductions. »
-
-Composant utilisé : `MoneyTile`/`PctTile` existants étendus avec une prop optionnelle `info` qui rend un `<Tooltip>`/`<HoverCard>` autour de l'icône `Info`.
-
-### 3. Scénarios — vérification
-
-Avec la correction #1, `buildScenarios` produira automatiquement des deltas non nuls sur « +3a max », « +Rachat LPP 20 000 » et « +Don 5 000 » même en source/frontalier. Aucun changement de logique nécessaire dans `scenarios.ts`, juste la propagation moteur.
-
----
-
-## Fichiers touchés
-
-- `src/lib/tax-global/engine.ts` — branchement déductions source/frontalier, badge TOU implicite.
-- `src/lib/tax/cross-border.ts` — extension `CrossBorderInput` + nouvelle assiette nette pour GE et accord 1983.
-- `src/lib/tax-global/types.ts` — extension `TaxGlobalTrace` avec le détail des déductions appliquées/rejetées par régime.
-- `src/routes/_app/calculators/tax-global.tsx` — tooltips sur tous les champs (inputs) ET sur toutes les tuiles (résultats). Note d'avertissement automatique dans la section Déductions quand le régime est source ou frontalier accord 1983.
-- `src/components/calculators/CalcUI.tsx` — `MoneyTile` et `PctTile` reçoivent une prop optionnelle `info?: React.ReactNode` qui rend une icône `Info` avec tooltip.
-- `src/lib/i18n/{fr,en,de,it}.ts` — clés `calc.global.tip.*` pour chaque bulle (input + résultat).
-
-## Vérification après implémentation
-
-- Sur le client `09278d25...` (frontalier suspecté) : taper 7 056 CHF en 3a → KPI baisse, scénario « +3a max » affiche un delta cohérent.
-- Saisir 20 000 CHF rachat LPP en mode résident GE puis basculer en frontalier GE → la première baisse l'impôt, la seconde affiche un delta + warning « TOU requise ».
-- Aucun test unitaire existant ne doit casser (`bun test`).
-
-## Questions
-
-Aucune, je commence directement après ton approbation.
+Confirme et j'applique.
