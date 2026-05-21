@@ -1348,7 +1348,7 @@ export const en: Record<string, string> = {
   "wizard.field.npa": "Postal code",
   "wizard.field.tax_status": "Tax status",
   "wizard.field.source_scale": "Source tax scale",
-  "wizard.field.source_scale.hint": "Select according to family situation",
+  "wizard.field.source_scale.hint": "Select according to family situation. French/Italian cross-border workers: choose A/B/C/H and set the tax status above.",
   "wizard.field.source_scale.placeholder": "Select",
   "wizard.field.confession": "Religion",
   "wizard.field.parish": "Parish (if relevant)",
