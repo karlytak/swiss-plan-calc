@@ -564,6 +564,187 @@ function LppCalc() {
   );
 }
 
+// ──────────────────────────────────────────────────────────────────────
+// Panneau explicatif du plan de rachat LPP
+// Transparence : méthode, hypothèses utilisées, avertissements.
+// Aucun calcul ici — uniquement de l'affichage explicatif.
+// ──────────────────────────────────────────────────────────────────────
+function BuybackPlanExplanation({
+  plan,
+  taxInput,
+  form,
+  actualBuybackCapped,
+}: {
+  plan: ReturnType<typeof simulateBuybackPlan>;
+  taxInput: IncomeTaxInput;
+  form: {
+    canton: string;
+    status: IncomeTaxInput["status"];
+    confession: NonNullable<IncomeTaxInput["confession"]>;
+    children: number;
+    grossSalary: number;
+    spouseGrossSalary: number;
+    pillar3aContributions: number;
+    healthInsurancePremiums: number;
+    actualBuyback: number;
+    buybackCapacity: number;
+    buybackYears: number;
+  };
+  actualBuybackCapped: number;
+}) {
+  const t = useT();
+  const [open, setOpen] = useState(false);
+
+  // Détection : revenu trop bas pour absorber la déduction.
+  const yearlyAmount = plan.yearlyAmount;
+  const absorbable = Math.max(0, plan.baselineTaxableIncome);
+  const partiallyLost = yearlyAmount > absorbable && yearlyAmount > 0;
+
+  // Détection : écart marginal effectif vs théorique baseline.
+  const rateGap = Math.abs(plan.effectiveMarginalRate - plan.baselineMarginalRate);
+  const showRateExplanation = rateGap >= 1; // ≥ 1 point d'écart
+
+  return (
+    <div className="mt-4 rounded-lg border border-border/60 bg-muted/20">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-muted-foreground hover:text-foreground"
+      >
+        <span className="flex items-center gap-2">
+          <Info className="h-3.5 w-3.5" />
+          {t("calc.lpp.explain.title")}
+        </span>
+        <span className="text-[10px] text-muted-foreground">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <div className="space-y-3 border-t border-border/60 px-3 py-3 text-[11px] leading-relaxed text-foreground/90">
+          {/* Méthode */}
+          <section>
+            <div className="mb-1 font-semibold text-foreground">
+              {t("calc.lpp.explain.method.title")}
+            </div>
+            <ul className="list-disc space-y-1 pl-4 text-muted-foreground">
+              <li>
+                {t("calc.lpp.explain.method.yearly", {
+                  total: formatCHF(actualBuybackCapped),
+                  years: form.buybackYears,
+                  yearly: formatCHF(yearlyAmount),
+                })}
+              </li>
+              <li>{t("calc.lpp.explain.method.diff")}</li>
+              <li>{t("calc.lpp.explain.method.sum")}</li>
+              <li>
+                {t("calc.lpp.explain.method.roi", {
+                  roi: plan.averageReturn,
+                  cents: Math.round(plan.averageReturn),
+                })}
+              </li>
+              <li>
+                {t("calc.lpp.explain.method.marginal", {
+                  rate: plan.effectiveMarginalRate,
+                })}
+              </li>
+            </ul>
+          </section>
+
+          {/* Hypothèses */}
+          <section>
+            <div className="mb-1 font-semibold text-foreground">
+              {t("calc.lpp.explain.assumptions.title")}
+            </div>
+            <div className="grid grid-cols-1 gap-1 sm:grid-cols-2">
+              <div>
+                <span className="text-muted-foreground">{t("pension.canton")} :</span>{" "}
+                <span className="font-medium">{tCanton(taxInput.canton)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{t("pension.civil_status")} :</span>{" "}
+                <span className="font-medium">{t(`calc.status.${form.status}`)}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{t("calc.lpp.explain.confession")} :</span>{" "}
+                <span className="font-medium">{form.confession}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{t("calc.lpp.field.children")} :</span>{" "}
+                <span className="font-medium tabular-nums">{form.children}</span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{t("calc.lpp.explain.gross_salary")} :</span>{" "}
+                <span className="font-medium tabular-nums">{formatCHF(form.grossSalary)}</span>
+              </div>
+              {form.status === "married" && (
+                <div>
+                  <span className="text-muted-foreground">{t("calc.lpp.field.spouse_salary")} :</span>{" "}
+                  <span className="font-medium tabular-nums">
+                    {formatCHF(form.spouseGrossSalary)}
+                  </span>
+                </div>
+              )}
+              <div>
+                <span className="text-muted-foreground">{t("calc.lpp.field.pillar3a_year")} :</span>{" "}
+                <span className="font-medium tabular-nums">
+                  {formatCHF(form.pillar3aContributions)}
+                </span>
+              </div>
+              <div>
+                <span className="text-muted-foreground">{t("calc.lpp.field.health_premiums")} :</span>{" "}
+                <span className="font-medium tabular-nums">
+                  {formatCHF(form.healthInsurancePremiums)}
+                </span>
+              </div>
+              <div className="sm:col-span-2">
+                <span className="text-muted-foreground">{t("calc.lpp.explain.baseline_income")} :</span>{" "}
+                <span className="font-medium tabular-nums">
+                  {formatCHF(plan.baselineTaxableIncome)}
+                </span>{" "}
+                <span className="text-[10px] text-muted-foreground">
+                  ({t("calc.lpp.explain.baseline_income.hint")})
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* Avertissements */}
+          <section className="space-y-1.5">
+            <div className="font-semibold text-foreground">
+              {t("calc.lpp.explain.warnings.title")}
+            </div>
+            <div className="flex items-start gap-2 rounded border border-warning/30 bg-warning/5 p-2">
+              <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-warning" />
+              <span>{t("calc.lpp.explain.warn.lockup")}</span>
+            </div>
+            {partiallyLost && (
+              <div className="flex items-start gap-2 rounded border border-warning/30 bg-warning/5 p-2">
+                <AlertTriangle className="mt-0.5 h-3 w-3 shrink-0 text-warning" />
+                <span>
+                  {t("calc.lpp.explain.warn.partial_lost", {
+                    yearly: formatCHF(yearlyAmount),
+                    absorbable: formatCHF(absorbable),
+                  })}
+                </span>
+              </div>
+            )}
+            {showRateExplanation && (
+              <div className="flex items-start gap-2 rounded border border-primary/30 bg-primary/5 p-2">
+                <Info className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
+                <span>
+                  {t("calc.lpp.explain.warn.rate_shift", {
+                    baseline: plan.baselineMarginalRate,
+                    effective: plan.effectiveMarginalRate,
+                  })}
+                </span>
+              </div>
+            )}
+          </section>
+        </div>
+      )}
+    </div>
+  );
+}
+
+
 function NumField({
   label,
   value,
