@@ -283,6 +283,11 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       spouseEmployed: couple && g.spouseEmployed,
       spouseGrossSalary: couple ? g.spouseGrossSalary : 0,
       eurChfRate: g.eurChfRate,
+      // Déductions FR-éligibles uniquement (intérêts résidence FR, garde, dons).
+      // Le 3e pilier A et le rachat LPP suisses ne sont pas déductibles côté FR.
+      mortgageInterestCHF: g.mortgageInterest,
+      childCareCostsCHF: g.childCareCosts,
+      donationsCHF: g.donations,
     });
 
     // Couche santé : CMU vs LAMal — SÉPARÉE de l'impôt
@@ -296,10 +301,59 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       lamalChildMonthlyCHF: g.lamalChildMonthlyCHF,
     });
 
-    const gross = computeGrossForRegime(g, det.regime);
-    const totalTax = crossBorder.totalTax;
-    const social = health.recommendedAnnualCHF;
+    // === Pour GE / cross_border_other : si déductions CH saisies, comparer
+    //     avec la TOU GE (taxation ordinaire CH avec déductions).
+    //     L'accord 1983 reste hors comparaison : imposition exclusive FR.
+    const chDeductionsTotal =
+      (g.pillar3aContributions || 0) +
+      (g.lppBuyback || 0) +
+      (g.realEstateMaintenance || 0) +
+      (g.healthInsurancePremiums || 0) +
+      (g.pillar3bContributions || 0);
+    let displayedCrossBorder = crossBorder;
     const cbNotes = [...crossBorder.notes];
+    if (
+      (det.regime === "cross_border_ge" || det.regime === "cross_border_other") &&
+      chDeductionsTotal > 0
+    ) {
+      const swissIncome =
+        g.grossSalary + g.bonus + (couple ? g.spouseGrossSalary : 0) + g.otherIncome + g.rentalIncome;
+      const worldwide = swissIncome + g.foreignIncome;
+      const eligibleTou = worldwide > 0 ? swissIncome / worldwide >= 0.9 : true;
+      const ordinaryCH = computeIncomeTax(toIncomeTaxInput(g));
+      // Comparer impôt CH ordinaire (avec déductions) à l'impôt CH source actuel.
+      if (ordinaryCH.totalTax < crossBorder.swissTax) {
+        const newSwiss = ordinaryCH.totalTax;
+        const newTotal = newSwiss + crossBorder.foreignTax;
+        displayedCrossBorder = {
+          ...crossBorder,
+          swissTax: newSwiss,
+          swissRate: Math.round((newSwiss / (g.grossSalary + g.bonus)) * 1000) / 10,
+          totalTax: newTotal,
+          totalRate: Math.round((newTotal / (g.grossSalary + g.bonus)) * 1000) / 10,
+          netAnnual: Math.round((g.grossSalary + g.bonus) - newTotal),
+          marginalRate: ordinaryCH.marginalRate,
+        };
+        cbNotes.push(
+          eligibleTou
+            ? `TOU GE applicable (${Math.round((swissIncome / Math.max(1, worldwide)) * 100)}% du revenu mondial en CH ≥ 90%) : déductions CH appliquées, économie suisse estimée ${Math.round(crossBorder.swissTax - newSwiss).toLocaleString("fr-CH")} CHF. Démarche : demander la TOU GE.`
+            : `Déductions CH non automatiques (quasi-résident non éligible : ${Math.round((swissIncome / Math.max(1, worldwide)) * 100)}% < 90%). Affichage simulé ici — nécessite une rectification IS auprès de l'AFC pour s'appliquer réellement.`,
+        );
+      } else {
+        cbNotes.push(
+          "Déductions CH saisies insuffisantes pour battre la retenue source GE — IS GE conservée.",
+        );
+      }
+    }
+    if (det.regime === "cross_border_fr_1983" && chDeductionsTotal > 0) {
+      cbNotes.push(
+        `Accord 1983 : imposition exclusive en France. Les déductions CH (3a, rachat LPP, primes LAMal, entretien immobilier CH) NE SONT PAS déductibles — saisie ignorée (${Math.round(chDeductionsTotal).toLocaleString("fr-CH")} CHF). Seuls intérêts d'emprunt résidence FR, garde d'enfants et dons réduisent l'assiette française.`,
+      );
+    }
+
+    const gross = computeGrossForRegime(g, det.regime);
+    const totalTax = displayedCrossBorder.totalTax;
+    const social = health.recommendedAnnualCHF;
     if (det.regime === "cross_border_ge") {
       cbNotes.push(
         "Part étrangère : estimation du résidu d'impôt français après crédit (à valider avec la déclaration FR effective).",
@@ -308,16 +362,16 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
-      crossBorder,
+      crossBorder: displayedCrossBorder,
       health,
       totalTaxCHF: totalTax,
       socialChargesCHF: social,
       grossIncomeCHF: gross,
       netAnnualCHF: Math.max(0, gross - totalTax - social),
-      swissShareCHF: crossBorder.swissTax,
-      foreignShareCHF: crossBorder.foreignTax,
+      swissShareCHF: displayedCrossBorder.swissTax,
+      foreignShareCHF: displayedCrossBorder.foreignTax,
       effectiveRate: rate(totalTax, gross),
-      marginalRate: crossBorder.marginalRate,
+      marginalRate: displayedCrossBorder.marginalRate,
       notes: [...notes, ...cbNotes],
       trace: {
         ...baseTrace,
@@ -329,12 +383,18 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
               : "IS canton de travail + imposition pays de résidence (modèle générique)",
           `Taux EUR/CHF utilisé : ${g.eurChfRate.toFixed(4)} (CHF→EUR dérivé : ${g.chfToEurRate.toFixed(4)})`,
           "Santé : comparaison CMU vs LAMal sur base des primes mensuelles saisies",
+          chDeductionsTotal > 0
+            ? `Déductions CH saisies : ${Math.round(chDeductionsTotal).toLocaleString("fr-CH")} CHF — ${det.regime === "cross_border_fr_1983" ? "ignorées (accord 1983)" : "appliquées via TOU/rectification IS"}`
+            : "Aucune déduction CH saisie",
         ],
         limits: [
           "Part étrangère = estimation du résidu d'impôt après crédit (≠ déclaration FR effective)",
           "Pas de prise en compte du quotient familial FR ni des charges de famille étendues",
           "Pas de calcul de la CSG/CRDS si affiliation FR partielle (statut mixte)",
           "Taux de change figé : volatilité EUR/CHF non simulée",
+          det.regime === "cross_border_fr_1983"
+            ? "Accord 1983 : déductions CH (3a, LPP, LAMal) totalement ignorées"
+            : "GE/autre : déductions CH appliquées uniquement via démarche TOU ou rectification IS",
         ],
       },
     };
