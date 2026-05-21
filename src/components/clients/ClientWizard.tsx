@@ -1060,15 +1060,9 @@ function StepPatrimoine({
                 suffix="CHF"
               />
             </Field>
-            {rules.canBuybackLPP && (
-              <Field label={t("wizard.lpp.buyback")} hint={t("wizard.lpp.buyback.hint")}>
-                <NumField
-                  value={form.lpp_max_buyback}
-                  onChange={(v) => update("lpp_max_buyback", v)}
-                  suffix="CHF"
-                />
-              </Field>
-            )}
+            {/* Capacité de rachat LPP retirée de la fiche client (V1) :
+                la saisie se fait directement dans le calculateur LPP.
+                La clé `lpp_max_buyback` reste dans le state pour ne rien casser. */}
             <Field label={t("wizard.lpp.plan")}>
               <Select value={form.lpp_plan} onValueChange={(v) => update("lpp_plan", v as LppPlan)}>
                 <SelectTrigger>
