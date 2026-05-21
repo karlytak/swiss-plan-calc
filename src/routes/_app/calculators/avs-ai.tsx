@@ -30,6 +30,8 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { useT } from "@/contexts/LanguageContext";
 import { parseChildren, ageFromDob } from "@/lib/clients/types";
+import { buildSurvivorBenefits } from "@/lib/avs/survivors";
+import { formatCHF } from "@/lib/format";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
