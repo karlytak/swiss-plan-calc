@@ -325,54 +325,95 @@ function TaxGlobalCalc() {
                 <AccordionTrigger>{t("calc.global.section.deductions")}</AccordionTrigger>
                 <AccordionContent>
                   <div className="space-y-4">
+                    {/* Bannière régime : explique l'effet réel des déductions */}
+                    {(() => {
+                      const reg = result.regime;
+                      if (reg === "cross_border_fr_1983") {
+                        return (
+                          <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+                            <strong>Accord 1983 — imposition exclusive en France.</strong> Le 3a, le rachat LPP, l'entretien immobilier CH et les primes LAMal CH <strong>ne sont pas déductibles</strong>. Seuls les intérêts d'emprunt résidence principale FR, les frais de garde et les dons réduisent l'assiette française. Vérifiez chaque bulle ci-dessous.
+                          </div>
+                        );
+                      }
+                      if (reg === "cross_border_ge" || reg === "cross_border_other") {
+                        return (
+                          <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
+                            <strong>Frontalier — déductions CH appliquées via TOU / rectification IS.</strong> Sans démarche auprès de l'AFC, l'impôt à la source reste calculé sur le brut. La simulation ci-dessous montre l'effet POTENTIEL des déductions si la démarche est effectuée.
+                          </div>
+                        );
+                      }
+                      if (reg === "source_taxed") {
+                        return (
+                          <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
+                            <strong>Imposé à la source — déductions appliquées via TOU (si quasi-résident ≥ 90 % revenus CH) ou rectification IS.</strong> Sans démarche, la retenue source brute s'applique. La simulation montre l'effet réel post-démarche.
+                          </div>
+                        );
+                      }
+                      if (reg === "tou") {
+                        return (
+                          <div className="rounded-md border border-success/40 bg-success/5 p-3 text-xs text-success">
+                            <strong>Quasi-résident éligible TOU.</strong> Les déductions saisies s'appliquent sur demande de Taxation Ordinaire Ultérieure (à déposer avant le 31 mars de l'année suivante).
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <NumField
                         label={t("calc.global.field.pillar_3a")}
                         value={form.pillar3aContributions}
                         onChange={(v) => set("pillar3aContributions", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "pillar3a")}
                       />
                       <NumField
                         label={t("calc.global.field.lpp_buyback")}
                         value={form.lppBuyback}
                         onChange={(v) => set("lppBuyback", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "lpp")}
                       />
                       <NumField
                         label={t("calc.global.field.mortgage")}
                         value={form.mortgageInterest}
                         onChange={(v) => set("mortgageInterest", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "mortgage")}
                       />
                       <NumField
                         label={t("calc.global.field.maintenance")}
                         value={form.realEstateMaintenance}
                         onChange={(v) => set("realEstateMaintenance", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "maintenance")}
                       />
                       <NumField
                         label={t("calc.global.field.health_premiums")}
                         value={form.healthInsurancePremiums}
                         onChange={(v) => set("healthInsurancePremiums", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "health")}
                       />
                       <NumField
                         label={t("calc.global.field.child_care")}
                         value={form.childCareCosts}
                         onChange={(v) => set("childCareCosts", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "childcare")}
                       />
                       <NumField
                         label="Cotisations 3e pilier B (assurance-vie / épargne libre)"
                         value={form.pillar3bContributions}
                         onChange={(v) => set("pillar3bContributions", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "pillar3b")}
                       />
                       <NumField
                         label={t("calc.global.field.donations")}
                         value={form.donations}
                         onChange={(v) => set("donations", v)}
                         suffix="CHF"
+                        tip={deductionTip(result.regime, "donations")}
                       />
                     </div>
                     <Pillar3bInfoTile
@@ -383,6 +424,7 @@ function TaxGlobalCalc() {
                   </div>
                 </AccordionContent>
               </AccordionItem>
+
 
               {showFrontalierBlock && (
                 <AccordionItem value="frontalier">
