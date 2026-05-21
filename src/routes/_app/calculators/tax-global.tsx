@@ -71,6 +71,59 @@ function TaxGlobalCalc() {
   const result = useMemo(() => computeTaxGlobal(form), [form]);
   const scenarios = useMemo(() => buildScenarios(form), [form]);
 
+  // ── Conversion devise pour revenus étrangers ──
+  const [fxCurrency, setFxCurrency] = useState<FxCurrency>("CHF");
+  const [fxAmount, setFxAmount] = useState<number>(0);
+  const [fxSource, setFxSource] = useState<"afc" | "market">("afc");
+  const [fxMarketRate, setFxMarketRate] = useState<number | null>(null);
+  const [fxMarketDate, setFxMarketDate] = useState<string | null>(null);
+  const [fxMarketLoading, setFxMarketLoading] = useState(false);
+
+  const fxRate: number | null = useMemo(() => {
+    if (fxCurrency === "CHF") return 1;
+    if (fxSource === "afc") return getAfcRate(form.taxYear, fxCurrency);
+    return fxMarketRate;
+  }, [fxCurrency, fxSource, fxMarketRate, form.taxYear]);
+
+  // Recharge le taux marché à la demande (devise ou source change).
+  useEffect(() => {
+    if (fxCurrency === "CHF" || fxSource !== "market") return;
+    let cancelled = false;
+    setFxMarketLoading(true);
+    const today = new Date().toISOString().slice(0, 10);
+    fetchMarketRates({ data: { dates: [today], currency: fxCurrency } })
+      .then((rates) => {
+        if (cancelled) return;
+        const r = rates[0];
+        setFxMarketRate(r?.rate ?? null);
+        setFxMarketDate(r?.effectiveDate ?? r?.date ?? today);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setFxMarketRate(null);
+          setFxMarketDate(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setFxMarketLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [fxCurrency, fxSource]);
+
+  // Synchronise foreignIncome (toujours en CHF dans le moteur).
+  useEffect(() => {
+    const chf = fxCurrency === "CHF"
+      ? Math.round(fxAmount)
+      : fxRate && fxAmount
+        ? Math.round((fxCurrency === "JPY" ? fxAmount / 100 : fxAmount) * fxRate)
+        : 0;
+    if (chf !== form.foreignIncome) {
+      set("foreignIncome", chf);
+    }
+  }, [fxAmount, fxRate, fxCurrency]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const selectableCantons = CANTONS.filter((c) => c.selectable);
   const showFortune = result.regime === "resident_ordinary";
   const showFrontalierBlock =
