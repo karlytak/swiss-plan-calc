@@ -152,26 +152,19 @@ export function SplitCompareLayout({
             </Badge>
           </div>
           <div className="space-y-2">
-            {rows.map((r, i) => {
-              const id = r.id ?? `row-${i}`;
-              const isOpen = !!expanded[id];
-              return (
-                <div key={`cur-${i}`} className="space-y-1">
-                  <div className="flex items-baseline justify-between gap-3 border-b border-destructive/15 pb-1.5">
-                    <span className="text-xs text-foreground/70">{r.label}</span>
-                    <span className="text-sm font-semibold tabular-nums">
-                      {formatValue(r.current, r.format)}
-                    </span>
-                  </div>
-                  {r.breakdown && isOpen && (
-                    <div className="rounded-md border border-destructive/20 bg-background/60 p-2 text-[11px] text-muted-foreground lg:hidden">
-                      {r.breakdown}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {rows.map((r, i) => (
+              <div
+                key={`cur-${i}`}
+                className="flex items-baseline justify-between gap-3 border-b border-destructive/15 pb-1.5 last:border-0 last:pb-0"
+              >
+                <span className="text-xs text-foreground/70">{r.label}</span>
+                <span className="text-sm font-semibold tabular-nums">
+                  {formatValue(r.current, r.format)}
+                </span>
+              </div>
+            ))}
           </div>
+
           {currentExtra && <div className="mt-3">{currentExtra}</div>}
         </div>
 
