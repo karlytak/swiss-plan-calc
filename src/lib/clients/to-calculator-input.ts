@@ -223,7 +223,16 @@ export function toLppInput(b: ClientBundle) {
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),
     insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
     currentBalance: numOrUndef(b.pension?.lpp_current_balance),
-    buybackCapacity: numOrUndef(b.pension?.lpp_max_buyback),
+    buybackCapacity:
+      (() => {
+        const stored = numOrUndef(b.pension?.lpp_max_buyback);
+        if (stored && stored > 0) return stored;
+        return estimateBuybackCapacity({
+          currentAge: ageFromDob(b.client.date_of_birth),
+          insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
+          currentBalance: numOrUndef(b.pension?.lpp_current_balance),
+        });
+      })(),
     conversionRate: a?.conversionRate ?? numOrUndef(b.pension?.lpp_conversion_rate),
     expectedReturnRate: a?.expectedReturnRate,
     feeRate: a?.feeRate,
