@@ -147,10 +147,8 @@ export function TaxGlobalCompareCard({ form, result }: Props) {
   const noEffect = result.regime === "cross_border_fr_1983";
 
   return (
-    <CalcCard
-      title="Optimisations fiscales · Actuel vs Projeté"
-      icon={TrendingUp}
-    >
+    <CalcCard title="Optimisations fiscales · Actuel vs Projeté">
+
       <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
         <Badge variant="outline" className="gap-1 bg-primary/5">
           Cible 3a : {formatCHF(target3a)}
