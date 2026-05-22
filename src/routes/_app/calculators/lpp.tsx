@@ -179,6 +179,44 @@ function LppCalc() {
     [form.buybackCapacity, form.buybackYears, actualBuybackCapped, enrichedTaxInput],
   );
 
+  // Projection sans rachat — baseline pour la comparaison "Actuel vs Projeté".
+  const projectionNoBuyback = useMemo(
+    () =>
+      projectLPP({
+        ...form,
+        currentBalance: effectiveCurrentBalance,
+        yearlyBuyback: 0,
+        buybackYears: 0,
+        insuredSalaryCap: form.insuredSalaryCap,
+      }),
+    [form, effectiveCurrentBalance],
+  );
+
+  const compareRows: SplitRow[] = useMemo(
+    () => [
+      {
+        label: "Capital LPP projeté à la retraite",
+        current: projectionNoBuyback.projectedBalance,
+        projected: projection.projectedBalance,
+        betterWhen: "higher",
+      },
+      {
+        label: "Rachats cumulés",
+        current: 0,
+        projected: projection.totalBuybacks,
+        betterWhen: "higher",
+      },
+      {
+        label: "Économie d'impôt totale (rachats)",
+        current: 0,
+        projected: buybackPlan.totalTaxSavings,
+        betterWhen: "higher",
+      },
+    ],
+    [projectionNoBuyback, projection, buybackPlan],
+  );
+
+
   const { user } = useAuth();
   const brokerHeader = useBrokerPdfHeader();
   const handleExport = () =>
