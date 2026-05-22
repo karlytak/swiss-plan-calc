@@ -27,7 +27,7 @@ import {
   type AvsDisabilityBenefits,
   type AvsSurvivorBenefits,
 } from "@/lib/avs/survivors";
-import { projectClientLPP } from "@/lib/client-dashboard/lpp-projection";
+import { projectClientLPP, projectClient3a } from "@/lib/client-dashboard/lpp-projection";
 
 export type PensionEvent = "retirement" | "disability" | "death";
 
@@ -153,6 +153,15 @@ function buildRetirement(b: ClientBundle): ConsolidatedScenario | null {
     pillar2Items.push(toItem("Rente LPP vieillesse", lpp.annualPension, "LPP"));
   }
 
+  // Pilier 3a : capital projeté annualisé sur 22 ans (espérance de vie post-retraite)
+  const p3a = projectClient3a(b);
+  if (p3a && p3a.projectedCapitalAt65 > 0) {
+    const annualized = Math.round(p3a.projectedCapitalAt65 / 22);
+    pillar2Items.push(
+      toItem("3a (capital projeté ÷ 22 ans)", annualized, "LPP"),
+    );
+  }
+
   const p1Total = benefits.totalAnnual;
   const p2Total = pillar2Items.reduce((s, i) => s + i.annual, 0);
   const combined = p1Total + p2Total;
@@ -161,6 +170,7 @@ function buildRetirement(b: ClientBundle): ConsolidatedScenario | null {
   if (avs.cappedCouple) notes.push("Rente couple plafonnée à 150 % du maximum individuel.");
   if (benefits.cappedFamily) notes.push("Rentes familiales plafonnées (150 %).");
   if (!lpp) notes.push("Aucune projection LPP disponible (avoir et salaire manquants).");
+  if (p3a) notes.push("3a annualisé sur 22 ans à titre indicatif (capital en pratique).");
 
   return {
     event: "retirement",
@@ -333,6 +343,62 @@ export function consolidatePensionBenefits(b: ClientBundle): ConsolidatedBenefit
     retirement: buildRetirement(b),
     disability: buildDisability(b, 100),
     death: buildDeath(b),
+  };
+}
+
+/**
+ * Variante "optimisée Piliarys" du même bundle :
+ * - LPP : saturation de la capacité de rachat restante (étalée linéairement
+ *   jusqu'à la retraite via le mécanisme existant de `lpp_planned_buybacks`).
+ * - 3a : cotisation portée au plafond légal salarié LPP (7 258 CHF, 2026)
+ *   si la cotisation actuelle est inférieure.
+ *
+ * Aucune modification persistée : on construit un bundle virtuel.
+ */
+export function consolidateOptimizedBenefits(b: ClientBundle): ConsolidatedBenefits {
+  return consolidatePensionBenefits(buildOptimizedBundle(b));
+}
+
+function buildOptimizedBundle(b: ClientBundle): ClientBundle {
+  const pension = (b.pension ?? {}) as Record<string, unknown> & {
+    lpp_planned_buybacks?: unknown;
+    lpp_max_buyback?: number | string | null;
+    pillar_3a_annual_contribution?: number | string | null;
+  };
+
+  const buybackCapacity = Number(pension.lpp_max_buyback ?? 0);
+  const existingPlanned = Array.isArray(pension.lpp_planned_buybacks)
+    ? (pension.lpp_planned_buybacks as Array<{ amount?: number }>)
+    : [];
+  const plannedTotal = existingPlanned.reduce(
+    (s, r) => s + Number(r?.amount ?? 0),
+    0,
+  );
+  const remaining = Math.max(0, buybackCapacity - plannedTotal);
+
+  const optimizedPlanned =
+    remaining > 0
+      ? [
+          ...existingPlanned,
+          {
+            year: new Date().getFullYear(),
+            amount: remaining,
+            label: "Saturation capacité (optimisation)",
+          },
+        ]
+      : existingPlanned;
+
+  const PILLAR_3A_MAX_LPP = 7_258;
+  const current3a = Number(pension.pillar_3a_annual_contribution ?? 0);
+  const optimized3a = Math.max(current3a, PILLAR_3A_MAX_LPP);
+
+  return {
+    ...b,
+    pension: {
+      ...(b.pension as object),
+      lpp_planned_buybacks: optimizedPlanned,
+      pillar_3a_annual_contribution: optimized3a,
+    } as ClientBundle["pension"],
   };
 }
 

@@ -26,6 +26,7 @@ import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePref
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
+import { ConsolidatedBenefitsCard } from "@/components/clients/ConsolidatedBenefitsCard";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -40,7 +41,7 @@ export const Route = createFileRoute("/_app/calculators/retirement")({
 function RetirementCalc() {
   const t = useT();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "retirement");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "retirement");
   const [form, setForm] = useState({
     capital: 600_000,
     canton: "VD",
@@ -240,6 +241,8 @@ function RetirementCalc() {
           Cette comparaison repose sur les hypothèses ci-dessus (espérance de vie, rendement, fiscalité). Une modification de ces paramètres peut changer la recommandation.
         </p>
       </div>
+
+      {bundle && <ConsolidatedBenefitsCard bundle={bundle} />}
 
       <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
