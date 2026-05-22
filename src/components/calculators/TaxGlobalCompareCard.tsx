@@ -10,7 +10,7 @@
 //   l'impact compréhensible.
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Camera, RotateCcw } from "lucide-react";
+import { Camera, RotateCcw, ArrowRight as ArrowRightIcon } from "lucide-react";
 
 import { CalcCard } from "@/components/calculators/CalcUI";
 import {
@@ -21,7 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCHF } from "@/lib/format";
 import { computeTaxGlobal } from "@/lib/tax-global/engine";
+import {
+  computeFieldSensitivities,
+  type FieldSensitivity,
+  type PostBreakdown,
+} from "@/lib/tax-global/sensitivities";
 import type { TaxGlobalInput, TaxGlobalResult } from "@/lib/tax-global/types";
+
 
 interface Props {
   form: TaxGlobalInput;
