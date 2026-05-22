@@ -55,6 +55,8 @@ interface Props {
   rows: SplitRow[];
   /** Bandeau synthèse en bas. */
   summary?: SplitSummary;
+  /** Mini-légende affichée sous le titre/description (ex. explication des pastilles delta). */
+  legend?: ReactNode;
   /** Contenu additionnel injecté sous le bloc colonne courante. */
   currentExtra?: ReactNode;
   /** Contenu additionnel injecté sous le bloc colonne projetée. */
