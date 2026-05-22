@@ -13,6 +13,28 @@ import { ageFromDob, parseChildren } from "./types";
 import type { IncomeTaxInput } from "@/lib/tax/income";
 import type { TaxStatusContext, WorkStatusContext } from "@/lib/optimizer";
 import { getTotalGrossIncomeOrUndef } from "./income";
+import { estimateRetroactiveLppBalance } from "@/lib/lpp";
+
+/**
+ * Estime la capacité de rachat LPP quand `lpp_max_buyback` est manquant ou = 0
+ * en fiche client. Approche : capital théorique LPP si l'assuré avait cotisé
+ * depuis 25 ans au salaire assuré courant, moins l'avoir actuel. Plancher à 0.
+ */
+function estimateBuybackCapacity(opts: {
+  currentAge: number | null;
+  insuredSalary: number | undefined;
+  currentBalance: number | undefined;
+}): number | undefined {
+  if (!opts.currentAge || opts.currentAge <= 25) return undefined;
+  if (!opts.insuredSalary || opts.insuredSalary <= 0) return undefined;
+  const theoretical = estimateRetroactiveLppBalance({
+    entryAge: 25,
+    currentAge: opts.currentAge,
+    insuredSalary: opts.insuredSalary,
+  });
+  const gap = theoretical - (opts.currentBalance ?? 0);
+  return gap > 0 ? Math.round(gap) : 0;
+}
 
 export interface ClientBundle {
   client: Client;
@@ -201,7 +223,16 @@ export function toLppInput(b: ClientBundle) {
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),
     insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
     currentBalance: numOrUndef(b.pension?.lpp_current_balance),
-    buybackCapacity: numOrUndef(b.pension?.lpp_max_buyback),
+    buybackCapacity:
+      (() => {
+        const stored = numOrUndef(b.pension?.lpp_max_buyback);
+        if (stored && stored > 0) return stored;
+        return estimateBuybackCapacity({
+          currentAge: ageFromDob(b.client.date_of_birth),
+          insuredSalary: numOrUndef(b.pension?.lpp_insured_salary),
+          currentBalance: numOrUndef(b.pension?.lpp_current_balance),
+        });
+      })(),
     conversionRate: a?.conversionRate ?? numOrUndef(b.pension?.lpp_conversion_rate),
     expectedReturnRate: a?.expectedReturnRate,
     feeRate: a?.feeRate,
