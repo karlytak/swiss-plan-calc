@@ -27,7 +27,7 @@ import {
   type AvsDisabilityBenefits,
   type AvsSurvivorBenefits,
 } from "@/lib/avs/survivors";
-import { projectClientLPP } from "@/lib/client-dashboard/lpp-projection";
+import { projectClientLPP, projectClient3a } from "@/lib/client-dashboard/lpp-projection";
 
 export type PensionEvent = "retirement" | "disability" | "death";
 
