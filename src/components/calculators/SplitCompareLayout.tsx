@@ -24,6 +24,8 @@ export interface SplitRow {
 export interface SplitSummary {
   /** Économie annuelle en CHF (positive = bon). */
   annualSaving?: number;
+  /** Libellé personnalisé de la tuile « Économie annuelle ». */
+  annualSavingLabel?: string;
   /** Gain retraite (capital ou rente) en CHF. Positive = bon. */
   retirementGain?: number;
   /** Libellé du gain retraite (ex: "Capital LPP supplémentaire" / "Rente annuelle en plus"). */
@@ -32,6 +34,8 @@ export interface SplitSummary {
   deltaPercent?: number;
   /** Label personnalisé pour le % de delta (défaut : "Amélioration globale"). */
   deltaLabel?: string;
+  /** Note textuelle affichée sous les 3 tuiles, ex. ventilation du gain. */
+  footnote?: ReactNode;
 }
 
 interface Props {
