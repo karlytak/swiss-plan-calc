@@ -19,7 +19,12 @@ export interface SplitRow {
   /** "higher_is_better" (défaut) ou "lower_is_better", pilote la couleur du delta. */
   betterWhen?: "higher" | "lower" | "neutral";
   hint?: string;
+  /** Identifiant stable pour relier les deux colonnes (expand synchronisé). */
+  id?: string;
+  /** Contenu détaillé affiché quand la pastille est cliquée (panneau sous la ligne). */
+  breakdown?: ReactNode;
 }
+
 
 export interface SplitSummary {
   /** Économie annuelle en CHF (positive = bon). */
