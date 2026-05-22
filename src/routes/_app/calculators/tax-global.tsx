@@ -855,7 +855,7 @@ function TaxGlobalCalc() {
       </div>
 
       {/* COMPARATEUR Actuel vs Projeté */}
-      <TaxGlobalCompareCard form={form} result={result} />
+      <TaxGlobalCompareCard form={form} result={result} clientId={clientId} />
 
       {/* TRANSPARENCE : comment ce résultat est calculé */}
       <TaxGlobalExplanation form={form} result={result} client={client} />
