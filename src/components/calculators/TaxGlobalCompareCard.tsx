@@ -1,73 +1,160 @@
-// Comparateur Actuel vs Projeté pour le Calculateur Fiscal Global.
-// Calcule un scénario "optimisé" en cumulant les leviers fiscaux principaux
-// (3a au plafond, rachat LPP étalé, 3b cantonal, frais santé au forfait),
-// puis affiche les deux scénarios côte à côte via SplitCompareLayout.
+// Comparateur "Avant / Après" pour le Calculateur Fiscal Global.
+//
+// Logique :
+// - Base de comparaison = snapshot figé du formulaire (capturé à l'ouverture
+//   ou via le bouton "Définir comme base").
+// - Situation simulée = formulaire actuel, en direct.
+// - Le bloc affiche l'impact réel des modifications de l'utilisateur :
+//   économie/surcoût d'impôt, charges santé, net annuel, taux effectif et
+//   marginal. La liste des champs modifiés est affichée pour rendre
+//   l'impact compréhensible.
 
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Camera, RotateCcw } from "lucide-react";
 
-import { CalcCard, HelpDot } from "@/components/calculators/CalcUI";
+import { CalcCard } from "@/components/calculators/CalcUI";
 import {
   SplitCompareLayout,
   type SplitRow,
 } from "@/components/calculators/SplitCompareLayout";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { formatCHF } from "@/lib/format";
 import { computeTaxGlobal } from "@/lib/tax-global/engine";
 import type { TaxGlobalInput, TaxGlobalResult } from "@/lib/tax-global/types";
-import {
-  PILLAR_3A_MAX_2026_LPP,
-  PILLAR_3A_MAX_2026_NO_LPP,
-} from "@/lib/tax/income";
 
 interface Props {
   form: TaxGlobalInput;
   result: TaxGlobalResult;
+  /** Identifiant client : si présent, la base est resynchronisée au changement. */
+  clientId?: string;
 }
 
-const DEFAULT_3B_TARGET = 3_500;
-const HEALTH_FORFAIT_DEFAULT = 3_500;
+// Champs numériques surveillés pour détecter une modification utilisateur.
+const NUMERIC_FIELDS: Array<keyof TaxGlobalInput> = [
+  "grossSalary",
+  "bonus",
+  "spouseGrossSalary",
+  "otherIncome",
+  "rentalIncome",
+  "imputedRent",
+  "foreignIncome",
+  "netWealth",
+  "pillar3aContributions",
+  "pillar3bContributions",
+  "lppBuyback",
+  "mortgageInterest",
+  "realEstateMaintenance",
+  "healthInsurancePremiums",
+  "childCareCosts",
+  "donations",
+  "children",
+];
 
-export function TaxGlobalCompareCard({ form, result }: Props) {
-  const hasLPP = !(form.permit === "G" && result.regime === "cross_border_fr_1983");
-  const target3a = hasLPP ? PILLAR_3A_MAX_2026_LPP : PILLAR_3A_MAX_2026_NO_LPP;
+const CATEGORICAL_FIELDS: Array<keyof TaxGlobalInput> = [
+  "canton",
+  "countryOfResidence",
+  "permit",
+  "civilStatus",
+  "confession",
+  "spouseEmployed",
+];
 
-  const lppCapacity = form.lppBuybackCapacity ?? 0;
-  const isCouple =
-    form.civilStatus === "married" || form.civilStatus === "registered_partnership";
-  const gross =
-    form.grossSalary + form.bonus + (isCouple ? form.spouseGrossSalary : 0);
-  const targetLppBuyback = Math.min(
-    lppCapacity,
-    Math.max(0, Math.round((gross * 0.25) / 1000) * 1000),
-  );
-  const targetLppYearly = targetLppBuyback > 0 ? Math.round(targetLppBuyback / 3) : 0;
+const FIELD_LABEL: Partial<Record<keyof TaxGlobalInput, string>> = {
+  grossSalary: "Salaire brut",
+  bonus: "Bonus",
+  spouseGrossSalary: "Salaire brut conjoint",
+  otherIncome: "Autres revenus",
+  rentalIncome: "Revenus locatifs",
+  imputedRent: "Valeur locative",
+  foreignIncome: "Revenus étrangers",
+  netWealth: "Fortune nette",
+  pillar3aContributions: "3e pilier A",
+  pillar3bContributions: "3e pilier B",
+  lppBuyback: "Rachat LPP",
+  mortgageInterest: "Intérêts hypothécaires",
+  realEstateMaintenance: "Entretien immobilier",
+  healthInsurancePremiums: "Primes santé",
+  childCareCosts: "Frais de garde",
+  donations: "Dons",
+  children: "Nombre d'enfants",
+  canton: "Canton",
+  countryOfResidence: "Pays de résidence",
+  permit: "Permis",
+  civilStatus: "Statut civil",
+  confession: "Confession",
+  spouseEmployed: "Conjoint actif",
+};
 
-  const target3b = Math.max(form.pillar3bContributions, DEFAULT_3B_TARGET);
-  const targetHealth = Math.max(form.healthInsurancePremiums, HEALTH_FORFAIT_DEFAULT);
+interface FieldDiff {
+  key: keyof TaxGlobalInput;
+  label: string;
+  before: string;
+  after: string;
+  delta?: number;
+}
 
-  const projectedForm: TaxGlobalInput = useMemo(
-    () => ({
-      ...form,
-      pillar3aContributions: Math.max(form.pillar3aContributions, target3a),
-      lppBuyback: Math.max(form.lppBuyback, targetLppYearly),
-      pillar3bContributions: target3b,
-      healthInsurancePremiums: targetHealth,
-    }),
-    [form, target3a, targetLppYearly, target3b, targetHealth],
-  );
+function fmtVal(v: unknown): string {
+  if (typeof v === "number") return formatCHF(v);
+  if (typeof v === "boolean") return v ? "Oui" : "Non";
+  return String(v ?? "—");
+}
 
-  const projected = useMemo(() => computeTaxGlobal(projectedForm), [projectedForm]);
+function diffForms(base: TaxGlobalInput, curr: TaxGlobalInput): FieldDiff[] {
+  const diffs: FieldDiff[] = [];
+  for (const k of NUMERIC_FIELDS) {
+    const a = Number(base[k] ?? 0);
+    const b = Number(curr[k] ?? 0);
+    if (a !== b) {
+      diffs.push({
+        key: k,
+        label: FIELD_LABEL[k] ?? String(k),
+        before: fmtVal(a),
+        after: fmtVal(b),
+        delta: b - a,
+      });
+    }
+  }
+  for (const k of CATEGORICAL_FIELDS) {
+    if (base[k] !== curr[k]) {
+      diffs.push({
+        key: k,
+        label: FIELD_LABEL[k] ?? String(k),
+        before: fmtVal(base[k]),
+        after: fmtVal(curr[k]),
+      });
+    }
+  }
+  return diffs;
+}
 
-  const delta3a = projectedForm.pillar3aContributions - form.pillar3aContributions;
-  const deltaLpp = projectedForm.lppBuyback - form.lppBuyback;
-  const delta3b = projectedForm.pillar3bContributions - form.pillar3bContributions;
-  const deltaHealth =
-    projectedForm.healthInsurancePremiums - form.healthInsurancePremiums;
+export function TaxGlobalCompareCard({ form, result, clientId }: Props) {
+  // Base de comparaison : snapshot initial du formulaire.
+  const [baseline, setBaseline] = useState<TaxGlobalInput>(form);
+  const initializedRef = useRef(false);
+  const lastClientRef = useRef<string | undefined>(clientId);
 
-  const annualSaving = result.totalTaxCHF - projected.totalTaxCHF;
-  const netGain = projected.netAnnualCHF - result.netAnnualCHF;
-  const deltaPct =
-    result.totalTaxCHF > 0 ? annualSaving / result.totalTaxCHF : 0;
+  // Resynchroniser la base lorsqu'on change de client (prefill).
+  useEffect(() => {
+    if (lastClientRef.current !== clientId) {
+      lastClientRef.current = clientId;
+      setBaseline(form);
+      initializedRef.current = true;
+      return;
+    }
+    // Première hydratation : si la base est encore le default et le form a été
+    // peuplé par le prefill, on resynchronise une seule fois.
+    if (!initializedRef.current) {
+      setBaseline(form);
+      initializedRef.current = true;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [clientId, form.grossSalary, form.canton, form.permit, form.civilStatus]);
+
+  const baselineResult = useMemo(() => computeTaxGlobal(baseline), [baseline]);
+
+  const diffs = useMemo(() => diffForms(baseline, form), [baseline, form]);
+  const hasChanges = diffs.length > 0;
 
   const ifdRow = (r: TaxGlobalResult): number =>
     r.income ? r.income.ifd : r.crossBorder?.swissTax ?? r.source?.annualTax ?? 0;
@@ -78,125 +165,193 @@ export function TaxGlobalCompareCard({ form, result }: Props) {
   const rows: SplitRow[] = [
     {
       label: "Impôt total annuel",
-      current: result.totalTaxCHF,
-      projected: projected.totalTaxCHF,
+      current: baselineResult.totalTaxCHF,
+      projected: result.totalTaxCHF,
       betterWhen: "lower",
     },
     {
       label: "Impôt fédéral / source CH",
-      current: ifdRow(result),
-      projected: ifdRow(projected),
+      current: ifdRow(baselineResult),
+      projected: ifdRow(result),
       betterWhen: "lower",
     },
-    ...(cantonalRow(result) > 0 || cantonalRow(projected) > 0
+    ...(cantonalRow(baselineResult) > 0 || cantonalRow(result) > 0
       ? [
           {
             label: "Cantonal + communal",
-            current: cantonalRow(result),
-            projected: cantonalRow(projected),
+            current: cantonalRow(baselineResult),
+            projected: cantonalRow(result),
             betterWhen: "lower" as const,
           },
         ]
       : []),
-    ...(wealthRow(result) > 0 || wealthRow(projected) > 0
+    ...(wealthRow(baselineResult) > 0 || wealthRow(result) > 0
       ? [
           {
             label: "Impôt sur la fortune",
-            current: wealthRow(result),
-            projected: wealthRow(projected),
+            current: wealthRow(baselineResult),
+            projected: wealthRow(result),
             betterWhen: "lower" as const,
           },
         ]
       : []),
-    ...(result.socialChargesCHF > 0 || projected.socialChargesCHF > 0
+    ...(baselineResult.socialChargesCHF > 0 || result.socialChargesCHF > 0
       ? [
           {
             label: "Charges santé (LAMal / CMU)",
-            current: result.socialChargesCHF,
-            projected: projected.socialChargesCHF,
+            current: baselineResult.socialChargesCHF,
+            projected: result.socialChargesCHF,
             betterWhen: "lower" as const,
           },
         ]
       : []),
     {
       label: "Net annuel disponible",
-      current: result.netAnnualCHF,
-      projected: projected.netAnnualCHF,
+      current: baselineResult.netAnnualCHF,
+      projected: result.netAnnualCHF,
       betterWhen: "higher",
     },
     {
       label: "Taux effectif",
-      current: result.effectiveRate / 100,
-      projected: projected.effectiveRate / 100,
+      current: baselineResult.effectiveRate / 100,
+      projected: result.effectiveRate / 100,
       format: "pct",
       betterWhen: "lower",
     },
     {
       label: "Taux marginal",
-      current: result.marginalRate / 100,
-      projected: projected.marginalRate / 100,
+      current: baselineResult.marginalRate / 100,
+      projected: result.marginalRate / 100,
       format: "pct",
       betterWhen: "lower",
     },
   ];
 
+  const annualSaving = baselineResult.totalTaxCHF - result.totalTaxCHF;
+  const netGain = result.netAnnualCHF - baselineResult.netAnnualCHF;
+  const deltaPct =
+    baselineResult.totalTaxCHF > 0
+      ? annualSaving / baselineResult.totalTaxCHF
+      : 0;
+
+  const regimeChanged = baselineResult.regime !== result.regime;
+  const noEffect = result.regime === "cross_border_fr_1983";
   const needsTou =
     result.regime === "source_taxed" ||
     result.regime === "cross_border_ge" ||
     result.regime === "cross_border_other";
-  const noEffect = result.regime === "cross_border_fr_1983";
 
   return (
-    <CalcCard title="Optimisations fiscales · Actuel vs Projeté">
+    <CalcCard title="Comparateur fiscal · Avant / Après">
+      <p className="mb-3 text-xs text-muted-foreground">
+        Comparez la situation de référence (base figée) avec la situation
+        simulée en direct. Toute modification du formulaire (rachat LPP, 3a,
+        canton, permis, statut, frontalier…) fait bouger la colonne « Après ».
+      </p>
 
-      <div className="mb-3 flex flex-wrap items-center gap-2 text-xs">
-        <Badge variant="outline" className="gap-1 bg-primary/5">
-          Cible 3a : {formatCHF(target3a)}
-          <HelpDot tip="Plafond légal 2026 du 3e pilier A. 7'258 CHF si affilié à une LPP, sinon 36'288 CHF (max 20 % du revenu net). Cotisation intégralement déductible du revenu imposable, capital bloqué jusqu'à la retraite (sortie possible 5 ans avant l'âge AVS)." />
-        </Badge>
-        {targetLppYearly > 0 && (
-          <Badge variant="outline" className="gap-1 bg-primary/5">
-            Rachat LPP : {formatCHF(targetLppYearly)} / an sur 3 ans
-            <HelpDot tip="Capacité de rachat issue de la fiche client, plafonnée à 25 % du brut et étalée sur 3 ans pour maximiser le gain marginal sans tomber dans une tranche trop basse. Blocage de 3 ans avant tout retrait en capital (art. 79b LPP)." />
-          </Badge>
+      {/* Barre d'actions base */}
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => setBaseline(form)}
+          className="gap-1.5"
+        >
+          <Camera className="h-3.5 w-3.5" />
+          Définir comme base
+        </Button>
+        {hasChanges && (
+          <Button
+            type="button"
+            size="sm"
+            variant="ghost"
+            onClick={() => setBaseline(form)}
+            className="gap-1.5 text-muted-foreground"
+            title="Réinitialiser la base sur les valeurs actuelles"
+          >
+            <RotateCcw className="h-3.5 w-3.5" />
+            Réinitialiser la base
+          </Button>
         )}
-        <Badge variant="outline" className="gap-1 bg-primary/5">
-          Cible 3b : {formatCHF(target3b)}
-          <HelpDot tip="3e pilier B (assurance-vie, épargne libre). Agrégé aux primes santé dans le plafond commun cantonal des frais d'assurance. Effet déductible variable selon le canton et le statut civil." />
+        <Badge variant="outline" className="ml-auto text-[10px]">
+          {hasChanges
+            ? `${diffs.length} modification${diffs.length > 1 ? "s" : ""} simulée${diffs.length > 1 ? "s" : ""}`
+            : "Aucune modification simulée"}
         </Badge>
-        {targetHealth > form.healthInsurancePremiums && (
-          <Badge variant="outline" className="gap-1 bg-primary/5">
-            Forfait santé : {formatCHF(targetHealth)}
-            <HelpDot tip="Forfait cantonal indicatif appliqué pour les primes LAMal et LCA lorsqu'aucun montant n'est saisi. Valeur typique pour un célibataire à Genève." />
-          </Badge>
-        )}
       </div>
 
-      {needsTou && (
-        <div className="mb-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
-          <strong>Démarche requise.</strong> Pour matérialiser ces économies il
-          faut demander la TOU (quasi-résident, 90 % des revenus en CH) ou une
-          rectification IS auprès de l'AFC avant le 31 mars de l'année suivante.
-          Sans démarche, la retenue à la source brute s'applique et l'économie
-          reste théorique.
+      {/* Liste des changements */}
+      {hasChanges ? (
+        <div className="mb-4 rounded-md border border-primary/30 bg-primary/5 p-3">
+          <div className="mb-2 text-xs font-semibold text-primary">
+            Changements simulés
+          </div>
+          <ul className="space-y-1 text-xs">
+            {diffs.map((d) => (
+              <li key={String(d.key)} className="flex flex-wrap items-baseline gap-2">
+                <span className="font-medium text-foreground">{d.label} :</span>
+                <span className="text-muted-foreground line-through">{d.before}</span>
+                <span className="text-foreground">→ {d.after}</span>
+                {typeof d.delta === "number" && d.delta !== 0 && (
+                  <span
+                    className={
+                      d.delta > 0
+                        ? "rounded bg-success/15 px-1.5 text-[10px] font-semibold text-success"
+                        : "rounded bg-destructive/15 px-1.5 text-[10px] font-semibold text-destructive"
+                    }
+                  >
+                    {d.delta > 0 ? "+" : "−"}
+                    {formatCHF(Math.abs(d.delta))}
+                  </span>
+                )}
+              </li>
+            ))}
+            {regimeChanged && (
+              <li className="flex flex-wrap items-baseline gap-2 pt-1">
+                <span className="font-medium text-foreground">Régime fiscal :</span>
+                <span className="text-muted-foreground line-through">
+                  {baselineResult.regimeLabel}
+                </span>
+                <span className="text-foreground">→ {result.regimeLabel}</span>
+              </li>
+            )}
+          </ul>
+        </div>
+      ) : (
+        <div className="mb-4 rounded-md border border-dashed border-border bg-muted/30 p-3 text-xs text-muted-foreground">
+          Aucune modification simulée. Modifiez un champ du formulaire (rachat
+          LPP, 3a, canton, permis…) ou appliquez une optimisation détectée pour
+          voir son impact ici.
         </div>
       )}
-      {noEffect && (
+
+      {needsTou && hasChanges && (
+        <div className="mb-3 rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
+          <strong>Démarche requise.</strong> Pour matérialiser l'économie il
+          faut demander la TOU (quasi-résident, 90 % des revenus en CH) ou une
+          rectification IS auprès de l'AFC avant le 31 mars de l'année
+          suivante. Sans démarche, la retenue à la source brute s'applique.
+        </div>
+      )}
+      {noEffect && hasChanges && (
         <div className="mb-3 rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
           <strong>Accord 1983.</strong> Imposition exclusive en France. Les
-          déductions suisses (3a, rachat LPP, primes LAMal CH) n'ont aucun effet
-          fiscal. Le scénario projeté est affiché à titre informatif uniquement.
+          déductions suisses (3a, rachat LPP, primes LAMal CH) n'ont aucun
+          effet fiscal. L'écart affiché est informatif.
         </div>
       )}
 
       <SplitCompareLayout
-        currentSubtitle="Situation déclarée (ce que vous avez saisi)"
-        projectedSubtitle="Avec tous les leviers fiscaux activés"
+        currentLabel="Avant modification"
+        projectedLabel="Après modification"
+        currentSubtitle="Base de comparaison (figée)"
+        projectedSubtitle="Situation simulée en direct"
         rows={rows}
         legend={
           <span>
-            Pastille verte : économie obtenue. Pastille rouge : surcoût. Si la
-            colonne projetée est identique, voir les raisons ci-dessous.
+            Pastille verte : économie ou amélioration. Pastille rouge :
+            surcoût. Pas de pastille = pas de changement.
           </span>
         }
         summary={{
@@ -205,77 +360,68 @@ export function TaxGlobalCompareCard({ form, result }: Props) {
           retirementGain: netGain,
           retirementGainLabel: "Gain net annuel (cash en poche)",
           deltaPercent: deltaPct,
-          deltaLabel: "Réduction d'impôt",
-          footnote: (
+          deltaLabel: "Variation d'impôt",
+          footnote: hasChanges ? (
             <span>
-              Décomposition des leviers projetés :
-              {delta3a > 0 && <> 3a +{formatCHF(delta3a)},</>}
-              {deltaLpp > 0 && <> rachat LPP +{formatCHF(deltaLpp)} / an,</>}
-              {delta3b > 0 && <> 3b +{formatCHF(delta3b)},</>}
-              {deltaHealth > 0 && <> santé +{formatCHF(deltaHealth)}.</>}
-              {delta3a === 0 &&
-                deltaLpp === 0 &&
-                delta3b === 0 &&
-                deltaHealth === 0 && (
-                  <> aucun levier supplémentaire n'est applicable, la situation
-                  actuelle est déjà optimisée par rapport aux cibles légales.</>
-                )}
+              Impact basé sur {diffs.length} modification
+              {diffs.length > 1 ? "s" : ""} :{" "}
+              {diffs
+                .map((d) =>
+                  typeof d.delta === "number" && d.delta !== 0
+                    ? `${d.label} ${d.delta > 0 ? "+" : "−"}${formatCHF(Math.abs(d.delta))}`
+                    : `${d.label} (${d.before} → ${d.after})`,
+                )
+                .join(", ")}
+              .
+            </span>
+          ) : (
+            <span>
+              Les deux colonnes sont identiques tant qu'aucune modification
+              n'est saisie.
             </span>
           ),
         }}
       />
 
-      {annualSaving < 100 && (
+      {hasChanges && Math.abs(annualSaving) < 100 && (
         <div className="mt-4 rounded-md border border-border bg-muted/30 p-3 text-xs">
           <div className="mb-1.5 font-semibold text-foreground">
-            Pourquoi l'économie projetée est-elle nulle ou très faible ?
+            Pourquoi l'impôt ne bouge presque pas malgré la modification ?
           </div>
           <ul className="space-y-1 text-muted-foreground">
-            {form.pillar3aContributions >= target3a && (
-              <li>• 3a : vous êtes déjà au plafond légal ({formatCHF(target3a)}).</li>
-            )}
-            {form.lppBuyback >= targetLppYearly && targetLppYearly > 0 && (
-              <li>
-                • Rachat LPP : le montant saisi ({formatCHF(form.lppBuyback)}) atteint
-                déjà la cible annuelle recommandée. Il fait partie de la situation
-                actuelle et n'apparaît pas comme une nouvelle économie.
-              </li>
-            )}
-            {targetLppYearly === 0 && lppCapacity === 0 && (
-              <li>
-                • Rachat LPP : aucune capacité de rachat renseignée sur la fiche
-                client. Renseignez-la pour activer ce levier.
-              </li>
-            )}
             {noEffect && (
               <li>
-                • Accord franco-suisse 1983 : les déductions CH (3a, rachat LPP,
-                LAMal CH) ne sont pas opposables au fisc français. L'impôt reste
-                inchangé quelle que soit la saisie.
+                • Accord franco-suisse 1983 : les déductions CH ne sont pas
+                opposables au fisc français. L'impôt CH reste inchangé.
               </li>
             )}
             {needsTou && (
               <li>
-                • Démarche TOU / rectification IS non effectuée : la retenue à la
-                source brute s'applique et les déductions n'ont aucun effet
-                automatique. L'économie ne se matérialise qu'après dépôt de la
-                demande à l'AFC.
+                • Régime à la source sans TOU : la retenue brute s'applique et
+                les déductions n'ont pas d'effet automatique. L'économie ne se
+                matérialise qu'après dépôt de la demande à l'AFC.
               </li>
             )}
             {result.regime === "source_taxed" &&
               result.touComparison &&
-              result.touComparison.ordinaryTax >= (result.source?.annualTax ?? 0) && (
+              result.touComparison.ordinaryTax >=
+                (result.source?.annualTax ?? 0) && (
                 <li>
-                  • La taxation ordinaire avec déductions reste plus coûteuse que la
-                  retenue à la source actuelle : la TOU n'apporte rien cette année.
+                  • La taxation ordinaire avec déductions reste plus coûteuse
+                  que la retenue à la source : la TOU n'apporte rien ici.
+                </li>
+              )}
+            {diffs.some((d) => d.key === "lppBuyback") &&
+              (form.lppBuybackCapacity ?? 0) === 0 && (
+                <li>
+                  • Capacité de rachat LPP non renseignée sur la fiche client :
+                  un rachat saisi peut être ignoré ou plafonné.
                 </li>
               )}
             <li className="pt-1 text-foreground/70">
-              Astuce : un rachat LPP modifie l'impôt seulement s'il est nouveau (non
-              encore dans la situation actuelle) et si la TOU / taxation ordinaire
-              s'applique. Pour visualiser un nouveau rachat, augmentez le montant
-              dans « Optimisations &amp; déductions », ou laissez le champ vide et
-              renseignez la capacité de rachat sur la fiche client.
+              Astuce : la modification peut affecter uniquement les charges
+              santé, le net cash ou le taux marginal sans déplacer l'impôt
+              total. Vérifiez chaque ligne du comparateur ci-dessus.
             </li>
           </ul>
         </div>
