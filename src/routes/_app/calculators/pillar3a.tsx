@@ -274,6 +274,7 @@ function Pillar3aCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="pillar3a" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.p3a.guide_title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 

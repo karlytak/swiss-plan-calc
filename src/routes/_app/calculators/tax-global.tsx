@@ -139,6 +139,7 @@ function TaxGlobalCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="tax-global" clientId={clientId} />
       {client && <ClientLinkBanner client={client} />}
 
       {/* Hero */}

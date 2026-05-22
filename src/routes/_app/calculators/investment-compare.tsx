@@ -150,6 +150,7 @@ function InvestmentCompareCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="investment-compare" clientId={clientId} />
       {client && <ClientLinkBanner client={client} />}
       <GuideMode
         open={guideOpen}
