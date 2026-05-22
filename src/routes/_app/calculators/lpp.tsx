@@ -449,7 +449,28 @@ function LppCalc() {
         </div>
       </CalcCard>
 
+      <SplitCompareLayout
+        title="Actuel (sans rachat) vs Projeté Piliarys (avec rachat)"
+        description="Impact du plan de rachat sur le capital final et la fiscalité, à hypothèses de salaire et rendement identiques."
+        currentSubtitle="Aucun rachat planifié"
+        projectedSubtitle={`Rachat de ${formatCHF(actualBuybackCapped)} sur ${form.buybackYears} an(s)`}
+        rows={compareRows}
+        summary={{
+          retirementGain: projection.projectedBalance - projectionNoBuyback.projectedBalance,
+          retirementGainLabel: "Capital LPP en plus à la retraite",
+          annualSaving:
+            buybackPlan.totalTaxSavings / Math.max(1, form.buybackYears),
+          deltaPercent:
+            projectionNoBuyback.projectedBalance > 0
+              ? (projection.projectedBalance - projectionNoBuyback.projectedBalance) /
+                projectionNoBuyback.projectedBalance
+              : 0,
+          deltaLabel: "Capital final",
+        }}
+      />
+
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
+
         <div className="md:col-span-3">
           <CalcCard title={t("calc.lpp.buyback_card")} description={t("calc.lpp.buyback_desc")}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
