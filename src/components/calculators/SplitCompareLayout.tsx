@@ -228,7 +228,7 @@ export function SplitCompareLayout({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {summary.annualSaving !== undefined && (
               <SummaryStat
-                label="💰 Économie annuelle"
+                label={`💰 ${summary.annualSavingLabel ?? "Économie annuelle"}`}
                 value={formatCHF(summary.annualSaving)}
                 tone={summary.annualSaving >= 0 ? "good" : "bad"}
               />
@@ -248,6 +248,11 @@ export function SplitCompareLayout({
               />
             )}
           </div>
+          {summary.footnote && (
+            <div className="mt-3 border-t border-primary/20 pt-3 text-[11px] leading-relaxed text-muted-foreground">
+              {summary.footnote}
+            </div>
+          )}
         </div>
       )}
     </div>
