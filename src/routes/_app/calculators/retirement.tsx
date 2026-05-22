@@ -41,7 +41,7 @@ export const Route = createFileRoute("/_app/calculators/retirement")({
 function RetirementCalc() {
   const t = useT();
   const { clientId } = Route.useSearch();
-  const { client, prefill } = usePrefillFromClient(clientId, "retirement");
+  const { client, bundle, prefill } = usePrefillFromClient(clientId, "retirement");
   const [form, setForm] = useState({
     capital: 600_000,
     canton: "VD",
