@@ -104,13 +104,14 @@ export function SplitCompareLayout({
   projectedSubtitle = "Optimisation recommandée",
   rows,
   summary,
+  legend,
   currentExtra,
   projectedExtra,
   className,
 }: Props) {
   return (
     <div className={cn("space-y-4", className)}>
-      {(title || description) && (
+      {(title || description || legend) && (
         <div className="space-y-1">
           {title && (
             <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight">
@@ -119,6 +120,7 @@ export function SplitCompareLayout({
             </h3>
           )}
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          {legend && <div className="text-[11px] text-muted-foreground">{legend}</div>}
         </div>
       )}
 
