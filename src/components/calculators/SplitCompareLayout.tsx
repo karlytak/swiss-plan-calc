@@ -24,6 +24,8 @@ export interface SplitRow {
 export interface SplitSummary {
   /** Économie annuelle en CHF (positive = bon). */
   annualSaving?: number;
+  /** Libellé personnalisé de la tuile « Économie annuelle ». */
+  annualSavingLabel?: string;
   /** Gain retraite (capital ou rente) en CHF. Positive = bon. */
   retirementGain?: number;
   /** Libellé du gain retraite (ex: "Capital LPP supplémentaire" / "Rente annuelle en plus"). */
@@ -32,6 +34,8 @@ export interface SplitSummary {
   deltaPercent?: number;
   /** Label personnalisé pour le % de delta (défaut : "Amélioration globale"). */
   deltaLabel?: string;
+  /** Note textuelle affichée sous les 3 tuiles, ex. ventilation du gain. */
+  footnote?: ReactNode;
 }
 
 interface Props {
@@ -51,6 +55,8 @@ interface Props {
   rows: SplitRow[];
   /** Bandeau synthèse en bas. */
   summary?: SplitSummary;
+  /** Mini-légende affichée sous le titre/description (ex. explication des pastilles delta). */
+  legend?: ReactNode;
   /** Contenu additionnel injecté sous le bloc colonne courante. */
   currentExtra?: ReactNode;
   /** Contenu additionnel injecté sous le bloc colonne projetée. */
@@ -98,13 +104,14 @@ export function SplitCompareLayout({
   projectedSubtitle = "Optimisation recommandée",
   rows,
   summary,
+  legend,
   currentExtra,
   projectedExtra,
   className,
 }: Props) {
   return (
     <div className={cn("space-y-4", className)}>
-      {(title || description) && (
+      {(title || description || legend) && (
         <div className="space-y-1">
           {title && (
             <h3 className="flex items-center gap-2 text-base font-semibold tracking-tight">
@@ -113,6 +120,7 @@ export function SplitCompareLayout({
             </h3>
           )}
           {description && <p className="text-xs text-muted-foreground">{description}</p>}
+          {legend && <div className="text-[11px] text-muted-foreground">{legend}</div>}
         </div>
       )}
 
@@ -220,7 +228,7 @@ export function SplitCompareLayout({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             {summary.annualSaving !== undefined && (
               <SummaryStat
-                label="💰 Économie annuelle"
+                label={`💰 ${summary.annualSavingLabel ?? "Économie annuelle"}`}
                 value={formatCHF(summary.annualSaving)}
                 tone={summary.annualSaving >= 0 ? "good" : "bad"}
               />
@@ -240,6 +248,11 @@ export function SplitCompareLayout({
               />
             )}
           </div>
+          {summary.footnote && (
+            <div className="mt-3 border-t border-primary/20 pt-3 text-[11px] leading-relaxed text-muted-foreground">
+              {summary.footnote}
+            </div>
+          )}
         </div>
       )}
     </div>
