@@ -106,6 +106,57 @@ function Pillar3aCalc() {
     [form],
   );
 
+  // Scénario optimisé : cotisation au plafond légal + projection sur la
+  // même durée et même rendement que la situation courante.
+  const optimizedSavings = useMemo(
+    () =>
+      pillar3aTaxSavings({
+        contribution: max,
+        taxInput: { canton: form.canton, status: form.status, grossSalary: form.grossSalary },
+      }),
+    [max, form.canton, form.status, form.grossSalary],
+  );
+  const optimizedProjection = useMemo(
+    () =>
+      projectPillar3a({
+        currentBalance: form.currentBalance,
+        yearlyContribution: max,
+        years: form.yearsToRetirement,
+        expectedReturnRate: form.expectedReturn,
+      }),
+    [max, form.currentBalance, form.yearsToRetirement, form.expectedReturn],
+  );
+
+  const compareRows: SplitRow[] = useMemo(
+    () => [
+      {
+        label: "Cotisation annuelle 3a",
+        current: form.contribution,
+        projected: max,
+        betterWhen: "higher",
+      },
+      {
+        label: "Économie d'impôt annuelle",
+        current: savings.taxSavings,
+        projected: optimizedSavings.taxSavings,
+        betterWhen: "higher",
+      },
+      {
+        label: "Coût net après impôt",
+        current: savings.effectiveCost,
+        projected: optimizedSavings.effectiveCost,
+        betterWhen: "lower",
+      },
+      {
+        label: `Capital à la retraite (${form.yearsToRetirement} ans)`,
+        current: projection.finalBalance,
+        projected: optimizedProjection.finalBalance,
+        betterWhen: "higher",
+      },
+    ],
+    [form.contribution, form.yearsToRetirement, max, savings, optimizedSavings, projection, optimizedProjection],
+  );
+
   const { user } = useAuth();
   const brokerHeader = useBrokerPdfHeader();
   const handleExport = () =>
