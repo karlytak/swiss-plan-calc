@@ -40,6 +40,7 @@ import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { useT } from "@/contexts/LanguageContext";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -117,6 +118,7 @@ function VestedBenefitsCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="vested-benefits" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.vested.guide_title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 

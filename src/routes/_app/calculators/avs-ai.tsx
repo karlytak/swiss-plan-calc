@@ -32,6 +32,7 @@ import { useT } from "@/contexts/LanguageContext";
 import { parseChildren, ageFromDob } from "@/lib/clients/types";
 import { buildSurvivorBenefits } from "@/lib/avs/survivors";
 import { formatCHF } from "@/lib/format";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -201,6 +202,7 @@ function AvsAiCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="avs-ai" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.avs.guide_title")} />
       {client && <ClientLinkBanner client={client} />}
       <div className="flex justify-end gap-2">

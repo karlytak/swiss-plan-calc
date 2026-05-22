@@ -33,6 +33,7 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { FiscalSnapshotBanner } from "@/components/calculators/FiscalSnapshotBanner";
 import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -273,6 +274,7 @@ function Pillar3aCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="pillar3a" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.p3a.guide_title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 

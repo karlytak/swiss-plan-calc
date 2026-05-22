@@ -27,6 +27,7 @@ import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { ConsolidatedBenefitsCard } from "@/components/clients/ConsolidatedBenefitsCard";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -110,6 +111,7 @@ function RetirementCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="retirement" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.retirement.guide.title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 

@@ -43,6 +43,7 @@ import {
   type InvestmentResult,
   type InvestmentType,
 } from "@/lib/investment-compare";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -149,6 +150,7 @@ function InvestmentCompareCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="investment-compare" clientId={clientId} />
       {client && <ClientLinkBanner client={client} />}
       <GuideMode
         open={guideOpen}

@@ -190,13 +190,13 @@ export function TaxGlobalCompareCard({ form, result }: Props) {
       )}
 
       <SplitCompareLayout
-        currentSubtitle="Situation déclarée"
-        projectedSubtitle="Avec leviers fiscaux activés"
+        currentSubtitle="Situation déclarée (ce que vous avez saisi)"
+        projectedSubtitle="Avec tous les leviers fiscaux activés"
         rows={rows}
         legend={
           <span>
-            Pastille verte : économie obtenue par rapport à la situation
-            actuelle. Pastille rouge : surcoût.
+            Pastille verte : économie obtenue. Pastille rouge : surcoût. Si la
+            colonne projetée est identique, voir les raisons ci-dessous.
           </span>
         }
         summary={{
@@ -218,12 +218,68 @@ export function TaxGlobalCompareCard({ form, result }: Props) {
                 delta3b === 0 &&
                 deltaHealth === 0 && (
                   <> aucun levier supplémentaire n'est applicable, la situation
-                  actuelle est déjà optimisée.</>
+                  actuelle est déjà optimisée par rapport aux cibles légales.</>
                 )}
             </span>
           ),
         }}
       />
+
+      {annualSaving < 100 && (
+        <div className="mt-4 rounded-md border border-border bg-muted/30 p-3 text-xs">
+          <div className="mb-1.5 font-semibold text-foreground">
+            Pourquoi l'économie projetée est-elle nulle ou très faible ?
+          </div>
+          <ul className="space-y-1 text-muted-foreground">
+            {form.pillar3aContributions >= target3a && (
+              <li>• 3a : vous êtes déjà au plafond légal ({formatCHF(target3a)}).</li>
+            )}
+            {form.lppBuyback >= targetLppYearly && targetLppYearly > 0 && (
+              <li>
+                • Rachat LPP : le montant saisi ({formatCHF(form.lppBuyback)}) atteint
+                déjà la cible annuelle recommandée. Il fait partie de la situation
+                actuelle et n'apparaît pas comme une nouvelle économie.
+              </li>
+            )}
+            {targetLppYearly === 0 && lppCapacity === 0 && (
+              <li>
+                • Rachat LPP : aucune capacité de rachat renseignée sur la fiche
+                client. Renseignez-la pour activer ce levier.
+              </li>
+            )}
+            {noEffect && (
+              <li>
+                • Accord franco-suisse 1983 : les déductions CH (3a, rachat LPP,
+                LAMal CH) ne sont pas opposables au fisc français. L'impôt reste
+                inchangé quelle que soit la saisie.
+              </li>
+            )}
+            {needsTou && (
+              <li>
+                • Démarche TOU / rectification IS non effectuée : la retenue à la
+                source brute s'applique et les déductions n'ont aucun effet
+                automatique. L'économie ne se matérialise qu'après dépôt de la
+                demande à l'AFC.
+              </li>
+            )}
+            {result.regime === "source_taxed" &&
+              result.touComparison &&
+              result.touComparison.ordinaryTax >= (result.source?.annualTax ?? 0) && (
+                <li>
+                  • La taxation ordinaire avec déductions reste plus coûteuse que la
+                  retenue à la source actuelle : la TOU n'apporte rien cette année.
+                </li>
+              )}
+            <li className="pt-1 text-foreground/70">
+              Astuce : un rachat LPP modifie l'impôt seulement s'il est nouveau (non
+              encore dans la situation actuelle) et si la TOU / taxation ordinaire
+              s'applique. Pour visualiser un nouveau rachat, augmentez le montant
+              dans « Optimisations &amp; déductions », ou laissez le champ vide et
+              renseignez la capacité de rachat sur la fiche client.
+            </li>
+          </ul>
+        </div>
+      )}
     </CalcCard>
   );
 }

@@ -51,6 +51,7 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
 import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
@@ -238,6 +239,7 @@ function LppCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="lpp" clientId={clientId} />
       <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.lpp.guide_title")} />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 

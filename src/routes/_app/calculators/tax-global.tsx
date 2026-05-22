@@ -39,6 +39,7 @@ import { createDefaultInput } from "@/lib/tax-global/profile";
 import type { TaxGlobalInput } from "@/lib/tax-global/types";
 import { SUPPORTED_CURRENCIES, getAfcRate, type Currency } from "@/lib/fx/sources";
 import { fetchMarketRates } from "@/lib/fx/fetch.functions";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 
 type FxCurrency = "CHF" | Currency;
@@ -138,6 +139,7 @@ function TaxGlobalCalc() {
 
   return (
     <div className="space-y-6">
+      <CrossCalcImpactBanner calculator="tax-global" clientId={clientId} />
       {client && <ClientLinkBanner client={client} />}
 
       {/* Hero */}
