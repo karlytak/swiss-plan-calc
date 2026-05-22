@@ -385,47 +385,185 @@ export function TaxGlobalCompareCard({ form, result, clientId }: Props) {
 
       {hasChanges && Math.abs(annualSaving) < 100 && (
         <div className="mt-4 rounded-md border border-border bg-muted/30 p-3 text-xs">
-          <div className="mb-1.5 font-semibold text-foreground">
-            Pourquoi l'impôt ne bouge presque pas malgré la modification ?
+          <div className="mb-2 font-semibold text-foreground">
+            Pourquoi l'écart reste à zéro malgré vos modifications ?
           </div>
-          <ul className="space-y-1 text-muted-foreground">
-            {noEffect && (
-              <li>
-                • Accord franco-suisse 1983 : les déductions CH ne sont pas
-                opposables au fisc français. L'impôt CH reste inchangé.
-              </li>
-            )}
-            {needsTou && (
-              <li>
-                • Régime à la source sans TOU : la retenue brute s'applique et
-                les déductions n'ont pas d'effet automatique. L'économie ne se
-                matérialise qu'après dépôt de la demande à l'AFC.
-              </li>
-            )}
-            {result.regime === "source_taxed" &&
-              result.touComparison &&
-              result.touComparison.ordinaryTax >=
-                (result.source?.annualTax ?? 0) && (
+
+          {/* Causes transverses (régime / accord) */}
+          {(noEffect || needsTou) && (
+            <ul className="mb-3 space-y-1 text-muted-foreground">
+              {noEffect && (
                 <li>
-                  • La taxation ordinaire avec déductions reste plus coûteuse
-                  que la retenue à la source : la TOU n'apporte rien ici.
+                  • <strong className="text-foreground">Accord franco-suisse 1983</strong> :
+                  imposition exclusive en France. Aucune déduction CH (3a, rachat
+                  LPP, primes LAMal CH) n'est opposable au fisc français.
                 </li>
               )}
-            {diffs.some((d) => d.key === "lppBuyback") &&
-              (form.lppBuybackCapacity ?? 0) === 0 && (
+              {needsTou && (
                 <li>
-                  • Capacité de rachat LPP non renseignée sur la fiche client :
-                  un rachat saisi peut être ignoré ou plafonné.
+                  • <strong className="text-foreground">Régime à la source sans TOU</strong> :
+                  la retenue brute s'applique. Les déductions n'ont d'effet
+                  qu'après dépôt d'une demande TOU (quasi-résident) ou d'une
+                  rectification IS auprès de l'AFC.
                 </li>
               )}
-            <li className="pt-1 text-foreground/70">
-              Astuce : la modification peut affecter uniquement les charges
-              santé, le net cash ou le taux marginal sans déplacer l'impôt
-              total. Vérifiez chaque ligne du comparateur ci-dessus.
-            </li>
+              {result.regime === "source_taxed" &&
+                result.touComparison &&
+                result.touComparison.ordinaryTax >=
+                  (result.source?.annualTax ?? 0) && (
+                  <li>
+                    • <strong className="text-foreground">TOU non avantageuse</strong> :
+                    la taxation ordinaire avec déductions reste plus coûteuse
+                    que la retenue à la source actuelle.
+                  </li>
+                )}
+            </ul>
+          )}
+
+          {/* Explication champ par champ */}
+          <div className="mb-1.5 font-semibold text-foreground">
+            Détail par champ modifié
+          </div>
+          <ul className="space-y-1.5 text-muted-foreground">
+            {diffs.map((d) => {
+              const reason = explainFieldNoImpact(d, {
+                form,
+                baseline,
+                regime: result.regime,
+                noEffect,
+                needsTou,
+                touUseless:
+                  result.regime === "source_taxed" &&
+                  !!result.touComparison &&
+                  result.touComparison.ordinaryTax >=
+                    (result.source?.annualTax ?? 0),
+              });
+              return (
+                <li key={`why-${String(d.key)}`}>
+                  <span className="font-medium text-foreground">{d.label}</span>{" "}
+                  <span className="text-foreground/60">
+                    ({d.before} → {d.after})
+                  </span>{" "}
+                  : {reason}
+                </li>
+              );
+            })}
+            {regimeChanged && (
+              <li>
+                <span className="font-medium text-foreground">Régime fiscal</span>{" "}
+                <span className="text-foreground/60">
+                  ({baselineResult.regimeLabel} → {result.regimeLabel})
+                </span>{" "}
+                : le nouveau régime conduit à un impôt total quasi équivalent
+                (différence inférieure à 100 CHF).
+              </li>
+            )}
           </ul>
+
+          <div className="mt-3 border-t border-border pt-2 text-foreground/70">
+            Astuce : une modification peut affecter uniquement les charges
+            santé, le net cash ou le taux marginal sans déplacer l'impôt total.
+            Vérifiez chaque ligne du comparateur ci-dessus.
+          </div>
         </div>
       )}
     </CalcCard>
   );
+}
+
+/** Contexte transverse pour expliquer pourquoi un champ ne déplace pas l'impôt. */
+interface ExplainCtx {
+  form: TaxGlobalInput;
+  baseline: TaxGlobalInput;
+  regime: TaxGlobalResult["regime"];
+  noEffect: boolean;
+  needsTou: boolean;
+  touUseless: boolean;
+}
+
+/** Plafond légal 2026 utilisé dans la note (aligné sur PILLAR_3A_MAX_2026_LPP). */
+const PILLAR_3A_CAP_LPP = 7_258;
+
+function explainFieldNoImpact(d: FieldDiff, ctx: ExplainCtx): string {
+  const { form, regime, noEffect, needsTou, touUseless } = ctx;
+
+  if (noEffect) {
+    return "déduction non opposable au fisc français (accord 1983) : aucun effet sur l'impôt.";
+  }
+
+  switch (d.key) {
+    case "pillar3aContributions": {
+      const after = Number(form.pillar3aContributions ?? 0);
+      if (after >= PILLAR_3A_CAP_LPP) {
+        return `plafond légal déjà atteint (${formatCHF(PILLAR_3A_CAP_LPP)}). Toute cotisation supplémentaire n'est plus déductible.`;
+      }
+      if (needsTou)
+        return "régime à la source : la cotisation 3a n'est déduite qu'après demande TOU ou rectification IS.";
+      if (touUseless)
+        return "la TOU avec 3a reste plus coûteuse que la retenue à la source : aucune économie.";
+      return "effet marginal trop faible pour modifier l'impôt total (tranche fiscale inchangée).";
+    }
+    case "lppBuyback": {
+      const cap = form.lppBuybackCapacity ?? 0;
+      const after = Number(form.lppBuyback ?? 0);
+      if (cap === 0)
+        return "aucune capacité de rachat LPP renseignée sur la fiche client : le moteur ne peut pas valider la déduction.";
+      if (after > cap)
+        return `montant supérieur à la capacité disponible (${formatCHF(cap)}) : la déduction est plafonnée.`;
+      if (needsTou)
+        return "régime à la source : le rachat LPP n'est déduit qu'après TOU ou rectification IS.";
+      if (touUseless)
+        return "même avec le rachat, la taxation ordinaire reste plus coûteuse que la retenue à la source.";
+      return "rachat valide mais déjà absorbé par les déductions existantes (tranche fiscale inchangée).";
+    }
+    case "pillar3bContributions":
+      return "le 3e pilier B est plafonné dans le forfait cantonal d'assurances : le plafond est probablement déjà atteint avec les primes santé.";
+    case "healthInsurancePremiums":
+      if (regime === "resident_ordinary")
+        return "primes plafonnées au forfait cantonal d'assurances : au-delà du plafond, la déduction supplémentaire est ignorée.";
+      if (needsTou)
+        return "frontalier / source : les primes CH ne sont déductibles qu'après TOU ou rectification IS.";
+      return "déduction plafonnée par le forfait cantonal d'assurances.";
+    case "mortgageInterest":
+    case "realEstateMaintenance":
+      if (regime !== "resident_ordinary")
+        return "déduction immobilière non applicable hors taxation ordinaire (source/frontalier).";
+      return "effet présent mais inférieur à 100 CHF d'économie d'impôt (tranche inchangée).";
+    case "childCareCosts":
+      return "frais de garde plafonnés (IFD : 25 500 CHF/enfant) et soumis au plafond cantonal : le plafond est probablement déjà atteint.";
+    case "donations":
+      if (regime !== "resident_ordinary" && regime !== "tou")
+        return "dons déductibles uniquement en taxation ordinaire (résident ou TOU activée).";
+      return "don déductible mais effet marginal inférieur à 100 CHF sur le total.";
+    case "netWealth":
+      if (regime !== "resident_ordinary")
+        return "impôt sur la fortune non applicable hors résident ordinaire (source/frontalier).";
+      return "variation insuffisante pour franchir un seuil d'imposition fortune.";
+    case "imputedRent":
+      return "valeur locative incluse dans l'impôt mais souvent neutralisée par les déductions hypothécaires.";
+    case "foreignIncome":
+      return "revenu étranger non pris en compte dans le calcul automatique (à reporter manuellement pour la progressivité).";
+    case "grossSalary":
+    case "bonus":
+    case "spouseGrossSalary":
+    case "otherIncome":
+    case "rentalIncome":
+      if (needsTou)
+        return "variation de revenu mais la retenue source proportionnelle compense quasi exactement.";
+      return "variation présente mais inférieure à 100 CHF d'écart d'impôt total (tranche inchangée).";
+    case "canton":
+      return "le nouveau canton produit un impôt cantonal+communal très proche : la différence reste inférieure à 100 CHF.";
+    case "permit":
+      return "le changement de permis ne fait pas basculer de régime fiscal applicable dans ce cas.";
+    case "civilStatus":
+      return "le barème applicable reste équivalent (concubinage = célibataire ; marié vs partenariat enregistré identiques).";
+    case "spouseEmployed":
+      return "le barème conjoint actif vs non actif produit ici un impôt très proche.";
+    case "confession":
+      return "impôt ecclésiastique non significatif dans ce canton ou ce régime.";
+    case "children":
+      return "déductions enfants déjà appliquées : la variation est intégrée mais reste inférieure à 100 CHF.";
+    default:
+      return "modification prise en compte mais effet inférieur à 100 CHF sur l'impôt total.";
+  }
 }
