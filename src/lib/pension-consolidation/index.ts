@@ -153,6 +153,15 @@ function buildRetirement(b: ClientBundle): ConsolidatedScenario | null {
     pillar2Items.push(toItem("Rente LPP vieillesse", lpp.annualPension, "LPP"));
   }
 
+  // Pilier 3a : capital projeté annualisé sur 22 ans (espérance de vie post-retraite)
+  const p3a = projectClient3a(b);
+  if (p3a && p3a.projectedCapitalAt65 > 0) {
+    const annualized = Math.round(p3a.projectedCapitalAt65 / 22);
+    pillar2Items.push(
+      toItem("3a (capital projeté ÷ 22 ans)", annualized, "LPP"),
+    );
+  }
+
   const p1Total = benefits.totalAnnual;
   const p2Total = pillar2Items.reduce((s, i) => s + i.annual, 0);
   const combined = p1Total + p2Total;
@@ -161,6 +170,7 @@ function buildRetirement(b: ClientBundle): ConsolidatedScenario | null {
   if (avs.cappedCouple) notes.push("Rente couple plafonnée à 150 % du maximum individuel.");
   if (benefits.cappedFamily) notes.push("Rentes familiales plafonnées (150 %).");
   if (!lpp) notes.push("Aucune projection LPP disponible (avoir et salaire manquants).");
+  if (p3a) notes.push("3a annualisé sur 22 ans à titre indicatif (capital en pratique).");
 
   return {
     event: "retirement",
