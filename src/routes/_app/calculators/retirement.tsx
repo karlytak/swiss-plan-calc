@@ -242,6 +242,8 @@ function RetirementCalc() {
         </p>
       </div>
 
+      {bundle && <ConsolidatedBenefitsCard bundle={bundle} />}
+
       <div className="flex flex-wrap justify-end gap-2">
         <SaveSimulationButton
           kind="retirement"
