@@ -119,7 +119,27 @@ export function DirectorLppBuybackCard({
       description="Simule un rachat étalé (1 an / 5 ans / jusqu'à la retraite) sur la base du salaire recommandé."
     >
       <div className="space-y-5">
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div>
+            <Label className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
+              Salaire brut annuel (CHF)
+              {salaryEdited && (
+                <Badge variant="secondary" className="bg-primary/15 text-[10px] text-primary">
+                  modifié
+                </Badge>
+              )}
+              {!salaryEdited && initialGrossSalary > 0 && (
+                <Badge variant="outline" className="text-[10px]">préfill</Badge>
+              )}
+            </Label>
+            <NumField
+              value={String(grossSalary)}
+              onChange={(v) => setGrossSalary(Number(v) || 0)}
+            />
+            <p className="mt-1 text-[10px] text-muted-foreground">
+              Modifiable. Recalcule salaire assuré, capacité et marginal.
+            </p>
+          </div>
           <div>
             <Label className="text-xs font-medium text-muted-foreground">Salaire assuré LPP</Label>
             <div className="mt-1 rounded-md border border-border bg-muted/30 px-3 py-2 text-sm tabular-nums">
@@ -129,6 +149,7 @@ export function DirectorLppBuybackCard({
               Plafond {inputs.lppPlan === "executive_1e" ? "plan 1e cadres" : "obligatoire"} appliqué.
             </p>
           </div>
+
           <div>
             <Label className="text-xs font-medium text-muted-foreground">Capacité de rachat (CHF)</Label>
             <NumField value={String(maxBuyback)} onChange={handleMaxChange} />
