@@ -1,5 +1,5 @@
-// Carte « Prestations consolidées » — addition automatique 1er + 2e pilier
-// par événement (vieillesse, invalidité, décès) à partir de la fiche client.
+// Carte « Prestations consolidées » — Actuel vs Projeté Piliarys
+// (vieillesse / invalidité / décès) à partir de la fiche client.
 
 import { useMemo, useState } from "react";
 import { HeartHandshake, ShieldAlert, Cross } from "lucide-react";
@@ -8,10 +8,16 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { formatCHF } from "@/lib/format";
 import {
   consolidatePensionBenefits,
+  consolidateOptimizedBenefits,
   PENSION_EVENT_LABELS,
+  type ConsolidatedBenefits,
   type ConsolidatedScenario,
   type PensionEvent,
 } from "@/lib/pension-consolidation";
+import {
+  SplitCompareLayout,
+  type SplitRow,
+} from "@/components/calculators/SplitCompareLayout";
 import type { ClientBundle } from "@/lib/client-dashboard";
 
 interface Props {
@@ -25,11 +31,15 @@ const EVENT_ICONS: Record<PensionEvent, typeof HeartHandshake> = {
 };
 
 export function ConsolidatedBenefitsCard({ bundle }: Props) {
-  const benefits = useMemo(() => consolidatePensionBenefits(bundle), [bundle]);
+  const current = useMemo(() => consolidatePensionBenefits(bundle), [bundle]);
+  const optimized = useMemo(() => consolidateOptimizedBenefits(bundle), [bundle]);
   const [tab, setTab] = useState<PensionEvent>("retirement");
 
   return (
-    <DashboardCard title="Prestations consolidées 1er + 2e pilier" icon={HeartHandshake}>
+    <DashboardCard
+      title="Prestations consolidées · Actuel vs Projeté Piliarys"
+      icon={HeartHandshake}
+    >
       <Tabs value={tab} onValueChange={(v) => setTab(v as PensionEvent)}>
         <TabsList className="grid w-full grid-cols-3">
           {(Object.keys(PENSION_EVENT_LABELS) as PensionEvent[]).map((ev) => {
@@ -44,7 +54,7 @@ export function ConsolidatedBenefitsCard({ bundle }: Props) {
         </TabsList>
         {(Object.keys(PENSION_EVENT_LABELS) as PensionEvent[]).map((ev) => (
           <TabsContent key={ev} value={ev} className="mt-3">
-            <ScenarioPanel scenario={benefits[ev]} />
+            <SplitPanel event={ev} current={current} optimized={optimized} />
           </TabsContent>
         ))}
       </Tabs>
@@ -52,76 +62,113 @@ export function ConsolidatedBenefitsCard({ bundle }: Props) {
   );
 }
 
-function ScenarioPanel({ scenario }: { scenario: ConsolidatedScenario | null }) {
-  if (!scenario) {
+function SplitPanel({
+  event,
+  current,
+  optimized,
+}: {
+  event: PensionEvent;
+  current: ConsolidatedBenefits;
+  optimized: ConsolidatedBenefits;
+}) {
+  const cur = current[event];
+  const opt = optimized[event];
+  if (!cur || !opt) {
     return (
       <p className="text-xs text-muted-foreground">
         Données insuffisantes (date de naissance, salaire ou avoirs manquants).
       </p>
     );
   }
+  const rows: SplitRow[] = [
+    {
+      label: "Total mensuel consolidé",
+      current: cur.combinedMonthly,
+      projected: opt.combinedMonthly,
+      format: "chf_per_month",
+    },
+    {
+      label: "Total annuel consolidé",
+      current: cur.combinedAnnual,
+      projected: opt.combinedAnnual,
+    },
+    {
+      label: "1er pilier (AVS / AI)",
+      current: cur.pillar1.totalAnnual,
+      projected: opt.pillar1.totalAnnual,
+    },
+    {
+      label: "2e pilier + 3a",
+      current: cur.pillar2.totalAnnual,
+      projected: opt.pillar2.totalAnnual,
+    },
+  ];
+
+  const annualGain = opt.combinedAnnual - cur.combinedAnnual;
+  const deltaPct =
+    cur.combinedAnnual > 0 ? annualGain / cur.combinedAnnual : 0;
+
   return (
-    <div className="space-y-3">
-      <div className="rounded-lg bg-primary/5 p-3 text-center">
-        <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
-          Total mensuel consolidé
-        </p>
-        <p className="mt-0.5 text-2xl font-bold tabular-nums text-foreground">
-          {formatCHF(scenario.combinedMonthly)}
-        </p>
-        <p className="text-[11px] text-muted-foreground">
-          {formatCHF(scenario.combinedAnnual)} / an
-        </p>
-      </div>
+    <SplitCompareLayout
+      currentSubtitle="Sans optimisation"
+      projectedSubtitle="Rachats LPP + 3a au plafond"
+      rows={rows}
+      summary={{
+        retirementGain: annualGain,
+        retirementGainLabel:
+          event === "retirement"
+            ? "Rente annuelle supplémentaire"
+            : event === "disability"
+              ? "Couverture AI annuelle en plus"
+              : "Couverture survivants en plus",
+        deltaPercent: deltaPct,
+        deltaLabel: "Amélioration prestations",
+      }}
+      currentExtra={<PillarDetails scenario={cur} tone="current" />}
+      projectedExtra={<PillarDetails scenario={opt} tone="projected" />}
+    />
+  );
+}
 
-      <PillarBlock title="1er pilier (AVS / AI)" total={scenario.pillar1.totalAnnual} items={scenario.pillar1.items} />
-      <PillarBlock title="2e pilier (LPP)" total={scenario.pillar2.totalAnnual} items={scenario.pillar2.items} />
-
+function PillarDetails({
+  scenario,
+  tone,
+}: {
+  scenario: ConsolidatedScenario;
+  tone: "current" | "projected";
+}) {
+  const all = [...scenario.pillar1.items, ...scenario.pillar2.items];
+  if (all.length === 0) return null;
+  return (
+    <details className="group rounded-md bg-background/60 p-2">
+      <summary className="cursor-pointer text-[11px] font-semibold text-muted-foreground">
+        Détail des prestations ({all.length})
+      </summary>
+      <ul className="mt-2 space-y-0.5">
+        {all.map((it, i) => (
+          <li
+            key={`${tone}-${i}`}
+            className="flex items-baseline justify-between gap-2 text-[11px]"
+          >
+            <span className="text-foreground/80">
+              <span className="mr-1 inline-flex h-3.5 items-center justify-center rounded bg-muted px-1 text-[9px] font-semibold text-muted-foreground">
+                {it.pillar}
+              </span>
+              {it.label}
+            </span>
+            <span className="tabular-nums text-muted-foreground">
+              {formatCHF(it.annual)} ({formatCHF(it.monthly)}/mois)
+            </span>
+          </li>
+        ))}
+      </ul>
       {scenario.notes.length > 0 && (
-        <ul className="space-y-0.5 rounded-md bg-muted/40 p-2 text-[10px] text-muted-foreground">
+        <ul className="mt-2 space-y-0.5 text-[10px] text-muted-foreground">
           {scenario.notes.map((n, i) => (
             <li key={i}>• {n}</li>
           ))}
         </ul>
       )}
-    </div>
-  );
-}
-
-function PillarBlock({
-  title,
-  total,
-  items,
-}: {
-  title: string;
-  total: number;
-  items: { label: string; annual: number; monthly: number }[];
-}) {
-  return (
-    <div className="rounded-md border border-border/60 p-2">
-      <div className="flex items-center justify-between border-b border-border/40 pb-1">
-        <span className="text-xs font-semibold text-foreground">{title}</span>
-        <span className="text-xs font-semibold tabular-nums text-primary">
-          {formatCHF(total)} / an
-        </span>
-      </div>
-      {items.length === 0 ? (
-        <p className="mt-1 text-[11px] text-muted-foreground">Aucune prestation.</p>
-      ) : (
-        <ul className="mt-1 space-y-0.5">
-          {items.map((it, i) => (
-            <li
-              key={i}
-              className="flex items-baseline justify-between gap-2 text-[11px]"
-            >
-              <span className="text-foreground/80">{it.label}</span>
-              <span className="tabular-nums text-muted-foreground">
-                {formatCHF(it.annual)} ({formatCHF(it.monthly)} / mois)
-              </span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
+    </details>
   );
 }
