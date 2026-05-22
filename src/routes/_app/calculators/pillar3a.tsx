@@ -267,7 +267,26 @@ function Pillar3aCalc() {
         </div>
       </div>
 
+      <SplitCompareLayout
+        title="Actuel vs Projeté Piliarys"
+        description={`Comparaison de la cotisation saisie (${form.contribution.toLocaleString("fr-CH")} CHF) avec le plafond légal (${max.toLocaleString("fr-CH")} CHF), à canton et statut identiques.`}
+        currentSubtitle={client ? "Données fiche client" : "Cotisation saisie"}
+        projectedSubtitle="Cotisation au maximum légal"
+        rows={compareRows}
+        summary={{
+          annualSaving: optimizedSavings.taxSavings - savings.taxSavings,
+          retirementGain: optimizedProjection.finalBalance - projection.finalBalance,
+          retirementGainLabel: "Capital 3a en plus à la retraite",
+          deltaPercent:
+            projection.finalBalance > 0
+              ? (optimizedProjection.finalBalance - projection.finalBalance) / projection.finalBalance
+              : 0,
+          deltaLabel: "Capital final",
+        }}
+      />
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
         <CalcCard title={t("calc.p3a.projection_card")}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <NumField label={t("calc.p3a.field.current_balance")} value={form.currentBalance} onChange={(v) => set("currentBalance", v)} />
