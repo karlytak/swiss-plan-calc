@@ -9,7 +9,7 @@
 //   marginal. La liste des champs modifiés est affichée pour rendre
 //   l'impact compréhensible.
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Camera, RotateCcw, ArrowRight as ArrowRightIcon } from "lucide-react";
 
 import { CalcCard } from "@/components/calculators/CalcUI";
@@ -18,7 +18,7 @@ import {
   type SplitRow,
 } from "@/components/calculators/SplitCompareLayout";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { formatCHF } from "@/lib/format";
 import { computeTaxGlobal } from "@/lib/tax-global/engine";
 import {
@@ -179,7 +179,7 @@ export function TaxGlobalCompareCard({ form, result, clientId }: Props) {
   const wealthRow = (r: TaxGlobalResult): number => r.income?.wealthTax ?? 0;
 
   // Helper : rend le panneau de causes pour un poste donné.
-  const buildBreakdown = (postKey: keyof PostBreakdown): React.ReactNode => {
+  const buildBreakdown = (postKey: keyof PostBreakdown): ReactNode => {
     if (sensitivities.length === 0) return null;
     const items = sensitivities
       .map((s) => ({
