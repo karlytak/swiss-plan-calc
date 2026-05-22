@@ -109,12 +109,14 @@ function Pillar3aCalc() {
   // Scénario optimisé : cotisation au plafond légal + 3b cible + retrait
   // fractionné. Permet d'afficher un vrai gain même quand le 3a est déjà au max.
   const isMaxed = form.contribution >= max;
-  // 3b cible : si < 3'000 CHF/an, on suggère 6'000 ; sinon on garde la valeur
-  // saisie + 50 %, plafonné à 10'000 CHF/an.
-  const target3bYearly = useMemo(() => {
+  // 3b cible — règle auto : si < 3'000 CHF/an → 6'000 ; sinon versement × 1,5
+  // (plafond 10'000). L'utilisateur peut surcharger via le champ ci-dessous.
+  const auto3bTarget = useMemo(() => {
     if (form.pillar3bYearly < 3_000) return 6_000;
     return Math.min(10_000, Math.round(form.pillar3bYearly * 1.5));
   }, [form.pillar3bYearly]);
+  const [target3bOverride, setTarget3bOverride] = useState<number | null>(null);
+  const target3bYearly = target3bOverride ?? auto3bTarget;
 
   const optimizedSavings = useMemo(
     () =>
