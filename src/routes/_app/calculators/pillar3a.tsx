@@ -346,21 +346,34 @@ function Pillar3aCalc() {
         </div>
       </div>
 
+      {isMaxed && (
+        <div className="rounded-xl border border-success/40 bg-success/5 p-4 text-sm">
+          <div className="font-semibold text-success">✅ Cotisation 3a déjà au maximum légal ({max.toLocaleString("fr-CH")} CHF)</div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Leviers d'optimisation restants : <strong>cotiser à un 3B</strong> (assurance-vie / épargne libre, cible {target3bYearly.toLocaleString("fr-CH")} CHF/an) et <strong>fractionner les retraits</strong> sur {Math.max(2, form.withdrawalAccounts)} comptes 3a pour réduire l'impôt de sortie.
+          </p>
+        </div>
+      )}
+
       <SplitCompareLayout
-        title="Actuel vs Projeté"
-        description={`Comparaison de la cotisation saisie (${form.contribution.toLocaleString("fr-CH")} CHF) avec le plafond légal (${max.toLocaleString("fr-CH")} CHF), à canton et statut identiques.`}
-        currentSubtitle={client ? "Données fiche client" : "Cotisation saisie"}
-        projectedSubtitle="Cotisation au maximum légal"
+        title="Actuel vs Projeté — Prévoyance privée totale (3a + 3b)"
+        description={
+          isMaxed
+            ? `3a déjà au max (${max.toLocaleString("fr-CH")} CHF). Projection = 3b cible (${target3bYearly.toLocaleString("fr-CH")} CHF/an) + retrait fractionné.`
+            : `3a au plafond (${max.toLocaleString("fr-CH")} CHF), 3b cible ${target3bYearly.toLocaleString("fr-CH")} CHF/an et retrait fractionné sur ${Math.max(2, form.withdrawalAccounts)} comptes.`
+        }
+        currentSubtitle={client ? "Données fiche client" : "Valeurs saisies"}
+        projectedSubtitle="3a max + 3b cible + retrait fractionné"
         rows={compareRows}
         summary={{
           annualSaving: optimizedSavings.taxSavings - savings.taxSavings,
-          retirementGain: optimizedProjection.finalBalance - projection.finalBalance,
-          retirementGainLabel: "Capital 3a en plus à la retraite",
+          retirementGain: projectedNetAfterTax - currentNetAfterTax,
+          retirementGainLabel: "Capital net supplémentaire (après impôt de sortie)",
           deltaPercent:
-            projection.finalBalance > 0
-              ? (optimizedProjection.finalBalance - projection.finalBalance) / projection.finalBalance
+            currentNetAfterTax > 0
+              ? (projectedNetAfterTax - currentNetAfterTax) / currentNetAfterTax
               : 0,
-          deltaLabel: "Capital final",
+          deltaLabel: "Capital net total",
         }}
       />
 
