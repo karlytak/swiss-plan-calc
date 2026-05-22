@@ -31,6 +31,7 @@ import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { FiscalSnapshotBanner } from "@/components/calculators/FiscalSnapshotBanner";
+import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
 
 const searchSchema = z.object({
@@ -103,6 +104,57 @@ function Pillar3aCalc() {
         status: form.status === "single_with_children" ? "single_with_children" : form.status,
       }),
     [form],
+  );
+
+  // Scénario optimisé : cotisation au plafond légal + projection sur la
+  // même durée et même rendement que la situation courante.
+  const optimizedSavings = useMemo(
+    () =>
+      pillar3aTaxSavings({
+        contribution: max,
+        taxInput: { canton: form.canton, status: form.status, grossSalary: form.grossSalary },
+      }),
+    [max, form.canton, form.status, form.grossSalary],
+  );
+  const optimizedProjection = useMemo(
+    () =>
+      projectPillar3a({
+        currentBalance: form.currentBalance,
+        yearlyContribution: max,
+        years: form.yearsToRetirement,
+        expectedReturnRate: form.expectedReturn,
+      }),
+    [max, form.currentBalance, form.yearsToRetirement, form.expectedReturn],
+  );
+
+  const compareRows: SplitRow[] = useMemo(
+    () => [
+      {
+        label: "Cotisation annuelle 3a",
+        current: form.contribution,
+        projected: max,
+        betterWhen: "higher",
+      },
+      {
+        label: "Économie d'impôt annuelle",
+        current: savings.taxSavings,
+        projected: optimizedSavings.taxSavings,
+        betterWhen: "higher",
+      },
+      {
+        label: "Coût net après impôt",
+        current: savings.effectiveCost,
+        projected: optimizedSavings.effectiveCost,
+        betterWhen: "lower",
+      },
+      {
+        label: `Capital à la retraite (${form.yearsToRetirement} ans)`,
+        current: projection.finalBalance,
+        projected: optimizedProjection.finalBalance,
+        betterWhen: "higher",
+      },
+    ],
+    [form.contribution, form.yearsToRetirement, max, savings, optimizedSavings, projection, optimizedProjection],
   );
 
   const { user } = useAuth();
@@ -215,7 +267,26 @@ function Pillar3aCalc() {
         </div>
       </div>
 
+      <SplitCompareLayout
+        title="Actuel vs Projeté Piliarys"
+        description={`Comparaison de la cotisation saisie (${form.contribution.toLocaleString("fr-CH")} CHF) avec le plafond légal (${max.toLocaleString("fr-CH")} CHF), à canton et statut identiques.`}
+        currentSubtitle={client ? "Données fiche client" : "Cotisation saisie"}
+        projectedSubtitle="Cotisation au maximum légal"
+        rows={compareRows}
+        summary={{
+          annualSaving: optimizedSavings.taxSavings - savings.taxSavings,
+          retirementGain: optimizedProjection.finalBalance - projection.finalBalance,
+          retirementGainLabel: "Capital 3a en plus à la retraite",
+          deltaPercent:
+            projection.finalBalance > 0
+              ? (optimizedProjection.finalBalance - projection.finalBalance) / projection.finalBalance
+              : 0,
+          deltaLabel: "Capital final",
+        }}
+      />
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
         <CalcCard title={t("calc.p3a.projection_card")}>
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <NumField label={t("calc.p3a.field.current_balance")} value={form.currentBalance} onChange={(v) => set("currentBalance", v)} />

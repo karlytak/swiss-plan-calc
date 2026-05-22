@@ -31,6 +31,7 @@ import { computeTaxGlobal } from "@/lib/tax-global/engine";
 import { createDefaultInput } from "@/lib/tax-global/profile";
 import type { TaxGlobalInput, Regime } from "@/lib/tax-global/types";
 import { CalcCard } from "@/components/calculators/CalcUI";
+import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { formatCHF } from "@/lib/format";
 import { ExportPdfButton } from "@/components/calculators/ExportPdfButton";
 import { exportCantonComparePdf } from "@/lib/pdf/reports";
@@ -561,6 +562,55 @@ function CantonCompareCalc() {
           dangerouslySetInnerHTML={{ __html: t("calc.canton_compare.scope_notice.html") }}
         />
       </div>
+
+      {(() => {
+        const refRow = data.find((d) => d.code === referenceCanton);
+        const zgRow = data.find((d) => d.code === ZG_CODE);
+        if (!refRow || !zgRow || refRow.code === zgRow.code) return null;
+        const rows: SplitRow[] = [
+          {
+            label: mode === "lump_sum" ? "Impôt sur prestation en capital" : "Impôt total annuel",
+            current: refRow.total,
+            projected: zgRow.total,
+            betterWhen: "lower",
+          },
+          {
+            label: "Taux effectif",
+            current: refRow.effective / 100,
+            projected: zgRow.effective / 100,
+            format: "pct",
+            betterWhen: "lower",
+          },
+          {
+            label: "Régime fiscal",
+            current: refRow.regimeLabel,
+            projected: zgRow.regimeLabel,
+            format: "text",
+            betterWhen: "neutral",
+          },
+        ];
+        const saving = refRow.total - zgRow.total;
+        return (
+          <SplitCompareLayout
+            title={`Résidence (${refRow.code}) vs Canton optimisé (Zoug)`}
+            description={
+              mode === "lump_sum"
+                ? `Comparaison de l'impôt sur un retrait en capital de ${formatCHF(refRow.total > 0 ? (refRow.total / refRow.effective) * 100 : 0)} environ. Domicile fiscal au moment du retrait requis pour bénéficier du canton.`
+                : "Comparaison à profil identique : seul le canton de domicile change."
+            }
+            currentLabel={`Canton de résidence · ${refRow.code}`}
+            projectedLabel="Canton optimisé · Zoug"
+            currentSubtitle={refRow.name}
+            projectedSubtitle="Référence basse fiscalité"
+            rows={rows}
+            summary={{
+              annualSaving: saving,
+              deltaPercent: refRow.total > 0 ? saving / refRow.total : 0,
+              deltaLabel: "Économie d'impôt",
+            }}
+          />
+        );
+      })()}
 
       <CalcCard title={t("calc.canton_compare.ranking.title")}>
         <div className="h-[520px] w-full chart-rise">
