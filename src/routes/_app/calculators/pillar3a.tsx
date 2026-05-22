@@ -33,6 +33,7 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { FiscalSnapshotBanner } from "@/components/calculators/FiscalSnapshotBanner";
 import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),

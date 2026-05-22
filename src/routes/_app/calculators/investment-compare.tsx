@@ -36,6 +36,7 @@ import { useBrokerPdfHeader } from "@/hooks/useBrokerPdfHeader";
 import { ReportPdf, makeFilename, type PdfHeaderInfo } from "@/lib/pdf/builder";
 import { formatCHF, formatPct } from "@/lib/format";
 import {
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
   compareInvestments,
   INVESTMENT_TYPES,
   type ContributionFrequency,

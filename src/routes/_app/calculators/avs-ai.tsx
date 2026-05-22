@@ -32,6 +32,7 @@ import { useT } from "@/contexts/LanguageContext";
 import { parseChildren, ageFromDob } from "@/lib/clients/types";
 import { buildSurvivorBenefits } from "@/lib/avs/survivors";
 import { formatCHF } from "@/lib/format";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),

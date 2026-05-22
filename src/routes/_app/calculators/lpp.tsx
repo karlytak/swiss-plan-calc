@@ -51,6 +51,7 @@ import { WikiTip } from "@/components/calculators/WikiTip";
 import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
 import { useClientDashboard } from "@/hooks/use-client-dashboard";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
