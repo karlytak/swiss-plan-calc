@@ -31,6 +31,7 @@ import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { FiscalSnapshotBanner } from "@/components/calculators/FiscalSnapshotBanner";
+import { SplitCompareLayout, type SplitRow } from "@/components/calculators/SplitCompareLayout";
 import { useT } from "@/contexts/LanguageContext";
 
 const searchSchema = z.object({
