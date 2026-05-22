@@ -36,7 +36,6 @@ import { useBrokerPdfHeader } from "@/hooks/useBrokerPdfHeader";
 import { ReportPdf, makeFilename, type PdfHeaderInfo } from "@/lib/pdf/builder";
 import { formatCHF, formatPct } from "@/lib/format";
 import {
-import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
   compareInvestments,
   INVESTMENT_TYPES,
   type ContributionFrequency,
@@ -44,6 +43,7 @@ import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactB
   type InvestmentResult,
   type InvestmentType,
 } from "@/lib/investment-compare";
+import { CrossCalcImpactBanner } from "@/components/calculators/CrossCalcImpactBanner";
 
 const searchSchema = z.object({
   clientId: fallback(z.string().uuid().optional(), undefined),
