@@ -336,6 +336,62 @@ export function consolidatePensionBenefits(b: ClientBundle): ConsolidatedBenefit
   };
 }
 
+/**
+ * Variante "optimisée Piliarys" du même bundle :
+ * - LPP : saturation de la capacité de rachat restante (étalée linéairement
+ *   jusqu'à la retraite via le mécanisme existant de `lpp_planned_buybacks`).
+ * - 3a : cotisation portée au plafond légal salarié LPP (7 258 CHF, 2026)
+ *   si la cotisation actuelle est inférieure.
+ *
+ * Aucune modification persistée : on construit un bundle virtuel.
+ */
+export function consolidateOptimizedBenefits(b: ClientBundle): ConsolidatedBenefits {
+  return consolidatePensionBenefits(buildOptimizedBundle(b));
+}
+
+function buildOptimizedBundle(b: ClientBundle): ClientBundle {
+  const pension = (b.pension ?? {}) as Record<string, unknown> & {
+    lpp_planned_buybacks?: unknown;
+    lpp_max_buyback?: number | string | null;
+    pillar_3a_annual_contribution?: number | string | null;
+  };
+
+  const buybackCapacity = Number(pension.lpp_max_buyback ?? 0);
+  const existingPlanned = Array.isArray(pension.lpp_planned_buybacks)
+    ? (pension.lpp_planned_buybacks as Array<{ amount?: number }>)
+    : [];
+  const plannedTotal = existingPlanned.reduce(
+    (s, r) => s + Number(r?.amount ?? 0),
+    0,
+  );
+  const remaining = Math.max(0, buybackCapacity - plannedTotal);
+
+  const optimizedPlanned =
+    remaining > 0
+      ? [
+          ...existingPlanned,
+          {
+            year: new Date().getFullYear(),
+            amount: remaining,
+            label: "Saturation capacité (optimisation)",
+          },
+        ]
+      : existingPlanned;
+
+  const PILLAR_3A_MAX_LPP = 7_258;
+  const current3a = Number(pension.pillar_3a_annual_contribution ?? 0);
+  const optimized3a = Math.max(current3a, PILLAR_3A_MAX_LPP);
+
+  return {
+    ...b,
+    pension: {
+      ...(b.pension as object),
+      lpp_planned_buybacks: optimizedPlanned,
+      pillar_3a_annual_contribution: optimized3a,
+    } as ClientBundle["pension"],
+  };
+}
+
 export const PENSION_EVENT_LABELS: Record<PensionEvent, string> = {
   retirement: "Vieillesse",
   disability: "Invalidité",
