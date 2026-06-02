@@ -3,7 +3,6 @@
 
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { Plus, Trash2, RefreshCw, Download, AlertCircle } from "lucide-react";
@@ -62,7 +61,6 @@ function newRow(date: string): FxTransaction {
 function FxClaimCalc() {
   const { clientId } = Route.useSearch();
   const header = useBrokerPdfHeader();
-  const fetchRates = useServerFn(fetchMarketRates);
   const [taxYear, setTaxYear] = useState<number>(2024);
   const [currency, setCurrency] = useState<Currency>("EUR");
   const [marginalRate, setMarginalRate] = useState<number>(28);
@@ -112,7 +110,7 @@ function FxClaimCalc() {
     }
     setLoading(true);
     try {
-      const fetched = await fetchRates({ data: { dates, currency } });
+      const fetched = await fetchMarketRates({ data: { dates, currency } });
       const map = new Map(fetched.map((r) => [r.date, r]));
       const missing: string[] = [];
       const shifted: string[] = [];
