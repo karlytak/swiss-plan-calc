@@ -312,7 +312,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 50_000,
     wealthExemptionMarried: 100_000,
     capital: "Fribourg",
-    calibrationFactor: 1.6,
+    calibrationFactor: 1.75,
     calibrationFactorMarried: 1.1,
   },
   NE: {
