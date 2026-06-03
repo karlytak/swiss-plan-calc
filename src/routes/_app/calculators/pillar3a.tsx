@@ -80,7 +80,12 @@ function Pillar3aCalc() {
     () =>
       pillar3aTaxSavings({
         contribution: form.contribution,
-        taxInput: { canton: form.canton, status: form.status, grossSalary: form.grossSalary },
+        taxInput: { 
+  canton: form.canton, 
+  status: form.status, 
+  grossSalary: form.grossSalary,
+  pillar3aContributions: form.contribution,
+},
       }),
     [form],
   );
@@ -123,7 +128,12 @@ function Pillar3aCalc() {
     () =>
       pillar3aTaxSavings({
         contribution: max,
-        taxInput: { canton: form.canton, status: form.status, grossSalary: form.grossSalary },
+        taxInput: { 
+  canton: form.canton, 
+  status: form.status, 
+  grossSalary: form.grossSalary,
+  pillar3aContributions: form.contribution,
+},
       }),
     [max, form.canton, form.status, form.grossSalary],
   );
