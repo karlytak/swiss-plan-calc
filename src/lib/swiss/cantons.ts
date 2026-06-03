@@ -40,7 +40,6 @@ export const CANTONS: Canton[] = [
   { code: "AG", name: "Argovie", selectable: false, comparable: false },
   { code: "AI", name: "Appenzell Rhodes-Intérieures", selectable: false, comparable: false },
   { code: "AR", name: "Appenzell Rhodes-Extérieures", selectable: false, comparable: false },
-  { code: "BE", name: "Berne", selectable: false, comparable: true },
   { code: "BL", name: "Bâle-Campagne", selectable: false, comparable: false },
   { code: "BS", name: "Bâle-Ville", selectable: false, comparable: false },
   { code: "GL", name: "Glaris", selectable: false, comparable: false },
