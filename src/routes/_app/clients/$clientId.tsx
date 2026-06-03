@@ -111,6 +111,7 @@ function ClientDetailPage() {
     onSuccess: (_d, archived) => {
       toast.success(archived ? "Client archivé" : "Client restauré");
       qc.invalidateQueries({ queryKey: ["client", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-bundle", clientId] });
       qc.invalidateQueries({ queryKey: ["clients"] });
     },
   });
@@ -126,6 +127,7 @@ function ClientDetailPage() {
     onSuccess: () => {
       toast.success("Statut fiscal vérifié");
       qc.invalidateQueries({ queryKey: ["client", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-bundle", clientId] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -164,6 +166,7 @@ function ClientDetailPage() {
     onSuccess: () => {
       setNoteBody("");
       qc.invalidateQueries({ queryKey: ["client", clientId] });
+      qc.invalidateQueries({ queryKey: ["client-bundle", clientId] });
       toast.success("Note ajoutée");
     },
   });
