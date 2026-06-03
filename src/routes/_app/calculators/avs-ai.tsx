@@ -66,7 +66,7 @@ function AvsAiCalc() {
     const base = {
       birthYear: 1980,
       gender: "male" as Gender,
-      contributionStartYear: 2003,
+      contributionStartYear: 2001,
       retirementYear: 2045,
       averageAnnualIncome: 90_000,
       departureYear: 0,
