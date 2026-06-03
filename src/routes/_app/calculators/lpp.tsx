@@ -79,7 +79,7 @@ function LppCalc() {
     feeRate: 0.6,
     insuredSalaryCap: LPP_2026.maxInsuredSalary as number,
     salaryGrowthRate: 1,
-    conversionRate: 6.0,
+    conversionRate: 6.8,
     extraCreditRate: 0,
     yearlyBuyback: 0,
     canton: "VD",
