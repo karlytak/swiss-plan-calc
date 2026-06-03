@@ -1060,9 +1060,15 @@ function StepPatrimoine({
                 suffix="CHF"
               />
             </Field>
-            {/* Capacité de rachat LPP retirée de la fiche client (V1) :
-                la saisie se fait directement dans le calculateur LPP.
-                La clé `lpp_max_buyback` reste dans le state pour ne rien casser. */}
+            <Field label="Capacité de rachat LPP (CHF)" hint="Montant figurant sur le certificat LPP annuel de la caisse.">
+  <input
+    type="number"
+    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+    value={form.lpp_max_buyback}
+    onChange={(e) => update("lpp_max_buyback", e.target.value)}
+    placeholder="0"
+  />
+</Field>
             <Field label={t("wizard.lpp.plan")}>
               <Select value={form.lpp_plan} onValueChange={(v) => update("lpp_plan", v as LppPlan)}>
                 <SelectTrigger>
