@@ -304,7 +304,7 @@ export function toRetirementInput(b: ClientBundle) {
       | "married"
       | "single_with_children",
     capital: projectedCapital,
-    yearsAlive: age !== null ? Math.max(15, 85 - 65) : yearsAlive,
+    yearsAlive: 20,
   };
 }
 
