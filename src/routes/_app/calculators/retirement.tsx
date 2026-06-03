@@ -22,6 +22,7 @@ import { useT } from "@/contexts/LanguageContext";
 
 import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
+import { useClientDashboard } from "@/hooks/use-client-dashboard";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
@@ -43,6 +44,8 @@ function RetirementCalc() {
   const t = useT();
   const { clientId } = Route.useSearch();
   const { client, bundle, prefill } = usePrefillFromClient(clientId, "retirement");
+  const dashboard = useClientDashboard(bundle ?? null);
+const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
   const [form, setForm] = useState({
     capital: 600_000,
     canton: "VD",
@@ -53,6 +56,11 @@ function RetirementCalc() {
     rentMarginalRate: 25,
   });
   useHydrateFormFromPrefill(prefill, setForm);
+  useEffect(() => {
+  if (projectedCapital && projectedCapital > 0) {
+    setForm((f) => ({ ...f, capital: projectedCapital }));
+  }
+}, [projectedCapital]);
 
   // Pré-remplir le taux marginal depuis la dernière simulation fiscale du client
   const { data: snapshot } = useClientFiscalSnapshot(clientId);

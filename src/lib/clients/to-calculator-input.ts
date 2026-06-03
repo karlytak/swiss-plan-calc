@@ -292,13 +292,19 @@ export function toRetirementInput(b: ClientBundle) {
   const married =
     b.client.civil_status === "married" ||
     b.client.civil_status === "registered_partnership";
+  const age = ageFromDob(b.client.date_of_birth);
+  // Capital projeté à 65 ans depuis le dashboard, sinon avoir actuel
+  const projectedCapital = numOrUndef(b.pension?.lpp_current_balance);
+  // Espérance de vie résiduelle après retraite : 85 - âge retraite (65) = 20 ans par défaut
+  const yearsAlive = 20;
   return {
     canton: b.client.canton ?? undefined,
     status: (married ? "married" : "single") as
       | "single"
       | "married"
       | "single_with_children",
-    capital: numOrUndef(b.pension?.lpp_current_balance),
+    capital: projectedCapital,
+    yearsAlive: age !== null ? Math.max(15, 85 - 65) : yearsAlive,
   };
 }
 
