@@ -56,8 +56,8 @@ const STEP_IDS = [1, 2, 3, 4, 5] as const;
 const STEP_KEYS = {
   1: { title: "wizard.step.identity.title", desc: "wizard.step.identity.desc" },
   2: { title: "wizard.step.family.title", desc: "wizard.step.family.desc" },
-  3: { title: "wizard.step.fiscal.title", desc: "wizard.step.fiscal.desc" },
-  4: { title: "wizard.step.activity.title", desc: "wizard.step.activity.desc" },
+  3: { title: "wizard.step.activity.title", desc: "wizard.step.activity.desc" },
+  4: { title: "wizard.step.fiscal.title", desc: "wizard.step.fiscal.desc" },
   5: { title: "wizard.step.patrimoine.title", desc: "wizard.step.patrimoine.desc" },
 } as const;
 const STEP_COUNT = 5;
@@ -122,7 +122,12 @@ interface FormState {
   spouse_last_name: string;
   spouse_date_of_birth: string;
   spouse_gross_annual_salary: string;
+  spouse_salary_is_fictif: boolean;
+  spouse_work_location: "switzerland" | "france" | "none";
   children: Child[];
+  // Nouveaux champs v2
+  activity_sector: string;
+  mortgage_interest_france: string;
   // Pension & assets (optional shortcuts)
   lpp_current_balance: string;
   lpp_insured_salary: string;
@@ -172,7 +177,11 @@ function initialForm(initial?: WizardInitialData): FormState {
     spouse_last_name: c?.spouse_last_name ?? "",
     spouse_date_of_birth: c?.spouse_date_of_birth ?? "",
     spouse_gross_annual_salary: c?.spouse_gross_annual_salary?.toString() ?? "",
+    spouse_salary_is_fictif: c?.spouse_salary_is_fictif ?? true,
+    spouse_work_location: (c?.spouse_work_location as "switzerland" | "france" | "none") ?? "none",
     children: parseChildrenSafe(c?.children),
+    activity_sector: c?.activity_sector ?? "",
+    mortgage_interest_france: c?.mortgage_interest_france?.toString() ?? "",
     lpp_current_balance: p?.lpp_current_balance?.toString() ?? "",
     lpp_insured_salary: p?.lpp_insured_salary?.toString() ?? "",
     lpp_max_buyback: p?.lpp_max_buyback?.toString() ?? "",
@@ -212,13 +221,12 @@ const stepSchemas = {
     email: z.string().trim().email("Email invalide").max(255).or(z.literal("")),
   }),
   2: z.object({}),
-  3: z.object({
+  3: z.object({}),
+  4: z.object({
     canton: z.string().min(2, "Canton requis"),
   }),
-  4: z.object({}),
   5: z.object({}),
 } as const;
-
 function num(v: string): number | null {
   if (!v.trim()) return null;
   const n = Number(v.replace(/[\s']/g, "").replace(",", "."));
@@ -308,6 +316,10 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         spouse_last_name: isMarried ? form.spouse_last_name || null : null,
         spouse_date_of_birth: isMarried ? form.spouse_date_of_birth || null : null,
         spouse_gross_annual_salary: isMarried ? num(form.spouse_gross_annual_salary) : null,
+        spouse_salary_is_fictif: isMarried ? form.spouse_salary_is_fictif : true,
+        spouse_work_location: isMarried ? form.spouse_work_location : "none",
+        activity_sector: form.activity_sector || null,
+        mortgage_interest_france: num(form.mortgage_interest_france) ?? 0,
         children: form.children.filter(
           (c) => (c.first_name && c.first_name.trim() !== "") || (c.date_of_birth && c.date_of_birth.trim() !== ""),
         ) as unknown as import("@/integrations/supabase/types").Json,
@@ -477,8 +489,8 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
       <div className="mt-8 rounded-2xl border border-border bg-card p-6 shadow-card sm:p-8">
       {step === 1 && <StepIdentity form={form} update={update} errors={errors} />}
 {step === 2 && <StepFamily form={form} update={update} isMarried={isMarried} />}
-{step === 3 && <StepFiscal form={form} update={update} errors={errors} />}
-{step === 4 && <StepActivity form={form} update={update} />}
+{step === 3 && <StepActivity form={form} update={update} />}
+{step === 4 && <StepFiscal form={form} update={update} errors={errors} />}
 {step === 5 && <StepPatrimoine form={form} update={update} workStatus={form.work_status} />}
       </div>
 
@@ -754,7 +766,18 @@ function StepFiscal({ form, update, errors }: StepProps) {
         />
       </Field>
 
-      {/* Années · résident / frontalier / cotisation AVS */}
+      <Field
+        label="Intérêts hypothécaires résidence France (CHF)"
+        htmlFor="mort_fr"
+        hint="Déductible côté France pour frontaliers accord 1983 — réduit l'assiette imposable française"
+      >
+        <NumField
+          id="mort_fr"
+          value={form.mortgage_interest_france}
+          onChange={(v) => update("mortgage_interest_france", v)}
+          suffix="CHF"
+        />
+      </Field>
       <Field
         label={t("wizard.field.arrival_year_ch")}
         htmlFor="arr_year"
@@ -878,6 +901,16 @@ function StepActivity({ form, update }: StepProps) {
           />
         </Field>
       )}
+      <Field label="Secteur d'activité / Métier" htmlFor="sector"
+        hint="Informatif — aide le courtier au suivi et à la personnalisation">
+        <Input
+          id="sector"
+          value={form.activity_sector}
+          onChange={(e) => update("activity_sector", e.target.value)}
+          placeholder="Ex : Ingénieur IT, Infirmière, Comptable..."
+          maxLength={120}
+        />
+      </Field>
       <Field label={otherIncomeLabel} htmlFor="oi">
         <NumField
           id="oi"
@@ -961,12 +994,55 @@ function StepFamily({
                   onChange={(e) => update("spouse_date_of_birth", e.target.value)}
                 />
               </Field>
-              <Field label={t("wizard.spouse.salary")}>
+              <Field label={t("wizard.spouse.salary")}
+                hint={form.spouse_salary_is_fictif
+                  ? `Revenu fictif provisoire 2026 : CHF ${Math.min(num(form.gross_annual_salary) ?? 0, 70500).toLocaleString("fr-CH")} — à corriger avec le salaire réel pour DRIS`
+                  : undefined}
+              >
                 <NumField
                   value={form.spouse_gross_annual_salary}
-                  onChange={(v) => update("spouse_gross_annual_salary", v)}
+                  onChange={(v) => {
+                    update("spouse_gross_annual_salary", v);
+                    update("spouse_salary_is_fictif", false);
+                  }}
                   suffix="CHF"
                 />
+              </Field>
+              <Field label="Mode salaire conjoint">
+                <Select
+                  value={form.spouse_salary_is_fictif ? "fictif" : "reel"}
+                  onValueChange={(v) => {
+                    const isFictif = v === "fictif";
+                    update("spouse_salary_is_fictif", isFictif);
+                    if (isFictif) {
+                      const fictif = Math.min(num(form.gross_annual_salary) ?? 0, 70_500);
+                      update("spouse_gross_annual_salary", String(fictif));
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="fictif">⚠️ Revenu fictif provisoire (min salaire, 70'500)</SelectItem>
+                    <SelectItem value="reel">✅ Salaire réel renseigné</SelectItem>
+                  </SelectContent>
+                </Select>
+              </Field>
+              <Field label="Lieu de travail du conjoint">
+                <Select
+                  value={form.spouse_work_location}
+                  onValueChange={(v) => update("spouse_work_location", v as "switzerland" | "france" | "none")}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">Pas d'activité</SelectItem>
+                    <SelectItem value="switzerland">🇨🇭 Suisse</SelectItem>
+                    <SelectItem value="france">🇫🇷 France</SelectItem>
+                  </SelectContent>
+                </Select>
               </Field>
             </div>
           </div>

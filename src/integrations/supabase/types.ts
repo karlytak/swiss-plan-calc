@@ -293,6 +293,7 @@ export type Database = {
       clients: {
         Row: {
           activity_rate: number | null
+          activity_sector: string | null
           archived: boolean
           arrival_year_ch: number | null
           avs_contribution_start_year: number | null
@@ -316,6 +317,7 @@ export type Database = {
           gross_annual_salary: number | null
           id: string
           last_name: string
+          mortgage_interest_france: number | null
           nationality: string | null
           other_income: number | null
           parish: string | null
@@ -327,6 +329,8 @@ export type Database = {
           spouse_first_name: string | null
           spouse_gross_annual_salary: number | null
           spouse_last_name: string | null
+          spouse_salary_is_fictif: boolean
+          spouse_work_location: string | null
           tax_status: Database["public"]["Enums"]["tax_status"]
           tax_status_migrated: boolean
           updated_at: string
@@ -334,6 +338,7 @@ export type Database = {
         }
         Insert: {
           activity_rate?: number | null
+          activity_sector?: string | null
           archived?: boolean
           arrival_year_ch?: number | null
           avs_contribution_start_year?: number | null
@@ -357,6 +362,7 @@ export type Database = {
           gross_annual_salary?: number | null
           id?: string
           last_name: string
+          mortgage_interest_france?: number | null
           nationality?: string | null
           other_income?: number | null
           parish?: string | null
@@ -368,6 +374,8 @@ export type Database = {
           spouse_first_name?: string | null
           spouse_gross_annual_salary?: number | null
           spouse_last_name?: string | null
+          spouse_salary_is_fictif?: boolean
+          spouse_work_location?: string | null
           tax_status?: Database["public"]["Enums"]["tax_status"]
           tax_status_migrated?: boolean
           updated_at?: string
@@ -375,6 +383,7 @@ export type Database = {
         }
         Update: {
           activity_rate?: number | null
+          activity_sector?: string | null
           archived?: boolean
           arrival_year_ch?: number | null
           avs_contribution_start_year?: number | null
@@ -398,6 +407,7 @@ export type Database = {
           gross_annual_salary?: number | null
           id?: string
           last_name?: string
+          mortgage_interest_france?: number | null
           nationality?: string | null
           other_income?: number | null
           parish?: string | null
@@ -409,6 +419,8 @@ export type Database = {
           spouse_first_name?: string | null
           spouse_gross_annual_salary?: number | null
           spouse_last_name?: string | null
+          spouse_salary_is_fictif?: boolean
+          spouse_work_location?: string | null
           tax_status?: Database["public"]["Enums"]["tax_status"]
           tax_status_migrated?: boolean
           updated_at?: string
