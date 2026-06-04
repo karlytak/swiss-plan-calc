@@ -366,7 +366,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 60_000,
     wealthExemptionMarried: 120_000,
     capital: "Delémont",
-    calibrationFactor: 0.85,
+    calibrationFactor: 0.95,
   },
 
   // === Référence comparateur uniquement (comparable v1, NON selectable) ===
