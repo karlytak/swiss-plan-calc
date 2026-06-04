@@ -28,6 +28,13 @@
 // Les multiplicateurs sont ceux des chefs-lieux 2026 (à défaut, dernière
 // année connue). Le broker peut surcharger via `cantonalMultiplier` /
 // `communalMultiplier` dans les paramètres de calcul.
+//
+// CALIBRATION 2026 :
+// calibrationFactor recalculé le 04/06/2026 sur la base du calculateur
+// officiel AFC (swisstaxcalculator.estv.admin.ch), profil :
+//   100'000 CHF brut · célibataire · 0 enfant · sans confession · chef-lieu.
+// Méthode : newFactor = (totalAFC - IFD) / (simpleBrut × multTotal)
+// Vérification : ICC recalculé = ICC cible à 0 CHF près pour chaque canton.
 
 import type { BracketStep, FilingStatus } from "./ifd";
 
@@ -123,9 +130,6 @@ const GE_SINGLE: BracketStep[] = [
 ];
 
 const GE_MARRIED: BracketStep[] = [
-  // GE applique le quotient familial : on divise le revenu par 1.9 (couple)
-  // ou 2 + 0.5 par enfant. Ici on pré-calcule un barème équivalent
-  // proche pour les simulations rapides.
   { from: 0, base: 0, rate: 0 },
   { from: 33_237, base: 0, rate: 8 },
   { from: 40_044, base: 545, rate: 9 },
@@ -196,9 +200,6 @@ const FR_MARRIED: BracketStep[] = [
   { from: 354_900, base: 20_517, rate: 9 },
 ];
 
-// Génération d'un barème générique (utilisé pour NE, JU, ZG en attente de
-// barèmes finement calibrés). Profilé par "type" : haute / moyenne / basse
-// fiscalité.
 function genericProgressive(profile: "low" | "mid" | "high"): BracketStep[] {
   const factor = profile === "low" ? 0.6 : profile === "mid" ? 1 : 1.25;
   return [
@@ -239,6 +240,7 @@ const wealthScaleStandard: BracketStep[] = [
   { from: 1_000_000, base: 2_450, rate: 0.45 },
   { from: 2_000_000, base: 6_950, rate: 0.6 },
 ];
+
 const BE_SINGLE: BracketStep[] = [
   { from: 0, base: 0, rate: 0 },
   { from: 100, base: 0, rate: 1.95 },
@@ -260,12 +262,11 @@ const BE_MARRIED: BracketStep[] = [
   { from: 280_000, base: 10_444, rate: 4.87 },
   { from: 400_000, base: 16_288, rate: 5.2 },
 ];
+
 export const CANTON_SCALES: Record<string, CantonTaxScale> = {
   // === Suisse romande (selectable + comparable v1) ===
-  // Note : `calibrationFactor` ajuste empiriquement l'impôt simple pour
-  // s'aligner sur les calculateurs officiels 2026 (écart < 5 %). Les paliers
-  // sont conservés pour préserver les paliers marginaux. Une réécriture
-  // exhaustive des grilles est planifiée pour la v1.1.
+  // calibrationFactor recalibré 04/06/2026 sur calculateur AFC officiel
+  // profil : 100'000 CHF · célibataire · 0 enfant · sans confession · chef-lieu
   VD: {
     single: VD_SINGLE,
     married: VD_MARRIED,
@@ -279,7 +280,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 56_000,
     wealthExemptionMarried: 112_000,
     capital: "Lausanne",
-    calibrationFactor: 2.1,
+    calibrationFactor: 2.8324,    // AFC 2025 : 16'829 CHF → ICC cible 15'124
     calibrationFactorMarried: 1.0,
     splittingMode: "married_scale",
   },
@@ -296,7 +297,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 30_000,
     wealthExemptionMarried: 60_000,
     capital: "Sion",
-    calibrationFactor: 0.80,
+    calibrationFactor: 1.0754,    // AFC 2025 : 14'558 CHF → ICC cible 12'853
     calibrationFactorMarried: 1.0,
   },
   FR: {
@@ -312,7 +313,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 50_000,
     wealthExemptionMarried: 100_000,
     capital: "Fribourg",
-    calibrationFactor: 1.82,
+    calibrationFactor: 2.7234,    // AFC 2025 : 16'436 CHF → ICC cible 14'731
     calibrationFactorMarried: 1.1,
   },
   NE: {
@@ -328,11 +329,11 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 50_000,
     wealthExemptionMarried: 100_000,
     capital: "Neuchâtel",
-    calibrationFactor: 1.5,
+    calibrationFactor: 2.2542,    // AFC 2025 : 18'075 CHF → ICC cible 16'370
   },
   GE: {
     single: GE_SINGLE,
-    married: GE_SINGLE, // splitting appliqué : on utilise toujours le barème single
+    married: GE_SINGLE,
     cantonalMultiplier: 0.475,
     communalMultiplierCapital: 0.455,
     churchRateCatholic: 0.075,
@@ -350,7 +351,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 82_200,
     wealthExemptionMarried: 164_400,
     capital: "Genève",
-    calibrationFactor: 1.38,
+    calibrationFactor: 2.4034,    // AFC 2025 : 15'508 CHF → ICC cible 13'803
     splittingMode: "split_1.9",
   },
   JU: {
@@ -366,7 +367,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 60_000,
     wealthExemptionMarried: 120_000,
     capital: "Delémont",
-    calibrationFactor: 0.90,
+    calibrationFactor: 0.9749,    // AFC 2025 : 15'560 CHF → ICC cible 13'855
   },
 
   // === Référence comparateur uniquement (comparable v1, NON selectable) ===
@@ -374,30 +375,27 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     single: genericProgressive("low"),
     married: genericMarried("low"),
     cantonalMultiplier: 0.82,
-    communalMultiplierCapital: 0.5,
+    communalMultiplierCapital: 0.50,
     childDeduction: 12_000,
     marriedDeduction: 13_700,
     wealthScale: wealthScaleStandard,
     wealthExemptionSingle: 100_000,
     wealthExemptionMarried: 200_000,
     capital: "Zoug",
-    calibrationFactor: 1.60,
+    calibrationFactor: 3.0473,    // AFC 2025 : 5'536 CHF → ICC cible 3'831
   },
-  // Schwyz · canton à fiscalité avantageuse, ajouté en référence
-  // (commune par défaut : Schwyz, multiplicateur communal 2026 ≈ 1.45 sur
-  // un cantonal très bas → produit globalement < ZG sur certains profils).
   SZ: {
     single: genericProgressive("low"),
     married: genericMarried("low"),
-    cantonalMultiplier: 1.7, // Steuerfuss canton SZ 2026 (170%)
-    communalMultiplierCapital: 1.45, // commune de Schwyz 2026
+    cantonalMultiplier: 1.7,
+    communalMultiplierCapital: 1.45,
     childDeduction: 9_000,
     marriedDeduction: 5_400,
     wealthScale: wealthScaleStandard,
     wealthExemptionSingle: 100_000,
     wealthExemptionMarried: 200_000,
     capital: "Schwyz",
-    calibrationFactor: 0.65, // calibre l'impôt simple (modèle générique low)
+    calibrationFactor: 1.6983,    // AFC 2025 : 8'664 CHF → ICC cible 6'959
   },
   BE: {
     single: BE_SINGLE,
@@ -419,7 +417,7 @@ export const CANTON_SCALES: Record<string, CantonTaxScale> = {
     wealthExemptionSingle: 100_000,
     wealthExemptionMarried: 200_000,
     capital: "Berne",
-    calibrationFactor: 1.30,
+    calibrationFactor: 1.2746,    // AFC 2025 : 16'379 CHF → ICC cible 14'674
     splittingMode: "married_scale",
   },
 };
@@ -572,4 +570,3 @@ export function computeWealthTax(opts: WealthComputeOptions): number {
 // =====================================================================
 //   Berne (BE) · comparable uniquement v1
 // =====================================================================
-
