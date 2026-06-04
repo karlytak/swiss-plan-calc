@@ -122,6 +122,7 @@ interface FormState {
   spouse_last_name: string;
   spouse_date_of_birth: string;
   spouse_gross_annual_salary: string;
+  spouse_salary_currency: "CHF" | "EUR";
   spouse_salary_is_fictif: boolean;
   spouse_work_location: "switzerland" | "france" | "none";
   children: Child[];
@@ -177,6 +178,7 @@ function initialForm(initial?: WizardInitialData): FormState {
     spouse_last_name: c?.spouse_last_name ?? "",
     spouse_date_of_birth: c?.spouse_date_of_birth ?? "",
     spouse_gross_annual_salary: c?.spouse_gross_annual_salary?.toString() ?? "",
+    spouse_salary_currency: "CHF",
     spouse_salary_is_fictif: c?.spouse_salary_is_fictif ?? true,
     spouse_work_location: (c?.spouse_work_location as "switzerland" | "france" | "none") ?? "none",
     children: parseChildrenSafe(c?.children),
@@ -993,20 +995,42 @@ function StepFamily({
                   value={form.spouse_date_of_birth}
                   onChange={(e) => update("spouse_date_of_birth", e.target.value)}
                 />
-              </Field>
+                </Field>
               <Field label={t("wizard.spouse.salary")}
                 hint={form.spouse_salary_is_fictif
                   ? `Revenu fictif provisoire 2026 : CHF ${Math.min(num(form.gross_annual_salary) ?? 0, 70500).toLocaleString("fr-CH")} — à corriger avec le salaire réel pour DRIS`
-                  : undefined}
+                  : form.spouse_salary_currency === "EUR"
+                    ? `≈ CHF ${Math.round((num(form.spouse_gross_annual_salary) ?? 0) * 0.95).toLocaleString("fr-CH")} (taux 0.95)`
+                    : undefined}
               >
-                <NumField
-                  value={form.spouse_gross_annual_salary}
-                  onChange={(v) => {
-                    update("spouse_gross_annual_salary", v);
-                    update("spouse_salary_is_fictif", false);
-                  }}
-                  suffix="CHF"
-                />
+                <div className="flex gap-2">
+                  <Select
+                    value={form.spouse_salary_currency}
+                    onValueChange={(v) => update("spouse_salary_currency", v as "CHF" | "EUR")}
+                  >
+                    <SelectTrigger className="w-24">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CHF">CHF</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <NumField
+                    value={form.spouse_gross_annual_salary}
+                    onChange={(v) => {
+                      // Convertit en CHF si EUR avant de stocker
+                      const raw = num(v) ?? 0;
+                      const inChf = form.spouse_salary_currency === "EUR"
+                        ? String(Math.round(raw * 0.95))
+                        : v;
+                      update("spouse_gross_annual_salary", inChf);
+                      update("spouse_salary_is_fictif", false);
+                    }}
+                    suffix={form.spouse_salary_currency}
+                    className="flex-1"
+                  />
+                </div>
               </Field>
               <Field label="Mode salaire conjoint">
                 <Select
