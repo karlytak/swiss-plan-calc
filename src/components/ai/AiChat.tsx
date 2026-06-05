@@ -69,7 +69,6 @@ export function AiChat() {
     setLoading(true);
 
     try {
-      const apiKey = import.meta.env.VITE_ANTHROPIC_API_KEY;
       const clientContext = activeClient
         ? `\n\nCONTEXTE CLIENT ACTIF — ${activeClient.first_name} ${activeClient.last_name} :\n- Canton : ${activeClient.canton ?? "non renseigné"}\n- Statut fiscal : ${activeClient.tax_status ?? "non renseigné"}\n- Salaire brut annuel : ${activeClient.gross_annual_salary ? Number(activeClient.gross_annual_salary).toLocaleString("fr-CH") + " CHF" : "non renseigné"}\n- Situation civile : ${activeClient.civil_status ?? "non renseigné"}\n- Permis : ${activeClient.permit ?? "non renseigné"}`
         : "";
@@ -77,21 +76,20 @@ export function AiChat() {
         .filter((m) => m.id !== "welcome")
         .map((m) => ({ role: m.role, content: m.content }));
 
-      const response = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-api-key": apiKey,
-          "anthropic-version": "2023-06-01",
-          "anthropic-dangerous-direct-browser-access": "true",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 1024,
-          system: SYSTEM_PROMPT + clientContext,
-          messages: history,
-        }),
-      });
+      const response = await fetch(
+        "https://ihepboeaudnxqxijeykl.supabase.co/functions/v1/ai-chat",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({
+            system: SYSTEM_PROMPT + clientContext,
+            messages: history,
+          }),
+        }
+      );;
 
       const data = await response.json();
       const assistantContent = data.content?.[0]?.text ?? "Désolé, je n'ai pas pu générer une réponse.";
