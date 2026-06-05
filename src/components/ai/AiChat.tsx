@@ -2,6 +2,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { Sparkles, X, Send, Loader2, ChevronDown, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useActiveClient } from "@/contexts/ActiveClientContext";
+import { supabase } from "@/integrations/supabase/client";
 import { Textarea } from "@/components/ui/textarea";
 
 interface Message {
@@ -29,13 +30,27 @@ Règles importantes :
 - Tu es concis : réponses courtes et structurées`;
 
 export function AiChat() {
-  const { activeClient } = useActiveClient();
+const { activeClient, setActiveClient } = useActiveClient();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [minimized, setMinimized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const clientId = params.get("clientId");
+    if (clientId && !activeClient) {
+      supabase
+        .from("clients")
+        .select("*")
+        .eq("id", clientId)
+        .single()
+        .then(({ data }) => {
+          if (data) setActiveClient(data);
+        });
+    }
+  }, []);
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
