@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useT } from "@/contexts/LanguageContext";
+import { useActiveClient } from "@/contexts/ActiveClientContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   ArrowLeft,
   Pencil,
@@ -77,6 +78,11 @@ export const Route = createFileRoute("/_app/clients/$clientId")({
 
 function ClientDetailPage() {
   const t = useT();
+  const { setActiveClient } = useActiveClient();
+  useEffect(() => {
+    if (data?.client) setActiveClient(data.client);
+    return () => setActiveClient(null);
+  }, [data?.client, setActiveClient]);
   const { clientId } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();

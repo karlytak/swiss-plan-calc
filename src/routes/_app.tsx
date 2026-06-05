@@ -1,3 +1,4 @@
+import { AiChat } from "@/components/ai/AiChat";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
@@ -18,7 +19,6 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle, SheetHeader } from "@/co
 import { useAuth } from "@/contexts/AuthContext";
 import { useT } from "@/contexts/LanguageContext";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_app")({
@@ -50,9 +50,9 @@ function AppShell() {
         <MobileHeader onSignOut={signOut} email={user?.email ?? ""} />
         <main className="flex-1 overflow-x-hidden">
           <Outlet />
+          <AiChat />
         </main>
       </div>
-      <FeedbackWidget />
     </div>
   );
 }

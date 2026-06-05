@@ -97,7 +97,7 @@ export function FeedbackWidget() {
         <Button
           type="button"
           size="sm"
-          className="fixed bottom-5 right-5 z-50 gap-2 shadow-lg"
+          className="gap-2"
           aria-label="Envoyer un retour"
         >
           <MessageSquarePlus className="h-4 w-4" />

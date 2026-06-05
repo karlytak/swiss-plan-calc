@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { LanguageProvider, useLanguage } from "@/contexts/LanguageContext";
+import { ActiveClientProvider } from "@/contexts/ActiveClientContext";
 import { t as translate } from "@/lib/i18n";
 
 const rootSearchSchema = z.object({
@@ -56,9 +57,11 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
+        <ActiveClientProvider>
         <LanguageProvider>
           <LanguageScopedTree />
         </LanguageProvider>
+        </ActiveClientProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
