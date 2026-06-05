@@ -69,8 +69,8 @@ import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
 import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
 import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
 import { AlertTriangle, Building2, ClipboardList } from "lucide-react";
+import { AiAnalysis } from "@/components/ai/AiAnalysis";
 import { SessionSummaryTab } from "@/components/clients/SessionSummaryTab";
-
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
   component: ClientDetailPage,
@@ -370,6 +370,9 @@ function ClientDetailPage() {
       </div>
 
       <div className="mt-6">
+        <AiAnalysis client={client} pension={pension} assets={assets} />
+      </div>
+      <div className="mt-4">
         <ClientCalculatorBar client={client} />
       </div>
 
