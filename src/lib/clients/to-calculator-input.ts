@@ -117,7 +117,7 @@ export function toIncomeTaxInput(b: ClientBundle) {
     otherIncome: numOrUndef(b.client.other_income),
     pillar3aContributions: numOrUndef(b.pension?.pillar_3a_annual_contribution),
     lppBuyback: 0,
-    mortgageInterest: numOrUndef(b.assets?.mortgage_interest),
+    mortgageInterest: numOrUndef(b.client.mortgage_interest_france) || numOrUndef(b.assets?.mortgage_interest),
     realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
     netWealth: computeFortune(b.assets),
     lppBuybackCapacity: numOrUndef(b.pension?.lpp_max_buyback),
@@ -240,7 +240,7 @@ export function toLppInput(b: ClientBundle) {
     actualBuyback: plannedTotal > 0 ? plannedTotal : undefined,
     buybackYears: plannedYears,
     pillar3aContributions: numOrUndef(b.pension?.pillar_3a_annual_contribution),
-    mortgageInterest: numOrUndef(b.assets?.mortgage_interest),
+    mortgageInterest: numOrUndef(b.client.mortgage_interest_france) || numOrUndef(b.assets?.mortgage_interest),
     realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
   };
 }
@@ -522,7 +522,7 @@ export function toTaxGlobalInput(b: ClientBundle) {
     pillar3aContributions: numOrUndef(b.pension?.pillar_3a_annual_contribution),
     lppBuyback: lppBuyback || undefined,
     lppBuybackCapacity: numOrUndef(b.pension?.lpp_max_buyback),
-    mortgageInterest: numOrUndef(b.assets?.mortgage_interest),
+    mortgageInterest: numOrUndef(b.client.mortgage_interest_france) || numOrUndef(b.assets?.mortgage_interest),
     realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
     taxYear: currentYear,
   };
