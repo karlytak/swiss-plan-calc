@@ -11,8 +11,7 @@ import { formatCHF } from "@/lib/format";
 import { simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
 import { LPP_2026, LPP_2026_SOURCE_NOTE } from "@/lib/lpp/parameters-2026";
 import type { CompensationResult } from "@/lib/director-compensation/types";
-import { Sparkles, PiggyBank } from "lucide-react";
-
+import { Sparkles, PiggyBank, AlertTriangle } from "lucide-react";
 interface Props {
   best: CompensationResult;
   retirementAge?: number;
@@ -239,6 +238,33 @@ export function DirectorLppBuybackCard({
           />
         </div>
 
+{actualBuyback > 0 && yearsToRetire <= 3 && (
+          <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold">Règle des 3 ans — retrait bloqué (art. 79b LPP)</p>
+              <p className="mt-1 text-destructive/80">
+                Le dirigeant part à la retraite dans {yearsToRetire} an{yearsToRetire > 1 ? "s" : ""}.
+                Tout rachat effectué maintenant sera bloqué 3 ans. Si le capital est retiré avant ce délai,
+                l'AFC annule la déduction fiscale et réclame le remboursement avec intérêts.
+                Vérifier impérativement la date de retraite effective avant de procéder.
+              </p>
+            </div>
+          </div>
+        )}
+        {actualBuyback > 0 && yearsToRetire > 3 && yearsToRetire <= 5 && (
+          <div className="flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-100">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <div>
+              <p className="font-semibold">Attention règle des 3 ans (art. 79b LPP)</p>
+              <p className="mt-1 text-amber-800/90 dark:text-amber-100/80">
+                Le dirigeant part à la retraite dans {yearsToRetire} ans. Les rachats effectués
+                dans les 3 dernières années avant le retrait en capital seront bloqués.
+                Planifier les rachats en conséquence et arrêter 3 ans avant la date de retrait prévue.
+              </p>
+            </div>
+          </div>
+        )}
         <p className="text-[10px] leading-relaxed text-muted-foreground">
           {LPP_2026_SOURCE_NOTE} · Le ROI fiscal dépend du taux marginal du dirigeant ({inputs.directorCanton},
           {" "}{inputs.status}). Étaler le rachat permet d'éviter la saturation de la déduction fiscale lorsque le

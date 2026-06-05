@@ -240,8 +240,7 @@ export function toLppInput(b: ClientBundle) {
     actualBuyback: plannedTotal > 0 ? plannedTotal : undefined,
     buybackYears: plannedYears,
     pillar3aContributions: numOrUndef(b.pension?.pillar_3a_annual_contribution),
-    mortgageInterest: numOrUndef(b.client.mortgage_interest_france) || numOrUndef(b.assets?.mortgage_interest),
-    realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
+mortgageInterest: numOrUndef(b.client.mortgage_interest_france) || numOrUndef(b.assets?.mortgage_interest),    realEstateMaintenance: numOrUndef(b.assets?.real_estate_maintenance),
   };
 }
 
