@@ -320,6 +320,20 @@ function ClientDetailPage() {
           </Button>
         </div>
       )}
+      {client.spouse_salary_is_fictif &&
+        (client.tax_status === "cross_border_ge" || client.tax_status === "cross_border_fr_1983" || client.tax_status === "source_taxed") &&
+        client.civil_status === "married" && (
+        <div className="mt-4 flex items-start gap-3 rounded-lg border border-orange-300 bg-orange-50 p-4 text-sm text-orange-900 dark:border-orange-700/60 dark:bg-orange-950/40 dark:text-orange-100">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+          <div className="flex-1">
+            <p className="font-medium">Salaire conjoint provisoire (revenu fictif AFC)</p>
+            <p className="mt-1 text-orange-800/90 dark:text-orange-100/80">
+              L'impôt à la source est calculé sur un revenu fictif du conjoint de CHF {Math.min(Number(client.gross_annual_salary ?? 0), 70_500).toLocaleString("fr-CH")}.
+              Déposer la DRIS auprès de l'AFC avant le <strong>31 mars {new Date().getFullYear() + 1}</strong> pour rectifier sur la base du salaire réel.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* KPI summary */}
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
