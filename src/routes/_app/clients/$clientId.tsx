@@ -79,10 +79,6 @@ export const Route = createFileRoute("/_app/clients/$clientId")({
 function ClientDetailPage() {
   const t = useT();
   const { setActiveClient } = useActiveClient();
-  useEffect(() => {
-    if (data?.client) setActiveClient(data.client);
-    return () => setActiveClient(null);
-  }, [data?.client, setActiveClient]);
   const { clientId } = Route.useParams();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -187,6 +183,10 @@ function ClientDetailPage() {
   });
 
   // IMPORTANT : tous les hooks doivent être appelés avant tout return conditionnel.
+  useEffect(() => {
+    if (data?.client) setActiveClient(data.client);
+    return () => setActiveClient(null);
+  }, [data?.client, setActiveClient]);
   const bundle = data
     ? { client: data.client, pension: data.pension, assets: data.assets }
     : null;
