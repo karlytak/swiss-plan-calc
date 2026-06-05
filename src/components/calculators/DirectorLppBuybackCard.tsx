@@ -1,7 +1,4 @@
 // Wave 3 · Module rachats LPP dirigeant
-// Pour la stratégie recommandée du comparateur dividende/salaire,
-// simule un plan de rachat LPP étalé sur 1 an, 5 ans et jusqu'à la retraite.
-// Affiche économie d'impôt, coût net et ROI fiscal.
 import { useCallback, useMemo, useState } from "react";
 import { CalcCard, MoneyTile } from "@/components/calculators/CalcUI";
 import { NumField } from "@/components/ui/num-field";
@@ -12,13 +9,13 @@ import { simulateBuybackPlan, computeLppInsuredSalary } from "@/lib/lpp";
 import { LPP_2026, LPP_2026_SOURCE_NOTE } from "@/lib/lpp/parameters-2026";
 import type { CompensationResult } from "@/lib/director-compensation/types";
 import { Sparkles, PiggyBank, AlertTriangle } from "lucide-react";
+
 interface Props {
   best: CompensationResult;
   retirementAge?: number;
-  /** Solde LPP actuel pré-rempli depuis la fiche client si disponible */
   initialBalance?: number;
-  /** Capacité de rachat communiquée par la caisse (sinon estimée) */
   initialMaxBuyback?: number;
+  clientGrossSalary?: number;
 }
 
 export function DirectorLppBuybackCard({
@@ -26,9 +23,10 @@ export function DirectorLppBuybackCard({
   retirementAge = 65,
   initialBalance = 0,
   initialMaxBuyback,
+  clientGrossSalary,
 }: Props) {
   const inputs = best.inputs;
-  const initialGrossSalary = best.company.grossSalary;
+  const initialGrossSalary = clientGrossSalary ?? best.company.grossSalary;
   const [grossSalary, setGrossSalary] = useState<number>(initialGrossSalary);
   const salaryEdited = grossSalary !== initialGrossSalary;
   const insuredCap =
@@ -38,7 +36,6 @@ export function DirectorLppBuybackCard({
     [grossSalary, insuredCap],
   );
 
-  // Estimation simple : capacité = 6 × salaire assuré − solde actuel (proxy)
   const estimatedCapacity = useMemo(
     () => Math.max(0, Math.round(insuredSalary * 6 - initialBalance)),
     [insuredSalary, initialBalance],
@@ -71,9 +68,6 @@ export function DirectorLppBuybackCard({
     [yearsToRetire, retirementAge],
   );
 
-  // Mémoïsation par horizon : évite de recalculer les 3 plans quand seul
-  // un paramètre indépendant change. simulateBuybackPlan ne dépend que de
-  // actualBuyback (pas de maxBuyback), donc on l'exclut des dépendances.
   const sim1y = useMemo(
     () => simulateBuybackPlan({ buybackCapacity: actualBuyback, actualBuyback, years: horizons[0].years, taxInput }),
     [actualBuyback, horizons[0].years, taxInput],
@@ -96,7 +90,6 @@ export function DirectorLppBuybackCard({
     [horizons, sim1y, sim5y, simRet],
   );
 
-  // Recommandation : ROI fiscal le plus élevé
   const best1 = useMemo(
     () => sims.reduce((a, b) => (b.result.averageReturn > a.result.averageReturn ? b : a), sims[0]),
     [sims],
@@ -148,7 +141,6 @@ export function DirectorLppBuybackCard({
               Plafond {inputs.lppPlan === "executive_1e" ? "plan 1e cadres" : "obligatoire"} appliqué.
             </p>
           </div>
-
           <div>
             <Label className="text-xs font-medium text-muted-foreground">Capacité de rachat (CHF)</Label>
             <NumField value={String(maxBuyback)} onChange={handleMaxChange} />
@@ -238,7 +230,7 @@ export function DirectorLppBuybackCard({
           />
         </div>
 
-{actualBuyback > 0 && yearsToRetire <= 3 && (
+        {actualBuyback > 0 && yearsToRetire <= 3 && (
           <div className="flex items-start gap-3 rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
             <div>
@@ -265,6 +257,7 @@ export function DirectorLppBuybackCard({
             </div>
           </div>
         )}
+
         <p className="text-[10px] leading-relaxed text-muted-foreground">
           {LPP_2026_SOURCE_NOTE} · Le ROI fiscal dépend du taux marginal du dirigeant ({inputs.directorCanton},
           {" "}{inputs.status}). Étaler le rachat permet d'éviter la saturation de la déduction fiscale lorsque le

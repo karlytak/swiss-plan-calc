@@ -498,7 +498,7 @@ function DirectorCompensationCalc() {
               <ComparisonChart results={tableResults} />
             </CalcCard>
 
-            <DirectorLppBuybackCard
+ <DirectorLppBuybackCard
               best={recommendation.best}
               retirementAge={65}
               initialBalance={
@@ -506,6 +506,11 @@ function DirectorCompensationCalc() {
                   (linkedClient as unknown as { lpp_current_balance?: number } | null)
                     ?.lpp_current_balance ?? 0,
                 ) || 0
+              }
+              clientGrossSalary={
+                linkedClient?.gross_annual_salary
+                  ? Number(linkedClient.gross_annual_salary)
+                  : undefined
               }
             />
           </div>
