@@ -438,29 +438,30 @@ function ClientDetailPage() {
             <DashboardFiscal dashboard={dashboard} clientId={clientId} />
           )}
           <Card title="Situation fiscale">
-            <Row label="Statut fiscal" value={TAX_STATUS_LABELS[client.tax_status]} />
-            {client.source_tax_scale && (
-              <Row
-                label="Barème impôt à la source"
-                value={SOURCE_TAX_SCALE_LABELS[client.source_tax_scale as SourceTaxScale] ?? client.source_tax_scale}
-              />
-            )}
-            <Row label="Confession" value={CONFESSION_LABELS[client.confession]} />
-            <Row label="Paroisse" value={client.parish ?? "—"} />
-            <Separator className="my-2" />
-            <Row
-              label="Statut professionnel"
-              value={WORK_STATUS_LABELS[client.work_status]}
-            />
-            <Row
-              label="Taux d'activité"
-              value={client.activity_rate !== null ? formatPct(Number(client.activity_rate), 0) : "—"}
-            />
-            <Row label="Employeur" value={client.employer ?? "—"} />
-            <Row label="Salaire annuel brut" value={formatCHF(client.gross_annual_salary)} />
-            <Row label="Bonus / 13e" value={formatCHF(client.bonus)} />
-            <Row label="Autres revenus" value={formatCHF(client.other_income)} />
-          </Card>
+  <Row label="Statut fiscal" value={TAX_STATUS_LABELS[client.tax_status]} />
+  {client.source_tax_scale && (
+    <Row
+      label="Barème impôt à la source"
+      value={SOURCE_TAX_SCALE_LABELS[client.source_tax_scale as SourceTaxScale] ?? client.source_tax_scale}
+    />
+  )}
+  <Row label="Confession" value={CONFESSION_LABELS[client.confession]} />
+  <Row label="Paroisse" value={client.parish ?? "—"} />
+</Card>
+<Card title="Activité professionnelle">
+  <Row
+    label="Statut professionnel"
+    value={WORK_STATUS_LABELS[client.work_status]}
+  />
+  <Row
+    label="Taux d'activité"
+    value={client.activity_rate !== null ? formatPct(Number(client.activity_rate), 0) : "—"}
+  />
+  <Row label="Employeur" value={client.employer ?? "—"} />
+  <Row label="Salaire annuel brut" value={formatCHF(client.gross_annual_salary)} />
+  <Row label="Bonus / 13e" value={formatCHF(client.bonus)} />
+  <Row label="Autres revenus" value={formatCHF(client.other_income)} />
+</Card>
         </TabsContent>
 
         <TabsContent value="pension" className="mt-4 space-y-6">
