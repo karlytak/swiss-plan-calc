@@ -69,7 +69,7 @@ const { user } = useAuth();
       setMessages([{
         id: "welcome",
         role: "assistant",
-        content: "Bonjour ! Je suis votre assistant SwissBroker Pro. Je peux vous aider avec les calculs fiscaux, la prévoyance LPP, les frontaliers et l'interprétation des résultats. Quelle est votre question ?",
+        content: `Bonjour ${user?.user_metadata?.first_name ?? ""}${user?.user_metadata?.first_name ? " !" : "!"} Je suis votre assistant SwissBroker Pro. Je peux vous aider avec les calculs fiscaux, la prévoyance LPP, les frontaliers et l'interprétation des résultats. Quelle est votre question ?`,
         timestamp: new Date(),
       }]);
     }
@@ -238,7 +238,7 @@ PATRIMOINE
                 {!minimized && (
                   <div className="flex items-center gap-1 text-[10px] text-white/70">
                     <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                    En ligne · Powered by Claude
+                    En ligne
                   </div>
                 )}
               </div>

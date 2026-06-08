@@ -1,3 +1,4 @@
+import { AiConversationsHistory } from "@/components/ai/AiConversationsHistory";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -400,6 +401,7 @@ function HistoryPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+    <AiConversationsHistory />
     </div>
   );
 }
