@@ -68,8 +68,9 @@ import { ClientCompanyCard } from "@/components/clients/ClientCompanyCard";
 import { DeleteConfirmDialog } from "@/components/common/DeleteConfirmDialog";
 import { ArchiveConfirmDialog } from "@/components/common/ArchiveConfirmDialog";
 import { LEGAL_FORM_LABELS, type Company } from "@/lib/companies/types";
-import { AlertTriangle, Building2, ClipboardList } from "lucide-react";
+import { AlertTriangle, Building2, ClipboardList, MessageSquare } from "lucide-react";
 import { AiAnalysis } from "@/components/ai/AiAnalysis";
+import { AiConversationsTab } from "@/components/ai/AiConversationsTab";
 import { SessionSummaryTab } from "@/components/clients/SessionSummaryTab";
 export const Route = createFileRoute("/_app/clients/$clientId")({
   head: () => ({ meta: [{ title: "Fiche client · SwissBroker Pro" }] }),
@@ -396,6 +397,10 @@ function ClientDetailPage() {
           <TabsTrigger value="patrimoine">Patrimoine</TabsTrigger>
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Conversations IA
+          </TabsTrigger>
           <TabsTrigger value="documents" className="gap-1">
             <FolderOpen className="h-3.5 w-3.5" />
             Documents
@@ -408,6 +413,10 @@ function ClientDetailPage() {
             clientId={clientId}
             clientName={`${client.first_name} ${client.last_name}`.trim()}
           />
+        </TabsContent>
+
+        <TabsContent value="ai" className="mt-4">
+          <AiConversationsTab clientId={clientId} />
         </TabsContent>
 
         <TabsContent value="optimizations" className="mt-4">
