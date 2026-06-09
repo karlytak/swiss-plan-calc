@@ -108,7 +108,7 @@ export function toIncomeTaxInput(b: ClientBundle) {
   return {
     canton: b.client.canton ?? undefined,
     taxStatus: b.client.tax_status,
-    status: mapStatus(b.client, children.length > 0),
+    status: mapStatus(b.client, children.some(ch => ch.in_household)),
     confession: mapConfession(b.client),
     children: children.length,
     grossSalary: numOrUndef(b.client.gross_annual_salary),
@@ -130,7 +130,7 @@ export function toSourceTaxInput(b: ClientBundle) {
   const married =
     b.client.civil_status === "married" ||
     b.client.civil_status === "registered_partnership";
-  const hasKids = parseChildren(b.client.children).length > 0;
+  const hasKids = parseChildren(b.client.children).some(ch => ch.in_household);
   const spouseSalary = Number(b.client.spouse_gross_annual_salary ?? 0);
   // Barème par défaut : C si marié biactif, B si marié monoactif, H si monoparental, A sinon.
   const defaultScale: "A" | "B" | "C" | "H" = married
@@ -214,7 +214,7 @@ export function toLppInput(b: ClientBundle) {
 
   return {
     canton: b.client.canton ?? undefined,
-    status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
+    status: mapStatus(b.client, parseChildren(b.client.children).some(ch => ch.in_household)),
     children: parseChildren(b.client.children).length,
     confession: mapConfession(b.client),
     currentAge: ageFromDob(b.client.date_of_birth) ?? undefined,
@@ -262,7 +262,7 @@ export function toPillar3aInput(b: ClientBundle) {
   const pillar3bSum = sumAccountBalances(b.pension?.pillar_3b_accounts);
   return {
     canton: b.client.canton ?? undefined,
-    status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
+    status: mapStatus(b.client, parseChildren(b.client.children).some(ch => ch.in_household)),
     grossSalary: getTotalGrossIncomeOrUndef(b.client),
     contribution: numOrUndef(b.pension?.pillar_3a_annual_contribution),
     currentBalance: pillar3aSum > 0 ? pillar3aSum : undefined,
@@ -278,7 +278,7 @@ export function toCantonCompareInput(b: ClientBundle) {
   // salaire + bonus + autres revenus pour refléter la base imposable totale.
   return {
     referenceCanton: b.client.canton ?? undefined,
-    status: mapStatus(b.client, parseChildren(b.client.children).length > 0),
+    status: mapStatus(b.client, parseChildren(b.client.children).some(ch => ch.in_household)),
     children: parseChildren(b.client.children).length,
     grossSalary: getTotalGrossIncomeOrUndef(b.client),
     spouseGrossSalary: numOrUndef(b.client.spouse_gross_annual_salary),

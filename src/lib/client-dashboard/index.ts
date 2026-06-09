@@ -161,7 +161,7 @@ function safeIncomeTaxInput(b: ClientBundle): IncomeTaxInput | null {
   return {
     canton: partial.canton ?? b.client.canton,
     status:
-      partial.status ?? (children.length > 0 ? "single_with_children" : "single"),
+      partial.status ?? (children.some(ch => ch.in_household) ? "single_with_children" : "single"),
     confession: partial.confession ?? "other",
     children: partial.children ?? children.length,
     grossSalary,
@@ -272,7 +272,7 @@ function buildRetirement(
     b.client.civil_status === "married" ||
     b.client.civil_status === "registered_partnership"
       ? "married"
-      : parseChildren(b.client.children).length > 0
+      : parseChildren(b.client.children).some(ch => ch.in_household)
         ? "single_with_children"
         : "single";
 
