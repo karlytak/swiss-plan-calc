@@ -62,6 +62,7 @@ export interface TaxGlobalInput {
   healthInsurancePremiums: number;
   childCareCosts: number;
   donations: number;
+  medicalExpenses: number;
 
   // === Frontaliers ===
   eurChfRate: number;

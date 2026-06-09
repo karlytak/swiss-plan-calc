@@ -122,6 +122,7 @@ export function createDefaultInput(): TaxGlobalInput {
     healthInsurancePremiums: 0,
     childCareCosts: 0,
     donations: 0,
+  medicalExpenses: 0,
     eurChfRate: 0.95,
     chfToEurRate: 1.05,
     taxYear: 2026,

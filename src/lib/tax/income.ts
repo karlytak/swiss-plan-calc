@@ -61,6 +61,8 @@ export interface IncomeTaxInput {
   healthInsurancePremiums?: number;
   /** Frais de garde (CHF) · par enfant ouvert au max légal */
   childCareCosts?: number;
+  /** Frais médicaux (au-delà de 5% du revenu net — IFD + ICC) */
+  medicalExpenses?: number;
   /** Donations à but utilité publique */
   donations?: number;
 
@@ -91,6 +93,7 @@ export interface IncomeTaxBreakdown {
     realEstate: number;
     healthInsurance: number;
     childCare: number;
+    medical: number;
     donations: number;
     children: number;
     married: number;
@@ -264,6 +267,9 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
     (input.children ?? 0) * CHILDCARE_MAX_FEDERAL_2026,
   );
   const donations = input.donations ?? 0;
+  // Frais médicaux : déductibles au-delà de 5% du revenu net (IFD + ICC)
+  const medicalThreshold = Math.round(grossIncome * 0.05);
+  const medical = Math.max(0, (input.medicalExpenses ?? 0) - medicalThreshold);
 
   // Déductions sociales : appliquées à l'ICC via canton (children/married)
   const childrenDed = 0; // intégré au calcul cantonal
@@ -282,6 +288,7 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
     realEstate +
     healthInsurance +
     childCare +
+    medical +
     donations;
 
   const taxableIncomeCC = Math.max(0, grossIncome - totalDeductions);
@@ -338,6 +345,7 @@ export function computeIncomeTax(input: IncomeTaxInput): IncomeTaxBreakdown {
       realEstate,
       healthInsurance,
       childCare,
+      medical,
       donations,
       children: childrenDed,
       married: marriedDed,

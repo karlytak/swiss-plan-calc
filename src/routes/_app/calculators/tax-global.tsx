@@ -518,7 +518,7 @@ function TaxGlobalCalc() {
                       if (reg === "cross_border_fr_1983") {
                         return (
                           <div className="rounded-md border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
-                            <strong>Accord 1983, imposition exclusive en France.</strong> Le 3a, le rachat LPP, l'entretien immobilier CH et les primes LAMal CH <strong>ne sont pas déductibles</strong>. Seuls les intérêts d'emprunt résidence principale FR, les frais de garde et les dons réduisent l'assiette française. Vérifiez chaque bulle ci-dessous.
+                            <strong>Accord 1983 — imposition en France.</strong> Le salaire suisse est imposé au barème français. Les cotisations sociales obligatoires (AVS, AI, LPP obligatoire) sont déductibles en France. En revanche, le 3a, les rachats LPP volontaires et l'entretien immobilier suisse ne réduisent pas l'assiette française. Les frais de garde, dons et intérêts d'emprunt résidence principale FR restent déductibles. Vérifiez chaque poste ci-dessous.
                           </div>
                         );
                       }
@@ -594,6 +594,13 @@ function TaxGlobalCalc() {
                         onChange={(v) => set("pillar3bContributions", v)}
                         suffix="CHF"
                         tip={deductionTip(result.regime, "pillar3b")}
+                      />
+                      <NumField
+                        label="Frais médicaux (CHF)"
+                        value={form.medicalExpenses}
+                        onChange={(v) => set("medicalExpenses", v)}
+                        suffix="CHF"
+                        tip="Frais médicaux déductibles au-delà de 5% du revenu net (IFD + ICC). Saisissez le total annuel — la franchise de 5% est calculée automatiquement."
                       />
                       <NumField
                         label={t("calc.global.field.donations")}

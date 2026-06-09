@@ -70,6 +70,7 @@ export function toIncomeTaxInput(g: TaxGlobalInput): IncomeTaxInput {
       (g.healthInsurancePremiums || 0) + (g.pillar3bContributions || 0) || undefined,
     childCareCosts: g.childCareCosts,
     donations: g.donations,
+    medicalExpenses: g.medicalExpenses,
     netWealth: g.netWealth,
   };
 }
@@ -201,6 +202,7 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
       (g.healthInsurancePremiums || 0) +
       (g.childCareCosts || 0) +
       (g.donations || 0) +
+      (g.medicalExpenses || 0) +
       (g.pillar3bContributions || 0);
 
     // Règle d'affichage : on prend le MIN entre source et ordinaire avec
