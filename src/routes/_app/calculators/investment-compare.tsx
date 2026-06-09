@@ -58,7 +58,7 @@ export const Route = createFileRoute("/_app/calculators/investment-compare")({
 const DEFAULT_A: InvestmentInput = {
   name: "",
   type: "savings",
-  initialCapital: 100_000,
+  initialCapital: 0,
   periodicContribution: 0,
   contributionFrequency: "none",
   grossReturnRate: 1.5,
@@ -71,7 +71,7 @@ const DEFAULT_A: InvestmentInput = {
 const DEFAULT_B: InvestmentInput = {
   name: "",
   type: "etf",
-  initialCapital: 100_000,
+  initialCapital: 0,
   periodicContribution: 0,
   contributionFrequency: "none",
   grossReturnRate: 5,

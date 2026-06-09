@@ -72,8 +72,8 @@ function LppCalc() {
   const [form, setForm] = useState({
     currentAge: 40,
     retirementAge: 65,
-    currentBalance: 250_000,
-    grossSalary: 120_000,
+    currentBalance: 0,
+    grossSalary: 0,
     insuredSalary: computeLppInsuredSalary(120_000, LPP_2026.maxInsuredSalary),
     expectedReturnRate: 1.25,
     feeRate: 0.6,
