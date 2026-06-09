@@ -532,7 +532,7 @@ function TaxGlobalCalc() {
                       if (reg === "source_taxed") {
                         return (
                           <div className="rounded-md border border-amber-500/40 bg-amber-500/5 p-3 text-xs text-amber-800 dark:text-amber-300">
-                            <strong>Imposé à la source, déductions appliquées via TOU (si quasi-résident ≥ 90 % revenus CH) ou rectification IS.</strong> Sans démarche, la retenue source brute s'applique. La simulation montre l'effet réel post-démarche.
+                            <strong>Imposé à la source.</strong> Si au moins 90 % de vos revenus mondiaux proviennent de Suisse (quasi-résident), vous pouvez demander la TOU pour faire valoir vos déductions effectives (3a, rachat LPP, intérêts hypothécaires). Sinon, une rectification IS reste possible pour certaines déductions. La simulation montre l'effet après déductions.
                           </div>
                         );
                       }
@@ -781,15 +781,21 @@ function TaxGlobalCalc() {
                   tip="Taux moyen du barème IS appliqué, le marginal réel dépend du barème détaillé du canton de travail."
                 />
               </Row>
+              // APRÈS
               {result.touEligibility && (
-                <div className="mt-3 rounded-md border p-3 text-sm">
+                <div className={`mt-3 rounded-md border p-3 text-sm ${!result.touEligibility.eligibleForTOU && result.touEligibility.swissShare < 90 ? "border-destructive/40 bg-destructive/5" : "border-border"}`}>
+                  {!result.touEligibility.eligibleForTOU && result.touEligibility.swissShare < 90 && (
+                    <p className="mb-2 font-semibold text-destructive text-xs">
+                      ⚠️ Non éligible à la TOU : seulement {result.touEligibility.swissShare}% de vos revenus mondiaux proviennent de Suisse (seuil requis : 90%). Les déductions TOU ne s'appliquent pas. Réduisez vos revenus étrangers ou vérifiez votre situation avec un fiscaliste.
+                    </p>
+                  )}
                   <div className="flex items-center gap-2">
                     {result.touEligibility.eligibleForTOU ? (
                       <Badge className="bg-success text-success-foreground">
                         {t("calc.global.tou.eligible")}
                       </Badge>
                     ) : (
-                      <Badge variant="secondary">{t("calc.global.tou.not_eligible")}</Badge>
+                      <Badge variant="destructive">{t("calc.global.tou.not_eligible")}</Badge>
                     )}
                     <span className="text-muted-foreground">
                       {t("calc.global.tile.swiss_part")} : {result.touEligibility.swissShare}%
