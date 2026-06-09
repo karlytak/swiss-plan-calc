@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
-import {
+import { useMemo, useState, useEffect } from "react";import {
   Select,
   SelectContent,
   SelectItem,
@@ -104,7 +103,7 @@ function Pillar3aCalc() {
   const stag = useMemo(
     () =>
       staggeredWithdrawal({
-        totalCapital: form.withdrawalCapital,
+        totalCapital: form.withdrawalCapital > 0 ? form.withdrawalCapital : projection.finalBalance,
         numberOfAccounts: form.withdrawalAccounts,
         canton: form.canton,
         status: form.status === "single_with_children" ? "single_with_children" : form.status,
@@ -275,6 +274,13 @@ function Pillar3aCalc() {
   }, [form.pillar3bCurrent, form.pillar3bReturn, form.pillar3bYears, form.pillar3bYearly]);
 
   const [guideOpen, setGuideOpen] = useState(false);
+  const [pillar3bManuallyEdited, setPillar3bManuallyEdited] = useState(false);
+
+useEffect(() => {
+  if (!pillar3bManuallyEdited && savings.taxSavings > 0) {
+    set("pillar3bYearly", Math.round(savings.taxSavings));
+  }
+}, [savings.taxSavings, pillar3bManuallyEdited]);
   const guideSteps: GuideStep[] = [
     { title: t("calc.p3a.step.welcome.t"), body: t("calc.p3a.step.welcome.b") },
     { title: t("calc.p3a.step.cap.t"), body: t("calc.p3a.step.cap.b") },
@@ -477,7 +483,7 @@ function Pillar3aCalc() {
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <NumField label={t("calc.p3a.field.3b_current")} value={form.pillar3bCurrent} onChange={(v) => set("pillar3bCurrent", v)} />
-              <NumField label={t("calc.p3a.field.3b_yearly")} value={form.pillar3bYearly} onChange={(v) => set("pillar3bYearly", v)} />
+              <NumField label={t("calc.p3a.field.3b_yearly")} value={form.pillar3bYearly} onChange={(v) => { set("pillar3bYearly", v); setPillar3bManuallyEdited(true); }} />
               <NumField label={t("calc.p3a.field.3b_years")} value={form.pillar3bYears} onChange={(v) => set("pillar3bYears", v)} />
               <NumField label={t("calc.p3a.field.3b_return")} value={form.pillar3bReturn} onChange={(v) => set("pillar3bReturn", v)} step={0.1} />
             </div>

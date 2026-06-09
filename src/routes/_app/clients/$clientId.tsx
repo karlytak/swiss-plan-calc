@@ -398,7 +398,7 @@ function ClientDetailPage() {
           <TabsTrigger value="family">Famille</TabsTrigger>
           <TabsTrigger value="notes">Notes</TabsTrigger>
           <TabsTrigger value="ai" className="gap-1">
-            <MessageSquare className="h-3.5 w-3.5" />
+          <MessageSquare className="h-3.5 w-3.5" />
             Conversations IA
           </TabsTrigger>
           <TabsTrigger value="documents" className="gap-1">
@@ -406,8 +406,7 @@ function ClientDetailPage() {
             Documents
           </TabsTrigger>
         </TabsList>
-
-
+        
         <TabsContent value="session" className="mt-4">
           <SessionSummaryTab
             clientId={clientId}
