@@ -410,7 +410,7 @@ function AvsAiCalc() {
               </Row>
             )}
             {projection.cappedCouple ? (
-              <p className="mt-3 rounded-md bg-warning/10 p-2 text-xs text-warning-foreground">
+              <p className="mt-3 rounded-md bg-warning/10 p-2 text-xs text-amber-700 dark:text-amber-300">
                 {t("calc.avs.capped_warning", { ceiling: AVS_2026.maxCoupleMonthlyPension })}
               </p>
             ) : null}
@@ -645,7 +645,7 @@ function SurvivorCard({
         ))}
       </div>
       {survivors.cappedFamily && (
-        <p className="mt-2 rounded-md bg-warning/10 p-2 text-[11px] text-warning-foreground">
+        <p className="mt-2 rounded-md bg-warning/10 p-2 text-[11px] text-amber-700 dark:text-amber-300">
           Plafond familial 150 % appliqué (réduction proportionnelle).
         </p>
       )}
