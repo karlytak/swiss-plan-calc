@@ -463,8 +463,13 @@ useEffect(() => {
 </div>
             <NumField label={t("pension.expected_return")} value={form.expectedReturn} onChange={(v) => set("expectedReturn", v)} step={0.1} />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <MoneyTile label={t("calc.p3a.final_balance")} value={projection.finalBalance} tone="primary" big tip={t("calc.p3a.tip.final_balance")} />
+          {/* Résultat principal mis en avant */}
+          <div className="mt-4 rounded-xl border-2 border-primary/40 bg-primary/5 p-4 text-center">
+            <p className="text-xs font-semibold uppercase tracking-wider text-primary/60">{t("calc.p3a.final_balance")}</p>
+            <p className="mt-1 text-4xl font-bold tabular-nums text-primary">{projection.finalBalance.toLocaleString("fr-CH")} CHF</p>
+            <p className="mt-1 text-[11px] text-muted-foreground">dans {form.yearsToRetirement} ans · dont {projection.totalReturns.toLocaleString("fr-CH")} CHF d'intérêts</p>
+          </div>
+          <div className="mt-3 grid grid-cols-2 gap-3">
             <MoneyTile label={t("calc.p3a.total_contrib")} value={projection.totalContributions} tip={t("calc.p3a.tip.total_contrib")} />
             <MoneyTile label={t("calc.p3a.total_returns")} value={projection.totalReturns} tone="success" tip={t("calc.p3a.tip.total_returns")} />
           </div>
