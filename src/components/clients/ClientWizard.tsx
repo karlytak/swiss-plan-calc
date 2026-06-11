@@ -136,6 +136,7 @@ interface FormState {
   lpp_plan: LppPlan;
   pillar_3a_annual_contribution: string;
   pillar_3a_accounts: PensionAccount[];
+  pillar_3a_opening_date: string;
   vested_benefits_accounts: PensionAccount[];
   bank_accounts: string;
   securities: string;
@@ -190,6 +191,7 @@ function initialForm(initial?: WizardInitialData): FormState {
     lpp_plan: p?.lpp_plan ?? "mandatory",
     pillar_3a_annual_contribution: p?.pillar_3a_annual_contribution?.toString() ?? "",
     pillar_3a_accounts: parsePensionAccountsSafe(p?.pillar_3a_accounts),
+    pillar_3a_opening_date: (p as Record<string, unknown>)?.pillar_3a_opening_date as string ?? "",
     vested_benefits_accounts: parsePensionAccountsSafe(p?.vested_benefits_accounts),
     bank_accounts: a?.bank_accounts?.toString() ?? "",
     securities: a?.securities?.toString() ?? "",
@@ -351,6 +353,7 @@ export function ClientWizard({ initial, mode, clientId }: ClientWizardProps) {
         lpp_max_buyback: num(form.lpp_max_buyback) ?? 0,
         lpp_plan: form.lpp_plan,
         pillar_3a_annual_contribution: num(form.pillar_3a_annual_contribution) ?? 0,
+        pillar_3a_opening_date: (form.pillar_3a_opening_date || null) as never,
         pillar_3a_accounts: form.pillar_3a_accounts.filter(
           (a) => a.institution.trim() !== "" || a.balance > 0,
         ) as unknown as import("@/integrations/supabase/types").Json,
@@ -1218,6 +1221,14 @@ function StepPatrimoine({
                 value={form.pillar_3a_annual_contribution}
                 onChange={(v) => update("pillar_3a_annual_contribution", v)}
                 suffix="CHF"
+              />
+            </Field>
+            <Field label="Date d'ouverture du 3a" hint="Date d'ouverture du premier compte 3a">
+              <input
+                type="date"
+                value={form.pillar_3a_opening_date}
+                onChange={(e) => update("pillar_3a_opening_date", e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               />
             </Field>
           </div>
