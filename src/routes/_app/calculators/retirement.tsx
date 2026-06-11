@@ -25,6 +25,7 @@ import { z } from "zod";
 import { useClientDashboard } from "@/hooks/use-client-dashboard";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { ClientPrefillBadge } from "@/components/calculators/ClientPrefillBadge";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { ConsolidatedBenefitsCard } from "@/components/clients/ConsolidatedBenefitsCard";
@@ -129,6 +130,7 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
           <CalcCard title={t("calc.retirement.section.title")} description={t("calc.retirement.section.desc")}>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <NumField label={t("calc.retirement.field.capital")} value={form.capital} onChange={(v) => set("capital", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.capital")} />
+              <ClientPrefillBadge show={!!prefill?.capital && form.capital === prefill.capital} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
               <div className="space-y-1.5">
                 <Label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                   <span>{t("calc.retirement.field.canton")}</span>
@@ -145,6 +147,7 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
                 <p className="text-[10px] text-muted-foreground">
                   {t("calc.retirement.note.canton")}
                 </p>
+                <ClientPrefillBadge show={!!prefill?.canton && form.canton === prefill.canton} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
               </div>
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-muted-foreground">{t("calc.retirement.field.civil_status")}</Label>
@@ -156,6 +159,7 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
                     <SelectItem value="single_with_children">{t("calc.status.single_with_children")}</SelectItem>
                   </SelectContent>
                 </Select>
+                <ClientPrefillBadge show={!!prefill?.status && form.status === prefill.status} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
               </div>
               <NumField label={t("calc.retirement.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.conversion_rate")} />
               <NumField label={t("calc.retirement.field.life_years")} value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.life_years")} />

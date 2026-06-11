@@ -37,6 +37,7 @@ import { zodValidator, fallback } from "@tanstack/zod-adapter";
 import { z } from "zod";
 import { usePrefillFromClient, useHydrateFormFromPrefill } from "@/hooks/usePrefillFromClient";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { ClientPrefillBadge } from "@/components/calculators/ClientPrefillBadge";
 import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { WikiTip } from "@/components/calculators/WikiTip";
 import { useT } from "@/contexts/LanguageContext";
@@ -152,12 +153,14 @@ function VestedBenefitsCalc() {
                 onChange={(v) => set("initialBalance", Number(v) || 0)}
                 suffix="CHF"
               />
+              <ClientPrefillBadge show={!!prefill?.initialBalance && form.initialBalance === prefill.initialBalance} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
             </Field>
             <Field label={t("calc.vested.field.years")} wikiId="lpp-conversion" wikiTip={t("calc.vested.tip.years")}>
               <BaseNumField
                 value={String(form.yearsToRetirement)}
                 onChange={(v) => set("yearsToRetirement", Number(v) || 0)}
               />
+              <ClientPrefillBadge show={!!prefill?.yearsToRetirement && form.yearsToRetirement === prefill.yearsToRetirement} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
             </Field>
             <Field label={t("calc.vested.field.canton")} wikiId="lpp-conversion" wikiTip={t("calc.vested.tip.canton")}>
               <Select value={form.withdrawalCanton} onValueChange={(v) => set("withdrawalCanton", v)}>

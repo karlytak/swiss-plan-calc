@@ -6,6 +6,7 @@ import { Sparkles, Info, ArrowRight } from "lucide-react";
 
 import { CalcCard, MoneyTile, PctTile, Row, InfoLabel, HelpDot } from "@/components/calculators/CalcUI";
 import { ClientLinkBanner } from "@/components/calculators/ClientLinkBanner";
+import { ClientPrefillBadge } from "@/components/calculators/ClientPrefillBadge";
 import { NumField as BaseNumField } from "@/components/ui/num-field";
 import { Label } from "@/components/ui/label";
 import {
@@ -191,6 +192,7 @@ function TaxGlobalCalc() {
                           ))}
                         </SelectContent>
                       </Select>
+                      <ClientPrefillBadge show={!!prefill?.canton && form.canton === prefill.canton} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     </Field>
                     <Field label={t("calc.global.field.country")}>
                       <Select
@@ -239,6 +241,7 @@ function TaxGlobalCalc() {
                           <SelectItem value="F">Permis F</SelectItem>
                         </SelectContent>
                       </Select>
+                      <ClientPrefillBadge show={!!prefill?.permit && form.permit === prefill.permit} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     </Field>
                     <Field label={t("calc.global.field.civil_status")}>
                       <Select
@@ -268,6 +271,7 @@ function TaxGlobalCalc() {
                           <SelectItem value="widowed">{t("enum.civil_status.widowed")}</SelectItem>
                         </SelectContent>
                       </Select>
+                      <ClientPrefillBadge show={!!prefill?.civilStatus && form.civilStatus === prefill.civilStatus} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     </Field>
                     <NumField
                       label={t("calc.global.field.children")}
@@ -295,6 +299,7 @@ function TaxGlobalCalc() {
                       value={form.age ?? 40}
                       onChange={(v) => set("age", v)}
                     />
+                      <ClientPrefillBadge show={!!prefill?.age && form.age === prefill.age} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     {isCouple && (
                       <Field label={t("calc.global.field.spouse_employed")}>
                         <div className="flex h-10 items-center">
@@ -325,6 +330,7 @@ function TaxGlobalCalc() {
                       suffix="CHF"
                       tip="Salaire annuel brut figurant sur le certificat de salaire (case 1/8), avant déductions sociales (AVS, AI, AC, LPP)."
                     />
+                      <ClientPrefillBadge show={!!prefill?.grossSalary && form.grossSalary === prefill.grossSalary} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     <NumField
                       label={t("calc.global.field.bonus")}
                       value={form.bonus}
@@ -332,6 +338,7 @@ function TaxGlobalCalc() {
                       suffix="CHF"
                       tip="Gratifications, 13e salaire, part variable. Imposés comme le salaire ordinaire."
                     />
+                      <ClientPrefillBadge show={!!prefill?.bonus && form.bonus === prefill.bonus} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     {isCouple && (
                       <NumField
                         label={t("calc.global.field.spouse_salary")}
