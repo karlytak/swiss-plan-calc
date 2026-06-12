@@ -301,25 +301,27 @@ function PricingModal({ onClose }: { onClose: () => void }) {
     {
       name: "Starter",
       price: "490",
-      priceYear: "441",
+      priceMonthEquiv: "441",
+      priceYear: "5'292",
       desc: "Idéal pour le courtier indépendant",
-      color: "border-border",
       highlight: false,
+      trial: false,
       features: [
         "10 dossiers clients",
         "2 sociétés",
         "Tous les calculateurs",
-        "Export PDF illimité",
-        "Assistant IA",
+        "10 exports PDF par mois",
+        "Assistant IA · 10 conversations/jour",
       ],
     },
     {
       name: "Pro",
       price: "790",
-      priceYear: "711",
+      priceMonthEquiv: "711",
+      priceYear: "8'532",
       desc: "Pour le courtier actif en croissance",
-      color: "border-primary",
       highlight: true,
+      trial: true,
       features: [
         "20 dossiers clients",
         "4 sociétés",
@@ -332,17 +334,18 @@ function PricingModal({ onClose }: { onClose: () => void }) {
     {
       name: "Cabinet",
       price: "1'290",
-      priceYear: "1'161",
+      priceMonthEquiv: "1'161",
+      priceYear: "13'932",
       desc: "Pour les cabinets multi-collaborateurs",
-      color: "border-border",
       highlight: false,
+      trial: true,
       features: [
         "Clients illimités",
         "Sociétés illimitées",
         "Tous les calculateurs",
         "Export PDF illimité",
         "Assistant IA illimité",
-        "+290 CHF/utilisateur sup.",
+        "+290 CHF/utilisateur supplémentaire",
         "Support dédié",
       ],
     },
@@ -354,14 +357,14 @@ function PricingModal({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-5xl rounded-3xl border border-border bg-background shadow-2xl"
+        className="relative w-full max-w-5xl rounded-3xl border border-border bg-background shadow-2xl overflow-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header modal */}
         <div className="flex items-center justify-between border-b border-border p-6">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Choisissez votre plan</h2>
-            <p className="mt-1 text-sm text-muted-foreground">Tous les plans incluent l'accès complet aux calculateurs. Annulez à tout moment.</p>
+            <p className="mt-1 text-sm text-muted-foreground">3 jours d'essai gratuits sur Pro et Cabinet · Carte bancaire requise · Aucun débit avant J+3</p>
           </div>
           <button onClick={onClose} className="rounded-full p-2 hover:bg-muted">
             <X className="h-5 w-5" />
@@ -409,11 +412,25 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                 <h3 className="text-lg font-bold">{plan.name}</h3>
                 <p className="mt-0.5 text-xs text-muted-foreground">{plan.desc}</p>
               </div>
-              <div className="mb-6">
-                <span className="text-4xl font-extrabold tabular-nums">{yearly ? plan.priceYear : plan.price}</span>
-                <span className="ml-1 text-sm text-muted-foreground">CHF/mois</span>
-                {yearly && <p className="mt-0.5 text-[11px] text-success">Facturé annuellement</p>}
+              <div className="mb-2">
+                {yearly ? (
+                  <div>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-4xl font-extrabold tabular-nums">{plan.priceYear}</span>
+                      <span className="text-sm text-muted-foreground">CHF/an</span>
+                    </div>
+                    <p className="mt-0.5 text-[11px] text-success">soit {plan.priceMonthEquiv} CHF/mois · économie de 10%</p>
+                  </div>
+                ) : (
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-4xl font-extrabold tabular-nums">{plan.price}</span>
+                    <span className="text-sm text-muted-foreground">CHF/mois</span>
+                  </div>
+                )}
               </div>
+              {plan.trial && (
+                <p className="mb-4 text-[11px] font-medium text-primary">✓ 3 jours d'essai gratuits inclus</p>
+              )}
               <ul className="mb-6 space-y-2">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
@@ -432,10 +449,12 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                     : "border border-border bg-background hover:bg-muted"
                 }`}
               >
-                Commencer avec {plan.name}
+                {plan.trial ? "Démarrer mon essai gratuit" : "Commencer avec Starter"}
               </Link>
               <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                Code promo early adopter : <span className="font-mono font-semibold">SWISSBROKER20</span>
+                {plan.trial
+                  ? "Carte requise · aucun débit avant J+3 · annulation libre"
+                  : "Accès immédiat · carte bancaire requise"}
               </p>
             </div>
           ))}
@@ -443,6 +462,8 @@ function PricingModal({ onClose }: { onClose: () => void }) {
 
         <div className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
           Facturation en CHF · Piliarys · Annulation à tout moment · Support inclus
+          <br />
+          <span className="text-[10px]">Les 10 premiers abonnés bénéficient de −20% la première année avec le code <span className="font-mono font-semibold">SWISSBROKER20</span></span>
         </div>
       </div>
     </div>
