@@ -256,6 +256,7 @@ export type Database = {
           lpp_planned_buybacks: Json
           pillar_3a_accounts: Json
           pillar_3a_annual_contribution: number
+          pillar_3a_opening_date: string | null
           pillar_3b_accounts: Json
           spouse_lpp_balance: number
           spouse_pillar_3a_balance: number
@@ -279,6 +280,7 @@ export type Database = {
           lpp_planned_buybacks?: Json
           pillar_3a_accounts?: Json
           pillar_3a_annual_contribution?: number
+          pillar_3a_opening_date?: string | null
           pillar_3b_accounts?: Json
           spouse_lpp_balance?: number
           spouse_pillar_3a_balance?: number
@@ -302,6 +304,7 @@ export type Database = {
           lpp_planned_buybacks?: Json
           pillar_3a_accounts?: Json
           pillar_3a_annual_contribution?: number
+          pillar_3a_opening_date?: string | null
           pillar_3b_accounts?: Json
           spouse_lpp_balance?: number
           spouse_pillar_3a_balance?: number
@@ -914,7 +917,14 @@ export type Database = {
     }
     Enums: {
       app_language: "fr" | "de" | "en" | "it"
-      broker_plan: "free" | "pro" | "enterprise"
+            broker_plan:
+        | "free"
+        | "pro"
+        | "enterprise"
+        | "trial"
+        | "starter"
+        | "cabinet"
+        | "internal"
       civil_status:
         | "single"
         | "married"
@@ -1127,7 +1137,15 @@ export const Constants = {
   public: {
     Enums: {
       app_language: ["fr", "de", "en", "it"],
-      broker_plan: ["free", "pro", "enterprise"],
+      broker_plan: [
+        "free",
+        "pro",
+        "enterprise",
+        "trial",
+        "starter",
+        "cabinet",
+        "internal",
+      ],
       civil_status: [
         "single",
         "married",
