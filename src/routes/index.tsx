@@ -441,7 +441,7 @@ function PricingModal({ onClose }: { onClose: () => void }) {
               </ul>
               <Link
                 to="/auth"
-                search={{ mode: "signup" }}
+                search={{ mode: "signup", plan: plan.name.toLowerCase() }}
                 onClick={onClose}
                 className={`block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition-all ${
                   plan.highlight

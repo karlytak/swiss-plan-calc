@@ -17,6 +17,7 @@ import { t as translate } from "@/lib/i18n";
 
 const authSearchSchema = z.object({
   mode: z.enum(["signin", "signup"]).optional(),
+  plan: z.enum(["starter", "pro", "cabinet"]).optional(),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -51,6 +52,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
+  const selectedPlan = search.plan ?? "pro";
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -94,7 +96,7 @@ function AuthPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {mode === "signup" ? <SignupForm /> : <SigninForm />}
+          {mode === "signup" ? <SignupForm plan={selectedPlan} /> : <SigninForm />}
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "signup" ? (
@@ -165,7 +167,7 @@ function GoogleButton() {
   );
 }
 
-function SignupForm() {
+function SignupForm({ plan }: { plan: string }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -194,7 +196,25 @@ function SignupForm() {
       return;
     }
     toast.success(t("auth.success.signup"));
-    navigate({ to: "/dashboard" });
+    // Appel Stripe Checkout
+    try {
+      const PRICE_IDS: Record<string, string> = {
+        starter: import.meta.env.VITE_STRIPE_STARTER_MONTHLY ?? "",
+        pro: import.meta.env.VITE_STRIPE_PRO_MONTHLY ?? "",
+        cabinet: import.meta.env.VITE_STRIPE_CABINET_MONTHLY ?? "",
+      };
+      const priceId = PRICE_IDS[plan] ?? PRICE_IDS.pro;
+      const { data: { session } } = await supabase.auth.getSession();
+      const brokerId = session?.user?.id ?? "";
+      const { data, error: fnError } = await supabase.functions.invoke("stripe-checkout", {
+        body: { priceId, brokerId, brokerEmail: values.email },
+      });
+      if (fnError || !data?.url) throw new Error("Erreur Stripe");
+      window.location.href = data.url;
+    } catch {
+      // Si Stripe échoue, on redirige quand même vers le dashboard
+      navigate({ to: "/dashboard" });
+    }
   };
 
   return (
