@@ -25,7 +25,11 @@ Deno.serve(async (req) => {
       "success_url": `${siteUrl}/auth?mode=signup&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
       "cancel_url": `${siteUrl}/?pricing=1`,
       "metadata[plan]": plan,
+      "payment_method_collection": "always",
     };
+
+    // Désactiver Apple Pay et Link — carte uniquement
+    params["payment_method_options[card][request_three_d_secure]"] = "automatic";
 
     // Trial 3 jours sur Pro et Cabinet
     if (plan === "pro" || plan === "cabinet") {

@@ -18,6 +18,7 @@ import { t as translate } from "@/lib/i18n";
 const authSearchSchema = z.object({
   mode: z.enum(["signin", "signup"]).optional(),
   plan: z.enum(["starter", "pro", "cabinet"]).optional(),
+  session_id: z.string().optional(),
 });
 
 export const Route = createFileRoute("/auth")({
@@ -53,6 +54,17 @@ function AuthPage() {
   const { isAuthenticated, isLoading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
   const selectedPlan = search.plan ?? "pro";
+  const sessionId = search.session_id;
+  const [stripeEmail, setStripeEmail] = useState<string>("");
+
+  useEffect(() => {
+    if (!sessionId) return;
+    supabase.functions.invoke("stripe-session", {
+      body: { sessionId },
+    }).then(({ data }) => {
+      if (data?.email) setStripeEmail(data.email);
+    });
+  }, [sessionId]);
 
   useEffect(() => {
     if (!isLoading && isAuthenticated) {
@@ -96,7 +108,7 @@ function AuthPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {mode === "signup" ? <SignupForm plan={selectedPlan} /> : <SigninForm />}
+          {mode === "signup" ? <SignupForm plan={selectedPlan} stripeEmail={stripeEmail} /> : <SigninForm />}
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "signup" ? (
@@ -167,13 +179,13 @@ function GoogleButton() {
   );
 }
 
-function SignupForm({ plan }: { plan: string }) {
+function SignupForm({ plan, stripeEmail }: { plan: string; stripeEmail: string }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const form = useForm<SignupValues>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "" },
+    defaultValues: { firstName: "", lastName: "", email: stripeEmail, password: "" },
   });
 
   const onSubmit = async (values: SignupValues) => {
@@ -237,7 +249,7 @@ function SignupForm({ plan }: { plan: string }) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="email">{t("auth.field.email_pro")}</Label>
-        <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
+        <Input id="email" type="email" autoComplete="email" {...form.register("email")} readOnly={!!stripeEmail} className={stripeEmail ? "bg-muted cursor-not-allowed" : ""} />
         {form.formState.errors.email && (
           <p className="text-xs text-destructive">{t(form.formState.errors.email.message ?? "")}</p>
         )}
