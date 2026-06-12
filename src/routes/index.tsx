@@ -296,6 +296,48 @@ function CTASection() {
   );
 }
 
+const PRICE_IDS: Record<string, string> = {
+  starter: import.meta.env.VITE_STRIPE_STARTER_MONTHLY ?? "",
+  pro: import.meta.env.VITE_STRIPE_PRO_MONTHLY ?? "",
+  cabinet: import.meta.env.VITE_STRIPE_CABINET_MONTHLY ?? "",
+};
+
+function CheckoutButton({ plan, highlight }: { plan: string; highlight: boolean }) {
+  const [loading, setLoading] = useState(false);
+
+  const handleCheckout = async () => {
+    setLoading(true);
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const priceId = PRICE_IDS[plan];
+      if (!priceId) throw new Error("Prix introuvable");
+      const { data, error } = await supabase.functions.invoke("stripe-checkout", {
+        body: { priceId, plan },
+      });
+      if (error || !data?.url) throw new Error("Erreur Stripe");
+      window.location.href = data.url;
+    } catch {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={handleCheckout}
+      disabled={loading}
+      className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
+        highlight
+          ? "bg-primary text-primary-foreground shadow-elegant hover:bg-primary/90"
+          : "border border-border bg-background hover:bg-muted"
+      }`}
+    >
+      {loading && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />}
+      {plan === "pro" ? "Démarrer mon essai gratuit" : `Commencer avec ${plan.charAt(0).toUpperCase() + plan.slice(1)}`}
+    </button>
+  );
+}
+
 function PricingModal({ onClose }: { onClose: () => void }) {
   const plans = [
     {
@@ -439,18 +481,7 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                   </li>
                 ))}
               </ul>
-              <Link
-                to="/auth"
-                search={{ mode: "signup", plan: plan.name.toLowerCase() }}
-                onClick={onClose}
-                className={`block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition-all ${
-                  plan.highlight
-                    ? "bg-primary text-primary-foreground shadow-elegant hover:bg-primary/90"
-                    : "border border-border bg-background hover:bg-muted"
-                }`}
-              >
-                {plan.name === "Pro" ? "Démarrer mon essai gratuit" : `Commencer avec ${plan.name}`}
-              </Link>
+              <CheckoutButton plan={plan.name.toLowerCase()} highlight={plan.highlight} />
               <p className="mt-2 text-center text-[10px] text-muted-foreground">
                 {plan.name === "Pro" ? "Aucun débit avant J+3" : "Accès immédiat"}
               </p>

@@ -9,8 +9,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { priceId, brokerId, brokerEmail, coupon } = await req.json();
+    const { priceId, plan, coupon } = await req.json();
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    const siteUrl = Deno.env.get("SITE_URL") ?? "https://swiss-plan-calc.vercel.app";
 
     if (!stripeKey) {
       throw new Error("STRIPE_SECRET_KEY manquante");
@@ -21,12 +22,15 @@ Deno.serve(async (req) => {
       "mode": "subscription",
       "line_items[0][price]": priceId,
       "line_items[0][quantity]": "1",
-      "customer_email": brokerEmail,
-      "client_reference_id": brokerId,
-      "success_url": `${Deno.env.get("SITE_URL") ?? "https://swiss-plan-calc.vercel.app"}/dashboard?session_id={CHECKOUT_SESSION_ID}`,
-      "cancel_url": `${Deno.env.get("SITE_URL") ?? "https://swiss-plan-calc.vercel.app"}/pricing`,
-      "metadata[broker_id]": brokerId,
+      "success_url": `${siteUrl}/auth?mode=signup&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
+      "cancel_url": `${siteUrl}/?pricing=1`,
+      "metadata[plan]": plan,
     };
+
+    // Trial 3 jours sur Pro et Cabinet
+    if (plan === "pro" || plan === "cabinet") {
+      params["subscription_data[trial_period_days]"] = "3";
+    }
 
     if (coupon) {
       params["discounts[0][coupon]"] = coupon;
