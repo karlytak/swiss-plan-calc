@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Calculator,
@@ -9,6 +10,9 @@ import {
   CheckCircle2,
   Building2,
   Globe2,
+  X,
+  Check,
+  Zap,
 } from "lucide-react";
 import { useT } from "@/contexts/LanguageContext";
 import { PublicLanguageSwitcher } from "@/components/common/PublicLanguageSwitcher";
@@ -25,10 +29,12 @@ export const Route = createFileRoute("/")({
 });
 
 function Landing() {
+  const [pricingOpen, setPricingOpen] = useState(false);
   return (
     <div className="min-h-screen bg-background">
-      <Header />
-      <Hero />
+      <Header onPricingOpen={() => setPricingOpen(true)} />
+      {pricingOpen && <PricingModal onClose={() => setPricingOpen(false)} />}
+      <Hero onPricingOpen={() => setPricingOpen(true)} />
       <Features />
       <Modules />
       <Optimization />
@@ -38,7 +44,7 @@ function Landing() {
   );
 }
 
-function Header() {
+function Header({ onPricingOpen }: { onPricingOpen: () => void }) {
   const t = useT();
   return (
     <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -61,6 +67,9 @@ function Header() {
           <a href="#optimisation" className="text-sm text-muted-foreground hover:text-foreground">
             {t("landing.nav.optimization")}
           </a>
+          <button onClick={onPricingOpen} className="text-sm font-semibold text-primary hover:text-primary/80">
+            Tarifs
+          </button>
         </nav>
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <PublicLanguageSwitcher />
@@ -81,7 +90,7 @@ function Header() {
   );
 }
 
-function Hero() {
+function Hero({ onPricingOpen }: { onPricingOpen: () => void }) {
   const t = useT();
   return (
     <section className="relative overflow-hidden bg-hero">
@@ -104,7 +113,7 @@ function Hero() {
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <Link to="/auth" search={{ mode: "signup" }}>
               <Button size="lg" className="h-12 px-8 shadow-elegant">
-                {t("landing.hero.cta.signup")}
+                Créer mon compte
                 <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             </Link>
@@ -117,15 +126,17 @@ function Hero() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              {t("landing.hero.check.free")}
+              Barèmes officiels 2026
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              {t("landing.hero.check.no_card")}
+              Données chiffrées et privées
             </span>
             <span className="inline-flex items-center gap-1.5">
               <CheckCircle2 className="h-3.5 w-3.5 text-success" />
-              {t("landing.hero.check.private")}
+              <button onClick={onPricingOpen} className="font-semibold text-primary underline-offset-2 hover:underline">
+                Voir les tarifs →
+              </button>
             </span>
           </div>
         </div>
@@ -271,7 +282,7 @@ function CTASection() {
             <h2 className="text-3xl font-bold tracking-tight text-primary-foreground sm:text-4xl">
               {t("landing.cta.title")}
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-primary-foreground/90">{t("landing.cta.desc")}</p>
+            <p className="mx-auto mt-4 max-w-xl text-primary-foreground/90">Rejoignez les premiers courtiers suisses romands à optimiser leurs rendez-vous clients avec SwissBroker Pro.</p>
             <Link to="/auth" search={{ mode: "signup" }} className="mt-8 inline-block">
               <Button size="lg" variant="secondary" className="h-12 px-8 text-foreground shadow-card">
                 {t("landing.cta.button")}
@@ -282,6 +293,159 @@ function CTASection() {
         </div>
       </div>
     </section>
+  );
+}
+
+function PricingModal({ onClose }: { onClose: () => void }) {
+  const plans = [
+    {
+      name: "Starter",
+      price: "490",
+      priceYear: "441",
+      desc: "Idéal pour le courtier indépendant",
+      color: "border-border",
+      highlight: false,
+      features: [
+        "10 dossiers clients",
+        "2 sociétés",
+        "Tous les calculateurs",
+        "Export PDF illimité",
+        "Assistant IA",
+      ],
+    },
+    {
+      name: "Pro",
+      price: "790",
+      priceYear: "711",
+      desc: "Pour le courtier actif en croissance",
+      color: "border-primary",
+      highlight: true,
+      features: [
+        "20 dossiers clients",
+        "4 sociétés",
+        "Tous les calculateurs",
+        "Export PDF illimité",
+        "Assistant IA illimité",
+        "Support prioritaire",
+      ],
+    },
+    {
+      name: "Cabinet",
+      price: "1'290",
+      priceYear: "1'161",
+      desc: "Pour les cabinets multi-collaborateurs",
+      color: "border-border",
+      highlight: false,
+      features: [
+        "Clients illimités",
+        "Sociétés illimitées",
+        "Tous les calculateurs",
+        "Export PDF illimité",
+        "Assistant IA illimité",
+        "+290 CHF/utilisateur sup.",
+        "Support dédié",
+      ],
+    },
+  ];
+
+  const [yearly, setYearly] = useState(false);
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+      <div
+        className="relative w-full max-w-5xl rounded-3xl border border-border bg-background shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header modal */}
+        <div className="flex items-center justify-between border-b border-border p-6">
+          <div>
+            <h2 className="text-2xl font-bold tracking-tight">Choisissez votre plan</h2>
+            <p className="mt-1 text-sm text-muted-foreground">Tous les plans incluent l'accès complet aux calculateurs. Annulez à tout moment.</p>
+          </div>
+          <button onClick={onClose} className="rounded-full p-2 hover:bg-muted">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Toggle mensuel/annuel */}
+        <div className="flex justify-center pt-6">
+          <div className="inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 p-1">
+            <button
+              onClick={() => setYearly(false)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${!yearly ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
+            >
+              Mensuel
+            </button>
+            <button
+              onClick={() => setYearly(true)}
+              className={`rounded-full px-4 py-1.5 text-sm font-medium transition-all ${yearly ? "bg-background shadow text-foreground" : "text-muted-foreground"}`}
+            >
+              Annuel <span className="ml-1 rounded-full bg-success/20 px-1.5 py-0.5 text-[10px] font-semibold text-success">−10%</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Plans */}
+        <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-3">
+          {plans.map((plan) => (
+            <div
+              key={plan.name}
+              className={`relative rounded-2xl border-2 bg-card p-6 transition-all ${
+                plan.highlight
+                  ? "border-primary shadow-[0_8px_30px_rgb(0,0,0,0.12),0_0_0_1px_rgba(var(--primary-rgb),0.2)] scale-[1.02]"
+                  : "border-border hover:border-primary/40 hover:shadow-lg"
+              }`}
+              style={plan.highlight ? { background: "linear-gradient(145deg, hsl(var(--card)) 0%, hsl(var(--primary)/0.03) 100%)" } : {}}
+            >
+              {plan.highlight && (
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-primary px-3 py-1 text-[11px] font-semibold text-primary-foreground shadow-elegant">
+                    <Zap className="h-3 w-3" /> Recommandé
+                  </span>
+                </div>
+              )}
+              <div className="mb-4">
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <p className="mt-0.5 text-xs text-muted-foreground">{plan.desc}</p>
+              </div>
+              <div className="mb-6">
+                <span className="text-4xl font-extrabold tabular-nums">{yearly ? plan.priceYear : plan.price}</span>
+                <span className="ml-1 text-sm text-muted-foreground">CHF/mois</span>
+                {yearly && <p className="mt-0.5 text-[11px] text-success">Facturé annuellement</p>}
+              </div>
+              <ul className="mb-6 space-y-2">
+                {plan.features.map((f) => (
+                  <li key={f} className="flex items-center gap-2 text-sm">
+                    <Check className="h-3.5 w-3.5 shrink-0 text-success" />
+                    <span>{f}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link
+                to="/auth"
+                search={{ mode: "signup" }}
+                onClick={onClose}
+                className={`block w-full rounded-xl px-4 py-2.5 text-center text-sm font-semibold transition-all ${
+                  plan.highlight
+                    ? "bg-primary text-primary-foreground shadow-elegant hover:bg-primary/90"
+                    : "border border-border bg-background hover:bg-muted"
+                }`}
+              >
+                Commencer avec {plan.name}
+              </Link>
+              <p className="mt-2 text-center text-[10px] text-muted-foreground">
+                Code promo early adopter : <span className="font-mono font-semibold">SWISSBROKER20</span>
+              </p>
+            </div>
+          ))}
+        </div>
+
+        <div className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
+          Facturation en CHF · Piliarys · Annulation à tout moment · Support inclus
+        </div>
+      </div>
+    </div>
   );
 }
 
