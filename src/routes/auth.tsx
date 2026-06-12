@@ -249,7 +249,7 @@ function SignupForm({ plan, stripeEmail }: { plan: string; stripeEmail: string }
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="email">{t("auth.field.email_pro")}</Label>
-        <Input id="email" type="email" autoComplete="email" {...form.register("email")} readOnly={!!stripeEmail} className={stripeEmail ? "bg-muted/50 cursor-not-allowed text-foreground" : ""} />
+        <Input id="email" type="email" autoComplete="email" {...form.register("email")}  />
         {stripeEmail && (
           <p className="text-[11px] text-muted-foreground">
             ⚠️ Utilisez obligatoirement l'email avec lequel vous avez payé. Si vous vous connectez via Google, assurez-vous que c'est le même email.
