@@ -364,7 +364,7 @@ function PricingModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between border-b border-border p-6">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Choisissez votre plan</h2>
-            <p className="mt-1 text-sm text-muted-foreground">3 jours d'essai gratuits sur Pro et Cabinet · Carte bancaire requise · Aucun débit avant J+3</p>
+            <p className="mt-1 text-sm text-muted-foreground">3 jours d'essai gratuits sur le plan Pro · Annulez à tout moment</p>
           </div>
           <button onClick={onClose} className="rounded-full p-2 hover:bg-muted">
             <X className="h-5 w-5" />
@@ -449,21 +449,18 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                     : "border border-border bg-background hover:bg-muted"
                 }`}
               >
-                {plan.trial ? "Démarrer mon essai gratuit" : "Commencer avec Starter"}
+                {plan.name === "Pro" ? "Démarrer mon essai gratuit" : `Commencer avec ${plan.name}`}
               </Link>
               <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                {plan.trial
-                  ? "Carte requise · aucun débit avant J+3 · annulation libre"
-                  : "Accès immédiat · carte bancaire requise"}
+                {plan.name === "Pro" ? "Aucun débit avant J+3" : "Accès immédiat"}
               </p>
             </div>
           ))}
         </div>
 
         <div className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
-          Facturation en CHF · Piliarys · Annulation à tout moment · Support inclus
-          <br />
-          <span className="text-[10px]">Les 10 premiers abonnés bénéficient de −20% la première année avec le code <span className="font-mono font-semibold">SWISSBROKER20</span></span>
+          <p className="font-medium text-foreground">Les 10 premiers abonnés bénéficient de −20% la première année (offre mensuelle) · Code : <span className="font-mono font-semibold text-primary">SWISSBROKER20</span></p>
+          <p className="mt-1">Facturation en CHF · Piliarys · Annulation à tout moment · Support inclus</p>
         </div>
       </div>
     </div>
