@@ -108,7 +108,7 @@ function AuthPage() {
             <div className="h-px flex-1 bg-border" />
           </div>
 
-          {mode === "signup" ? <SignupForm plan={selectedPlan} stripeEmail={stripeEmail} /> : <SigninForm />}
+          {mode === "signup" ? <SignupForm plan={selectedPlan} stripeEmail={stripeEmail} sessionId={sessionId} /> : <SigninForm />}
 
           <div className="mt-6 text-center text-sm text-muted-foreground">
             {mode === "signup" ? (
@@ -179,7 +179,7 @@ function GoogleButton() {
   );
 }
 
-function SignupForm({ plan, stripeEmail }: { plan: string; stripeEmail: string }) {
+function SignupForm({ plan, stripeEmail, sessionId }: { plan: string; stripeEmail: string; sessionId?: string }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
