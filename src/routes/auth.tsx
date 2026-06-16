@@ -55,6 +55,8 @@ function AuthPage() {
   const selectedPlan = search.plan ?? "pro";
 
   useEffect(() => {
+    // Ne pas rediriger si on est sur la page de confirmation (flux post-email)
+    if (window.location.pathname.startsWith("/auth/confirm")) return;
     if (!isLoading && isAuthenticated) {
       navigate({ to: "/dashboard" });
     }
