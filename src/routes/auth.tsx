@@ -4,7 +4,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Mail, AlertCircle } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -45,101 +45,123 @@ const signinSchema = z.object({
 type SignupValues = z.infer<typeof signupSchema>;
 type SigninValues = z.infer<typeof signinSchema>;
 
+const PRICE_IDS: Record<string, string> = {
+  starter: import.meta.env.VITE_STRIPE_STARTER_MONTHLY ?? "",
+  pro: import.meta.env.VITE_STRIPE_PRO_MONTHLY ?? "",
+  cabinet: import.meta.env.VITE_STRIPE_CABINET_MONTHLY ?? "",
+};
+
 function AuthPage() {
   const t = useT();
   const search = Route.useSearch();
   const navigate = useNavigate();
   const { isAuthenticated, isLoading } = useAuth();
   const [mode, setMode] = useState<"signin" | "signup">(search.mode ?? "signin");
-  const [emailSent, setEmailSent] = useState<string | null>(null);
   const selectedPlan = search.plan ?? "pro";
 
+  const [otpState, setOtpState] = useState<{ email: string; plan: string } | null>(null);
+  const [otpToken, setOtpToken] = useState("");
+  const [otpLoading, setOtpLoading] = useState(false);
+  const [otpError, setOtpError] = useState<string | null>(null);
+
   useEffect(() => {
-    // Ne pas rediriger si on est sur la page de confirmation (flux post-email)
-    if (window.location.pathname.startsWith("/auth/confirm")) return;
+    if (otpState) return;
     if (!isLoading && isAuthenticated) {
       navigate({ to: "/dashboard" });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [isAuthenticated, isLoading, navigate, otpState]);
 
-  // Page confirmation email envoyé
-  if (emailSent) {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otpState) return;
+    setOtpLoading(true);
+    setOtpError(null);
+
+    const { data, error: otpError } = await supabase.auth.verifyOtp({
+      email: otpState.email,
+      token: otpToken,
+      type: "signup",
+    });
+
+    if (otpError || !data.session) {
+      setOtpLoading(false);
+      setOtpError("Code incorrect ou expiré. Vérifiez le code reçu par email.");
+      return;
+    }
+
+    const priceId = PRICE_IDS[otpState.plan];
+    if (!priceId) {
+      navigate({ to: "/dashboard" });
+      return;
+    }
+
+    try {
+      const { data: stripeData, error: fnError } = await supabase.functions.invoke("stripe-checkout", {
+        body: {
+          priceId,
+          brokerId: data.session.user.id,
+          brokerEmail: data.session.user.email,
+          plan: otpState.plan,
+        },
+      });
+      if (fnError || !stripeData?.url) throw new Error("Erreur Stripe");
+      window.location.href = stripeData.url;
+    } catch {
+      setOtpError("Erreur lors de la redirection vers le paiement. Contactez le support.");
+      setOtpLoading(false);
+    }
+  };
+
+  if (otpState) {
     return (
-      <div className="relative min-h-screen overflow-hidden bg-hero">
+      <div className="relative min-h-screen overflow-hidden bg-hero flex items-center justify-center px-4">
         <div className="absolute inset-0 grid-bg opacity-40" aria-hidden />
-        <div className="relative mx-auto flex min-h-screen max-w-lg flex-col items-center justify-center px-4 py-8">
-          <div className="w-full rounded-2xl border border-border bg-card p-8 shadow-elegant">
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
-                <Mail className="h-8 w-8 text-success" />
-              </div>
-              <h1 className="text-2xl font-bold tracking-tight">Vérifiez vos emails</h1>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Un email de confirmation a été envoyé à
-              </p>
-              <p className="mt-1 font-medium text-foreground">{emailSent}</p>
-              <p className="mt-3 text-sm text-muted-foreground">
-                Cliquez sur le lien dans cet email pour continuer vers le paiement et activer votre accès SwissBroker Pro.
-              </p>
+        <div className="relative w-full max-w-md rounded-2xl border border-border bg-card p-8 shadow-elegant">
+          <div className="text-center mb-6">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <span className="text-3xl">📧</span>
+            </div>
+            <h1 className="text-2xl font-bold tracking-tight">Vérifiez vos emails</h1>
+            <p className="mt-2 text-sm text-muted-foreground">Un code à 6 chiffres a été envoyé à</p>
+            <p className="font-medium text-foreground">{otpState.email}</p>
+          </div>
+
+          <form onSubmit={handleOtpSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="otp">Code de confirmation</Label>
+              <Input
+                id="otp"
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={otpToken}
+                onChange={(e) => setOtpToken(e.target.value.replace(/\D/g, ""))}
+                placeholder="123456"
+                className="text-center text-2xl tracking-widest font-bold"
+                autoFocus
+                required
+              />
             </div>
 
-            <div className="mt-6 space-y-3">
-              <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Vous ne trouvez pas l'email ?
-              </p>
+            {otpError && <p className="text-sm text-destructive text-center">{otpError}</p>}
 
-              <div className="rounded-lg border border-border bg-muted/40 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg">📮</span>
-                  <div>
-                    <p className="text-sm font-medium">Outlook, Hotmail ou Live</p>
-                    <p className="text-xs text-muted-foreground">
-                      Vérifiez le dossier <strong>Courrier indésirable</strong>. Cliquez sur l'email puis sur <strong>"Pas indésirable"</strong>.
-                    </p>
-                  </div>
-                </div>
-              </div>
+            <Button type="submit" className="h-11 w-full shadow-elegant" disabled={otpLoading || otpToken.length !== 6}>
+              {otpLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Confirmer et accéder au paiement
+            </Button>
+          </form>
 
-              <div className="rounded-lg border border-border bg-muted/40 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg">📱</span>
-                  <div>
-                    <p className="text-sm font-medium">Application Mail iPhone ou iPad</p>
-                    <p className="text-xs text-muted-foreground">
-                      Vérifiez le dossier <strong>Indésirables</strong>. Si absent, connectez-vous directement sur <strong>outlook.com</strong> ou <strong>gmail.com</strong> depuis un navigateur.
-                    </p>
-                  </div>
-                </div>
-              </div>
+          <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-center">
+            <p className="text-xs text-muted-foreground">
+              Vérifiez vos <strong>courriers indésirables</strong> si vous ne trouvez pas l'email.<br />
+              Expéditeur : <strong>noreply@swissbrokerpro.ch</strong>
+            </p>
+          </div>
 
-              <div className="rounded-lg border border-border bg-muted/40 p-4">
-                <div className="flex items-start gap-3">
-                  <span className="text-lg">✉️</span>
-                  <div>
-                    <p className="text-sm font-medium">Gmail</p>
-                    <p className="text-xs text-muted-foreground">
-                      Vérifiez l'onglet <strong>Promotions</strong> ou le dossier <strong>Spam</strong>.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-lg bg-primary/5 border border-primary/20 p-3 text-center">
-              <p className="text-xs text-muted-foreground">
-                Ajoutez <strong>noreply@swissbrokerpro.ch</strong> à vos contacts pour ne plus manquer nos emails.
-              </p>
-            </div>
-
-            <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => setEmailSent(null)}
-                className="text-sm text-muted-foreground hover:text-foreground underline"
-              >
-                Retour
-              </button>
-            </div>
+          <div className="mt-4 text-center">
+            <button type="button" onClick={() => setOtpState(null)} className="text-xs text-muted-foreground hover:text-foreground underline">
+              Retour
+            </button>
           </div>
         </div>
       </div>
@@ -151,10 +173,7 @@ function AuthPage() {
       <div className="absolute inset-0 grid-bg opacity-40" aria-hidden />
       <div className="relative mx-auto flex min-h-screen max-w-md flex-col px-4 py-8">
         <div className="flex items-center justify-between">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 self-start text-sm text-muted-foreground transition-colors hover:text-foreground"
-          >
+          <Link to="/" className="inline-flex items-center gap-1.5 self-start text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="h-4 w-4" /> {t("auth.back_home")}
           </Link>
           <PublicLanguageSwitcher />
@@ -174,14 +193,12 @@ function AuthPage() {
 
           <div className="my-6 flex items-center gap-3">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-xs uppercase tracking-wider text-muted-foreground">
-              {t("auth.divider.or")}
-            </span>
+            <span className="text-xs uppercase tracking-wider text-muted-foreground">{t("auth.divider.or")}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
           {mode === "signup" ? (
-            <SignupForm plan={selectedPlan} onEmailSent={setEmailSent} />
+            <SignupForm plan={selectedPlan} onOtpRequired={setOtpState} />
           ) : (
             <SigninForm />
           )}
@@ -190,22 +207,14 @@ function AuthPage() {
             {mode === "signup" ? (
               <>
                 {t("auth.toggle.have_account")}{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("signin")}
-                  className="font-medium text-primary hover:underline"
-                >
+                <button type="button" onClick={() => setMode("signin")} className="font-medium text-primary hover:underline">
                   {t("auth.toggle.signin")}
                 </button>
               </>
             ) : (
               <>
                 {t("auth.toggle.no_account")}{" "}
-                <button
-                  type="button"
-                  onClick={() => setMode("signup")}
-                  className="font-medium text-primary hover:underline"
-                >
+                <button type="button" onClick={() => setMode("signup")} className="font-medium text-primary hover:underline">
                   {t("auth.toggle.signup")}
                 </button>
               </>
@@ -217,7 +226,7 @@ function AuthPage() {
   );
 }
 
-function SignupForm({ plan, onEmailSent }: { plan: string; onEmailSent: (email: string) => void }) {
+function SignupForm({ plan, onOtpRequired }: { plan: string; onOtpRequired: (state: { email: string; plan: string }) => void }) {
   const t = useT();
   const [loading, setLoading] = useState(false);
   const form = useForm<SignupValues>({
@@ -227,21 +236,14 @@ function SignupForm({ plan, onEmailSent }: { plan: string; onEmailSent: (email: 
 
   const onSubmit = async (values: SignupValues) => {
     setLoading(true);
-
-    // emailRedirectTo pointe vers la page de checkout Stripe
-    const redirectTo = `${window.location.origin}/auth/confirm?plan=${plan}&email=${encodeURIComponent(values.email)}`;
-
     const { error } = await supabase.auth.signUp({
       email: values.email,
       password: values.password,
       options: {
-        emailRedirectTo: redirectTo,
         data: { first_name: values.firstName, last_name: values.lastName },
       },
     });
-
     setLoading(false);
-
     if (error) {
       if (error.message.toLowerCase().includes("already")) {
         toast.error(t("auth.error.account_exists"));
@@ -250,9 +252,7 @@ function SignupForm({ plan, onEmailSent }: { plan: string; onEmailSent: (email: 
       }
       return;
     }
-
-    // Redirige vers la page de saisie du code OTP
-    window.location.href = `/auth/confirm?plan=${plan}&email=${encodeURIComponent(values.email)}`;
+    onOtpRequired({ email: values.email, plan });
   };
 
   return (
@@ -279,12 +279,7 @@ function SignupForm({ plan, onEmailSent }: { plan: string; onEmailSent: (email: 
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">{t("auth.field.password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="new-password"
-          {...form.register("password")}
-        />
+        <Input id="password" type="password" autoComplete="new-password" {...form.register("password")} />
         {form.formState.errors.password && (
           <p className="text-xs text-destructive">{t(form.formState.errors.password.message ?? "")}</p>
         )}
@@ -325,21 +320,10 @@ function SigninForm() {
       <div className="space-y-1.5">
         <Label htmlFor="email">{t("auth.field.email")}</Label>
         <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
-        {form.formState.errors.email && (
-          <p className="text-xs text-destructive">{t(form.formState.errors.email.message ?? "")}</p>
-        )}
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="password">{t("auth.field.password")}</Label>
-        <Input
-          id="password"
-          type="password"
-          autoComplete="current-password"
-          {...form.register("password")}
-        />
-        {form.formState.errors.password && (
-          <p className="text-xs text-destructive">{t(form.formState.errors.password.message ?? "")}</p>
-        )}
+        <Input id="password" type="password" autoComplete="current-password" {...form.register("password")} />
       </div>
       <Button type="submit" className="h-11 w-full shadow-elegant" disabled={loading}>
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
