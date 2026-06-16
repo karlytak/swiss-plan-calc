@@ -14,6 +14,7 @@ import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as SharedTokenRouteImport } from './routes/shared.$token'
 import { Route as ClientUploadTokenRouteImport } from './routes/client-upload.$token'
+import { Route as AuthConfirmRouteImport } from './routes/auth/confirm'
 import { Route as AppWikiRouteImport } from './routes/_app/wiki'
 import { Route as AppHistoryRouteImport } from './routes/_app/history'
 import { Route as AppFeedbackRouteImport } from './routes/_app/feedback'
@@ -72,6 +73,11 @@ const ClientUploadTokenRoute = ClientUploadTokenRouteImport.update({
   id: '/client-upload/$token',
   path: '/client-upload/$token',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthConfirmRoute = AuthConfirmRouteImport.update({
+  id: '/confirm',
+  path: '/confirm',
+  getParentRoute: () => AuthRoute,
 } as any)
 const AppWikiRoute = AppWikiRouteImport.update({
   id: '/wiki',
@@ -256,7 +262,7 @@ const AppClientsClientIdEditRoute = AppClientsClientIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/account': typeof AppAccountRoute
   '/calculators': typeof AppCalculatorsRouteWithChildren
   '/companies': typeof AppCompaniesRouteWithChildren
@@ -264,6 +270,7 @@ export interface FileRoutesByFullPath {
   '/feedback': typeof AppFeedbackRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
@@ -296,12 +303,13 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/account': typeof AppAccountRoute
   '/dashboard': typeof AppDashboardRoute
   '/feedback': typeof AppFeedbackRoute
   '/history': typeof AppHistoryRoute
   '/wiki': typeof AppWikiRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
@@ -336,7 +344,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteWithChildren
   '/_app/account': typeof AppAccountRoute
   '/_app/calculators': typeof AppCalculatorsRouteWithChildren
   '/_app/companies': typeof AppCompaniesRouteWithChildren
@@ -344,6 +352,7 @@ export interface FileRoutesById {
   '/_app/feedback': typeof AppFeedbackRoute
   '/_app/history': typeof AppHistoryRoute
   '/_app/wiki': typeof AppWikiRoute
+  '/auth/confirm': typeof AuthConfirmRoute
   '/client-upload/$token': typeof ClientUploadTokenRoute
   '/shared/$token': typeof SharedTokenRoute
   '/_app/calculators/avs-ai': typeof AppCalculatorsAvsAiRoute
@@ -386,6 +395,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/history'
     | '/wiki'
+    | '/auth/confirm'
     | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
@@ -424,6 +434,7 @@ export interface FileRouteTypes {
     | '/feedback'
     | '/history'
     | '/wiki'
+    | '/auth/confirm'
     | '/client-upload/$token'
     | '/shared/$token'
     | '/calculators/avs-ai'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/_app/feedback'
     | '/_app/history'
     | '/_app/wiki'
+    | '/auth/confirm'
     | '/client-upload/$token'
     | '/shared/$token'
     | '/_app/calculators/avs-ai'
@@ -499,7 +511,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AppRoute: typeof AppRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  AuthRoute: typeof AuthRouteWithChildren
   ClientUploadTokenRoute: typeof ClientUploadTokenRoute
   SharedTokenRoute: typeof SharedTokenRoute
   ApiPublicClientUploadTokenRoute: typeof ApiPublicClientUploadTokenRoute
@@ -541,6 +553,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/client-upload/$token'
       preLoaderRoute: typeof ClientUploadTokenRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/auth/confirm': {
+      id: '/auth/confirm'
+      path: '/confirm'
+      fullPath: '/auth/confirm'
+      preLoaderRoute: typeof AuthConfirmRouteImport
+      parentRoute: typeof AuthRoute
     }
     '/_app/wiki': {
       id: '/_app/wiki'
@@ -879,10 +898,20 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AuthRouteChildren {
+  AuthConfirmRoute: typeof AuthConfirmRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthConfirmRoute: AuthConfirmRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AppRoute: AppRouteWithChildren,
-  AuthRoute: AuthRoute,
+  AuthRoute: AuthRouteWithChildren,
   ClientUploadTokenRoute: ClientUploadTokenRoute,
   SharedTokenRoute: SharedTokenRoute,
   ApiPublicClientUploadTokenRoute: ApiPublicClientUploadTokenRoute,
