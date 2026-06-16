@@ -9,32 +9,32 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { priceId, plan, coupon } = await req.json();
+    const { priceId, brokerId, brokerEmail, plan, coupon } = await req.json();
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
-    const siteUrl = Deno.env.get("SITE_URL") ?? "https://swiss-plan-calc.vercel.app";
 
     if (!stripeKey) {
       throw new Error("STRIPE_SECRET_KEY manquante");
     }
+
+    const siteUrl = Deno.env.get("SITE_URL") ?? "https://swiss-plan-calc.vercel.app";
 
     const params: Record<string, string> = {
       "payment_method_types[0]": "card",
       "mode": "subscription",
       "line_items[0][price]": priceId,
       "line_items[0][quantity]": "1",
-      "success_url": `${siteUrl}/auth?mode=signup&plan=${plan}&session_id={CHECKOUT_SESSION_ID}`,
-      "cancel_url": `${siteUrl}/?pricing=1`,
-      "metadata[plan]": plan,
-      "payment_method_collection": "always",
+      "customer_email": brokerEmail,
+      "client_reference_id": brokerId ?? "",
+      // Après paiement → page de connexion (pas le dashboard)
+      "success_url": `${siteUrl}/auth?paiement=ok`,
+      "cancel_url": `${siteUrl}/`,
+      // Le plan est transmis au webhook pour activer le bon abonnement en base
+      "metadata[plan]": plan ?? "pro",
+      "metadata[broker_id]": brokerId ?? "",
+      "subscription_data[metadata][plan]": plan ?? "pro",
+      // Période d'essai 3 jours sur tous les plans
+      "subscription_data[trial_period_days]": "3",
     };
-
-    // Désactiver Apple Pay et Link — carte uniquement
-    params["payment_method_options[card][request_three_d_secure]"] = "automatic";
-
-    // Trial 3 jours sur Pro et Cabinet
-    if (plan === "pro" || plan === "cabinet") {
-      params["subscription_data[trial_period_days]"] = "3";
-    }
 
     if (coupon) {
       params["discounts[0][coupon]"] = coupon;
@@ -60,7 +60,6 @@ Deno.serve(async (req) => {
     return new Response(JSON.stringify({ url: session.url }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-
   } catch (err) {
     return new Response(JSON.stringify({ error: String(err) }), {
       status: 500,

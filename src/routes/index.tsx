@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,7 +38,7 @@ function Landing() {
       <Features />
       <Modules />
       <Optimization />
-      <CTASection />
+      <CTASection onPricingOpen={() => setPricingOpen(true)} />
       <Footer />
     </div>
   );
@@ -73,17 +73,17 @@ function Header({ onPricingOpen }: { onPricingOpen: () => void }) {
         </nav>
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
           <PublicLanguageSwitcher />
+          {/* Se connecter = page connexion uniquement */}
           <Link to="/auth">
             <Button variant="ghost" size="sm" className="px-2 sm:px-3">
               {t("landing.cta.signin")}
             </Button>
           </Link>
-          <Link to="/auth" search={{ mode: "signup" }}>
-            <Button size="sm" className="shadow-elegant">
-              <span className="hidden sm:inline">{t("landing.cta.try")}</span>
-              <span className="sm:hidden">{t("landing.cta.try_short")}</span>
-            </Button>
-          </Link>
+          {/* Essayer = ouvre la modale tarifs pour choisir un plan */}
+          <Button size="sm" className="shadow-elegant" onClick={onPricingOpen}>
+            <span className="hidden sm:inline">{t("landing.cta.try")}</span>
+            <span className="sm:hidden">{t("landing.cta.try_short")}</span>
+          </Button>
         </div>
       </div>
     </header>
@@ -111,12 +111,11 @@ function Hero({ onPricingOpen }: { onPricingOpen: () => void }) {
             {t("landing.hero.subtitle")}
           </p>
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-            <Link to="/auth" search={{ mode: "signup" }}>
-              <Button size="lg" className="h-12 px-8 shadow-elegant">
-                Créer mon compte
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
+            {/* Créer mon compte = ouvre la modale tarifs */}
+            <Button size="lg" className="h-12 px-8 shadow-elegant" onClick={onPricingOpen}>
+              Créer mon compte
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
             <a href="#modules">
               <Button size="lg" variant="outline" className="h-12 px-8">
                 {t("landing.hero.cta.modules")}
@@ -271,7 +270,7 @@ function SuggestionCard({ title, amount, desc }: { title: string; amount: string
   );
 }
 
-function CTASection() {
+function CTASection({ onPricingOpen }: { onPricingOpen: () => void }) {
   const t = useT();
   return (
     <section className="border-t border-border/50 py-24">
@@ -283,12 +282,11 @@ function CTASection() {
               {t("landing.cta.title")}
             </h2>
             <p className="mx-auto mt-4 max-w-xl text-primary-foreground/90">Rejoignez les premiers courtiers suisses romands à optimiser leurs rendez-vous clients avec SwissBroker Pro.</p>
-            <Link to="/auth" search={{ mode: "signup" }} className="mt-8 inline-block">
-              <Button size="lg" variant="secondary" className="h-12 px-8 text-foreground shadow-card">
-                {t("landing.cta.button")}
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Button>
-            </Link>
+            {/* Créer mon compte courtier = ouvre la modale tarifs */}
+            <Button size="lg" variant="secondary" className="mt-8 h-12 px-8 text-foreground shadow-card" onClick={onPricingOpen}>
+              {t("landing.cta.button")}
+              <ArrowRight className="ml-1 h-4 w-4" />
+            </Button>
           </div>
         </div>
       </div>
@@ -296,43 +294,22 @@ function CTASection() {
   );
 }
 
-const PRICE_IDS: Record<string, string> = {
-  starter: import.meta.env.VITE_STRIPE_STARTER_MONTHLY ?? "",
-  pro: import.meta.env.VITE_STRIPE_PRO_MONTHLY ?? "",
-  cabinet: import.meta.env.VITE_STRIPE_CABINET_MONTHLY ?? "",
-};
-
-function CheckoutButton({ plan, highlight }: { plan: string; highlight: boolean }) {
-  const [loading, setLoading] = useState(false);
-
-  const handleCheckout = async () => {
-    setLoading(true);
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const priceId = PRICE_IDS[plan];
-      if (!priceId) throw new Error("Prix introuvable");
-      const { data, error } = await supabase.functions.invoke("stripe-checkout", {
-        body: { priceId, plan },
-      });
-      if (error || !data?.url) throw new Error("Erreur Stripe");
-      window.location.href = data.url;
-    } catch {
-      setLoading(false);
-    }
+function PlanButton({ plan, highlight }: { plan: string; highlight: boolean }) {
+  const navigate = useNavigate();
+  // Tous les boutons de plan mènent à l'inscription avec le plan présélectionné
+  const handleClick = () => {
+    navigate({ to: "/auth", search: { mode: "signup", plan: plan as "starter" | "pro" | "cabinet" } });
   };
-
   return (
     <button
       type="button"
-      onClick={handleCheckout}
-      disabled={loading}
+      onClick={handleClick}
       className={`flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all ${
         highlight
           ? "bg-primary text-primary-foreground shadow-elegant hover:bg-primary/90"
           : "border border-border bg-background hover:bg-muted"
       }`}
     >
-      {loading && <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-current border-t-transparent" />}
       {plan === "pro" ? "Démarrer mon essai gratuit" : `Commencer avec ${plan.charAt(0).toUpperCase() + plan.slice(1)}`}
     </button>
   );
@@ -347,7 +324,6 @@ function PricingModal({ onClose }: { onClose: () => void }) {
       priceYear: "5'292",
       desc: "Idéal pour le courtier indépendant",
       highlight: false,
-      trial: false,
       features: [
         "10 dossiers clients",
         "2 sociétés",
@@ -363,7 +339,6 @@ function PricingModal({ onClose }: { onClose: () => void }) {
       priceYear: "8'532",
       desc: "Pour le courtier actif en croissance",
       highlight: true,
-      trial: true,
       features: [
         "20 dossiers clients",
         "4 sociétés",
@@ -380,7 +355,6 @@ function PricingModal({ onClose }: { onClose: () => void }) {
       priceYear: "13'932",
       desc: "Pour les cabinets multi-collaborateurs",
       highlight: false,
-      trial: true,
       features: [
         "Clients illimités",
         "Sociétés illimitées",
@@ -402,18 +376,16 @@ function PricingModal({ onClose }: { onClose: () => void }) {
         className="relative w-full max-w-5xl rounded-3xl border border-border bg-background shadow-2xl overflow-auto max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header modal */}
         <div className="flex items-center justify-between border-b border-border p-6">
           <div>
             <h2 className="text-2xl font-bold tracking-tight">Choisissez votre plan</h2>
-            <p className="mt-1 text-sm text-muted-foreground">3 jours d'essai gratuits sur le plan Pro · Annulez à tout moment</p>
+            <p className="mt-1 text-sm text-muted-foreground">3 jours d'essai gratuits sur tous les plans · Annulez à tout moment</p>
           </div>
           <button onClick={onClose} className="rounded-full p-2 hover:bg-muted">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Toggle mensuel/annuel */}
         <div className="flex justify-center pt-6">
           <div className="inline-flex items-center gap-3 rounded-full border border-border bg-muted/50 p-1">
             <button
@@ -431,7 +403,6 @@ function PricingModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {/* Plans */}
         <div className="grid grid-cols-1 gap-4 p-6 md:grid-cols-3">
           {plans.map((plan) => (
             <div
@@ -470,9 +441,7 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                   </div>
                 )}
               </div>
-              {plan.trial && (
-                <p className="mb-4 text-[11px] font-medium text-primary">✓ 3 jours d'essai gratuits inclus</p>
-              )}
+              <p className="mb-4 text-[11px] font-medium text-primary">✓ 3 jours d'essai gratuits inclus</p>
               <ul className="mb-6 space-y-2">
                 {plan.features.map((f) => (
                   <li key={f} className="flex items-center gap-2 text-sm">
@@ -481,9 +450,9 @@ function PricingModal({ onClose }: { onClose: () => void }) {
                   </li>
                 ))}
               </ul>
-              <CheckoutButton plan={plan.name.toLowerCase()} highlight={plan.highlight} />
+              <PlanButton plan={plan.name.toLowerCase()} highlight={plan.highlight} />
               <p className="mt-2 text-center text-[10px] text-muted-foreground">
-                {plan.name === "Pro" ? "Aucun débit avant J+3" : "Accès immédiat"}
+                Aucun débit avant J+3
               </p>
             </div>
           ))}
