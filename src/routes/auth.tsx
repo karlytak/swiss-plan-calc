@@ -151,11 +151,25 @@ function AuthPage() {
             </Button>
           </form>
 
-          <div className="mt-4 rounded-lg border border-border bg-muted/40 p-3 text-center">
-            <p className="text-xs text-muted-foreground">
-              Vérifiez vos <strong>courriers indésirables</strong> si vous ne trouvez pas l'email.<br />
-              Expéditeur : <strong>noreply@swissbrokerpro.ch</strong>
+          <div className="mt-4 space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center">
+              Vous ne trouvez pas l'email ?
             </p>
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">
+                <strong>Outlook, Hotmail, Live :</strong> vérifiez votre dossier <strong>Courrier indésirable</strong>.
+              </p>
+            </div>
+            <div className="rounded-lg border border-border bg-muted/40 p-3">
+              <p className="text-xs text-muted-foreground">
+                <strong>Sur téléphone :</strong> si l'email n'apparaît pas dans l'app Mail, ouvrez directement l'<strong>application Outlook</strong> ou connectez-vous sur <strong>outlook.com</strong> / <strong>gmail.com</strong> depuis un navigateur.
+              </p>
+            </div>
+            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <p className="text-xs text-muted-foreground">
+                Expéditeur : <strong>noreply@swissbrokerpro.ch</strong> — ajoutez cette adresse à vos contacts.
+              </p>
+            </div>
           </div>
 
           <div className="mt-4 text-center">
