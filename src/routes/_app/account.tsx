@@ -21,6 +21,7 @@ function AccountPage() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [plan, setPlan] = useState<string>("trial");
   const [profile, setProfile] = useState({
     first_name: "",
     last_name: "",
@@ -40,12 +41,13 @@ function AccountPage() {
       const { data, error } = await supabase
         .from("profiles")
         .select(
-          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note,logo_url",
+          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note,logo_url,plan",
         )
         .eq("id", user.id)
         .maybeSingle();
       if (error) toast.error(t("account.toast.load_error"));
       if (data) {
+        setPlan(data.plan ?? "trial");
         setProfile({
           first_name: data.first_name ?? "",
           last_name: data.last_name ?? "",
