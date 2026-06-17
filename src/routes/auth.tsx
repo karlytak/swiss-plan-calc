@@ -309,6 +309,8 @@ function SignupForm({ plan, onOtpRequired }: { plan: string; onOtpRequired: (sta
 function SigninForm() {
   const t = useT();
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
   const navigate = useNavigate();
   const form = useForm<SigninValues>({
     resolver: zodResolver(signinSchema),
@@ -329,6 +331,20 @@ function SigninForm() {
     navigate({ to: "/dashboard" });
   };
 
+  const onForgotPassword = async () => {
+    const email = form.getValues("email");
+    if (!email) {
+      toast.error("Saisissez votre email d'abord.");
+      return;
+    }
+    setResetLoading(true);
+    await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setResetLoading(false);
+    setResetSent(true);
+  };
+
   return (
     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1.5">
@@ -336,9 +352,25 @@ function SigninForm() {
         <Input id="email" type="email" autoComplete="email" {...form.register("email")} />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="password">{t("auth.field.password")}</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">{t("auth.field.password")}</Label>
+          <button
+            type="button"
+            onClick={onForgotPassword}
+            disabled={resetLoading}
+            className="text-xs text-primary hover:underline flex items-center gap-1"
+          >
+            {resetLoading && <Loader2 className="h-3 w-3 animate-spin" />}
+            Mot de passe oublié ?
+          </button>
+        </div>
         <Input id="password" type="password" autoComplete="current-password" {...form.register("password")} />
       </div>
+      {resetSent && (
+        <div className="rounded-lg bg-success/10 border border-success/20 p-3 text-center">
+          <p className="text-xs text-success font-medium">Email envoyé. Vérifiez votre boîte mail.</p>
+        </div>
+      )}
       <Button type="submit" className="h-11 w-full shadow-elegant" disabled={loading}>
         {loading && <Loader2 className="h-4 w-4 animate-spin" />}
         {t("auth.signin.submit")}
