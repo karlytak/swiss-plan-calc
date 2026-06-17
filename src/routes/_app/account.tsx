@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, User, Building2, CreditCard, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,12 +16,51 @@ export const Route = createFileRoute("/_app/account")({
   component: AccountPage,
 });
 
+const TABS = [
+  { id: "profil", label: "Profil", icon: User },
+  { id: "cabinet", label: "Mon cabinet", icon: Building2 },
+  { id: "abonnement", label: "Abonnement", icon: CreditCard },
+  { id: "pdf", label: "Rapports PDF", icon: FileText },
+] as const;
+
+type TabId = typeof TABS[number]["id"];
+
+const PLAN_CONFIG: Record<string, { label: string; color: string; features: string[] }> = {
+  trial: {
+    label: "Essai gratuit (3 jours)",
+    color: "bg-amber-100 text-amber-800 border-amber-200",
+    features: ["Accès complet Pro pendant 3 jours", "Carte bancaire enregistrée", "Aucun débit avant J+3"],
+  },
+  starter: {
+    label: "Starter — 490 CHF/mois",
+    color: "bg-blue-100 text-blue-800 border-blue-200",
+    features: ["10 clients max", "2 sociétés max", "Tous les calculateurs", "10 exports PDF/mois", "IA 10 conversations/jour"],
+  },
+  pro: {
+    label: "Pro — 790 CHF/mois",
+    color: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    features: ["20 clients max", "4 sociétés max", "Tous les calculateurs", "Exports PDF illimités", "IA illimitée", "Support prioritaire"],
+  },
+  cabinet: {
+    label: "Cabinet — 1'290 CHF/mois",
+    color: "bg-purple-100 text-purple-800 border-purple-200",
+    features: ["Clients illimités", "Sociétés illimitées", "Tous les calculateurs", "Exports PDF illimités", "IA illimitée", "Gestion multi-courtiers", "Support dédié"],
+  },
+  expired: {
+    label: "Abonnement expiré",
+    color: "bg-red-100 text-red-800 border-red-200",
+    features: ["Accès restreint — renouvelez votre abonnement pour retrouver l'accès complet"],
+  },
+};
+
 function AccountPage() {
   const t = useT();
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabId>("profil");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [plan, setPlan] = useState<string>("trial");
+  const [sendingReset, setSendingReset] = useState(false);
   const [profile, setProfile] = useState({
     first_name: "",
     last_name: "",
@@ -40,9 +79,7 @@ function AccountPage() {
     (async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select(
-          "first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note,logo_url,plan",
-        )
+        .select("first_name,last_name,brokerage_name,phone,default_canton,pdf_primary_color,pdf_accent_color,pdf_footer_note,logo_url,plan")
         .eq("id", user.id)
         .maybeSingle();
       if (error) toast.error(t("account.toast.load_error"));
@@ -64,24 +101,10 @@ function AccountPage() {
     })();
   }, [user, t]);
 
-  const onSave = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSave = async (fields: Partial<typeof profile>) => {
     if (!user) return;
     setSaving(true);
-    const { error } = await supabase
-      .from("profiles")
-      .update({
-        first_name: profile.first_name.trim() || null,
-        last_name: profile.last_name.trim() || null,
-        brokerage_name: profile.brokerage_name.trim() || null,
-        phone: profile.phone.trim() || null,
-        default_canton: profile.default_canton || null,
-        pdf_primary_color: profile.pdf_primary_color || "#0F4C81",
-        pdf_accent_color: profile.pdf_accent_color || "#3B82F6",
-        pdf_footer_note: profile.pdf_footer_note.trim() || null,
-        logo_url: profile.logo_url || null,
-      })
-      .eq("id", user.id);
+    const { error } = await supabase.from("profiles").update(fields).eq("id", user.id);
     setSaving(false);
     if (error) {
       toast.error(t("account.toast.save_error"));
@@ -90,28 +113,26 @@ function AccountPage() {
     toast.success(t("account.toast.save_success"));
   };
 
+  const onResetPassword = async () => {
+    if (!user?.email) return;
+    setSendingReset(true);
+    await supabase.auth.resetPasswordForEmail(user.email, {
+      redirectTo: `${window.location.origin}/auth`,
+    });
+    setSendingReset(false);
+    toast.success("Email de réinitialisation envoyé");
+  };
+
   const onUploadLogo = async (file: File) => {
     if (!user) return;
     const ALLOWED = ["image/png", "image/jpeg", "image/svg+xml"];
-    if (!ALLOWED.includes(file.type)) {
-      toast.error("Format non supporté (PNG, JPG ou SVG uniquement).");
-      return;
-    }
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("Logo trop lourd (max 2 Mo).");
-      return;
-    }
+    if (!ALLOWED.includes(file.type)) { toast.error("Format non supporté (PNG, JPG ou SVG uniquement)."); return; }
+    if (file.size > 2 * 1024 * 1024) { toast.error("Logo trop lourd (max 2 Mo)."); return; }
     setUploadingLogo(true);
     const ext = (file.name.split(".").pop() || "png").toLowerCase();
     const path = `${user.id}/logo.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from("broker-logos")
-      .upload(path, file, { upsert: true, contentType: file.type });
-    if (upErr) {
-      setUploadingLogo(false);
-      toast.error("Échec de l'upload du logo");
-      return;
-    }
+    const { error: upErr } = await supabase.storage.from("broker-logos").upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) { setUploadingLogo(false); toast.error("Échec de l'upload du logo"); return; }
     const { data: pub } = supabase.storage.from("broker-logos").getPublicUrl(path);
     const url = `${pub.publicUrl}?v=${Date.now()}`;
     await supabase.from("profiles").update({ logo_url: url }).eq("id", user.id);
@@ -126,6 +147,7 @@ function AccountPage() {
     setProfile((p) => ({ ...p, logo_url: "" }));
     toast.success("Logo retiré");
   };
+
   if (loading) {
     return (
       <div className="flex min-h-[40vh] items-center justify-center">
@@ -134,123 +156,189 @@ function AccountPage() {
     );
   }
 
+  const currentPlan = PLAN_CONFIG[plan] ?? PLAN_CONFIG["trial"];
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
-      <h1 className="text-3xl font-bold tracking-tight">{t("account.title")}</h1>
-      <p className="mt-1 text-sm text-muted-foreground">{t("account.subtitle")}</p>
+      <h1 className="text-3xl font-bold tracking-tight">Mon profil</h1>
+      <p className="mt-1 text-sm text-muted-foreground">Gérez vos informations, votre abonnement et vos préférences.</p>
 
-      <form
-        onSubmit={onSave}
-        className="mt-8 space-y-6 rounded-2xl border border-border bg-card p-6 shadow-card"
-      >
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="first_name"
-            label={t("form.first_name")}
-            value={profile.first_name}
-            onChange={(v) => setProfile((p) => ({ ...p, first_name: v }))}
-          />
-          <Field
-            id="last_name"
-            label={t("form.last_name")}
-            value={profile.last_name}
-            onChange={(v) => setProfile((p) => ({ ...p, last_name: v }))}
-          />
+      {/* Onglets horizontaux */}
+      <div className="mt-6 flex gap-1 rounded-xl border border-border bg-muted/40 p-1">
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const active = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all ${
+                active
+                  ? "bg-background text-foreground shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="hidden sm:inline">{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Contenu onglet Profil */}
+      {activeTab === "profil" && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card space-y-5">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor="first_name">{t("form.first_name")}</Label>
+              <Input id="first_name" value={profile.first_name} onChange={(e) => setProfile((p) => ({ ...p, first_name: e.target.value }))} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="last_name">{t("form.last_name")}</Label>
+              <Input id="last_name" value={profile.last_name} onChange={(e) => setProfile((p) => ({ ...p, last_name: e.target.value }))} />
+            </div>
+          </div>
+          <div className="space-y-1.5">
+            <Label>Email</Label>
+            <Input value={user?.email ?? ""} disabled className="bg-muted text-muted-foreground" />
+            <p className="text-xs text-muted-foreground">L'adresse email ne peut pas être modifiée.</p>
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="phone">{t("form.phone")}</Label>
+            <Input id="phone" value={profile.phone} onChange={(e) => setProfile((p) => ({ ...p, phone: e.target.value }))} />
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <button
+              type="button"
+              onClick={onResetPassword}
+              disabled={sendingReset}
+              className="text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              {sendingReset && <Loader2 className="h-3 w-3 animate-spin" />}
+              Réinitialiser mon mot de passe
+            </button>
+            <Button
+              onClick={() => onSave({ first_name: profile.first_name.trim() || null, last_name: profile.last_name.trim() || null, phone: profile.phone.trim() || null } as Parameters<typeof onSave>[0])}
+              disabled={saving}
+              className="shadow-elegant"
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer
+            </Button>
+          </div>
         </div>
-        <Field
-          id="brokerage_name"
-          label={t("account.brokerage_name")}
-          value={profile.brokerage_name}
-          onChange={(v) => setProfile((p) => ({ ...p, brokerage_name: v }))}
-        />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field
-            id="phone"
-            label={t("form.phone")}
-            value={profile.phone}
-            onChange={(v) => setProfile((p) => ({ ...p, phone: v }))}
-          />
+      )}
+
+      {/* Contenu onglet Mon cabinet */}
+      {activeTab === "cabinet" && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card space-y-5">
+          <div className="space-y-1.5">
+            <Label htmlFor="brokerage_name">{t("account.brokerage_name")}</Label>
+            <Input id="brokerage_name" value={profile.brokerage_name} onChange={(e) => setProfile((p) => ({ ...p, brokerage_name: e.target.value }))} />
+          </div>
           <div className="space-y-1.5">
             <Label htmlFor="canton">{t("account.default_canton")}</Label>
             <select
               id="canton"
               value={profile.default_canton}
-              onChange={(e) =>
-                setProfile((p) => ({ ...p, default_canton: e.target.value }))
-              }
+              onChange={(e) => setProfile((p) => ({ ...p, default_canton: e.target.value }))}
               className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
             >
               <option value="">{t("account.default_canton.none")}</option>
               {getSelectableCantons().map((c) => (
-                <option key={c.code} value={c.code}>
-                  {c.code} · {tCanton(c.code)}
-                </option>
+                <option key={c.code} value={c.code}>{c.code} · {tCanton(c.code)}</option>
               ))}
-              {profile.default_canton &&
-                !isSelectableCanton(profile.default_canton) && (
-                  <option value={profile.default_canton}>
-                    {profile.default_canton} ·{" "}
-                    {tCanton(profile.default_canton) ||
-                      CANTON_BY_CODE[profile.default_canton]?.name ||
-                      profile.default_canton}{" "}
-                    {t("account.default_canton.out_of_scope")}
-                  </option>
-                )}
+              {profile.default_canton && !isSelectableCanton(profile.default_canton) && (
+                <option value={profile.default_canton}>
+                  {profile.default_canton} · {tCanton(profile.default_canton) || CANTON_BY_CODE[profile.default_canton]?.name || profile.default_canton} {t("account.default_canton.out_of_scope")}
+                </option>
+              )}
             </select>
-            {profile.default_canton &&
-              !isSelectableCanton(profile.default_canton) && (
-                <p className="text-xs text-warning">
-                  {t("account.default_canton.warning")}
-                </p>
-              )}
+          </div>
+
+          {/* Logo */}
+          <div className="space-y-3 rounded-xl border border-dashed border-border bg-muted/30 p-4">
+            <div>
+              <h2 className="text-sm font-semibold">Logo du cabinet</h2>
+              <p className="text-xs text-muted-foreground">PNG, JPG ou SVG, 2 Mo max. Affiché en haut à gauche de chaque PDF.</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-border bg-white">
+                {profile.logo_url ? (
+                  <img src={profile.logo_url} alt="Logo cabinet" className="max-h-full max-w-full object-contain" />
+                ) : (
+                  <span className="text-[10px] text-muted-foreground">Aucun logo</span>
+                )}
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">
+                  {uploadingLogo && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {profile.logo_url ? "Remplacer le logo" : "Téléverser un logo"}
+                  <input type="file" accept="image/png,image/jpeg,image/svg+xml" className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) onUploadLogo(f); e.target.value = ""; }}
+                    disabled={uploadingLogo}
+                  />
+                </label>
+                {profile.logo_url && (
+                  <button type="button" onClick={onRemoveLogo} className="text-left text-xs text-destructive hover:underline">Retirer le logo</button>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              onClick={() => onSave({ brokerage_name: profile.brokerage_name.trim() || null, default_canton: profile.default_canton || null } as Parameters<typeof onSave>[0])}
+              disabled={saving}
+              className="shadow-elegant"
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer
+            </Button>
           </div>
         </div>
+      )}
 
-        {/* === Logo cabinet === */}
-        <div className="space-y-3 rounded-xl border border-dashed border-border bg-muted/30 p-4">
+      {/* Contenu onglet Abonnement */}
+      {activeTab === "abonnement" && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card space-y-5">
           <div>
-            <h2 className="text-sm font-semibold">Logo du cabinet</h2>
-            <p className="text-xs text-muted-foreground">PNG, JPG ou SVG, 2 Mo max. Affiché en haut à gauche de chaque PDF.</p>
+            <h2 className="text-base font-semibold mb-3">Plan actif</h2>
+            <span className={`inline-flex items-center rounded-full border px-4 py-1.5 text-sm font-semibold ${currentPlan.color}`}>
+              {currentPlan.label}
+            </span>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-md border border-border bg-white">
-              {profile.logo_url ? (
-                <img src={profile.logo_url} alt="Logo cabinet" className="max-h-full max-w-full object-contain" />
-              ) : (
-                <span className="text-[10px] text-muted-foreground">Aucun logo</span>
-              )}
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-1.5 text-xs font-medium hover:bg-accent">
-                {uploadingLogo && <Loader2 className="h-3 w-3 animate-spin" />}
-                {profile.logo_url ? "Remplacer le logo" : "Téléverser un logo"}
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/svg+xml"
-                  className="hidden"
-                  onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) onUploadLogo(f);
-                    e.target.value = "";
-                  }}
-                  disabled={uploadingLogo}
-                />
-              </label>
-              {profile.logo_url && (
-                <button
-                  type="button"
-                  onClick={onRemoveLogo}
-                  className="text-left text-xs text-destructive hover:underline"
-                >
-                  Retirer le logo
-                </button>
-              )}
-            </div>
+          <div>
+            <h3 className="text-sm font-medium mb-2 text-muted-foreground">Inclus dans votre plan</h3>
+            <ul className="space-y-2">
+              {currentPlan.features.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-sm">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
           </div>
+          {plan === "expired" && (
+            <div className="rounded-lg bg-destructive/10 border border-destructive/20 p-4">
+              <p className="text-sm text-destructive font-medium">Votre abonnement est expiré.</p>
+              <a href="/" className="mt-2 inline-block text-sm font-medium text-primary hover:underline">
+                Renouveler mon abonnement →
+              </a>
+            </div>
+          )}
+          {plan !== "expired" && (
+            <div className="rounded-lg bg-muted/40 border border-border p-4">
+              <p className="text-xs text-muted-foreground">Pour modifier votre plan, contactez le support à <strong>support@swissbrokerpro.ch</strong></p>
+            </div>
+          )}
         </div>
+      )}
 
-        {/* === Personnalisation des rapports PDF === */}
-        <div className="space-y-4 rounded-xl border border-dashed border-border bg-muted/30 p-4">
+      {/* Contenu onglet Rapports PDF */}
+      {activeTab === "pdf" && (
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-card space-y-5">
           <div>
             <h2 className="text-sm font-semibold">{t("account.pdf.title")}</h2>
             <p className="text-xs text-muted-foreground">{t("account.pdf.subtitle")}</p>
@@ -259,15 +347,11 @@ function AccountPage() {
             <div className="space-y-1.5">
               <Label htmlFor="pdf_primary_color">{t("account.pdf.primary_color")}</Label>
               <div className="flex items-center gap-2">
-                <input
-                  id="pdf_primary_color"
-                  type="color"
-                  value={profile.pdf_primary_color}
+                <input id="pdf_primary_color" type="color" value={profile.pdf_primary_color}
                   onChange={(e) => setProfile((p) => ({ ...p, pdf_primary_color: e.target.value }))}
                   className="h-9 w-14 cursor-pointer rounded border border-input bg-transparent"
                 />
-                <Input
-                  value={profile.pdf_primary_color}
+                <Input value={profile.pdf_primary_color}
                   onChange={(e) => setProfile((p) => ({ ...p, pdf_primary_color: e.target.value }))}
                   className="font-mono text-xs"
                 />
@@ -276,15 +360,11 @@ function AccountPage() {
             <div className="space-y-1.5">
               <Label htmlFor="pdf_accent_color">{t("account.pdf.accent_color")}</Label>
               <div className="flex items-center gap-2">
-                <input
-                  id="pdf_accent_color"
-                  type="color"
-                  value={profile.pdf_accent_color}
+                <input id="pdf_accent_color" type="color" value={profile.pdf_accent_color}
                   onChange={(e) => setProfile((p) => ({ ...p, pdf_accent_color: e.target.value }))}
                   className="h-9 w-14 cursor-pointer rounded border border-input bg-transparent"
                 />
-                <Input
-                  value={profile.pdf_accent_color}
+                <Input value={profile.pdf_accent_color}
                   onChange={(e) => setProfile((p) => ({ ...p, pdf_accent_color: e.target.value }))}
                   className="font-mono text-xs"
                 />
@@ -293,64 +373,37 @@ function AccountPage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="pdf_footer_note">{t("account.pdf.footer_note")}</Label>
-            <Input
-              id="pdf_footer_note"
-              value={profile.pdf_footer_note}
+            <Input id="pdf_footer_note" value={profile.pdf_footer_note}
               onChange={(e) => setProfile((p) => ({ ...p, pdf_footer_note: e.target.value }))}
               placeholder={t("account.pdf.footer_note.placeholder")}
             />
             <p className="text-xs text-muted-foreground">{t("account.pdf.footer_note.help")}</p>
           </div>
-
-          {/* Aperçu live du header PDF */}
           <div className="space-y-1.5">
             <Label>{t("account.pdf.preview")}</Label>
-            <div
-              className="overflow-hidden rounded-lg border border-border"
-              style={{ background: profile.pdf_primary_color }}
-            >
+            <div className="overflow-hidden rounded-lg border border-border" style={{ background: profile.pdf_primary_color }}>
               <div className="px-4 py-3 text-white">
                 <div className="text-sm font-bold">
                   {profile.brokerage_name || `${profile.first_name} ${profile.last_name}`.trim() || t("account.pdf.preview.cabinet_placeholder")}
                 </div>
                 <div className="text-[10px] opacity-90">
-                  {[
-                    `${profile.first_name} ${profile.last_name}`.trim(),
-                    user?.email,
-                    profile.phone,
-                  ].filter(Boolean).join(" · ")}
+                  {[`${profile.first_name} ${profile.last_name}`.trim(), user?.email, profile.phone].filter(Boolean).join(" · ")}
                 </div>
               </div>
             </div>
           </div>
+          <div className="flex justify-end">
+            <Button
+              onClick={() => onSave({ pdf_primary_color: profile.pdf_primary_color, pdf_accent_color: profile.pdf_accent_color, pdf_footer_note: profile.pdf_footer_note.trim() || null } as Parameters<typeof onSave>[0])}
+              disabled={saving}
+              className="shadow-elegant"
+            >
+              {saving && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enregistrer
+            </Button>
+          </div>
         </div>
-
-        <div className="flex justify-end">
-          <Button type="submit" disabled={saving} className="shadow-elegant">
-            {saving && <Loader2 className="h-4 w-4 animate-spin" />}
-            {t("account.save")}
-          </Button>
-        </div>
-      </form>
-    </div>
-  );
-}
-
-function Field({
-  id,
-  label,
-  value,
-  onChange,
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div className="space-y-1.5">
-      <Label htmlFor={id}>{label}</Label>
-      <Input id={id} value={value} onChange={(e) => onChange(e.target.value)} />
+      )}
     </div>
   );
 }
