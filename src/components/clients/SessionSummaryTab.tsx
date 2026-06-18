@@ -337,15 +337,22 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
             Facturer ce RDV
           </Button>
         )}
-        <Button
-          size="lg"
-          className="gap-2 shine"
-          onClick={() => setReportOpen(true)}
-          disabled={entries.length === 0}
-        >
-          <FileText className="h-4 w-4" />
-          {pdfUnlocked ? "📄 PDF débloqué — Générer la synthèse" : t("client.session.prepare_pdf_button", { name: clientName })}
-        </Button>
+        <div className="flex flex-col items-end gap-2">
+          {!pdfUnlocked && (
+            <p className="text-xs text-muted-foreground text-right">
+              Facturez ce RDV pour débloquer la génération de la synthèse PDF.
+            </p>
+          )}
+          <Button
+            size="lg"
+            className="gap-2 shine"
+            onClick={() => setReportOpen(true)}
+            disabled={entries.length === 0 || !pdfUnlocked}
+          >
+            <FileText className="h-4 w-4" />
+            {pdfUnlocked ? "📄 Générer la synthèse PDF" : "🔒 PDF verrouillé"}
+          </Button>
+        </div>
       </div>
 
       <SynthesisReportModal
