@@ -327,7 +327,7 @@ function PlanButton({ plan, highlight }: { plan: string; highlight: boolean }) {
 function PricingModal({ onClose }: { onClose: () => void }) {
   const plans = [
     { name: "Starter", price: "490", priceMonthEquiv: "441", priceYear: "5'292", desc: "Idéal pour le courtier indépendant", highlight: false,
-      features: ["10 dossiers clients", "2 sociétés", "Tous les calculateurs", "10 exports PDF par mois", "Assistant IA 10 conversations par jour"] },
+      features: ["10 dossiers clients", "2 sociétés", "Tous les calculateurs", "Export PDF illimité", "Assistant IA illimité"] },
     { name: "Pro", price: "790", priceMonthEquiv: "711", priceYear: "8'532", desc: "Pour le courtier actif en croissance", highlight: true,
       features: ["20 dossiers clients", "4 sociétés", "Tous les calculateurs", "Export PDF illimité", "Assistant IA illimité", "Support prioritaire"] },
     { name: "Cabinet", price: "1'290", priceMonthEquiv: "1'161", priceYear: "13'932", desc: "Pour les cabinets multi-collaborateurs", highlight: false,
@@ -382,7 +382,7 @@ function PricingModal({ onClose }: { onClose: () => void }) {
           ))}
         </div>
         <div className="border-t border-border px-6 py-4 text-center text-xs text-muted-foreground">
-          <p className="font-medium text-foreground">Les 10 premiers abonnés bénéficient de −20% la première année (offre mensuelle) · Code : <span className="font-mono font-semibold text-primary">SWISSBROKER20</span></p>
+
           <p className="mt-1">Facturation en CHF · Piliarys · Annulation à tout moment · Support inclus</p>
         </div>
       </motion.div>
