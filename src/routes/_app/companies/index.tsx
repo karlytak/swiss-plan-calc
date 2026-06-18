@@ -70,6 +70,8 @@ function CompaniesListPage() {
   const t = useT();
   const { user } = useAuth();
   const { canAddCompany, limits } = usePlan();
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
@@ -77,19 +79,22 @@ function CompaniesListPage() {
   const [formFilter, setFormFilter] = useState<LegalForm | "all">("all");
   const [pendingDelete, setPendingDelete] = useState<Company | null>(null);
 
-  const { data: companies = [], isLoading } = useQuery({
-    queryKey: ["companies", user?.id, filter],
+  const { data: allCompanies = [], isLoading } = useQuery({
+    queryKey: ["companies", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("companies")
         .select("*")
-        .eq("archived", filter === "archived")
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data as Company[];
     },
   });
+  const companies = allCompanies.filter(c => filter === "archived" ? c.archived : !c.archived);
+
+  // Nombre de sociétés créées ce mois-ci (pour la limite mensuelle, archives comprises)
+  const companiesCreatedThisMonth = allCompanies.filter(c => c.created_at >= startOfMonth).length;
 
   // Compteur dirigeants rattachés (par société)
   const { data: directorsCount = {} } = useQuery({
@@ -159,10 +164,10 @@ function CompaniesListPage() {
         <div className="flex flex-col items-end gap-1">
           <Button
             onClick={() => {
-              if (!canAddCompany(companies.length)) return;
+              if (!canAddCompany(companiesCreatedThisMonth)) return;
               navigate({ to: "/companies/new" });
             }}
-            disabled={!canAddCompany(companies.length)}
+            disabled={!canAddCompany(companiesCreatedThisMonth)}
             className="shadow-elegant"
           >
             <PlusCircle className="h-4 w-4" />
@@ -170,7 +175,7 @@ function CompaniesListPage() {
           </Button>
           {limits.maxCompanies !== null && (
             <span className="text-xs text-muted-foreground">
-              {companies.length} / {limits.maxCompanies} sociétés
+              {companiesCreatedThisMonth} / {limits.maxCompanies} créations ce mois
             </span>
           )}
         </div>
@@ -214,7 +219,7 @@ function CompaniesListPage() {
           <div className="p-12 text-center text-sm text-muted-foreground">{t("common.loading")}</div>
         ) : filtered.length === 0 ? (
           <EmptyState
-            onCreate={() => { if (canAddCompany(companies.length)) navigate({ to: "/companies/new" }); }}
+            onCreate={() => { if (canAddCompany(companiesCreatedThisMonth)) navigate({ to: "/companies/new" }); }}
             hasSearch={!!search || formFilter !== "all"}
           />
         ) : (

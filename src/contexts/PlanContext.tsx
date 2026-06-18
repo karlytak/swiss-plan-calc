@@ -77,6 +77,7 @@ export function PlanProvider({ children }: { children: ReactNode }) {
     limits,
     isLoading,
     isExpired: plan === "expired" || plan === "free",
+    // count = nombre de créations ce mois-ci uniquement
     canAddClient: (count) => limits.maxClients === null || count < limits.maxClients,
     canAddCompany: (count) => limits.maxCompanies === null || count < limits.maxCompanies,
   };

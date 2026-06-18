@@ -60,25 +60,28 @@ function ClientsListPage() {
   const t = useT();
   const { user } = useAuth();
   const { canAddClient, limits, plan } = usePlan();
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
   const navigate = useNavigate();
   const qc = useQueryClient();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"active" | "archived">("active");
   const [pendingDelete, setPendingDelete] = useState<Client | null>(null);
 
-  const { data: clients = [], isLoading } = useQuery({
-    queryKey: ["clients", user?.id, filter],
+  const { data: allClients = [], isLoading } = useQuery({
+    queryKey: ["clients", user?.id],
     enabled: !!user,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("clients")
         .select("*")
-        .eq("archived", filter === "archived")
         .order("updated_at", { ascending: false });
       if (error) throw error;
       return data as Client[];
     },
   });
+  const clients = allClients.filter(c => filter === "archived" ? c.archived : !c.archived);
+  const createdThisMonth = allClients.filter(c => c.created_at >= startOfMonth).length;
 
   const archive = useMutation({
     mutationFn: async ({ id, archived }: { id: string; archived: boolean }) => {
@@ -132,10 +135,10 @@ function ClientsListPage() {
         <div className="flex flex-col items-end gap-1">
           <Button
             onClick={() => {
-              if (!canAddClient(clients.filter(c => !c.archived).length)) return;
+              if (!canAddClient(createdThisMonth)) return;
               navigate({ to: "/clients/new" });
             }}
-            disabled={!canAddClient(clients.filter(c => !c.archived).length)}
+            disabled={!canAddClient(createdThisMonth)}
             className="shadow-elegant"
           >
             <PlusCircle className="h-4 w-4" />
@@ -143,7 +146,7 @@ function ClientsListPage() {
           </Button>
           {limits.maxClients !== null && (
             <span className="text-xs text-muted-foreground">
-              {clients.filter(c => !c.archived).length} / {limits.maxClients} clients
+              {createdThisMonth} / {limits.maxClients} créations ce mois
             </span>
           )}
         </div>
