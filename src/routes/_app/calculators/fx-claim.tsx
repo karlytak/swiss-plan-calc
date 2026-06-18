@@ -158,7 +158,7 @@ function FxClaimCalc() {
       <div className="md:col-span-3 space-y-4">
         <CalcCard
           title="Paramètres généraux"
-          description="Le taux AFC est appliqué uniformément ; le taux BNS/ECB reflète la valeur réelle à la date de versement."
+          description="Le fisc français applique un taux de change annuel moyen (taux AFC) pour convertir vos revenus CHF en euros. Si le taux réel du jour était plus favorable, vous avez peut-être trop déclaré."
         >
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="space-y-1.5">
@@ -197,7 +197,7 @@ function FxClaimCalc() {
                 Taux AFC retenu{" "}
                 {AFC_ANNUAL_RATES[taxYear]?.[currency] != null ? (
                   <span className="text-success">
-                   , officiel {taxYear} : {(AFC_ANNUAL_RATES[taxYear]![currency] ?? 0).toFixed(4)} CHF/{currency}
+                   , officiel {taxYear} : {(AFC_ANNUAL_RATES[taxYear]![currency] ?? 0).toFixed(4)} CHF/{currency} = {(1 / (AFC_ANNUAL_RATES[taxYear]![currency] ?? 1)).toFixed(4)} {currency}/CHF
                   </span>
                 ) : (
                   <span className="text-warning">
@@ -228,7 +228,7 @@ function FxClaimCalc() {
 
         <CalcCard
           title="Versements"
-          description="Listez chaque versement perçu en devise étrangère pendant l'année fiscale."
+          description="Saisissez vos versements en CHF (salaire suisse). Le calculateur compare le taux fiscal officiel au taux réel du jour de versement pour estimer un éventuel trop-payé d'impôt en France."
         >
           <div className="overflow-x-auto">
             <Table>
@@ -236,7 +236,7 @@ function FxClaimCalc() {
                 <TableRow>
                   <TableHead className="w-[130px]">Date</TableHead>
                   <TableHead>Libellé</TableHead>
-                  <TableHead className="w-[120px]">Montant {currency}</TableHead>
+                  <TableHead className="w-[120px]">Montant CHF</TableHead>
                   <TableHead className="w-[110px]">Taux BNS/ECB</TableHead>
                   <TableHead className="w-[120px] text-right">Écart en euros</TableHead>
                   <TableHead className="w-[40px]"></TableHead>
