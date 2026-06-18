@@ -42,15 +42,32 @@ export function PlanProvider({ children }: { children: ReactNode }) {
       setIsLoading(false);
       return;
     }
-    supabase
-      .from("profiles")
-      .select("plan")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data?.plan) setPlan(data.plan as BrokerPlan);
-        setIsLoading(false);
-      });
+    // Charge le plan depuis Supabase
+    const loadPlan = () => {
+      supabase
+        .from("profiles")
+        .select("plan")
+        .eq("id", user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data?.plan) setPlan(data.plan as BrokerPlan);
+          setIsLoading(false);
+        });
+    };
+    loadPlan();
+    // Recharge le plan en temps réel si la base change
+    const channel = supabase
+      .channel("plan-changes")
+      .on("postgres_changes", {
+        event: "UPDATE",
+        schema: "public",
+        table: "profiles",
+        filter: `id=eq.${user.id}`,
+      }, (payload) => {
+        if (payload.new?.plan) setPlan(payload.new.plan as BrokerPlan);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [user, isAuthenticated]);
 
   const limits = PLAN_LIMITS[plan] ?? PLAN_LIMITS.trial;
