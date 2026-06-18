@@ -10,6 +10,10 @@ Deno.serve(async (req) => {
 
   try {
     const { brokerId, clientId, amountChf, description, returnUrl } = await req.json();
+
+    if (!amountChf || amountChf < 80) {
+      throw new Error("Le montant minimum de facturation est de 80 CHF.");
+    }
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
