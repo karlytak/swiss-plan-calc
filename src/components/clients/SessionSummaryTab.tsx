@@ -75,8 +75,9 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
   };
 
   // Vérifier si le PDF est débloqué via une facture payée
-  const { data: pdfUnlocked = false } = useQuery({
+  const { data: pdfUnlocked = false, refetch: refetchPdf } = useQuery({
     queryKey: ["pdf-unlocked", clientId],
+    refetchInterval: 5000, // Recharge toutes les 5 secondes
     queryFn: async () => {
       const { data } = await supabase
         .from("rdv_invoices")
@@ -85,6 +86,21 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
         .eq("pdf_unlocked", true)
         .maybeSingle();
       return !!data;
+    },
+  });
+
+  // Charger aussi les factures en attente pour afficher le badge
+  const { data: pendingInvoice } = useQuery({
+    queryKey: ["pending-invoice", clientId],
+    refetchInterval: 5000,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from("rdv_invoices")
+        .select("id,amount_chf,status,stripe_payment_link,created_at")
+        .eq("client_id", clientId)
+        .order("created_at", { ascending: false })
+        .maybeSingle();
+      return data;
     },
   });
 
@@ -206,6 +222,38 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
           )}
         </CardContent>
       </Card>
+
+      {/* BLOC STATUT PAIEMENT */}
+      {pendingInvoice && !invoiceOpen && (
+        <div className={`rounded-xl border p-4 flex items-center justify-between ${
+          pendingInvoice.status === "paid"
+            ? "border-success/30 bg-success/5"
+            : "border-amber-200 bg-amber-50"
+        }`}>
+          <div>
+            {pendingInvoice.status === "paid" ? (
+              <p className="text-sm font-semibold text-success">✅ Paiement reçu — {(pendingInvoice.amount_chf / 100).toLocaleString("fr-CH", { minimumFractionDigits: 2 })} CHF</p>
+            ) : (
+              <p className="text-sm font-semibold text-amber-800">⏳ Paiement en attente — {(pendingInvoice.amount_chf / 100).toLocaleString("fr-CH", { minimumFractionDigits: 2 })} CHF</p>
+            )}
+            <p className="text-xs text-muted-foreground mt-0.5">{new Date(pendingInvoice.created_at).toLocaleDateString("fr-CH")}</p>
+          </div>
+          <div className="flex gap-2">
+            {pendingInvoice.status === "pending" && pendingInvoice.stripe_payment_link && (
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(pendingInvoice.stripe_payment_link!);
+                  toast.success("Lien copié — envoyez-le à votre client");
+                }}
+                className="rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-medium text-amber-800 hover:bg-amber-50"
+              >
+                Renvoyer le lien
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* BLOC 3 · Facturation RDV */}
       {invoiceOpen && (
