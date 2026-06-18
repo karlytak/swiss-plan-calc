@@ -212,7 +212,18 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
           {isLoading ? (
             <p className="text-sm text-muted-foreground">{t("history.loading")}</p>
           ) : entries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">{t("client.session.empty_state")}</p>
+            <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 space-y-2">
+              <p className="text-sm font-semibold text-amber-800">Aucune simulation enregistrée</p>
+              <p className="text-xs text-amber-700">
+                Pour générer la synthèse PDF de ce rendez-vous, vous devez d'abord sauvegarder au moins une simulation depuis un calculateur.
+              </p>
+              <ol className="text-xs text-amber-700 space-y-1 list-decimal list-inside">
+                <li>Lancez un calculateur depuis cette fiche client (bouton en haut de page)</li>
+                <li>Effectuez votre calcul</li>
+                <li>Cliquez sur "Sauvegarder la simulation" en bas du calculateur</li>
+                <li>Revenez sur cet onglet pour générer la synthèse PDF</li>
+              </ol>
+            </div>
           ) : (
             <ul className="space-y-3">
               {entries.map((e) => (
