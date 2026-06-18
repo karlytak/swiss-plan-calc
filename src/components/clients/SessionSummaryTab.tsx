@@ -63,7 +63,12 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
       setInvoiceLink(data.paymentLink);
       toast.success("Lien de paiement généré.");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Erreur génération lien");
+      const msg = e instanceof Error ? e.message : "Erreur génération lien";
+      if (msg.includes("Compte bancaire non configuré")) {
+        toast.error("Compte bancaire non connecté. Allez dans Mon profil → Abonnement pour connecter votre IBAN.");
+      } else {
+        toast.error(msg);
+      }
     } finally {
       setInvoiceLoading(false);
     }
