@@ -77,15 +77,15 @@ export function SessionSummaryTab({ clientId, clientName }: { clientId: string; 
   // Vérifier si le PDF est débloqué via une facture payée
   const { data: pdfUnlocked = false, refetch: refetchPdf } = useQuery({
     queryKey: ["pdf-unlocked", clientId],
-    refetchInterval: 5000, // Recharge toutes les 5 secondes
+    refetchInterval: 5000,
     queryFn: async () => {
       const { data } = await supabase
         .from("rdv_invoices")
         .select("pdf_unlocked")
         .eq("client_id", clientId)
         .eq("pdf_unlocked", true)
-        .maybeSingle();
-      return !!data;
+        .limit(1);
+      return !!(data && data.length > 0);
     },
   });
 
