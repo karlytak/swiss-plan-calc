@@ -238,13 +238,14 @@ function FxClaimCalc() {
                   <TableHead>Libellé</TableHead>
                   <TableHead className="w-[120px]">Montant {currency}</TableHead>
                   <TableHead className="w-[110px]">Taux BNS/ECB</TableHead>
-                  <TableHead className="w-[120px] text-right">Écart CHF</TableHead>
+                  <TableHead className="w-[120px] text-right">Écart en euros</TableHead>
                   <TableHead className="w-[40px]"></TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {rows.map((r, i) => {
-                  const delta = r.amount * (afcRate - r.marketRate);
+                  const deltaChf = r.amount * (afcRate - r.marketRate);
+                  const deltaEur = r.marketRate > 0 ? deltaChf / r.marketRate : 0;
                   return (
                     <TableRow key={i}>
                       <TableCell>
@@ -276,8 +277,8 @@ function FxClaimCalc() {
                           onChange={(e) => updateRow(i, { marketRate: Number(e.target.value) || 0 })}
                         />
                       </TableCell>
-                      <TableCell className={`text-right tabular-nums ${delta > 0 ? "text-success" : delta < 0 ? "text-warning" : ""}`}>
-                        {formatCHF(delta)}
+                      <TableCell className={`text-right tabular-nums ${deltaEur > 0 ? "text-success" : deltaEur < 0 ? "text-warning" : ""}`}>
+                        {deltaEur !== 0 ? deltaEur.toLocaleString("fr-CH", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €" : "—"}
                       </TableCell>
                       <TableCell>
                         <Button
