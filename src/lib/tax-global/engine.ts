@@ -388,6 +388,11 @@ export function computeTaxGlobal(g: TaxGlobalInput): TaxGlobalResult {
         "Part étrangère : estimation du résidu d'impôt français après crédit (à valider avec la déclaration FR effective).",
       );
     }
+    if (g.otherIncome > 0 && (det.regime === "cross_border_ge" || det.regime === "cross_border_other")) {
+      cbNotes.push(
+        "Autres revenus suisses (" + g.otherIncome.toLocaleString("fr-CH") + " CHF : dividendes, revenus locatifs suisses) : non soumis à la retenue source mensuelle. Feront l objet d une rectification IS en fin d année — un solde d impôt supplémentaire sera probablement dû.",
+      );
+    }
     return {
       regime: det.regime,
       regimeLabel: det.regimeLabel,
