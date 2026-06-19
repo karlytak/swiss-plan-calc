@@ -117,8 +117,8 @@ function InvestmentCompareCalc() {
 
   const guideSteps: GuideStep[] = [
     { title: t("calc.invcompare.step.welcome.t"), body: t("calc.invcompare.step.welcome.b") },
-    { title: t("calc.invcompare.step.params.t"), body: t("calc.invcompare.step.params.b") },
-    { title: t("calc.invcompare.step.results.t"), body: t("calc.invcompare.step.results.b") },
+    { target: "invcompare-return-rate", title: t("calc.invcompare.step.params.t"), body: t("calc.invcompare.step.params.b") },
+    { target: "invcompare-results", title: t("calc.invcompare.step.results.t"), body: t("calc.invcompare.step.results.b") },
   ];
 
   // Données graphique : merge des séries A et B sur l'année max.
@@ -212,7 +212,7 @@ function InvestmentCompareCalc() {
         )}
       </CalcCard>
 
-      <CalcCard title={t("calc.invcompare.chart_title")} description={t("calc.invcompare.chart_desc")}>
+      <CalcCard title={t("calc.invcompare.chart_title")} description={t("calc.invcompare.chart_desc")} data-guide="invcompare-results">
         <div className="h-72 w-full">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData} margin={{ top: 8, right: 16, left: 0, bottom: 8 }}>
@@ -367,13 +367,15 @@ function InvestmentCard({
               suffix="CHF"
             />
           )}
-          <NumField
-            label={t("calc.invcompare.field.return")}
-            value={value.grossReturnRate}
-            onChange={(v) => set("grossReturnRate", clampPct(v))}
-            suffix="%"
-            tip={t("calc.invcompare.tip.return")}
-          />
+          <div data-guide="invcompare-return-rate">
+            <NumField
+              label={t("calc.invcompare.field.return")}
+              value={value.grossReturnRate}
+              onChange={(v) => set("grossReturnRate", clampPct(v))}
+              suffix="%"
+              tip={t("calc.invcompare.tip.return")}
+            />
+          </div>
           <NumField
             label={t("calc.invcompare.field.fees")}
             value={value.annualFeeRate}
