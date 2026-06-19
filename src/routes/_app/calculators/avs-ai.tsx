@@ -203,9 +203,16 @@ function AvsAiCalc() {
   return (
     <div className="space-y-6">
       <CrossCalcImpactBanner calculator="avs-ai" clientId={clientId} />
-      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.avs.guide_title")} />
+        <GuideMode
+        open={guideOpen}
+        onClose={() => setGuideOpen(false)}
+        steps={guideSteps}
+        title={t("calc.avs.guide_title")}
+        guideId="calc-avs-ai"
+      />
       {client && <ClientLinkBanner client={client} />}
       <div className="flex justify-end gap-2">
+        <GuideToggleButton onClick={() => setGuideOpen(true)} />
       </div>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-5">
         <div className="space-y-4 md:col-span-3">

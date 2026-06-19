@@ -1,12 +1,16 @@
+// src/components/calculators/GuideMode.tsx
 // Mode "guide" : visite interactive d'un calculateur.
 // Affiche les explications essentielles dans l'ordre de saisie, en surlignant
 // chaque champ ciblé par un id (`data-guide="<id>"`).
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+// Si guideId est fourni : auto-ouverture à la première visite (persistée via
+// GuideContext/Supabase), puis réutilisable manuellement via GuideToggleButton.
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { Sparkles, ArrowRight, ArrowLeft, X, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useT } from "@/contexts/LanguageContext";
+import { useGuide } from "@/contexts/GuideContext";
 
 export type GuideStep = {
   /** Id ciblé via data-guide="..." sur l'élément à surligner. Optionnel pour intro/outro. */
@@ -37,37 +41,68 @@ export function GuideMode({
   onClose,
   steps,
   title,
+  guideId,
 }: {
   open: boolean;
   onClose: () => void;
   steps: GuideStep[];
   title?: string;
+  /** Identifiant unique pour la persistance "déjà vu" (ex: "calc-avs-ai"). Optionnel : sans lui, comportement 100% manuel comme avant. */
+  guideId?: string;
 }) {
   const t = useT();
   const effectiveTitle = title ?? t("common.guide_mode");
   const [i, setI] = useState(0);
   const step = steps[i];
 
+  // Persistance "déjà vu" : partagée avec le système Joyride via le même contexte.
+  const { hasSeenGuide, markGuideSeen, isLoading } = useGuide();
+
+  // État interne pour l'auto-ouverture à la première visite (distinct de `open`,
+  // qui reste piloté par le parent pour l'ouverture manuelle via le bouton Sparkles).
+  const [autoOpen, setAutoOpen] = useState(false);
+
   useEffect(() => {
-    if (!open) setI(0);
-  }, [open]);
+    if (!guideId || isLoading) return;
+    if (!hasSeenGuide(guideId)) {
+      const timer = setTimeout(() => setAutoOpen(true), 500);
+      return () => clearTimeout(timer);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [guideId, isLoading]);
+
+  // Le guide est visible si le parent l'ouvre manuellement OU si l'auto-ouverture s'est déclenchée.
+  const isOpen = open || autoOpen;
+
+  const handleClose = () => {
+    if (guideId && !hasSeenGuide(guideId)) {
+      markGuideSeen(guideId);
+    }
+    setAutoOpen(false);
+    onClose();
+  };
+
+  useEffect(() => {
+    if (!isOpen) setI(0);
+  }, [isOpen]);
 
   // Scroll + surlignage du champ ciblé
-  const rect = useTargetRect(open ? step?.target : undefined, [i, open]);
+  const rect = useTargetRect(isOpen ? step?.target : undefined, [i, isOpen]);
 
   // ESC pour fermer, flèches pour naviguer
   useEffect(() => {
-    if (!open) return;
+    if (!isOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") handleClose();
       if (e.key === "ArrowRight") setI((x) => Math.min(steps.length - 1, x + 1));
       if (e.key === "ArrowLeft") setI((x) => Math.max(0, x - 1));
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open, onClose, steps.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, steps.length]);
 
-  if (!open || typeof document === "undefined") return null;
+  if (!isOpen || typeof document === "undefined") return null;
 
   const isLast = i === steps.length - 1;
   const isFirst = i === 0;
@@ -77,7 +112,7 @@ export function GuideMode({
       {/* Overlay sombre + trou autour du champ ciblé */}
       <div
         className="fixed inset-0 z-[80] bg-foreground/40 backdrop-blur-[1px] transition-opacity"
-        onClick={onClose}
+        onClick={handleClose}
       />
       {rect && (
         <div
@@ -109,7 +144,7 @@ export function GuideMode({
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
             aria-label={t("common.close")}
           >
@@ -148,7 +183,7 @@ export function GuideMode({
             {t("common.previous")}
           </Button>
           {isLast ? (
-            <Button type="button" size="sm" onClick={onClose} className="gap-1">
+            <Button type="button" size="sm" onClick={handleClose} className="gap-1">
               {t("common.guide_finish")}
             </Button>
           ) : (
