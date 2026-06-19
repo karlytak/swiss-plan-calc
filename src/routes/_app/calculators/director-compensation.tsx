@@ -240,10 +240,10 @@ function DirectorCompensationCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: t("calc.dir.guide.s1.title"), body: t("calc.dir.guide.s1.body") },
-    { title: t("calc.dir.guide.s2.title"), body: t("calc.dir.guide.s2.body") },
-    { title: t("calc.dir.guide.s3.title"), body: t("calc.dir.guide.s3.body") },
-    { title: t("calc.dir.guide.s4.title"), body: t("calc.dir.guide.s4.body") },
-    { title: t("calc.dir.guide.s5.title"), body: t("calc.dir.guide.s5.body") },
+    { target: "dir-total-profit", title: t("calc.dir.guide.s2.title"), body: t("calc.dir.guide.s2.body") },
+    { target: "dir-strategies", title: t("calc.dir.guide.s3.title"), body: t("calc.dir.guide.s3.body") },
+    { target: "dir-reserve-target", title: t("calc.dir.guide.s4.title"), body: t("calc.dir.guide.s4.body") },
+    { target: "dir-compare", title: t("calc.dir.guide.s5.title"), body: t("calc.dir.guide.s5.body") },
   ];
 
   return (
@@ -263,22 +263,26 @@ function DirectorCompensationCalc() {
               description={t("calc.dir.card.inputs.desc")}
             >
               <div className="space-y-4">
-                <NumField
-                  label={t("calc.dir.field.profit")}
-                  value={inputs.totalProfit}
-                  onChange={(v) => setField("totalProfit", v)}
-                  hint={t("calc.dir.field.profit.hint")}
-                  wikiId="dirigeant"
-                  wikiTip={t("calc.dir.field.profit.tip")}
-                />
-                <NumField
-                  label={t("calc.dir.field.reserve")}
-                  value={inputs.reserveTarget ?? 0}
-                  onChange={(v) => setField("reserveTarget", v)}
-                  hint={t("calc.dir.field.reserve.hint")}
-                  wikiId="dirigeant"
-                  wikiTip={t("calc.dir.field.reserve.tip")}
-                />
+                <div data-guide="dir-total-profit">
+                  <NumField
+                    label={t("calc.dir.field.profit")}
+                    value={inputs.totalProfit}
+                    onChange={(v) => setField("totalProfit", v)}
+                    hint={t("calc.dir.field.profit.hint")}
+                    wikiId="dirigeant"
+                    wikiTip={t("calc.dir.field.profit.tip")}
+                  />
+                </div>
+                <div data-guide="dir-reserve-target">
+                  <NumField
+                    label={t("calc.dir.field.reserve")}
+                    value={inputs.reserveTarget ?? 0}
+                    onChange={(v) => setField("reserveTarget", v)}
+                    hint={t("calc.dir.field.reserve.hint")}
+                    wikiId="dirigeant"
+                    wikiTip={t("calc.dir.field.reserve.tip")}
+                  />
+                </div>
                 {(inputs.reserveTarget ?? 0) > 0 && (
                   <div className="rounded-lg border border-primary/30 bg-primary/5 p-3 text-xs">
                     <div className="flex justify-between"><span>{t("calc.dir.reserve.total_profit")}</span><strong className="tabular-nums">{formatCHF(inputs.totalProfit)}</strong></div>
@@ -393,9 +397,10 @@ function DirectorCompensationCalc() {
               </div>
             </CalcCard>
 
-            <CalcCard
+           <CalcCard
               title={t("calc.dir.card.custom.title")}
               description={t("calc.dir.card.custom.desc")}
+              data-guide="dir-strategies"
             >
               <CustomStrategySliders value={custom} onChange={setCustom} />
             </CalcCard>
@@ -446,9 +451,10 @@ function DirectorCompensationCalc() {
               clientName={linkedClient ? `${linkedClient.first_name} ${linkedClient.last_name}` : null}
             />
 
-            <CalcCard
+           <CalcCard
               title={t("calc.dir.card.compare.title")}
               description={t("calc.dir.card.compare.desc")}
+              data-guide="dir-compare"
             >
               <ComparisonTable
                 results={tableResults}
