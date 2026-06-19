@@ -284,9 +284,9 @@ useEffect(() => {
 }, [savings.taxSavings, pillar3bManuallyEdited]);
   const guideSteps: GuideStep[] = [
     { title: t("calc.p3a.step.welcome.t"), body: t("calc.p3a.step.welcome.b") },
-    { title: t("calc.p3a.step.cap.t"), body: t("calc.p3a.step.cap.b") },
-    { title: t("calc.p3a.step.assumptions.t"), body: t("calc.p3a.step.assumptions.b") },
-    { title: t("calc.p3a.step.p3b.t"), body: t("calc.p3a.step.p3b.b") },
+    { target: "p3a-contribution", title: t("calc.p3a.step.cap.t"), body: t("calc.p3a.step.cap.b") },
+    { target: "p3a-expected-return", title: t("calc.p3a.step.assumptions.t"), body: t("calc.p3a.step.assumptions.b") },
+    { target: "p3a-3b-yearly", title: t("calc.p3a.step.p3b.t"), body: t("calc.p3a.step.p3b.b") },
   ];
 
   return (
@@ -352,7 +352,9 @@ useEffect(() => {
 <div className="space-y-1">
   <NumField label={t("pension.gross_salary_annual")} value={form.grossSalary} onChange={(v) => set("grossSalary", v)} />
   <ClientPrefillBadge show={!!prefill?.grossSalary && form.grossSalary === prefill.grossSalary} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
-</div>              <NumField label={t("calc.p3a.field.contribution_max", { max })} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} wikiId="p3a-base" wikiTip={t("calc.p3a.tip.contribution_max")} />
+</div>              <div data-guide="p3a-contribution">
+                <NumField label={t("calc.p3a.field.contribution_max", { max })} value={form.contribution} onChange={(v) => set("contribution", Math.min(v, max))} wikiId="p3a-base" wikiTip={t("calc.p3a.tip.contribution_max")} />
+              </div>
             </div>
           </CalcCard>
         </div>
@@ -461,8 +463,9 @@ useEffect(() => {
   <NumField label={t("pension.years_to_retirement")} value={form.yearsToRetirement} onChange={(v) => set("yearsToRetirement", v)} />
   <ClientPrefillBadge show={!!prefill?.yearsToRetirement && form.yearsToRetirement === prefill.yearsToRetirement} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
 </div>
-            <NumField label={t("pension.expected_return")} value={form.expectedReturn} onChange={(v) => set("expectedReturn", v)} step={0.1} />
-          </div>
+<div data-guide="p3a-expected-return">
+              <NumField label={t("pension.expected_return")} value={form.expectedReturn} onChange={(v) => set("expectedReturn", v)} step={0.1} />
+            </div>          </div>
           {/* Résultat principal mis en avant */}
           <div className="mt-4 rounded-xl border-2 border-primary/40 bg-primary/5 p-4 text-center">
             <p className="text-xs font-semibold uppercase tracking-wider text-primary/60">{t("calc.p3a.final_balance")}</p>
@@ -497,8 +500,9 @@ useEffect(() => {
           <div className="space-y-3">
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <NumField label={t("calc.p3a.field.3b_current")} value={form.pillar3bCurrent} onChange={(v) => set("pillar3bCurrent", v)} />
-              <NumField label={t("calc.p3a.field.3b_yearly")} value={form.pillar3bYearly} onChange={(v) => { set("pillar3bYearly", v); setPillar3bManuallyEdited(true); }} />
-              <NumField label={t("calc.p3a.field.3b_years")} value={form.pillar3bYears} onChange={(v) => set("pillar3bYears", v)} />
+<div data-guide="p3a-3b-yearly">
+                <NumField label={t("calc.p3a.field.3b_yearly")} value={form.pillar3bYearly} onChange={(v) => { set("pillar3bYearly", v); setPillar3bManuallyEdited(true); }} />
+              </div>              <NumField label={t("calc.p3a.field.3b_years")} value={form.pillar3bYears} onChange={(v) => set("pillar3bYears", v)} />
               <NumField label={t("calc.p3a.field.3b_return")} value={form.pillar3bReturn} onChange={(v) => set("pillar3bReturn", v)} step={0.1} />
             </div>
             <p className="text-[11px] text-muted-foreground">{t("calc.p3a.p3b_help")}</p>
