@@ -112,10 +112,10 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
       reco,
     });
   const [guideOpen, setGuideOpen] = useState(false);
-  const guideSteps: GuideStep[] = [
+    const guideSteps: GuideStep[] = [
     { title: t("calc.retirement.guide.s1.title"), body: t("calc.retirement.guide.s1.body") },
-    { title: t("calc.retirement.guide.s2.title"), body: t("calc.retirement.guide.s2.body") },
-    { title: t("calc.retirement.guide.s3.title"), body: t("calc.retirement.guide.s3.body") },
+    { target: "retirement-conversion-rate", title: t("calc.retirement.guide.s2.title"), body: t("calc.retirement.guide.s2.body") },
+    { target: "retirement-lump-tax", title: t("calc.retirement.guide.s3.title"), body: t("calc.retirement.guide.s3.body") },
   ];
 
   return (
@@ -161,8 +161,9 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
                 </Select>
                 <ClientPrefillBadge show={!!prefill?.status && form.status === prefill.status} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
               </div>
-              <NumField label={t("calc.retirement.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.conversion_rate")} />
-              <NumField label={t("calc.retirement.field.life_years")} value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.life_years")} />
+<div data-guide="retirement-conversion-rate">
+                <NumField label={t("calc.retirement.field.conversion_rate")} value={form.conversionRate} onChange={(v) => set("conversionRate", v)} step={0.05} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.conversion_rate")} />
+              </div>              <NumField label={t("calc.retirement.field.life_years")} value={form.yearsAlive} onChange={(v) => set("yearsAlive", v)} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.life_years")} />
               <NumField label={t("calc.retirement.field.return_rate")} value={form.selfReturnRate} onChange={(v) => set("selfReturnRate", v)} step={0.1} wikiId="lpp-conversion" wikiTip={t("calc.retirement.tip.return_rate")} />
               <div className="space-y-1">
                 <NumField label={t("calc.retirement.field.marginal_rate")} value={form.rentMarginalRate} onChange={(v) => set("rentMarginalRate", v)} step={0.5} suffix="%" wikiId="lpp-conversion" wikiTip="Le taux marginal correspond à l'impôt prélevé sur chaque franc supplémentaire de revenu (ici, la rente LPP), en fonction de la situation fiscale globale du client. Estimé depuis sa situation actuelle, ajustez selon vos hypothèses pour la retraite." />
@@ -176,7 +177,7 @@ const projectedCapital = dashboard?.lpp?.projectedCapitalAt65;
           </CalcCard>
         </div>
         <div className="space-y-4 md:col-span-2">
-          <CalcCard title={t("calc.retirement.lump_tax.title")}>
+          <CalcCard title={t("calc.retirement.lump_tax.title")} data-guide="retirement-lump-tax">
             <Row>
               <MoneyTile label={t("calc.income_tax.tile.ifd")} value={lumpTax.ifd} tip={t("calc.income_tax.tip.ifd")} />
               <MoneyTile label={t("calc.income_tax.tile.cantonal")} value={lumpTax.cantonal} tip={t("calc.income_tax.tip.cantonal")} />
