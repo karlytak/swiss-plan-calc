@@ -28,7 +28,7 @@ import { Pillar3bInfoTile } from "@/components/optimizer/OptimizationsPanel";
 import { SaveSimulationButton } from "@/components/calculators/SaveSimulationButton";
 import { TaxGlobalExplanation } from "@/components/calculators/TaxGlobalExplanation";
 import { TaxGlobalCompareCard } from "@/components/calculators/TaxGlobalCompareCard";
-
+import { GuideMode, GuideToggleButton, type GuideStep } from "@/components/calculators/GuideMode";
 import { CANTONS } from "@/lib/swiss/cantons";
 import { formatCHF } from "@/lib/format";
 import { useT } from "@/contexts/LanguageContext";
@@ -137,10 +137,24 @@ function TaxGlobalCalc() {
   const isFrontalier = showFrontalierBlock;
   const isCouple = form.civilStatus === "married" || form.civilStatus === "registered_partnership";
   const isCohabiting = form.civilStatus === "cohabiting";
-
+  const [guideOpen, setGuideOpen] = useState(false);
+  const guideSteps: GuideStep[] = [
+    { title: t("calc.global.guide.s1.title"), body: t("calc.global.guide.s1.body") },
+    { target: "global-gross-salary", title: t("calc.global.guide.s2.title"), body: t("calc.global.guide.s2.body") },
+    { target: "global-other-income", title: t("calc.global.guide.s3.title"), body: t("calc.global.guide.s3.body") },
+    { target: "global-rental-income", title: t("calc.global.guide.s4.title"), body: t("calc.global.guide.s4.body") },
+    { target: "global-imputed-rent", title: t("calc.global.guide.s5.title"), body: t("calc.global.guide.s5.body") },
+    { target: "global-foreign-income", title: t("calc.global.guide.s6.title"), body: t("calc.global.guide.s6.body") },
+    { target: "global-net-wealth", title: t("calc.global.guide.s7.title"), body: t("calc.global.guide.s7.body") },
+    { target: "global-deductions", title: t("calc.global.guide.s8.title"), body: t("calc.global.guide.s8.body") },
+    { target: "global-frontalier-fx", title: t("calc.global.guide.s9.title"), body: t("calc.global.guide.s9.body") },
+    { target: "global-results", title: t("calc.global.guide.s10.title"), body: t("calc.global.guide.s10.body") },
+  ];
   return (
     <div className="space-y-6">
       <CrossCalcImpactBanner calculator="tax-global" clientId={clientId} />
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.global.guide.title")} guideId="calc-tax-global" />
+      <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
       {client && <ClientLinkBanner client={client} />}
 
       {/* Hero */}
@@ -323,13 +337,15 @@ function TaxGlobalCalc() {
                 <AccordionTrigger>{t("calc.global.section.income")}</AccordionTrigger>
                 <AccordionContent>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <NumField
-                      label={t("calc.global.field.gross_salary")}
-                      value={form.grossSalary}
-                      onChange={(v) => set("grossSalary", v)}
-                      suffix="CHF"
-                      tip="Salaire annuel brut figurant sur le certificat de salaire (case 1/8), avant déductions sociales (AVS, AI, AC, LPP)."
-                    />
+                     <div data-guide="global-gross-salary">
+                      <NumField
+                        label={t("calc.global.field.gross_salary")}
+                        value={form.grossSalary}
+                        onChange={(v) => set("grossSalary", v)}
+                        suffix="CHF"
+                        tip="Salaire annuel brut figurant sur le certificat de salaire (case 1/8), avant déductions sociales (AVS, AI, AC, LPP)."
+                      />
+                    </div>
                       <ClientPrefillBadge show={!!prefill?.grossSalary && form.grossSalary === prefill.grossSalary} clientName={client ? `${client.first_name} ${client.last_name}` : undefined} />
                     <NumField
                       label={t("calc.global.field.bonus")}
@@ -348,30 +364,38 @@ function TaxGlobalCalc() {
                         tip="Salaire brut annuel du conjoint. Cumulé au revenu du ménage en taxation ordinaire."
                       />
                     )}
-                    <NumField
-                      label={t("calc.global.field.other_income")}
-                      value={form.otherIncome}
-                      onChange={(v) => set("otherIncome", v)}
-                      suffix="CHF"
-                      tip="Revenus accessoires : jetons de présence, indemnités, activité indépendante secondaire, rentes imposables. S'ajoutent au revenu brut."
-                    />
-                    <NumField
-                      label={t("calc.global.field.rental_income")}
-                      value={form.rentalIncome}
-                      onChange={(v) => set("rentalIncome", v)}
-                      suffix="CHF"
-                      tip="Loyers nets perçus d'immeubles loués (avant entretien et intérêts hypothécaires, qui se déclarent en déductions). S'ajoutent au revenu imposable."
-                    />
-                    <NumField
-                      label={t("calc.global.field.imputed_rent")}
-                      value={form.imputedRent}
-                      onChange={(v) => set("imputedRent", v)}
-                      suffix="CHF"
-                      tip="Valeur locative, revenu fictif imposé aux propriétaires occupant leur logement en Suisse (art. 21 LIFD). Représente le loyer théorique qu'ils paieraient en louant. Incluse dans le revenu imposable mais PAS dans le cash réel."
-                    />
+                   <div data-guide="global-other-income">
+                      <NumField
+                        label={t("calc.global.field.other_income")}
+                        value={form.otherIncome}
+                        onChange={(v) => set("otherIncome", v)}
+                        suffix="CHF"
+                        tip="Revenus accessoires : jetons de présence, indemnités, activité indépendante secondaire, rentes imposables. S'ajoutent au revenu brut."
+                      />
+                    </div>
+                    <div data-guide="global-rental-income">
+                       <div data-guide="global-rental-income">
+                      <NumField
+                        label={t("calc.global.field.rental_income")}
+                        value={form.rentalIncome}
+                        onChange={(v) => set("rentalIncome", v)}
+                        suffix="CHF"
+                        tip="Loyers nets perçus d'immeubles loués (avant entretien et intérêts hypothécaires, qui se déclarent en déductions). S'ajoutent au revenu imposable."
+                      />
+                    </div>
+                    </div>
+                    <div data-guide="global-imputed-rent">
+                      <NumField
+                        label={t("calc.global.field.imputed_rent")}
+                        value={form.imputedRent}
+                        onChange={(v) => set("imputedRent", v)}
+                        suffix="CHF"
+                        tip="Valeur locative, revenu fictif imposé aux propriétaires occupant leur logement en Suisse (art. 21 LIFD). Représente le loyer théorique qu'ils paieraient en louant. Incluse dans le revenu imposable mais PAS dans le cash réel."
+                      />
+                    </div>
 
                     {/* ── Revenus étrangers avec conversion devise ── */}
-                    <div className="sm:col-span-2 space-y-2 rounded-md border border-border/50 bg-muted/20 p-3">
+                    <div className="sm:col-span-2 space-y-2 rounded-md border border-border/50 bg-muted/20 p-3" data-guide="global-foreign-income">
                       <div className="flex items-center gap-1.5">
                         <Label className="text-xs font-semibold">
                           {t("calc.global.field.foreign_income")}
@@ -503,7 +527,7 @@ function TaxGlobalCalc() {
                 <AccordionItem value="wealth">
                   <AccordionTrigger>{t("calc.global.section.wealth")}</AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-guide="global-net-wealth">
                       <NumField
                         label={t("calc.global.field.net_wealth")}
                         value={form.netWealth}
@@ -552,7 +576,7 @@ function TaxGlobalCalc() {
                       }
                       return null;
                     })()}
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-guide="global-deductions">
                       <NumField
                         label={t("calc.global.field.pillar_3a")}
                         value={form.pillar3aContributions}
@@ -631,7 +655,7 @@ function TaxGlobalCalc() {
                 <AccordionItem value="frontalier">
                   <AccordionTrigger>{t("calc.global.section.frontalier")}</AccordionTrigger>
                   <AccordionContent>
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2" data-guide="global-frontalier-fx">
                       <NumField
                         label={t("calc.global.field.eur_chf")}
                         value={form.eurChfRate}
@@ -691,7 +715,7 @@ function TaxGlobalCalc() {
 
         {/* RIGHT, Results */}
         <div className="space-y-4 lg:col-span-2">
-          <CalcCard title={t("calc.global.results.title")}>
+          <CalcCard title={t("calc.global.results.title")} data-guide="global-results">
             <Row>
               <MoneyTile
                 label={t("calc.global.tile.total_tax")}
