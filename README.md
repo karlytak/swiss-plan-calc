@@ -58,3 +58,4 @@ Suivre la checklist dans [`docs/SCOPE.md`](docs/SCOPE.md) (étapes a → f).
 - Tous les sélecteurs UI passent par `getSelectableCantons()`.
 
 
+// Test migration Fri Jun 19 11:53:52 CEST 2026
