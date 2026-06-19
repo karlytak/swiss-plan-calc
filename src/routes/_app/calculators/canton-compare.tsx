@@ -311,8 +311,8 @@ function CantonCompareCalc() {
   const [guideOpen, setGuideOpen] = useState(false);
   const guideSteps: GuideStep[] = [
     { title: t("calc.canton_compare.guide.s1.title"), body: t("calc.canton_compare.guide.s1.body") },
-    { title: t("calc.canton_compare.guide.s2.title"), body: t("calc.canton_compare.guide.s2.body") },
-    { title: t("calc.canton_compare.guide.s3.title"), body: t("calc.canton_compare.guide.s3.body") },
+    { target: "canton-gross-salary", title: t("calc.canton_compare.guide.s2.title"), body: t("calc.canton_compare.guide.s2.body") },
+    { target: "canton-ranking", title: t("calc.canton_compare.guide.s3.title"), body: t("calc.canton_compare.guide.s3.body") },
   ];
 
   const isCouple =
@@ -436,8 +436,9 @@ function CantonCompareCalc() {
         }
       >
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <NumField label="Salaire brut annuel (CHF)" value={base.grossSalary} onChange={(v) => set("grossSalary", v)} wikiTip={t("calc.canton_compare.tip.gross")} />
-          <NumField label="Bonus / 13e (CHF)" value={base.bonus} onChange={(v) => set("bonus", v)} />
+<div data-guide="canton-gross-salary">
+            <NumField label="Salaire brut annuel (CHF)" value={base.grossSalary} onChange={(v) => set("grossSalary", v)} wikiTip={t("calc.canton_compare.tip.gross")} />
+          </div>          <NumField label="Bonus / 13e (CHF)" value={base.bonus} onChange={(v) => set("bonus", v)} />
           <NumField label="Autres revenus (CHF)" value={base.otherIncome} onChange={(v) => set("otherIncome", v)} />
 
           <div className="space-y-1.5">
@@ -614,7 +615,7 @@ function CantonCompareCalc() {
         );
       })()}
 
-      <CalcCard title={t("calc.canton_compare.ranking.title")}>
+      <CalcCard title={t("calc.canton_compare.ranking.title")} data-guide="canton-ranking">
         <div className="h-[520px] w-full chart-rise">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data} layout="vertical" margin={{ left: 12, right: 32, top: 8, bottom: 8 }}>
