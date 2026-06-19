@@ -57,3 +57,4 @@ Suivre la checklist dans [`docs/SCOPE.md`](docs/SCOPE.md) (étapes a → f).
 - Le comparateur cantonal ignore silencieusement (warn console) tout canton `comparable` sans barème chargé, plutôt que crasher.
 - Tous les sélecteurs UI passent par `getSelectableCantons()`.
 
+
