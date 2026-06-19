@@ -250,7 +250,7 @@ function DirectorCompensationCalc() {
     <TooltipProvider delayDuration={150}>
       <div className="space-y-6">
         <CrossCalcImpactBanner calculator="director-compensation" clientId={clientId} />
-        <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.dir.guide.title")} />
+        <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.dir.guide.title")} guideId="calc-director-compensation" />
         <div className="flex justify-end gap-2">
           <GuideToggleButton onClick={() => setGuideOpen(true)} />
         </div>

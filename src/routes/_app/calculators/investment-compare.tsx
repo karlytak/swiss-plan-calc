@@ -157,6 +157,7 @@ function InvestmentCompareCalc() {
         onClose={() => setGuideOpen(false)}
         steps={guideSteps}
         title={t("calc.invcompare.guide_title")}
+        guideId="calc-investment-compare"
       />
 
       <div className="flex items-start justify-between gap-3">

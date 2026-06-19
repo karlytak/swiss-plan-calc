@@ -321,7 +321,7 @@ function CantonCompareCalc() {
   return (
     <div className="space-y-6">
       <CrossCalcImpactBanner calculator="canton-compare" clientId={clientId} />
-      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.canton_compare.guide.title")} />
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.canton_compare.guide.title")} guideId="calc-canton-compare" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 
       {client && <ClientLinkBanner client={client} />}

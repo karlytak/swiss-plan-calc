@@ -120,7 +120,7 @@ function VestedBenefitsCalc() {
   return (
     <div className="space-y-6">
       <CrossCalcImpactBanner calculator="vested-benefits" clientId={clientId} />
-      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.vested.guide_title")} />
+      <GuideMode open={guideOpen} onClose={() => setGuideOpen(false)} steps={guideSteps} title={t("calc.vested.guide_title")} guideId="calc-vested-benefits" />
       <div className="flex justify-end"><GuideToggleButton onClick={() => setGuideOpen(true)} /></div>
 
       {/* Bloc recherche officielle d'avoirs LPP/libre passage oubliés */}
