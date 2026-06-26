@@ -1,3 +1,4 @@
+import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
 import { AiChat } from "@/components/ai/AiChat";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -53,6 +54,9 @@ function AppShell() {
           <Outlet />
           <AiChat />
         </main>
+        <div className="fixed bottom-6 right-6 z-50">
+          <FeedbackWidget />
+        </div>
       </div>
     </div>
   );
