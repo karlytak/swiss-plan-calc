@@ -1,4 +1,5 @@
 import { FeedbackWidget } from "@/components/feedback/FeedbackWidget";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 import { AiChat } from "@/components/ai/AiChat";
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -142,8 +143,9 @@ function UserFooter({ email, onSignOut }: { email: string; onSignOut: () => Prom
 function DesktopSidebar({ onSignOut, email }: { onSignOut: () => Promise<void>; email: string }) {
   return (
     <aside className="hidden w-64 shrink-0 border-r border-sidebar-border/60 bg-sidebar/70 backdrop-blur-xl lg:flex lg:flex-col shadow-[inset_-1px_0_0_0_color-mix(in_oklab,white_30%,transparent)]">
-      <div className="flex h-16 items-center gap-2 border-b border-sidebar-border px-5">
+      <div className="flex h-16 items-center justify-between gap-2 border-b border-sidebar-border px-5">
         <BrandMark />
+        <NotificationBell />
       </div>
       <NavLinks />
       <UserFooter email={email} onSignOut={onSignOut} />
@@ -156,7 +158,9 @@ function MobileHeader({ onSignOut, email }: { onSignOut: () => Promise<void>; em
   return (
     <header className="sticky top-0 z-40 flex h-14 items-center justify-between gap-2 border-b border-border/60 bg-background/70 px-4 backdrop-blur-xl saturate-150 lg:hidden">
       <BrandMark />
-      <Sheet open={open} onOpenChange={setOpen}>
+      <div className="flex items-center gap-1">
+        <NotificationBell />
+        <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon" aria-label="Ouvrir le menu">
             <Menu className="h-5 w-5" />
@@ -172,6 +176,7 @@ function MobileHeader({ onSignOut, email }: { onSignOut: () => Promise<void>; em
           <UserFooter email={email} onSignOut={onSignOut} />
         </SheetContent>
       </Sheet>
+      </div>
     </header>
   );
 }
