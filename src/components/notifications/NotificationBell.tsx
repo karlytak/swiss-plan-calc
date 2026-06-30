@@ -29,15 +29,15 @@ export function NotificationBell() {
     loadNotifications();
 
     const channel = (supabase as any)
-  .channel("notifications-changes")
-  .on(
-    "postgres_changes",
-    { event: "INSERT", schema: "public", table: "notifications", filter: `broker_id=eq.${user.id}` },
-    () => loadNotifications()
-  )
-  .subscribe();
+      .channel(`notifications-${user.id}`)
+      .on(
+        "postgres_changes",
+        { event: "INSERT", schema: "public", table: "notifications", filter: `broker_id=eq.${user.id}` },
+        () => loadNotifications()
+      )
+      .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { (supabase as any).removeChannel(channel); };
   }, [user]);
 
   useEffect(() => {
