@@ -15,6 +15,9 @@ type FeedbackRow = {
   page_path: string | null;
   rating: number | null;
   created_at: string;
+  admin_reply: string | null;
+  admin_reply_at: string | null;
+  admin_reply_by: string | null;
 };
 
 const CATEGORY_LABEL: Record<FeedbackRow["category"], string> = {
@@ -53,12 +56,12 @@ function FeedbackPage() {
     if (!user) return;
     supabase
       .from("user_feedback")
-      .select("id,category,status,subject,message,page_path,rating,created_at")
+      .select("id,category,status,subject,message,page_path,rating,created_at,admin_reply,admin_reply_at,admin_reply_by")
       .eq("broker_id", user.id)
       .order("created_at", { ascending: false })
       .then(({ data, error }) => {
-        if (!error) setRows((data ?? []) as FeedbackRow[]);
-      });
+  if (!error) setRows((data ?? []) as unknown as FeedbackRow[]);
+});
   }, [user]);
 
   return (
@@ -104,8 +107,17 @@ function FeedbackPage() {
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="space-y-3">
                 <p className="whitespace-pre-wrap text-sm text-foreground/90">{r.message}</p>
+                {r.admin_reply && (
+                  <div className="rounded-lg border border-primary/25 bg-primary/5 p-3">
+                    <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-primary">
+                      Réponse de {r.admin_reply_by}
+                      {r.admin_reply_at && ` · ${new Date(r.admin_reply_at).toLocaleString("fr-CH")}`}
+                    </p>
+                    <p className="whitespace-pre-wrap text-sm text-foreground/90">{r.admin_reply}</p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           ))}
